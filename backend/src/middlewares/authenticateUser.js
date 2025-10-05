@@ -3,7 +3,9 @@ dotenv.config();
 import jwt from 'jsonwebtoken';
 
 export const authenticateUser = (req, res, next) => {
+  console.log('this middleware is working')
   const token = req.cookies?.token;
+  console.log(token)
   
   if (!token) {
     return res.status(401).json({

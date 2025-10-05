@@ -67,8 +67,8 @@ const AuthCard = () => {
         const { user } = response.data;
 
         if (user.firstLogin) {
-          if (user.role === "doctor") navigate("/doctor/register");
-          else if (user.role === "patient") navigate("/patient/register");
+          if (user.role === "doctor") navigate("/doctor/registration");
+          else if (user.role === "patient") navigate("/patient/registration");
         } else {
           navigate(`/${role}/profile`);
         }
