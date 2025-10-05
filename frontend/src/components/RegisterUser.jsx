@@ -7,7 +7,8 @@ import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const RegisterUser = () => {
-  const { email, id, token } = useUser();
+  const { email, id} = useUser();
+  console.log(email,id)
   const navigate = useNavigate();
   const { openModal } = useModal();
 
@@ -18,7 +19,8 @@ const RegisterUser = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    if (!email || !id || !token) return;
+    if (!email || !id ) return;
+     console.log('hello world')
     try {
       const formData = new FormData();
       formData.append("email", email);
@@ -29,15 +31,13 @@ const RegisterUser = () => {
       formData.append("dob", data.dob);
       formData.append("gender", data.gender);
 
-      const response = await api.post("/api/patient/register", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const response = await api.post("/api/patient/registration", formData);
+      console.log(response.data)
       if (!response.data.success) {
         openModal(response.data.message);
       } else {
         openModal(response.data.message);
-        navigate("/");
+        navigate("/patient/profile");
       }
     } catch (error) {
       console.log(error);
