@@ -21,7 +21,6 @@ app.use(cors({
 app.use('/api/auth',userRoutes);
 
 //patient routes
-
 app.use('/api/patient',patientRoutes)
 
 //doctor routes
