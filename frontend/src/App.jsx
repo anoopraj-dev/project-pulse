@@ -1,23 +1,29 @@
-import { BrowserRouter as Router,Routes, Route} from "react-router-dom"
-import Navbar from "./components/Navbar"
-import Home from "./pages/Home"
-import SignIn from "./pages/SignIn"
-import Signup from "./pages/Signup"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Navbar from "./components/Navbar";
+import SignIn from "./pages/SignIn";
+import Signup from "./pages/Signup";
+import VerifyEmail from "./pages/VerifyEmail";
+import PatientProfile from "./pages/patient/PatientProfile"; 
+import DoctorProfile from "./pages/doctor/DoctorProfile";
+import Layout from "./components/Layout";
+import PatientRegistration from "./pages/patient/PatientRegistration";
 
 const App = () => {
   return (
     <Router>
-      <div>
-        <Navbar/>
-      </div>
+      <Navbar />
       <Routes>
-           <Route path="/" element={<Home/>}/>
-           <Route path="/signin" element= {<SignIn/>} />
-           <Route path="/signup" element= {<Signup/>} />
+        <Route path="/" element={<Home />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/patient/profile" element={<Layout><PatientProfile /></Layout>} />
+        <Route path="/doctor/profile" element={<Layout><DoctorProfile /></Layout>} />
+        <Route path="/patient/register" element={<PatientRegistration />} />
       </Routes>
-     
     </Router>
-  )
-}
+  );
+};
 
-export default App
+export default App;
