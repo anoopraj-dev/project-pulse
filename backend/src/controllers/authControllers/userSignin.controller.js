@@ -40,7 +40,8 @@ export const userSignin = async (req, res) => {
     const payload = {
       id: role === 'doctor' ? user.doctorId : user.patientId,
       email: user.email,
-      role
+      role,
+      name:user.name
     };
 
     // Create token
@@ -64,7 +65,8 @@ export const userSignin = async (req, res) => {
         id: role === 'doctor' ? user.doctorId : user.patientId,
         email: user.email,
         role,
-        firstLogin: user.firstLogin
+        firstLogin: user.firstLogin,
+        name:user.name
       }
     });
 
