@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DynamicForm from "../../components/DynamicForm";
 import { formSteps } from "../../constants/formStepConfig";
@@ -10,47 +10,64 @@ import { useModal } from "../../contexts/ModalContext";
 const PatientRegistration = () => {
   const stepKeys = Object.keys(formSteps);
   const [currentStep, setCurrentStep] = useState(0);
-  const { email, id } = useUser();
+  const { email, id,firstLogin } = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
 
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  // Check when user data becomes available
+  useEffect(() => {
+    if (email && id) setLoadingUser(false);
+  }, [email, id]);
+
   const handleNext = async (data) => {
-    if (!email || !id) return;
+    if (!email || !id) {
+      openModal("User data not loaded yet. Please wait.");
+      return;
+    }
 
-    try{
-        const formData = new FormData();
-        formData.append('email',email);
-        formData.append('patientId',id);
+    if (currentStep >= stepKeys.length) return;
 
-        Object.entries(data).forEach(([key,value])=>{
-            formData.append(key,value)
-        });
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("patientId", id);
+      formData.append('firstLogin', firstLogin);
 
-        if(currentStep === 0) {
-            const response = await api.post('/api/patient/registration',formData);
-            if(!response.data.success){
-                openModal(response.data.message);
-                return;
-            }
-            openModal(response.data.message);
-            setCurrentStep(currentStep+1);
+
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      if (currentStep === 0) {
+        const response = await api.post("/api/patient/personal-info", formData);
+        console.log("Step 0 response:", response.data);
+
+        if (!response.data.success) {
+          openModal(response.data.message);
+          return;
         }
 
-        else if(currentStep===1){
-            const response = await api.post ('/api/patient/medical-info',formData);
-            if(!response.data.success){
-                openModal(response.data.message);
-                return;
-            }
-            openModal(response.data.message);
-            navigate('/patient/profile');
-        }
-    }catch(error){
-        console.log(error);
-        
+        openModal(response.data.message);
+        setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1));
+      } else if (currentStep === 1) {
+        const response = await api.post("/api/patient/medical-info", formData);
+        console.log("Step 1 response:", response.data);
 
-    if (currentStep < stepKeys.length - 1) {
-      setCurrentStep(currentStep + 1);
+        if (!response.data.success) {
+          openModal(response.data.message);
+          return;
+        }
+
+        openModal(response.data.message);
+        navigate("/patient/profile");
+      }
+
+      
+    } catch (error) {
+      console.log("API error:", error);
+      openModal("Something went wrong. Please try again.");
     }
   };
 
@@ -65,6 +82,7 @@ const PatientRegistration = () => {
           }
         />
 
+        {/* Step Indicator */}
         <div className="flex items-center justify-center my-6 space-x-6">
           {stepKeys.map((key, index) => (
             <div key={key} className="flex items-center">
@@ -84,14 +102,18 @@ const PatientRegistration = () => {
           ))}
         </div>
 
-        <DynamicForm
-          config={formSteps[stepKeys[currentStep]]}
-          onSubmit={handleNext}
-        />
+        {/* Dynamic Form */}
+        {loadingUser ? (
+          <div className="text-center text-gray-500">Loading user data...</div>
+        ) : (
+          <DynamicForm
+            config={formSteps[stepKeys[currentStep]]}
+            onSubmit={handleNext}
+          />
+        )}
       </div>
     </div>
   );
 };
-}
-export default PatientRegistration;
 
+export default PatientRegistration;
