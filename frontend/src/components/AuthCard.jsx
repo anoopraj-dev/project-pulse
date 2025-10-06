@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -8,13 +9,15 @@ import PrimaryButton from "./PrimaryButton";
 import SliderToggle from "./SliderToggle";
 import { useUser } from "../contexts/UserContext";
 
-const AuthCard = () => {
+const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const isSignup = location.pathname === "/signup";
   const { dispatch } = useUser();
+
+  const isSignup = location.pathname === "/signup";
+  const isAdmin = initialRole === "admin" || location.pathname.includes("/admin");
 
   const {
     register,
@@ -23,80 +26,102 @@ const AuthCard = () => {
     reset,
   } = useForm();
 
+ //submit function
   const onSubmit = async (data) => {
-    try {
-      const role = isDoctor ? "doctor" : "patient";
+  try {
+    const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-      if (isSignup) {
-        if (data.password !== data.confirmPassword) {
-          openModal("Passwords do not match");
-          return;
-        }
-
-        const signupData = {
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          confirmPassword: data.confirmPassword,
-          role,
-          firstLogin: true,
-        };
-
-        const response = await api.post("/api/auth/signup", signupData);
-
-        if (!response.data.success) {
-          openModal(response.data.message);
-        } else {
-          openModal(response.data.message);
-          reset();
-          navigate("/verify-email", { state: { email: data.email } });
-        }
-      } else {
-        const signinData = {
-          email: data.email,
-          password: data.password,
-          role,
-        };
-
-        const response = await api.post("/api/auth/signin", signinData);
-        if (response.data.success) {
-          const { user, token } = response.data;
-          dispatch({ type: "SET_USER", payload: { ...user, token } });
-        }
-
-        const { user } = response.data;
-
-        if (user.firstLogin) {
-          if (user.role === "doctor") navigate("/doctor/registration");
-          else if (user.role === "patient") navigate("/patient/registration");
-        } else {
-          navigate(`/${role}/profile`);
-        }
+    // --- SIGNUP FLOW (Only for Patient/Doctor) ---
+    if (isSignup && !isAdmin) {
+      if (data.password !== data.confirmPassword) {
+        openModal("Passwords do not match");
+        return;
       }
-    } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Something went wrong";
-      openModal(message);
+
+      const signupData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        role,
+        firstLogin: true,
+      };
+
+      const response = await api.post("/api/auth/signup", signupData);
+      if (!response.data.success) {
+        openModal(response.data.message);
+      } else {
+        openModal(response.data.message);
+        reset();
+        navigate("/verify-email", { state: { email: data.email } });
+      }
+      return;
     }
-  };
+
+    // --- SIGNIN FLOW (Admin / Doctor / Patient) ---
+    if (isAdmin) {
+      // ✅ ADMIN LOGIN
+      const response = await api.post("/api/admin/login", {
+        email: data.email,
+        password: data.password,
+      });
+
+      if (response.data.success) {
+        const { admin } = response.data;
+        dispatch({ type: "SET_USER", payload: { ...admin } });
+        navigate("/admin/profile");
+      } else {
+        openModal(response.data.message);
+      }
+      return; // stop execution here for admin
+    }
+
+    // ✅ PATIENT / DOCTOR LOGIN
+    const response = await api.post("/api/auth/signin", {
+      email: data.email,
+      password: data.password,
+      role,
+    });
+
+    if (response.data.success) {
+      const { user, token } = response.data;
+      dispatch({ type: "SET_USER", payload: { ...user, token } });
+
+      if (user.firstLogin) {
+        if (role === "doctor") navigate("/doctor/personal-info");
+        else if (role === "patient") navigate("/patient/personal-info");
+      } else {
+        navigate(`/${role}/profile`);
+      }
+    } else {
+      openModal(response.data.message);
+    }
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong";
+    openModal(message);
+  }
+};
+
 
   return (
     <form className="my-32" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col items-center w-[550px] h-auto bg-white rounded-xl shadow-2xl p-6 px-16 border border-[rgba(117,202,255,0.5)]">
         <div className="flex items-center ml-16">
           <Headings
-            text={`${isDoctor ? "Doctor" : "Patient"} ${
+            text={`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${
               isSignup ? "Signup" : "Login"
             }`}
             className="flex justify-center"
           />
-          <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />
+          {/* Hide toggle for admin */}
+          {!isAdmin && <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />}
         </div>
 
-        {/* Signup field: Name */}
-        {isSignup && (
+        {/* Name (only for signup, non-admin) */}
+        {!isAdmin && isSignup && (
           <div className="w-full my-2">
             <input
               type="text"
@@ -105,9 +130,7 @@ const AuthCard = () => {
               className="w-full p-4 border border-gray-300 rounded-md"
             />
             {errors.name && (
-              <span className="text-red-600 text-sm">
-                {errors.name.message}
-              </span>
+              <span className="text-red-600 text-sm">{errors.name.message}</span>
             )}
           </div>
         )}
@@ -121,9 +144,7 @@ const AuthCard = () => {
             className="w-full p-4 border border-gray-300 rounded-md"
           />
           {errors.email && (
-            <span className="text-red-600 text-sm">
-              {errors.email.message}
-            </span>
+            <span className="text-red-600 text-sm">{errors.email.message}</span>
           )}
         </div>
 
@@ -136,14 +157,12 @@ const AuthCard = () => {
             className="w-full p-4 border border-gray-300 rounded-md"
           />
           {errors.password && (
-            <span className="text-red-600 text-sm">
-              {errors.password.message}
-            </span>
+            <span className="text-red-600 text-sm">{errors.password.message}</span>
           )}
         </div>
 
-        {/* Confirm Password */}
-        {isSignup && (
+        {/* Confirm Password (signup only, not admin) */}
+        {!isAdmin && isSignup && (
           <div className="w-full my-2">
             <input
               type="password"
@@ -161,7 +180,7 @@ const AuthCard = () => {
           </div>
         )}
 
-        {/* Remember me for login */}
+        {/* Remember Me (signin only) */}
         {!isSignup && (
           <div className="flex items-center mt-5">
             <input type="checkbox" className="mr-2" />
@@ -175,7 +194,8 @@ const AuthCard = () => {
           type="submit"
         />
 
-        {!isSignup && (
+        {/* Google signin only for patient/doctor */}
+        {!isSignup && !isAdmin && (
           <PrimaryButton
             text="SIGNIN WITH GOOGLE"
             className="w-full bg-[#BD2F2F] mt-2"
@@ -183,7 +203,12 @@ const AuthCard = () => {
         )}
 
         <div className="my-5 text-center">
-          {isSignup ? (
+          {/* Admin only has signin */}
+          {isAdmin ? (
+            <p className="text-gray-600">
+              Login with your admin credentials
+            </p>
+          ) : isSignup ? (
             <p>
               Already a member?{" "}
               <Link to="/signin" className="text-blue-600 underline">
@@ -194,7 +219,7 @@ const AuthCard = () => {
             <>
               <p>
                 Forgot Password?{" "}
-                <span className="text-blue-600 underline">
+                <span className="text-blue-600 underline cursor-pointer">
                   Reset Password
                 </span>
               </p>

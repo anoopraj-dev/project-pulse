@@ -2,6 +2,7 @@ import express from 'express';
 import userRoutes from './routes/user.Routes.js';
 import patientRoutes from './routes/patient.Routes.js'
 import doctorRoutes from './routes/doctor.Routes.js'
+import adminRoutes from './routes/admin.Routes.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 
@@ -25,6 +26,9 @@ app.use('/api/patient',patientRoutes)
 
 //doctor routes
 app.use('/api/doctor',doctorRoutes)
+
+//admin routes
+app.use('/api/admin',adminRoutes)
 
 
 export default app;

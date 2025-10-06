@@ -1,6 +1,8 @@
 import { Icon } from '@iconify/react';
+import { Link } from 'react-router-dom';
 
 const Sidebar = () => {
+
   return (
     <div className="h-screen w-64 bg-[#0096C7] text-gray-100 flex flex-col mt-12">
       <nav className="flex-1">
@@ -13,7 +15,8 @@ const Sidebar = () => {
         </div>
 
         <ul className="space-y-3 gap-3">
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
+         <Link to='/patient/dashboard'>
+           <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
             <Icon
               icon="mdi:home"
               className="w-7 h-7 text-gray-600 hover:text-[#162C55]"
@@ -21,6 +24,7 @@ const Sidebar = () => {
             />
             <span className="font-semibold">Dashboard</span>
           </li>
+         </Link>
 
           <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
             <Icon

@@ -16,7 +16,9 @@ const Navbar = () => {
                <li className="hover:text-[#0096C7] cursor-pointer">Login</li>
             </Link>
            
+          <Link to="/admin/login">
             <li className="hover:text-[#0096C7] cursor-pointer">Admin</li>
+          </Link> 
           </ul>
         </div>
       </div>
