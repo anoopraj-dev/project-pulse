@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { api } from "../api/api";
@@ -7,14 +7,20 @@ import { useModal } from "../contexts/ModalContext";
 import Headings from "./Headings";
 import PrimaryButton from "./PrimaryButton";
 import SliderToggle from "./SliderToggle";
-import { useUser } from "../contexts/UserContext";
+import { useUser  } from "../contexts/UserContext";
+import { useClerk, useUser as clerkUser } from "@clerk/clerk-react";
+import { Icon } from "@iconify/react";
 
 const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(false);
+  const [showPassword,setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { openModal } = useModal();
   const { dispatch } = useUser();
+  const {user,isSignedIn,isLoaded} = clerkUser();
+  const {openSignIn} = useClerk()
+  
 
   const isSignup = location.pathname === "/signup";
   const isAdmin = initialRole === "admin" || location.pathname.includes("/admin");
@@ -26,12 +32,18 @@ const AuthCard = ({ role: initialRole }) => {
     reset,
   } = useForm();
 
+  //show password
+  const handleShowPassword = () => {
+    setShowPassword(prev=>!prev);
+  }
+
  //submit function
   const onSubmit = async (data) => {
   try {
     const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-    // --- SIGNUP FLOW (Only for Patient/Doctor) ---
+    // signup flow (Patient/Doctor) 
+
     if (isSignup && !isAdmin) {
       if (data.password !== data.confirmPassword) {
         openModal("Passwords do not match");
@@ -58,9 +70,10 @@ const AuthCard = ({ role: initialRole }) => {
       return;
     }
 
-    // --- SIGNIN FLOW (Admin / Doctor / Patient) ---
+    // signin flow (Admin / Doctor / Patient) 
+
     if (isAdmin) {
-      // ✅ ADMIN LOGIN
+    
       const response = await api.post("/api/admin/login", {
         email: data.email,
         password: data.password,
@@ -73,10 +86,10 @@ const AuthCard = ({ role: initialRole }) => {
       } else {
         openModal(response.data.message);
       }
-      return; // stop execution here for admin
+      return; 
     }
 
-    // ✅ PATIENT / DOCTOR LOGIN
+    
     const response = await api.post("/api/auth/signin", {
       email: data.email,
       password: data.password,
@@ -104,6 +117,26 @@ const AuthCard = ({ role: initialRole }) => {
     openModal(message);
   }
 };
+
+//for users authenticated with clerk
+
+useEffect(()=> {
+
+  if(!isLoaded) return;
+
+  if(isSignedIn && user) {
+    const role = user.publicMetadata?.role;
+    if(role === 'doctor'){
+    navigate('/doctor/profile');
+  }else{
+    navigate('/patient/profile')
+  }
+  }
+  
+},[isSignedIn,user,navigate]);
+
+if (!isLoaded) return null;
+if (isSignedIn && user) return null;
 
 
   return (
@@ -149,13 +182,21 @@ const AuthCard = ({ role: initialRole }) => {
         </div>
 
         {/* Password */}
-        <div className="w-full my-2">
+        <div className="w-full my-2 relative">
           <input
-            type="password"
+            type= {showPassword?'text' :'password'}
             placeholder="Password"
             {...register("password", { required: "Password is required" })}
             className="w-full p-4 border border-gray-300 rounded-md"
           />
+
+           <span
+    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+    onClick={handleShowPassword}
+  >
+    <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" />
+  </span>
+
           {errors.password && (
             <span className="text-red-600 text-sm">{errors.password.message}</span>
           )}
@@ -163,15 +204,19 @@ const AuthCard = ({ role: initialRole }) => {
 
         {/* Confirm Password (signup only, not admin) */}
         {!isAdmin && isSignup && (
-          <div className="w-full my-2">
-            <input
-              type="password"
+          <div className="w-full my-2 relative">
+            <input 
+              type= {showPassword?'text' :'password'}
               placeholder="Confirm Password"
               {...register("confirmPassword", {
                 required: "Confirm your password",
               })}
               className="w-full p-4 border border-gray-300 rounded-md"
             />
+              <span
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+      onClick={handleShowPassword} 
+    >  <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" /></span>
             {errors.confirmPassword && (
               <span className="text-red-600 text-sm">
                 {errors.confirmPassword.message}
@@ -180,7 +225,7 @@ const AuthCard = ({ role: initialRole }) => {
           </div>
         )}
 
-        {/* Remember Me (signin only) */}
+        
         {!isSignup && (
           <div className="flex items-center mt-5">
             <input type="checkbox" className="mr-2" />
@@ -194,9 +239,10 @@ const AuthCard = ({ role: initialRole }) => {
           type="submit"
         />
 
+
         {/* Google signin only for patient/doctor */}
         {!isSignup && !isAdmin && (
-          <PrimaryButton
+          <PrimaryButton onClick={openSignIn}
             text="SIGNIN WITH GOOGLE"
             className="w-full bg-[#BD2F2F] mt-2"
           />

@@ -3,13 +3,18 @@ import { useUser } from "../contexts/UserContext";
 import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
 import { api } from "../api/api.js";
+import { useNavigate } from "react-router-dom";
+import { useUser as clerkUser, useClerk } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const { email, role, name, dispatch, isLoading } = useUser();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-
-  const isLoggedIn = !!email;
+  
+  const {user} = clerkUser();
+  const {signOut} = useClerk();
+  const isLoggedIn = !!email || !!user;
 
 
   useEffect(() => {
@@ -23,9 +28,26 @@ const Navbar = () => {
   }, []);
 
   const handleLogout =async () => {
-    const response = await api.
-    dispatch({ type: "CLEAR_USER" });
-    setMenuOpen(false);
+    try {
+
+        if(user){
+          await signOut();
+          navigate('/signin');
+          return;
+        }
+        const res = await api.post('/api/auth/logout');
+        dispatch({ type: "CLEAR_USER" });
+        setMenuOpen(false);
+        if(!res.data.success){
+          console.log('Logout failed')
+          
+        }
+        navigate(role==='admin'? '/admin/login':'/signin')
+
+    } catch (error) {
+      console.error(error)
+    }
+     
   };
 
   return (

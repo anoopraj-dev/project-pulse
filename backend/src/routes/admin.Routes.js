@@ -3,6 +3,6 @@ import { adminLogin } from "../controllers/authControllers/adminLogin.controller
 import { authenticateUser } from "../middlewares/authenticateUser.js";
 const router = Router();
 
-router.post('/login',authenticateUser,adminLogin)
+router.post('/login',adminLogin)
 
 export default router;
