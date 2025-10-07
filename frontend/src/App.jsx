@@ -11,6 +11,7 @@ import PatientRegistration from "./pages/patient/PatientRegistration";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import PatientDashboard from "./pages/patient/PatientDashboard";
+import DoctorRegistration from "./pages/doctor/DoctorRegistration";
 
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/patient/dashbord" element={<PatientDashboard />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/patient/personal-info" element={<PatientRegistration />} />
+        <Route path="/doctor/personal-info" element={<DoctorRegistration/>} />
         <Route path="/patient/profile" element={<Layout><PatientProfile /></Layout>} />
         <Route path="/doctor/profile" element={<Layout><DoctorProfile /></Layout>} />
 

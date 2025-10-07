@@ -1,93 +1,86 @@
 import { Icon } from "@iconify/react";
 
 const InfoCards = ({ data }) => {
+  // Fallback for missing data
+  const fallback = "N/A";
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 w-full ">
       {/* Left Column */}
-      <div className="flex flex-col gap-15">
+      <div className="flex flex-col gap-6">
         {/* Overview Card */}
-        <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-[500px]">
-          <div className="flex gap-5 items-center">
+        <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-full min-h-[200px]">
+          <div className="flex gap-5 items-center mb-4">
             <Icon icon="mdi-face-male-shimmer" className="w-16 h-16 text-[#0096C7]" />
-            <h3 className="text-center font-semibold text-2xl">{data.Name}</h3>
+            <h3 className="text-center font-semibold text-2xl">{data?.Name || fallback}</h3>
           </div>
 
-          <div className="flex flex-col gap-5 py-6 px-10">
+          <div className="flex flex-col gap-3">
             <div className="flex justify-between">
               <p>Patient ID</p>
-              <p>{data["Patient Id"]}</p>
+              <p>{data?.["Patient Id"] || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Member Since</p>
-              <p>{new Date(data["Created At"]).toLocaleDateString()}</p>
+              <p>{data?.["Created At"] ? new Date(data["Created At"]).toLocaleDateString() : fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Total Appointments</p>
-              <p>{data?.appointment}</p>
+              <p>{data?.appointment || 0}</p>
             </div>
           </div>
         </div>
 
         {/* Personal Information Card */}
-        <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-[500px] mt-6">
-          <div className="flex gap-5 items-center">
+        <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-full min-h-[200px]">
+          <div className="flex gap-5 items-center mb-4">
             <Icon icon="mdi:account" className="w-16 h-16 text-[#0096C7]" />
             <h3 className="text-center font-semibold text-2xl">Personal Information</h3>
           </div>
 
-          <div className="flex flex-col gap-5 py-6 px-10">
+          <div className="flex flex-col gap-3">
             <div className="flex justify-between">
               <p>Date of Birth</p>
-              <p>{data["Patient Id"]}</p>
+              <p>{data?.dob || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Email</p>
-              <p>{new Date(data["Created At"]).toLocaleDateString()}</p>
+              <p>{data?.email || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Phone</p>
-              <p>{data?.appointment}</p>
+              <p>{data?.phone || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Address</p>
-              <p>{data?.appointment}</p>
+              <p>{data?.address || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Employed As</p>
-              <p>{data?.appointment}</p>
+              <p>{data?.employment || fallback}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right Column */}
-      <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-[500px]">
-        <div className="flex gap-5 items-center">
+      <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-full ">
+        <div className="flex gap-5 items-center mb-4">
           <Icon icon="healthicons:heart-cardiogram-24px" className="w-16 h-16 text-[#0096C7]" />
           <h3 className="text-center font-semibold text-2xl">Medical History</h3>
         </div>
 
-        <div className="flex flex-col gap-5 py-6 px-10">
-          <div className="flex justify-between">
-            <p>Date of Birth</p>
-            <p>{data["Patient Id"]}</p>
-          </div>
-          <div className="flex justify-between">
-            <p>Email</p>
-            <p>{new Date(data["Created At"]).toLocaleDateString()}</p>
-          </div>
-          <div className="flex justify-between">
-            <p>Phone</p>
-            <p>{data?.appointment}</p>
-          </div>
-          <div className="flex justify-between">
-            <p>Address</p>
-            <p>{data?.appointment}</p>
-          </div>
-          <div className="flex justify-between">
-            <p>Employed As</p>
-            <p>{data?.appointment}</p>
-          </div>
+        <div className="flex flex-col gap-3">
+          {data?.medicalHistory && data.medicalHistory.length > 0 ? (
+            data.medicalHistory.map((item, idx) => (
+              <div key={idx} className="flex justify-between">
+                <p>{item.type || fallback}</p>
+                <p>{item.date ? new Date(item.date).toLocaleDateString() : fallback}</p>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 py-8">No medical history available</div>
+          )}
         </div>
       </div>
     </div>
