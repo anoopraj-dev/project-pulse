@@ -12,6 +12,8 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import DoctorRegistration from "./pages/doctor/DoctorRegistration";
+import ProtectedRoute from "./components/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 
 
 const App = () => {
@@ -20,17 +22,21 @@ const App = () => {
     <Router>
       <Navbar />
       <Routes>
+
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/patient/dashbord" element={<PatientDashboard />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/patient/personal-info" element={<PatientRegistration />} />
-        <Route path="/doctor/personal-info" element={<DoctorRegistration/>} />
-        <Route path="/patient/profile" element={<Layout><PatientProfile /></Layout>} />
-        <Route path="/doctor/profile" element={<Layout><DoctorProfile /></Layout>} />
+
+        <Route path="/admin/profile" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/patient/dashbord" element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} />
+        <Route path="/patient/personal-info" element={<ProtectedRoute><PatientRegistration /> </ProtectedRoute>} />
+        <Route path="/doctor/personal-info" element={<ProtectedRoute><DoctorRegistration /></ProtectedRoute>} />
+        <Route path="/patient/profile" element={<ProtectedRoute><Layout><PatientProfile /></Layout></ProtectedRoute>} />
+        <Route path="/doctor/profile" element={<ProtectedRoute><Layout><DoctorProfile /></Layout></ProtectedRoute>} />
+
+        <Route path="/page-not-found" element={<NotFound />} />
 
       </Routes>
     </Router>

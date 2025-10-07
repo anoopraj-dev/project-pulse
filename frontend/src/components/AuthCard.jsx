@@ -7,20 +7,21 @@ import { useModal } from "../contexts/ModalContext";
 import Headings from "./Headings";
 import PrimaryButton from "./PrimaryButton";
 import SliderToggle from "./SliderToggle";
-import { useUser  } from "../contexts/UserContext";
+import { useUser } from "../contexts/UserContext";
 import { useClerk, useUser as clerkUser } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
 
 const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(false);
-  const [showPassword,setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isResending, SetIsResending] = useState(false)
   const location = useLocation();
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const { dispatch } = useUser();
-  const {user,isSignedIn,isLoaded} = clerkUser();
-  const {openSignIn} = useClerk()
-  
+  const { dispatch, isLoggedIn } = useUser();
+  const { user, isSignedIn, isLoaded } = clerkUser();
+  const { openSignIn } = useClerk()
+
 
   const isSignup = location.pathname === "/signup";
   const isAdmin = initialRole === "admin" || location.pathname.includes("/admin");
@@ -34,109 +35,116 @@ const AuthCard = ({ role: initialRole }) => {
 
   //show password
   const handleShowPassword = () => {
-    setShowPassword(prev=>!prev);
+    setShowPassword(prev => !prev);
   }
 
- //submit function
+  //submit function
   const onSubmit = async (data) => {
-  try {
-    const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
+    try {
+      const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-    // signup flow (Patient/Doctor) 
+      // signup flow (Patient/Doctor) 
 
-    if (isSignup && !isAdmin) {
-      if (data.password !== data.confirmPassword) {
-        openModal("Passwords do not match");
+      if (isSignup && !isAdmin) {
+        if (data.password !== data.confirmPassword) {
+          openModal("Passwords do not match");
+          return;
+        }
+
+        const signupData = {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          confirmPassword: data.confirmPassword,
+          role,
+          firstLogin: true,
+        };
+
+        const response = await api.post("/api/auth/signup", signupData);
+        if (!response.data.success) {
+          openModal(response.data.message);
+        } else {
+          openModal(response.data.message);
+          reset();
+          navigate("/verify-email", { state: { email: data.email } });
+        }
         return;
       }
 
-      const signupData = {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-        role,
-        firstLogin: true,
-      };
 
-      const response = await api.post("/api/auth/signup", signupData);
-      if (!response.data.success) {
-        openModal(response.data.message);
-      } else {
-        openModal(response.data.message);
-        reset();
-        navigate("/verify-email", { state: { email: data.email } });
+      // resend otp
+
+
+
+
+
+      // signin flow (Admin / Doctor / Patient) 
+
+      if (isAdmin) {
+
+        const response = await api.post("/api/admin/login", {
+          email: data.email,
+          password: data.password,
+        });
+
+        if (response.data.success) {
+          const { admin } = response.data;
+          dispatch({ type: "SET_USER", payload: { ...admin } });
+          navigate("/admin/profile");
+        } else {
+          openModal(response.data.message);
+        }
+        return;
       }
-      return;
-    }
 
-    // signin flow (Admin / Doctor / Patient) 
 
-    if (isAdmin) {
-    
-      const response = await api.post("/api/admin/login", {
+      const response = await api.post("/api/auth/signin", {
         email: data.email,
         password: data.password,
+        role,
       });
 
       if (response.data.success) {
-        const { admin } = response.data;
-        dispatch({ type: "SET_USER", payload: { ...admin } });
-        navigate("/admin/profile");
+        const { user, token } = response.data;
+        dispatch({ type: "SET_USER", payload: { ...user, token } });
+
+        if (user.firstLogin) {
+          if (role === "doctor") navigate("/doctor/personal-info");
+          else if (role === "patient") navigate("/patient/personal-info");
+        } else {
+          navigate(`/${role}/profile`);
+        }
       } else {
         openModal(response.data.message);
       }
-      return; 
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      openModal(message);
     }
+  };
 
-    
-    const response = await api.post("/api/auth/signin", {
-      email: data.email,
-      password: data.password,
-      role,
-    });
+  //for users authenticated with clerk
 
-    if (response.data.success) {
-      const { user, token } = response.data;
-      dispatch({ type: "SET_USER", payload: { ...user, token } });
+  useEffect(() => {
 
-      if (user.firstLogin) {
-        if (role === "doctor") navigate("/doctor/personal-info");
-        else if (role === "patient") navigate("/patient/personal-info");
+    if (!isLoaded) return;
+
+    if (isSignedIn && user) {
+      const role = user.publicMetadata?.role;
+      if (role === 'doctor') {
+        navigate('/doctor/profile');
       } else {
-        navigate(`/${role}/profile`);
+        navigate('/patient/profile')
       }
-    } else {
-      openModal(response.data.message);
     }
-  } catch (error) {
-    const message =
-      error?.response?.data?.message ||
-      error?.message ||
-      "Something went wrong";
-    openModal(message);
-  }
-};
 
-//for users authenticated with clerk
+  }, [isSignedIn, user, navigate]);
 
-useEffect(()=> {
-
-  if(!isLoaded) return;
-
-  if(isSignedIn && user) {
-    const role = user.publicMetadata?.role;
-    if(role === 'doctor'){
-    navigate('/doctor/profile');
-  }else{
-    navigate('/patient/profile')
-  }
-  }
-  
-},[isSignedIn,user,navigate]);
-
-if (!isLoaded) return null;
-if (isSignedIn && user) return null;
+  if (!isLoaded) return null;
+  if (isSignedIn && user) return null;
 
 
   return (
@@ -144,9 +152,8 @@ if (isSignedIn && user) return null;
       <div className="flex flex-col items-center w-[550px] h-auto bg-white rounded-xl shadow-2xl p-6 px-16 border border-[rgba(117,202,255,0.5)]">
         <div className="flex items-center ml-16">
           <Headings
-            text={`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${
-              isSignup ? "Signup" : "Login"
-            }`}
+            text={`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "Signup" : "Login"
+              }`}
             className="flex justify-center"
           />
           {/* Hide toggle for admin */}
@@ -184,18 +191,18 @@ if (isSignedIn && user) return null;
         {/* Password */}
         <div className="w-full my-2 relative">
           <input
-            type= {showPassword?'text' :'password'}
+            type={showPassword ? 'text' : 'password'}
             placeholder="Password"
             {...register("password", { required: "Password is required" })}
             className="w-full p-4 border border-gray-300 rounded-md"
           />
 
-           <span
-    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
-    onClick={handleShowPassword}
-  >
-    <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" />
-  </span>
+          <span
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+            onClick={handleShowPassword}
+          >
+            <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" />
+          </span>
 
           {errors.password && (
             <span className="text-red-600 text-sm">{errors.password.message}</span>
@@ -205,18 +212,18 @@ if (isSignedIn && user) return null;
         {/* Confirm Password (signup only, not admin) */}
         {!isAdmin && isSignup && (
           <div className="w-full my-2 relative">
-            <input 
-              type= {showPassword?'text' :'password'}
+            <input
+              type={showPassword ? 'text' : 'password'}
               placeholder="Confirm Password"
               {...register("confirmPassword", {
                 required: "Confirm your password",
               })}
               className="w-full p-4 border border-gray-300 rounded-md"
             />
-              <span
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
-      onClick={handleShowPassword} 
-    >  <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" /></span>
+            <span
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+              onClick={handleShowPassword}
+            >  <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" /></span>
             {errors.confirmPassword && (
               <span className="text-red-600 text-sm">
                 {errors.confirmPassword.message}
@@ -225,7 +232,7 @@ if (isSignedIn && user) return null;
           </div>
         )}
 
-        
+
         {!isSignup && (
           <div className="flex items-center mt-5">
             <input type="checkbox" className="mr-2" />
