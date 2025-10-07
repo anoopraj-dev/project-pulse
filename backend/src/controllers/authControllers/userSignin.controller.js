@@ -83,3 +83,11 @@ export const userSignin = async (req, res) => {
 };
 
 
+export const authCheck = async (req, res) => {
+  try {
+    // authMiddleware already sets req.user
+    res.status(200).json({ user: req.user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
