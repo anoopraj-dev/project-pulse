@@ -8,6 +8,9 @@ import jwt from 'jsonwebtoken';
 
 const jwtSecret = process.env.JWT_SECRET;
 
+
+//user signin
+
 export const userSignin = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -78,3 +81,5 @@ export const userSignin = async (req, res) => {
     });
   }
 };
+
+

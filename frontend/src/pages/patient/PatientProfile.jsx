@@ -41,7 +41,7 @@ const PatientProfile = () => {
   }, {});
 
   return (
-    <div className="flex flex-col items-center my-16 px-48">
+    <div className="flex flex-col items-center my-16 px-48 ">
       <Headings text="Keep your profile up to date" className="my-8 text-center" />
       <div>
         <InfoCards data={userData} />

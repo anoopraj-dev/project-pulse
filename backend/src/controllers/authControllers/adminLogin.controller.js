@@ -51,10 +51,10 @@ export const adminLogin = async (req, res) => {
     };
 
     // Generate token
-    const adminToken = jwt.sign(payload, jwtSecret, { expiresIn: "1d" });
+    const token = jwt.sign(payload, jwtSecret, { expiresIn: "1d" });
 
     // Set token in cookie (httpOnly)
-    res.cookie("adminToken", adminToken, {
+    res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000, // 1 day
@@ -67,8 +67,7 @@ export const adminLogin = async (req, res) => {
       admin: {
         email: admin.email,
         role: "admin",
-      },
-      token: adminToken,
+      }
     });
   } catch (error) {
     console.error("Admin login error:", error);
