@@ -1,7 +1,9 @@
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 
+
 const Sidebar = () => {
+ 
 
   return (
     <div className="h-screen w-64 bg-[#0096C7] text-gray-100 flex flex-col mt-19">

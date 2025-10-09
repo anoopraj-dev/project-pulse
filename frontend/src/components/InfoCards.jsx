@@ -9,10 +9,10 @@ const InfoCards = ({ data }) => {
       {/* Left Column */}
       <div className="flex flex-col gap-6">
         {/* Overview Card */}
-        <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-full min-h-[200px]">
+        <div className="border border-[#c3d6fc] rounded-sm p-4 bg-white  w-full min-h-[200px]">
           <div className="flex gap-5 items-center mb-4">
             <Icon icon="mdi-face-male-shimmer" className="w-16 h-16 text-[#0096C7]" />
-            <h3 className="text-center font-semibold text-2xl">{data?.Name || fallback}</h3>
+            <h3 className="text-center font-semibold text-2xl">{data?.Name.toUpperCase() || fallback}</h3>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -32,7 +32,7 @@ const InfoCards = ({ data }) => {
         </div>
 
         {/* Personal Information Card */}
-        <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-full min-h-[200px]">
+        <div className="border border-[#c3d6fc] rounded-sm p-4 bg-white w-full min-h-[200px]">
           <div className="flex gap-5 items-center mb-4">
             <Icon icon="mdi:account" className="w-16 h-16 text-[#0096C7]" />
             <h3 className="text-center font-semibold text-2xl">Personal Information</h3>
@@ -64,7 +64,7 @@ const InfoCards = ({ data }) => {
       </div>
 
       {/* Right Column */}
-      <div className="border border-[#B0C4F2] rounded-sm p-4 bg-white shadow-md w-full ">
+      <div className="border border-[#c3d6fc] rounded-sm p-4 bg-white  w-full ">
         <div className="flex gap-5 items-center mb-4">
           <Icon icon="healthicons:heart-cardiogram-24px" className="w-16 h-16 text-[#0096C7]" />
           <h3 className="text-center font-semibold text-2xl">Medical History</h3>

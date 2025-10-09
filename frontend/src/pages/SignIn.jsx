@@ -1,14 +1,17 @@
 import AuthCard from "../components/AuthCard";
+import AuthImage from "../components/AuthImage";
 import Footer from "../components/Footer";
 
 
 const SignIn = () => {
     return (
         <>
-            <div className="flex justify-center items-center bg-[linear-gradient(150deg,#FFFFFF_0%,#E0F7FA_26%,#B2EBF2_72%,#FFFFFF_100%)]" >
+            <div className=" grid grid-cols-[70%_30%] "  >
+                <div className="px-2 ">
+                <AuthImage/>
+                </div>
                 <AuthCard />
             </div>
-            <Footer />
         </>
     )
 }

@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { api } from "../api/api";
@@ -10,6 +10,11 @@ import SliderToggle from "./SliderToggle";
 import { useUser } from "../contexts/UserContext";
 import { useClerk, useUser as clerkUser } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
+import gsap from 'gsap'
+import {PropagateLoader} from 'react-spinners'
+import ShimmerCard from "./ShimmerCard";
+
+
 
 const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(false);
@@ -21,8 +26,8 @@ const AuthCard = ({ role: initialRole }) => {
   const { dispatch, isLoggedIn } = useUser();
   const { user, isSignedIn, isLoaded } = clerkUser();
   const { openSignIn } = useClerk()
-
-
+  const buttonRef = useRef(null);
+  const [loading,setLoading] = useState(false);
   const isSignup = location.pathname === "/signup";
   const isAdmin = initialRole === "admin" || location.pathname.includes("/admin");
 
@@ -41,13 +46,14 @@ const AuthCard = ({ role: initialRole }) => {
   //submit function
   const onSubmit = async (data) => {
     try {
+      setLoading(true);
       const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-      // signup flow (Patient/Doctor) 
+ // signup flow (Patient/Doctor) 
 
       if (isSignup && !isAdmin) {
         if (data.password !== data.confirmPassword) {
-          openModal("Passwords do not match");
+          openModal('Passwords do not match!')
           return;
         }
 
@@ -60,20 +66,25 @@ const AuthCard = ({ role: initialRole }) => {
           firstLogin: true,
         };
 
+        
         const response = await api.post("/api/auth/signup", signupData);
+     
         if (!response.data.success) {
-          openModal(response.data.message);
+          openModal(response.data.message)
+          
         } else {
-          openModal(response.data.message);
+          openModal(response.data.message)
           reset();
+          
           navigate("/verify-email", { state: { email: data.email } });
         }
+       
         return;
       }
 
 
       // resend otp
-
+      
 
 
 
@@ -92,17 +103,19 @@ const AuthCard = ({ role: initialRole }) => {
           dispatch({ type: "SET_USER", payload: { ...admin } });
           navigate("/admin/profile");
         } else {
-          openModal(response.data.message);
+         openModal(response.data.message)
         }
         return;
       }
 
-
+  
       const response = await api.post("/api/auth/signin", {
         email: data.email,
         password: data.password,
         role,
       });
+
+
 
       if (response.data.success) {
         const { user, token } = response.data;
@@ -115,19 +128,21 @@ const AuthCard = ({ role: initialRole }) => {
           navigate(`/${role}/profile`);
         }
       } else {
-        openModal(response.data.message);
+        toast.error(response.data.message)
       }
     } catch (error) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
         "Something went wrong";
-      openModal(message);
+        openModal(message)
+    } finally {
+      setLoading(false)
     }
   };
 
-  //for users authenticated with clerk
 
+  //for users authenticated with clerk
   useEffect(() => {
 
     if (!isLoaded) return;
@@ -141,23 +156,35 @@ const AuthCard = ({ role: initialRole }) => {
       }
     }
 
+   
+
   }, [isSignedIn, user, navigate]);
 
-  if (!isLoaded) return null;
+  
+  if (!isLoaded) return (
+    <div>
+      <ShimmerCard/>
+      <ShimmerCard/>
+      <ShimmerCard/>
+      <ShimmerCard/>
+    </div>
+    
+  );
   if (isSignedIn && user) return null;
 
 
   return (
     <form className="my-32" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col items-center w-[550px] h-auto bg-white rounded-xl shadow-2xl p-6 px-16 border border-[rgba(117,202,255,0.5)]">
-        <div className="flex items-center ml-16">
+      <div className="flex flex-col items-center w-[550px] h-auto bg-white rounded-xl p-6 px-16 ">
+        <div className="flex flex-col items-center ">
+          {!isAdmin && <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />}
           <Headings
-            text={`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "Signup" : "Login"
+            text={`${isAdmin ? "Admin" : isDoctor ? "DOCTOR" : "PATIENT"} ${isSignup ? "SIGNUP" : "LOGIN"
               }`}
             className="flex justify-center"
           />
-          {/* Hide toggle for admin */}
-          {!isAdmin && <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />}
+       
+          
         </div>
 
         {/* Name (only for signup, non-admin) */}
@@ -239,24 +266,29 @@ const AuthCard = ({ role: initialRole }) => {
             <p>Remember me</p>
           </div>
         )}
-
-        <PrimaryButton
+        {!loading ? (
+          <PrimaryButton
+          ref={buttonRef}
           text={isSignup ? "SIGN UP" : "SIGN IN"}
-          className="w-full mt-2"
+          className="w-full mt-2 text-white"
           type="submit"
         />
+        ):(
+          <PropagateLoader color="#0096C7"/>
+        )}
+        
 
 
         {/* Google signin only for patient/doctor */}
         {!isSignup && !isAdmin && (
           <PrimaryButton onClick={openSignIn}
             text="SIGNIN WITH GOOGLE"
-            className="w-full bg-[#BD2F2F] mt-2"
+            className="w-full bg-white text-black border border-sky-600 mt-2"
           />
         )}
 
+         {/* Admin only has signin */}
         <div className="my-5 text-center">
-          {/* Admin only has signin */}
           {isAdmin ? (
             <p className="text-gray-600">
               Login with your admin credentials

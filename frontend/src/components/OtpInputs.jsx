@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import PrimaryButton from "./PrimaryButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
-import { useModal } from "../contexts/ModalContext";
+import toast from "react-hot-toast";
+
 
 export default function OtpVerification() {
   const [secondsLeft, setSecondsLeft] = useState(120);
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const location = useLocation();
   const email = location.state?.email;
-  const { openModal } = useModal();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,17 +46,24 @@ export default function OtpVerification() {
     const otpCode = otp.join('');
 
     try {
+
+      const loadingToast = toast.loading ('Verifying your OTP...')
+
       const { data } = await api.post('/api/auth/verify-email', {
         otp: otpCode,
         email: email
       });
 
+      toast.dismiss(loadingToast);
+
       if (!data.success) {
-        openModal(data.message);
+
+        toast.error(data.message)
+        
         return;
       }
 
-      openModal(data.message);
+      toast.error(data.message)
       navigate('/signin', { state: { email } });
 
     } catch (error) {

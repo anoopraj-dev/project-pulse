@@ -15,7 +15,7 @@ export const personalInfo = async (req, res) => {
                 message: 'Patient not found'
             })
         }
-        console.log(patient)
+        
         return res.status(200).json({
             success: true,
             message: 'Personal information updated successfully'
@@ -33,18 +33,20 @@ export const medicalInfo = async (req, res) => {
   try {
     const {
       email,
+      bloodGroup,
       height,
       weight,
-      allergies,
-      conditions,
+      allergies =[],
+      conditions=[],
       cholesterolLevel,
       bloodPressure,
       glucoseLevel
     } = req.body;
 
     const medicalData = {
-      height: Number(height),
-      weight: Number(weight),
+      bloodGroup,
+      height,
+      weight,
       allergies,
       conditions,
       cholesterolLevel,
@@ -54,7 +56,7 @@ export const medicalInfo = async (req, res) => {
 
     const patient = await Patient.findOneAndUpdate(
       { email },
-      { $set: medicalData },
+      { $set:{medical_history: medicalData}},
       { new: true, runValidators: true }
     );
 
@@ -65,7 +67,7 @@ export const medicalInfo = async (req, res) => {
       });
     }
 
-    console.log("Updated patient:", patient);
+   
     return res.status(200).json({
       success: true,
       message: "Medical information updated successfully"

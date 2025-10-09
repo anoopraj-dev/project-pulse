@@ -35,6 +35,11 @@ const PatientRegistration = () => {
       formData.append("patientId", id);
       formData.append('firstLogin', firstLogin);
 
+      const payload = {
+        email,
+        ...data,
+        firstLogin
+      }
 
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
@@ -51,8 +56,11 @@ const PatientRegistration = () => {
 
         openModal(response.data.message);
         setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1));
+
+
+
       } else if (currentStep === 1) {
-        const response = await api.post("/api/patient/medical-info", formData);
+        const response = await api.post("/api/patient/medical-info",payload);
         console.log("Step 1 response:", response.data);
 
         if (!response.data.success) {

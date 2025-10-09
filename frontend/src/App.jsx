@@ -19,6 +19,8 @@ import NotFound from "./pages/NotFound";
 const App = () => {
 
   return (
+    <>
+  
     <Router>
       <Navbar />
       <Routes>
@@ -30,7 +32,7 @@ const App = () => {
         <Route path="/verify-email" element={<VerifyEmail />} />
 
         <Route path="/admin/profile" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/patient/dashbord" element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} />
+        <Route path="/patient/dashboard" element={<ProtectedRoute><Layout><PatientDashboard /></Layout></ProtectedRoute>} />
         <Route path="/patient/personal-info" element={<ProtectedRoute><PatientRegistration /> </ProtectedRoute>} />
         <Route path="/doctor/personal-info" element={<ProtectedRoute><DoctorRegistration /></ProtectedRoute>} />
         <Route path="/patient/profile" element={<ProtectedRoute><Layout><PatientProfile /></Layout></ProtectedRoute>} />
@@ -40,6 +42,7 @@ const App = () => {
 
       </Routes>
     </Router>
+    </>
   );
 };
 

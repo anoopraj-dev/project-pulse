@@ -18,7 +18,7 @@ const VerifyEmail = () => {
       </div>
 
     </div>
-    <Footer/>
+  
     </>
   );
 };
