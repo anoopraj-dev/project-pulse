@@ -4,7 +4,7 @@ const SliderToggle = ({ isChecked, onToggle }) => {
   };
 
   return (
-    <label className="relative inline-block w-14 h-8 mx-5 cursor-pointer">
+       <label className="relative inline-block w-52 h-12 cursor-pointer select-none">
       <input
         type="checkbox"
         checked={isChecked}
@@ -13,10 +13,20 @@ const SliderToggle = ({ isChecked, onToggle }) => {
       />
 
       {/* Slider track */}
-      <div className="w-full h-full bg-gray-300 rounded-full transition-colors duration-300 peer-checked:bg-blue-500"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0096C7]  to-sky-600 rounded-full flex items-center justify-between px-5 text-white font-semibold text-sm">
+        <span className={`${!isChecked ? "opacity-100" : "opacity-50"} transition-opacity duration-300`}>
+          Doctor
+        </span>
+        <span className={`${isChecked ? "opacity-100" : "opacity-50"} transition-opacity duration-300`}>
+          Patient
+        </span>
+      </div>
 
-      {/* Slider knob */}
-      <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 peer-checked:translate-x-6"></div>
+      {/* Knob */}
+      <div
+        className={`absolute top-1 left-1 w-24 h-10 rounded-full border-2 border-white bg-white shadow-md transition-transform duration-300 z-10
+          ${isChecked ? "translate-x-[105px]" : "translate-x-0"}`}
+      ></div>
     </label>
   );
 };

@@ -51,15 +51,29 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white fixed w-full shadow-md z-50">
+    <nav className="bg-white fixed w-full  z-50">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
         <div className="flex justify-between items-center py-4">
-          <div className="text-xl font-bold text-[#0096C7] w-lg">PULSE 360</div>
+          <div className="text-xl font-bold text-[#0096C7] w-md">PULSE 360</div>
 
           {!isLoading && (
             <>
               {!isLoggedIn ? (
-                <ul className="flex space-x-6">
+                <>
+                <div className="flex items-center space-x-2 flex-grow max-w-3xl ml-0 mr-auto ">
+                    <input
+                      type="text"
+                      placeholder="Search doctors, services..."
+                      className="flex-grow px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0096C7]"
+                    />
+                    <select className="px-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0096C7]">
+                      <option>Location</option>
+                      <option>Bangalore</option>
+                      <option>Kochi</option>
+                    </select>
+                    <button className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]">Search</button>
+                  </div>
+                <ul className="flex space-x-6 text-lg font-md">
                   <Link to="/"><li className="hover:text-[#0096C7] cursor-pointer">Home</li></Link>
                   <li className="hover:text-[#0096C7] cursor-pointer">About Us</li>
                   <li className="hover:text-[#0096C7] cursor-pointer">Services</li>
@@ -67,6 +81,7 @@ const Navbar = () => {
                   <Link to="/signin"><li className="hover:text-[#0096C7] cursor-pointer">Login</li></Link>
                   <Link to="/admin/login"><li className="hover:text-[#0096C7] cursor-pointer">Admin</li></Link>
                 </ul>
+                </>
               ) : (
                 <div className="flex justify-between items-center w-full">
 

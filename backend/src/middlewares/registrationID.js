@@ -6,8 +6,7 @@ export const generateId = () => {
   return async (req, res, next) => {
     try {
       const { role } = req.body;
-      console.log(role);
-      console.log(typeof role);
+ 
 
       if (!role || !["doctor", "patient"].includes(role)) {
         return res.status(400).json({

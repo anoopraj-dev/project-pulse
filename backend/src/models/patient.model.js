@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { medicalSchema } from "./medicalHistory.js";
 
 const PatientSchema = new Schema(
   {
@@ -34,12 +35,8 @@ const PatientSchema = new Schema(
     profile_pic: {
       type: String,
     },
-    medical_history: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "TreatmentReport",
-      },
-    ],
+    medical_history: medicalSchema
+    ,
     status: {
       type: String,
       enum: ["active", "blocked"],

@@ -13,6 +13,7 @@ export const formSteps = {
   medicalInfo: {
     title: "Medical Information",
     fields: [
+      { name: "bloodGroup", label: "Blood Group", type: "select",options:["A+","A−","B+","B−","AB+","AB−","O+","O−"] },
       { name: "bloodPressure", label: "Blood Pressure", type: "text" },
       { name: "sugarLevel", label: "Sugar Level", type: "text" },
       { name: "cholesterol", label: "Cholesterol", type: "text" },
