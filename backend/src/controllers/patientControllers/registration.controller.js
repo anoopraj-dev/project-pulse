@@ -3,11 +3,11 @@ import Patient from "../../models/patient.model.js";
 export const personalInfo = async (req, res) => {
 
     try {
-        const { email, gender, address, phone, dob, work,firstLogin} = req.body;
+        const { gender, address, phone, dob, work,firstLogin} = req.body;
 
         const updateData = { gender, address, phone, dob, work,firstLogin:false};
 
-        const patient = await Patient.findOneAndUpdate({ email }, updateData);
+        const patient = await Patient.findOneAndUpdate({ id:req.user.id}, updateData);
 
         if (!patient) {
             return res.status(404).json({
@@ -32,15 +32,15 @@ export const personalInfo = async (req, res) => {
 export const medicalInfo = async (req, res) => {
   try {
     const {
-      email,
       bloodGroup,
       height,
       weight,
       allergies =[],
-      conditions=[],
+      medicalConditions=[],
       cholesterolLevel,
       bloodPressure,
-      glucoseLevel
+      glucoseLevel,
+      work
     } = req.body;
 
     const medicalData = {
@@ -48,14 +48,15 @@ export const medicalInfo = async (req, res) => {
       height,
       weight,
       allergies,
-      conditions,
+      medicalConditions,
       cholesterolLevel,
       bloodPressure,
-      glucoseLevel
+      glucoseLevel,
+      work
     };
 
-    const patient = await Patient.findOneAndUpdate(
-      { email },
+    const patient = await Patient.findByIdAndUpdate(
+      { id:req.user.id },
       { $set:{medical_history: medicalData}},
       { new: true, runValidators: true }
     );

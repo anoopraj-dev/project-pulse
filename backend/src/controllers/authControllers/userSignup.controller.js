@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import Patient from '../../models/patient.model.js';
-import Doctor from '../../models/doctor.model.js';
+import Doctor from '../../models/doctorModels/doctor.model.js';
 import bcrypt from 'bcryptjs';
 import { generateOtp } from "../../utils/otpGenerator.js";
 import Otp from "../../models/otps.model.js";

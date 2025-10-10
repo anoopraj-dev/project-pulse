@@ -4,14 +4,17 @@ import AuthImage from "../components/AuthImage";
 const Signup = () => {
     return (
       <>
-            <div className=" grid grid-cols-[70%_30%]"  >
-                <div className="px-2">
+            <div className=" grid grid-cols-[60%_40%]"  >
+                <div className="">
                 <AuthImage/>
                 </div>
-                <AuthCard />
+                <div className="flex justify-center items-center">
+                    <AuthCard />
+                </div>
+                
             </div>
 
-        </> 
+     </> 
     )
 }
 

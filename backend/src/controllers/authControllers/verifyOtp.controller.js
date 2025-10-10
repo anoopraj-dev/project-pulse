@@ -1,5 +1,5 @@
 import Patient from "../../models/patient.model.js";
-import Doctor from "../../models/doctor.model.js";
+import Doctor from "../../models/doctorModels/doctor.model.js";
 import Otp from "../../models/otps.model.js";
 
 export const verifyOtp = async (req, res) => {

@@ -1,9 +1,25 @@
-import { Icon } from '@iconify/react';
-import { Link } from 'react-router-dom';
+import { Icon, loadIcon } from '@iconify/react';
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 
 const Sidebar = () => {
+  const [selected,setSelected] = useState(false)
+
+  const location = useLocation();
+   const menuItems = [
+    { name: "Dashboard", icon: "mdi:home", path: "/patient/dashboard" },
+    { name: "Profile", icon: "mdi:account", path: "/patient/profile" },
+    { name: "Messages", icon: "mdi:message-bubble", path: "/patient/messages" },
+    { name: "Doctors", icon: "healthicons:doctor-male", path: "/patient/doctors" },
+    { name: "Appointments", icon: "mdi:calendar-month", path: "/patient/appointments" },
+    { name: "Records", icon: "mdi:file-document", path: "/patient/records" },
+    { name: "Transactions", icon: "mdi:bank-transfer", path: "/patient/transactions" },
+    { name: "Wallet", icon: "mdi:wallet", path: "/patient/wallet" },
+    { name: "Settings", icon: "mdi:settings", path: "/patient/settings" },
+  ];
  
+  
 
   return (
     <div className="h-screen w-64 bg-[#0096C7] text-gray-100 flex flex-col mt-19">
@@ -12,93 +28,30 @@ const Sidebar = () => {
           <img
             src="/profile.png"
             alt="Profile"
-            className="rounded-full w-40 h-40 object-cover"
+            className="rounded-full w-30 h-30 object-cover"
           />
         </div>
 
         <ul className="space-y-3 gap-3">
-         <Link to='/patient/dashboard'>
-           <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:home"
-              className="w-7 h-7 text-gray-600 hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Dashboard</span>
-          </li>
-         </Link>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:account"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Profile</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:message-bubble"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Messages</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="healthicons:doctor-male"
-              className="w-8 h-8 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Doctors</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:calendar-month"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Appointments</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:file-document"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Records</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:bank-transfer"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Transactions</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:wallet"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Wallet</span>
-          </li>
-
-          <li className="flex items-center gap-3 p-2 hover:bg-white hover:text-[#162C55] cursor-pointer">
-            <Icon
-              icon="mdi:settings"
-              className="w-7 h-7 text-white hover:text-[#162C55]"
-              color="currentColor"
-            />
-            <span className="font-semibold">Settings</span>
-          </li>
+          {menuItems.map((item,idx)=>{
+            const isActive = location.pathname === item.path
+            return(
+              <Link to={item.path} key={idx}>
+                <li
+                  className={`flex items-center gap-3 p-2 cursor-pointer rounded
+                    ${isActive ? "bg-white text-[#162C55]" : "text-white hover:bg-slate-500 hover:text-[#162C55]"}
+                  `}
+                >
+                  <Icon
+                    icon={item.icon}
+                    className={`w-7 h-7 ${isActive ? "text-[#162C55]" : "text-white"} `}
+                  />
+                  <span className="font-semibold">{item.name}</span>
+                </li>
+              </Link>
+            )
+          })}
+         
         </ul>
       </nav>
     </div>
