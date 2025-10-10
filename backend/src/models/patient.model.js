@@ -54,6 +54,9 @@ const PatientSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    work:{
+      type: String,
+    }
   },
   { collection: "patients", timestamps: true }
 );

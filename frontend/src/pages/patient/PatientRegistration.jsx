@@ -6,23 +6,19 @@ import Headings from "../../components/Headings";
 import { useUser } from "../../contexts/UserContext";
 import { api } from "../../api/api";
 import { useModal } from "../../contexts/ModalContext";
+import ShimmerCard from "../../components/ShimmerCard";
 
 const PatientRegistration = () => {
   const stepKeys = Object.keys(formSteps);
   const [currentStep, setCurrentStep] = useState(0);
-  const { email, id,firstLogin } = useUser();
+  const { email, id,isLoading} = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
 
-  const [loadingUser, setLoadingUser] = useState(true);
 
-  // Check when user data becomes available
-  useEffect(() => {
-    if (email && id) setLoadingUser(false);
-  }, [email, id]);
 
   const handleNext = async (data) => {
-    if (!email || !id) {
+    if (isLoading||!email || !id) {
       openModal("User data not loaded yet. Please wait.");
       return;
     }
@@ -31,15 +27,8 @@ const PatientRegistration = () => {
 
     try {
       const formData = new FormData();
-      formData.append("email", email);
-      formData.append("patientId", id);
-      formData.append('firstLogin', firstLogin);
-
-      const payload = {
-        email,
-        ...data,
-        firstLogin
-      }
+      const payload = {...data}
+      console.log(payload)
 
       Object.entries(data).forEach(([key, value]) => {
         formData.append(key, value);
@@ -111,8 +100,13 @@ const PatientRegistration = () => {
         </div>
 
         {/* Dynamic Form */}
-        {loadingUser ? (
-          <div className="text-center text-gray-500">Loading user data...</div>
+        {isLoading? (
+          <>
+            <ShimmerCard/>
+            <ShimmerCard/>
+            <ShimmerCard/>
+          </>
+
         ) : (
           <DynamicForm
             config={formSteps[stepKeys[currentStep]]}

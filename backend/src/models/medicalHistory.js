@@ -25,7 +25,7 @@ export const medicalSchema = new mongoose.Schema({
     allergies:{
         type: [String]
     },
-    conditions:{
+    medicalConditions:{
         type:[String]
     }
 },{_id:false})

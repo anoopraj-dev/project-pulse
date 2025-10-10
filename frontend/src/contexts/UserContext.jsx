@@ -34,8 +34,6 @@ const UserContext = createContext({
   ...initialState,
   dispatch: () => null,
 });
-
-
 //provider
 export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState);

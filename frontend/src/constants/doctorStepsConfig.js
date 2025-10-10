@@ -10,6 +10,7 @@ const doctorPersonalInfoConfig = {
     { name: "clinicAddress", label: "Clinic Address", type: "textarea", required: true },
     { name: "about", label: "About Yourself", type: "textarea", required: false },
     { name: "profilePic", label: "Profile Picture", type: "file", accept: "image/*", required: false },
+    { name: "location", label: "Clinic Location", type: "text", required: true }
   ],
 };
 
@@ -20,6 +21,7 @@ const doctorProfessionalInfoConfig = {
     { name: "qualifications", label: "Qualifications", type: "textarea", required: true, placeholder: "Enter your qualifications" },
     { name: "specializations", label: "Specializations", type: "textarea", required: true, placeholder: "Enter your specializations" },
     
+    
     // Experience Section (repeatable)
     { 
       name: "experience", 
@@ -29,6 +31,7 @@ const doctorProfessionalInfoConfig = {
         { name: "years", label: "Years", type: "number", required: true },
         { name: "hospital", label: "Hospital Name", type: "text", required: true },
         { name: "location", label: "Location", type: "text", required: true },
+
       ]
     },
 

@@ -4,7 +4,7 @@ const AuthImage = () => {
   return (
     <div className="w-full h-screen flex justify-center items-center">
       <img 
-        src="./authbanner.webp" 
+        src="./loginbanner.jpg" 
         alt="auth banner" 
         className="w-full h-full object-cover"
       />

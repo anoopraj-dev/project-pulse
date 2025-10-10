@@ -1,7 +1,9 @@
 import { Icon } from "@iconify/react";
+import { formatLabel } from "../utilis/formLabelFormat";
 
 const InfoCards = ({ data }) => {
-  // Fallback for missing data
+
+  console.log(data)
   const fallback = "N/A";
 
   return (
@@ -41,23 +43,25 @@ const InfoCards = ({ data }) => {
           <div className="flex flex-col gap-3">
             <div className="flex justify-between">
               <p>Date of Birth</p>
-              <p>{data?.dob || fallback}</p>
+              <p>
+                {data?.Dob ? new Date(data.Dob).toDateString() : fallback}
+              </p>
             </div>
             <div className="flex justify-between">
               <p>Email</p>
-              <p>{data?.email || fallback}</p>
+              <p>{data?.["Email"] || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Phone</p>
-              <p>{data?.phone || fallback}</p>
+              <p>{data?.['Phone'] || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Address</p>
-              <p>{data?.address || fallback}</p>
+              <p>{data?.['Address'] || fallback}</p>
             </div>
             <div className="flex justify-between">
               <p>Employed As</p>
-              <p>{data?.employment || fallback}</p>
+              <p>{data?.['Employment'] || fallback}</p>
             </div>
           </div>
         </div>
@@ -71,15 +75,19 @@ const InfoCards = ({ data }) => {
         </div>
 
         <div className="flex flex-col gap-3">
-          {data?.medicalHistory && data.medicalHistory.length > 0 ? (
-            data.medicalHistory.map((item, idx) => (
-              <div key={idx} className="flex justify-between">
-                <p>{item.type || fallback}</p>
-                <p>{item.date ? new Date(item.date).toLocaleDateString() : fallback}</p>
+          {data?.Medical_history && Object.keys(data.Medical_history).length > 0 ? (
+            Object.entries(data.Medical_history).map(([key, value], idx) => (
+              <div key={idx} className="flex justify-between py-2 ">
+                <p className="font-md">{formatLabel(key)}</p>
+                <p>
+                  {Array.isArray(value) ? value.join(", ") : value || fallback}
+                </p>
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 py-8">No medical history available</div>
+            <div className="text-center text-gray-500 py-8">
+              No medical history available
+            </div>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import Doctor from "../../models/doctor.model.js";
+import Doctor from "../../models/doctorModels/doctor.model.js";
 
 export const getDoctorProfile = async (req, res) => {
   const token = req.cookies.token;

@@ -1,4 +1,4 @@
-import Doctor from "../models/doctor.model.js";
+import Doctor from "../models/doctorModels/doctor.model.js";
 import Patient from "../models/patient.model.js";
 import { generateUniqueId } from "../utils/idGenerator.js";
 

@@ -5,16 +5,19 @@ import Headings from "../../components/Headings";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../api/api";
 import { doctorStepsConfig } from "../../constants/doctorStepsConfig";
+import { useUser } from "../../contexts/UserContext";
 
 const DoctorRegistration = () => {
   const stepKeys = Object.keys(doctorStepsConfig);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const {email} = useUser();
 
   const handleNext = async (data) => {
     try {
       const formData = new FormData();
+      formData.append('email',email);
 
       // Append form data
       Object.entries(data).forEach(([key, value]) => {

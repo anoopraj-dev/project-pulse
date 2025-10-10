@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import Doctor from "../../models/doctor.model.js";
+import Doctor from "../../models/doctorModels/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
@@ -41,7 +41,8 @@ export const userSignin = async (req, res) => {
 
     // Create JWT payload
     const payload = {
-      id: role === 'doctor' ? user.doctorId : user.patientId,
+      id:user._id,
+      customId: role === 'doctor' ? user.doctorId : user.patientId,
       email: user.email,
       role,
       name:user.name
@@ -65,7 +66,8 @@ export const userSignin = async (req, res) => {
       success: true,
       message: 'Login successful',
       user: {
-        id: role === 'doctor' ? user.doctorId : user.patientId,
+        id:user._id ,
+        customId: role === 'doctor' ? user.doctorId : user.patientId,
         email: user.email,
         role,
         firstLogin: user.firstLogin,
