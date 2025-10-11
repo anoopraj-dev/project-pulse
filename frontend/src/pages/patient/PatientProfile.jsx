@@ -20,8 +20,7 @@ const PatientProfile = () => {
     fetchUser();
   }, []);
 
-
-
+  
   const userData = user
   ? Object.entries(user).reduce((acc, [key, value]) => {
       let displayValue;

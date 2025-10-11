@@ -14,49 +14,62 @@ const DoctorRegistration = () => {
   const { openModal } = useModal();
   const {email} = useUser();
 
-  const handleNext = async (data) => {
-    try {
-      const formData = new FormData();
-      formData.append('email',email);
+const handleNext = async (data) => {
+  try {
+    const formData = new FormData();
 
-      // Append form data
-      Object.entries(data).forEach(([key, value]) => {
-        if (value instanceof FileList) {
-          formData.append(key, value[0]); // single file upload
-        } else if (typeof value === "object") {
-          formData.append(key, JSON.stringify(value)); // for arrays or nested objects
-        } else {
-          formData.append(key, value);
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value instanceof FileList) {
+      
+        if (value.length > 0) {
+          formData.append(key, value[0]);
         }
-      });
-
-      // Post to the corresponding endpoint
-      let response;
-      if (currentStep === 0) {
-        response = await api.post("/api/doctor/personal-info", formData);
-      } else if (currentStep === 1) {
-        response = await api.post("/api/doctor/professional-info", formData);
-      } else if (currentStep === 2) {
-        response = await api.post("/api/doctor/services-availability", formData);
-      }
-
-      if (!response.data.success) {
-        openModal(response.data.message);
-        return;
-      }
-
-      openModal(response.data.message);
-
-      if (currentStep < stepKeys.length - 1) {
-        setCurrentStep((prev) => prev + 1);
+      } else if (Array.isArray(value) || typeof value === "object") {
+        // Convert arrays or objects to JSON strings
+        formData.append(key, JSON.stringify(value));
       } else {
-        navigate("/doctor/dashboard"); // final step redirect
+        // For normal strings, numbers, etc.
+        formData.append(key, value);
       }
-    } catch (error) {
-      console.error("API error:", error);
-      openModal("Something went wrong. Please try again.");
+    });
+
+   
+    for (let [key, val] of formData.entries()) {
+      console.log(`${key}:`, val);
     }
-  };
+
+
+    let response;
+    if (currentStep === 0) {
+      response = await api.post("/api/doctor/personal-info", formData);
+    } else if (currentStep === 1) {
+      response = await api.post("/api/doctor/professional-info", formData);
+    } else if (currentStep === 2) {
+      response = await api.post("/api/doctor/services-info", formData);
+    }
+
+    if (!response.data.success) {
+      openModal(response.data.message);
+      return;
+    }
+
+    openModal(response.data.message);
+
+    if (currentStep < stepKeys.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      navigate("/doctor/dashboard");
+    }
+  } catch (error) {
+    console.error("API error:", error);
+    openModal("Something went wrong. Please try again.");
+  }
+};
+
+
+
+
 
   const handlePrev = () => {
     if (currentStep > 0) setCurrentStep((prev) => prev - 1);

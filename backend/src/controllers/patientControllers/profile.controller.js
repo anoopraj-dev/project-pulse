@@ -2,6 +2,7 @@ import Patient from "../../models/patient.model.js";
 
 export const getPatientProfile = async (req, res) => {
   const token = req.cookies.token;
+ 
 
   if (!token) {
     return res.status(401).json({
@@ -15,7 +16,7 @@ export const getPatientProfile = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const patient = await Patient.findOne({ patientId: req.user.id }).select(
+    const patient = await Patient.findById(req.user.id ).select(
       "-password"
     );
     console.log(patient);

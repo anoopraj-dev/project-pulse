@@ -45,50 +45,99 @@ export const registerDoctor = async (req, res) => {
 
 
 
-export const professionalInfo = async (req, res) => {
+
+export const updateProfessionalInfo = async (req, res) => {
   try {
-    const { email } = req.body;
-    let { qualifications, specializations, experienceYears, experience, education } = req.body;
+    let { qualifications, specializations, experience, education } = req.body;
 
- 
-    if (typeof experience === "string") {
-      experience = JSON.parse(experience);
-    }
-    if (typeof education === "string") {
-      education = JSON.parse(education);
+    // --- Validation ---
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: "Unauthorized access" });
     }
 
- 
-    if (Array.isArray(education)) {
-      education = education.map((item) => ({
-        ...item,
-        certificate: typeof item.certificate === "object" ? "" : item.certificate || ""
+    // --- Build update object dynamically ---
+    const updateData = {};
+
+    if (qualifications) updateData["professionalInfo.qualifications"] = qualifications;
+    if (specializations) updateData["professionalInfo.specializations"] = specializations;
+
+    if (experience) {
+      experience = JSON.parse(experience)
+      updateData["professionalInfo.experience"] = experience.map(exp => ({
+        years: exp.years,
+        hospitalName: exp.hospital || exp.hospitalName,
+        location: exp.location
       }));
     }
 
-   
-    experienceYears = Number(experienceYears) || 0;
+    if (education) {
+      education =JSON.parse(education)
+      updateData["professionalInfo.education"] = education.map(edu => ({
+        degree: edu.degree,
+        college: edu.college,
+        completionYear: edu.completionYear,
+        certificate:''
+      }));
+    }
 
-    const doctor = await Doctor.findOne({ email });
-    if (!doctor) {
+    // --- Update doctor record ---
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+      req.user.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDoctor) {
       return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    doctor.qualifications = qualifications;
-    doctor.specializations = specializations;
-    doctor.experienceYears = experienceYears;
-    doctor.experience = experience;
-    doctor.education = education;
-
-    await doctor.save();
-
-    res.status(200).json({
+    // --- Response ---
+    return res.status(200).json({
       success: true,
-      message: "Professional info saved successfully",
-      data: doctor,
+      message: "Professional information updated successfully",
+      data: updatedDoctor.professionalInfo
     });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Server error", error });
+    console.error("Error updating professional info:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating professional info",
+      error: error.message
+    });
   }
 };
+
+
+
+export const servicesInfo = async(req,res) => {
+  try {
+    const {servicesTypes,fees} =req.body;
+
+    const serviceInfo = {
+      servicesTypes,
+      fees
+    }
+
+    const doctor = await Doctor.findByIdAndUpdate(req.user.id, serviceInfo,{new: true});
+
+    if(!doctor){
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found!'
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Service info updated successfully'
+    })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success:false,
+      message: 'Server error'
+    })
+  }
+}

@@ -71,10 +71,7 @@ const doctorServicesConfig = {
         { name: "onlineFee", label: "Online Consultation Fee", type: "number", required: true },
         { name: "offlineFee", label: "Offline Consultation Fee", type: "number", required: true }
       ]
-    },
-
-    { name: "availableDays", label: "Available Days", type: "text", placeholder: "e.g., Mon, Wed, Fri", required: true },
-    { name: "availableTime", label: "Available Time", type: "text", placeholder: "e.g., 10:00 AM - 4:00 PM", required: true },
+    } 
   ],
 };
 

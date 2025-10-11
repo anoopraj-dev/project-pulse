@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PrimaryButton from "./PrimaryButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../api/api";
-import toast from "react-hot-toast";
+
 
 
 export default function OtpVerification() {
@@ -54,11 +54,11 @@ export default function OtpVerification() {
         email: email
       });
 
-      toast.dismiss(loadingToast);
+      
 
       if (!data.success) {
 
-        toast.error(data.message)
+       
         
         return;
       }
@@ -68,7 +68,7 @@ export default function OtpVerification() {
 
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || 'Something went wrong';
-      openModal(message);
+      
     }
   }
 
