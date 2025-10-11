@@ -4,7 +4,7 @@ import React from "react";
 const DynamicForm = ({ config, onSubmit, defaultValues }) => {
   const { watch, register, control, handleSubmit, formState: { errors } } = useForm({ defaultValues });
 
-  // --- Explicitly declare useFieldArray for each repeatable ---
+  // --- declare useFieldArray for each repeatable ---
   const { fields: experienceItems, append: appendExperience, remove: removeExperience } = useFieldArray({
     control,
     name: "experience",

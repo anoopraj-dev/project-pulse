@@ -85,8 +85,12 @@ const AuthCard = ({ role: initialRole }) => {
 
       // resend otp
       
+      const handleResendOtp = async () => {
+       
+        }
+      
 
-
+      
 
 
       // signin flow (Admin / Doctor / Patient) 
@@ -97,6 +101,8 @@ const AuthCard = ({ role: initialRole }) => {
           email: data.email,
           password: data.password,
         });
+
+
 
         if (response.data.success) {
           const { admin } = response.data;
@@ -304,9 +310,11 @@ const AuthCard = ({ role: initialRole }) => {
             <>
               <p>
                 Forgot Password?{" "}
-                <span className="text-blue-600 underline cursor-pointer">
+                <Link to='/reset-password'>
+                <span className="text-blue-600 underline cursor-pointer" onClick={handleResendOtp}>
                   Reset Password
                 </span>
+                 </Link>
               </p>
               <p>
                 Not a member yet?{" "}
