@@ -7,10 +7,12 @@ const ModalProvider = ({ children }) => {
   const [modal, setModal] = useState({
     isOpen: false,
     message: "",
+    Component:null,
+    props:{}
   });
 
-  const openModal = (message = "") => {
-    setModal({ isOpen: true, message });
+  const openModal = (message = "",Component =null,props={}) => {
+    setModal({ isOpen: true, message,Component,props});
   };
 
   const closeModal = () => {
@@ -20,17 +22,13 @@ const ModalProvider = ({ children }) => {
   return (
     <ModalContext.Provider value={{ modal, openModal, closeModal }}>
       {children}
-      <Modal isOpen={modal.isOpen} onClose={closeModal} message={modal.message} />
+      <Modal isOpen={modal.isOpen} onClose={closeModal} message={modal.message} >
+        {modal.Component && <modal.Component {...modal.props} />}
+      </Modal>
     </ModalContext.Provider>
   );
 };
 
-export const useModal = () => {
-  const ctx = useContext(ModalContext);
-  if (!ctx) {
-    throw new Error("useModal must be used within a ModalProvider");
-  }
-  return ctx;
-};
+export const useModal = () => useContext(ModalContext)
 
 export default ModalProvider;
