@@ -56,30 +56,52 @@ export const verifyOtp = async (req, res) => {
 };
 
 
-export const resendOtp = async (req,res)=> {
-   const otpCode = generateOtp();
-       await Otp.create({
-         email,
-         otp: otpCode,
-         expiresAt: new Date(Date.now() + 2 * 60 * 1000) // 2 minutes
-       });
+// reset password controller
+export const resetPassword = async (req, res) => {
+
+  try {
+    const { email, role } = req.body;
+    const Model = role ==='doctor'? Doctor: Patient;
+    const user = await Model.findOne({email})
+    if(!user){
+      console.error(`${role.charAt(0).toUpperCase()+role.slice(1)} not found`)
+      return res.status(404).json({
+        success:false,
+        message: `${role.charAt(0).toUpperCase()+role.slice(1)} not found`
+      })
+    }
 
 
-       const mailOptions = {
+    //generate otp
+    const otpCode = generateOtp();
+    await Otp.create({
+      email,
+      otp: otpCode,
+      expiresAt: new Date(Date.now() + 2 * 60 * 1000) // 2 minutes
+    });
+
+    //send mail
+    const mailOptions = {
       from: `"PULSE360" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: 'Email verification',
-      text: `Hello ${name}, verify your email with this one-time password: ${otpCode}`
+      text: `Hello , verify your email with this one-time password: ${otpCode}`
     };
 
-    try {
-      await sendEmail(mailOptions)
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        success: false,
-        message: 'Error sending OTP, try resending the email'
-      });
-    }
+
+    await sendEmail(mailOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: 'OTP sent successfully'
+    })
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error sending OTP, try resending the email'
+    });
+  }
 
 }

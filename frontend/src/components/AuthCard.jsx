@@ -1,5 +1,5 @@
 
-import { useEffect, useState,useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { api } from "../api/api";
@@ -10,24 +10,23 @@ import SliderToggle from "./SliderToggle";
 import { useUser } from "../contexts/UserContext";
 import { useClerk, useUser as clerkUser } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
-import gsap from 'gsap'
-import {PropagateLoader} from 'react-spinners'
+import { PropagateLoader } from 'react-spinners'
 import ShimmerCard from "./ShimmerCard";
+import ResetPasswordModalComponent from "./ResetPasswordModalComponent";
 
 
 
 const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isResending, SetIsResending] = useState(false)
   const location = useLocation();
   const navigate = useNavigate();
-  const { openModal } = useModal();
+  const { openModal,closeModal } = useModal();
   const { dispatch, isLoggedIn } = useUser();
   const { user, isSignedIn, isLoaded } = clerkUser();
   const { openSignIn } = useClerk()
   const buttonRef = useRef(null);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const isSignup = location.pathname === "/signup";
   const isAdmin = initialRole === "admin" || location.pathname.includes("/admin");
 
@@ -49,7 +48,7 @@ const AuthCard = ({ role: initialRole }) => {
       setLoading(true);
       const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
- // signup flow (Patient/Doctor) 
+      // signup flow (Patient/Doctor) 
 
       if (isSignup && !isAdmin) {
         if (data.password !== data.confirmPassword) {
@@ -66,31 +65,21 @@ const AuthCard = ({ role: initialRole }) => {
           firstLogin: true,
         };
 
-        
+
         const response = await api.post("/api/auth/signup", signupData);
-     
+
         if (!response.data.success) {
           openModal(response.data.message)
-          
+
         } else {
           openModal(response.data.message)
           reset();
-          
+
           navigate("/verify-email", { state: { email: data.email } });
         }
-       
+
         return;
       }
-
-
-      // resend otp
-      
-      const handleResendOtp = async () => {
-       
-        }
-      
-
-      
 
 
       // signin flow (Admin / Doctor / Patient) 
@@ -109,12 +98,12 @@ const AuthCard = ({ role: initialRole }) => {
           dispatch({ type: "SET_USER", payload: { ...admin } });
           navigate("/admin/profile");
         } else {
-         openModal(response.data.message)
+          openModal(response.data.message)
         }
         return;
       }
 
-  
+
       const response = await api.post("/api/auth/signin", {
         email: data.email,
         password: data.password,
@@ -141,11 +130,39 @@ const AuthCard = ({ role: initialRole }) => {
         error?.response?.data?.message ||
         error?.message ||
         "Something went wrong";
-        openModal(message)
+      openModal(message)
     } finally {
       setLoading(false)
     }
   };
+
+  //function to make api call from modal
+
+  const fetchFromModal = async (email,role) => {
+    await api.post('/api/auth/reset-password',{
+      email,role
+    })
+  }
+
+//reset password
+const handleResetPassword = () => {
+  openModal(
+    'Tell us who you are?',
+    ResetPasswordModalComponent,
+    {
+      onSubmit: async({email,role,setResponse,closeModal}) => {
+        try {
+          const res=await fetchFromModal(email,role);
+          setResponse(res.data.message);
+          setTimeout(()=> closeModal(),2000)
+        } catch (error) {
+          setResponse(error.response?.data?.message || 'Something went wrong')
+        }
+      },
+      closeModal
+    }
+  )
+}
 
 
   //for users authenticated with clerk
@@ -162,19 +179,16 @@ const AuthCard = ({ role: initialRole }) => {
       }
     }
 
-   
+
 
   }, [isSignedIn, user, navigate]);
 
-  
+
   if (!isLoaded) return (
     <div>
-      <ShimmerCard/>
-      <ShimmerCard/>
-      <ShimmerCard/>
-      <ShimmerCard/>
+      <ShimmerCard />
     </div>
-    
+
   );
   if (isSignedIn && user) return null;
 
@@ -189,8 +203,8 @@ const AuthCard = ({ role: initialRole }) => {
               }`}
             className="flex justify-center"
           />
-       
-          
+
+
         </div>
 
         {/* Name (only for signup, non-admin) */}
@@ -274,15 +288,18 @@ const AuthCard = ({ role: initialRole }) => {
         )}
         {!loading ? (
           <PrimaryButton
-          ref={buttonRef}
-          text={isSignup ? "SIGN UP" : "SIGN IN"}
-          className="w-full mt-2 text-white"
-          type="submit"
-        />
-        ):(
-          <PropagateLoader color="#0096C7"/>
+            ref={buttonRef}
+            text={isSignup ? "SIGN UP" : "SIGN IN"}
+            className="w-full mt-2 text-white"
+            type="submit"
+          />
+        ) : (
+          <div className="my-4">
+            <PropagateLoader color="#0096C7" />
+
+          </div>
         )}
-        
+
 
 
         {/* Google signin only for patient/doctor */}
@@ -293,7 +310,7 @@ const AuthCard = ({ role: initialRole }) => {
           />
         )}
 
-         {/* Admin only has signin */}
+        {/* Admin only has signin */}
         <div className="my-5 text-center">
           {isAdmin ? (
             <p className="text-gray-600">
@@ -311,10 +328,10 @@ const AuthCard = ({ role: initialRole }) => {
               <p>
                 Forgot Password?{" "}
                 <Link to='/reset-password'>
-                <span className="text-blue-600 underline cursor-pointer" onClick={handleResendOtp}>
-                  Reset Password
-                </span>
-                 </Link>
+                  <span className="text-blue-600 underline cursor-pointer" onClick={() => handleResetPassword()}>
+                    Reset Password
+                  </span>
+                </Link>
               </p>
               <p>
                 Not a member yet?{" "}

@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import { userSignup } from '../controllers/authControllers/userSignup.controller.js';
 import { generateId } from '../middlewares/registrationID.js';
-import { resendOtp, verifyOtp } from '../controllers/authControllers/verifyOtp.controller.js';
+import { resetPassword, verifyOtp } from '../controllers/authControllers/verifyOtp.controller.js';
 import { authCheck, userSignin } from '../controllers/authControllers/userSignin.controller.js';
 import { userLogout } from '../controllers/authControllers/logout.controller.js';
 import multer from 'multer'
@@ -18,7 +18,7 @@ router.post('/signin',userSignin);
 router.get('/me',authenticateUser,getCurrentUserInfo)
 router.post('/logout',userLogout);
 router.get('/authenticate',authenticateUser,authCheck)
-router.get('/reset-password', resendOtp);
+router.post('/reset-password', resetPassword);
 //email verification
 router.post('/verify-email',verifyOtp)
 
