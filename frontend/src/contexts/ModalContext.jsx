@@ -23,7 +23,7 @@ const ModalProvider = ({ children }) => {
     <ModalContext.Provider value={{ modal, openModal, closeModal }}>
       {children}
       <Modal isOpen={modal.isOpen} onClose={closeModal} message={modal.message} >
-        {modal.Component && <modal.Component {...modal.props} />}
+        {modal.Component && <modal.Component {...modal.props} closeModal={closeModal}/>}
       </Modal>
     </ModalContext.Provider>
   );

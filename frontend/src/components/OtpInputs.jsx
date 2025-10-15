@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
 import PrimaryButton from "./PrimaryButton";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api/api";
+import { useModal } from "../contexts/ModalContext";
+import { SetPasswordModal } from "./ModalInputs";
+import toast from "react-hot-toast";
 
-
-
-export default function OtpVerification() {
-  const [secondsLeft, setSecondsLeft] = useState(120);
+const  OtpInputs = () => {
+  const [secondsLeft, setSecondsLeft] = useState(60);
   const [otp, setOtp] = useState(new Array(6).fill(''));
-  const location = useLocation();
-  const email = location.state?.email;
   const navigate = useNavigate();
+  const {openModal} = useModal();
+  const [resendDisabled, setResendDisabled] = useState(true);
+
+  const sessionData = JSON.parse(sessionStorage.getItem('otpSession' || '{}'))
+  const type = sessionData.type || '';
+  const email = sessionData.email || '';
+  
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,7 +30,8 @@ export default function OtpVerification() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [secondsLeft]);
+
 
   const handleInputs = (e, index) => {
     const value = e.target.value;
@@ -41,34 +48,76 @@ export default function OtpVerification() {
     }
   }
 
+  // resend otp
+
+  const handleResendOtp = async () => {
+  if (resendDisabled) return;
+
+  setResendDisabled(true);
+  setSecondsLeft(60); 
+
+  try {
+    
+    const payload = { email,type};
+    const response = await api.post('/api/auth/resend-otp', payload);
+
+    if (response.data.success) {
+      toast.success('OTP has been resent!');
+    } else {
+      toast.error(response.data.message || 'Failed to resend OTP');
+      setResendDisabled(false);  // Allow retry on fail
+      setSecondsLeft(0);
+    }
+  } catch (err) {
+    toast.error('Error resending OTP. Please try again.');
+    setResendDisabled(false);
+    setSecondsLeft(0);
+  }
+};
+
+useEffect(() => {
+  if (secondsLeft === 0) {
+    setResendDisabled(false);
+  } else {
+    setResendDisabled(true);
+  }
+}, [secondsLeft]);
+
+
+
+//submit otp
   const handleSubmit = async (e) => {
     e.preventDefault();
     const otpCode = otp.join('');
-
+    const payload = {otp:otpCode,type,email};
+   
     try {
-
-      const loadingToast = toast.loading ('Verifying your OTP...')
-
-      const { data } = await api.post('/api/auth/verify-email', {
-        otp: otpCode,
-        email: email
-      });
-
+      const {data} = await api.post('/api/auth/verify-email', payload);
       
-
       if (!data.success) {
-
-       
-        
+        console.log('error sending payload');
+        toast.error(data.message);
         return;
       }
 
-      toast.error(data.message)
-      navigate('/signin', { state: { email } });
+      if(type === 'emailVerification'){
+        toast.success(data.message)
+        navigate('/signin');
+      }else if( type === 'resetPassword'){
+          toast.success(data.message)
+          openModal("Forgot your password?", SetPasswordModal, {
+            endPoint: "/api/auth/set-password",
+            type:'resetPassword',
+            onSubmit: (res) => navigate("/signin"),
+          });
+        
+      }   
+      setOtp(new Array(6).fill(''));
 
     } catch (error) {
       const message = error?.response?.data?.message || error?.message || 'Something went wrong';
-      
+      setOtp(new Array(6).fill(''));
+      toast.error(message)
     }
   }
 
@@ -105,9 +154,9 @@ export default function OtpVerification() {
           <div className="flex justify-evenly">
             <p className="mt-4 text-sm text-gray-600 text-center">
               Didn’t receive the OTP?{" "}
-              <a href="#" className="text-blue-500">
-                {secondsLeft === 0 ? "Resend" : time}
-              </a>
+              <button  className="text-blue-500" onClick={handleResendOtp}>
+                {secondsLeft === 0 ? "Resend" : time} 
+              </button>
             </p>
           </div>
         </div>
@@ -115,3 +164,5 @@ export default function OtpVerification() {
     </div>
   );
 }
+
+export default OtpInputs;

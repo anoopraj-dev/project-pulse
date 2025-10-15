@@ -12,8 +12,8 @@ import { useClerk, useUser as clerkUser } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
 import { PropagateLoader } from 'react-spinners'
 import ShimmerCard from "./ShimmerCard";
-import ResetPasswordModalComponent from "./ResetPasswordModalComponent";
-
+import { EmailModal } from "./ModalInputs";
+import toast from "react-hot-toast";
 
 
 const AuthCard = ({ role: initialRole }) => {
@@ -21,8 +21,8 @@ const AuthCard = ({ role: initialRole }) => {
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { openModal,closeModal } = useModal();
-  const { dispatch, isLoggedIn } = useUser();
+  const { openModal} = useModal();
+  const { dispatch} = useUser();
   const { user, isSignedIn, isLoaded } = clerkUser();
   const { openSignIn } = useClerk()
   const buttonRef = useRef(null);
@@ -49,7 +49,6 @@ const AuthCard = ({ role: initialRole }) => {
       const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
       // signup flow (Patient/Doctor) 
-
       if (isSignup && !isAdmin) {
         if (data.password !== data.confirmPassword) {
           openModal('Passwords do not match!')
@@ -67,23 +66,24 @@ const AuthCard = ({ role: initialRole }) => {
 
 
         const response = await api.post("/api/auth/signup", signupData);
-
-        if (!response.data.success) {
-          openModal(response.data.message)
+        if (response.data.success) {
+          toast.success(response.data.message);
+          const payload = {
+            email: data.email,
+            type:'emailVerification',
+            role:data.role
+          }
+          sessionStorage.setItem('otpSession',JSON.stringify(payload));
+          navigate('/verify-email')
 
         } else {
-          openModal(response.data.message)
-          reset();
-
-          navigate("/verify-email", { state: { email: data.email } });
+          toast.error(response.data.message)
         }
 
         return;
       }
 
-
       // signin flow (Admin / Doctor / Patient) 
-
       if (isAdmin) {
 
         const response = await api.post("/api/admin/login", {
@@ -136,33 +136,20 @@ const AuthCard = ({ role: initialRole }) => {
     }
   };
 
-  //function to make api call from modal
 
-  const fetchFromModal = async (email,role) => {
-    await api.post('/api/auth/reset-password',{
-      email,role
-    })
-  }
 
-//reset password
-const handleResetPassword = () => {
-  openModal(
-    'Tell us who you are?',
-    ResetPasswordModalComponent,
-    {
-      onSubmit: async({email,role,setResponse,closeModal}) => {
-        try {
-          const res=await fetchFromModal(email,role);
-          setResponse(res.data.message);
-          setTimeout(()=> closeModal(),2000)
-        } catch (error) {
-          setResponse(error.response?.data?.message || 'Something went wrong')
-        }
-      },
-      closeModal
-    }
-  )
-}
+  
+
+//forgot password - password reset
+  const handleForgotPassword = () => {
+  openModal("Forgot your password?", EmailModal, {
+    endPoint: "/api/auth/reset-password",
+    type:'resetPassword',
+    onSubmit: (res) => navigate("/verify-email"),
+  });
+};
+
+
 
 
   //for users authenticated with clerk
@@ -194,7 +181,7 @@ const handleResetPassword = () => {
 
 
   return (
-    <form className="my-32" onSubmit={handleSubmit(onSubmit)}>
+    <form className="my-16 mx-auto max-w-md sm:max-w-lg md:max-w-xl lg:max-w-[550px] p-4 sm:p-6 md:p-8 bg-white rounded-xl" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex flex-col items-center w-[550px] h-auto bg-white rounded-xl p-6 px-16 ">
         <div className="flex flex-col items-center ">
           {!isAdmin && <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />}
@@ -280,17 +267,11 @@ const handleResetPassword = () => {
         )}
 
 
-        {!isSignup && (
-          <div className="flex items-center mt-5">
-            <input type="checkbox" className="mr-2" />
-            <p>Remember me</p>
-          </div>
-        )}
         {!loading ? (
           <PrimaryButton
             ref={buttonRef}
             text={isSignup ? "SIGN UP" : "SIGN IN"}
-            className="w-full mt-2 text-white"
+            className="w-full mt-2 text-white bg-[#0096C7]"
             type="submit"
           />
         ) : (
@@ -306,7 +287,7 @@ const handleResetPassword = () => {
         {!isSignup && !isAdmin && (
           <PrimaryButton onClick={openSignIn}
             text="SIGNIN WITH GOOGLE"
-            className="w-full bg-white text-black border border-sky-600 mt-2"
+            className="w-full  bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
           />
         )}
 
@@ -327,11 +308,9 @@ const handleResetPassword = () => {
             <>
               <p>
                 Forgot Password?{" "}
-                <Link to='/reset-password'>
-                  <span className="text-blue-600 underline cursor-pointer" onClick={() => handleResetPassword()}>
+                  <span className="text-blue-600 underline cursor-pointer" onClick={() => handleForgotPassword()}>
                     Reset Password
                   </span>
-                </Link>
               </p>
               <p>
                 Not a member yet?{" "}

@@ -4,7 +4,7 @@ import DynamicForm from "../../components/DynamicForm";
 import Headings from "../../components/Headings";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../api/api";
-import { doctorStepsConfig } from "../../constants/doctorStepsConfig";
+import { doctorStepsConfig } from "../../formConfigs/doctorStepsConfig";
 import { useUser } from "../../contexts/UserContext";
 
 const DoctorRegistration = () => {
