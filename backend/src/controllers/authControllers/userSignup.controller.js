@@ -12,6 +12,7 @@ export const userSignup = async (req, res) => {
   try {
     const { name, email, password, confirmPassword, role, isVerified, firstLogin } = req.body;
 
+    console.log(email,role)
     // Check if user already exists
     const existingPatient = await Patient.findOne({ email });
     const existingDoctor = await Doctor.findOne({ email });
@@ -85,10 +86,13 @@ export const userSignup = async (req, res) => {
         message: 'Error sending OTP, try resending the email'
       });
     }
-
+    req.session.OTP = {
+      email,
+      type: 'emailVerification'
+    }
     return res.status(201).json({
       success: true,
-      message: `${role} registered successfully! Verify your email with the OTP sent to your email`
+      message: ` Verify your email with the OTP sent to your email`
     });
 
   } catch (error) {

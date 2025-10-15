@@ -6,7 +6,7 @@ const AuthImage = () => {
       <img 
         src="./loginbanner.jpg" 
         alt="auth banner" 
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover object-center"
       />
     </div>
   );

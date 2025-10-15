@@ -1,9 +1,9 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import React from "react";
 
-const DynamicForm = ({ config, onSubmit, defaultValues }) => {
+const DynamicForm = ({ config, onSubmit, defaultValues,mode,loading }) => {
   const { watch, register, control, handleSubmit, formState: { errors } } = useForm({ defaultValues });
-
+  const isModal = mode === 'modal'
   // --- declare useFieldArray for each repeatable ---
   const { fields: experienceItems, append: appendExperience, remove: removeExperience } = useFieldArray({
     control,
@@ -20,9 +20,9 @@ const DynamicForm = ({ config, onSubmit, defaultValues }) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-lg font-semibold mb-6 text-gray-700">{config.title}</h3>
+      <h3 className="text-lg font-semibold mb-6 text-gray-700">{isModal? '':config.title}</h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch">
+      <div className={isModal ? "grid grid-cols-1 gap-4" : "grid grid-cols-1 md:grid-cols-2 gap-12"}>
         {config.fields.map((field) => {
 
           // --- Experience Repeatable ---
@@ -255,9 +255,13 @@ const DynamicForm = ({ config, onSubmit, defaultValues }) => {
       <div className="flex justify-center mt-10">
         <button
           type="submit"
-          className="px-8 py-3 bg-[#0096C7] text-white font-semibold rounded-lg hover:bg-[#0077a3] transition duration-200"
+          className={isModal
+          ? "w-full mt-4 px-4 py-3 bg-[#0096C7] text-white rounded-md hover:bg-[#2cc4f7] transition"
+          : "mt-4 px-4 py-3 bg-[#0096C7] text-white rounded-md hover:bg-[#2cc4f7] transition"
+        }
+        disabled={loading}
         >
-          {config.buttonText || "Next"}
+          {loading? 'Processing...':config.buttonText || "Next"}
         </button>
       </div>
     </form>

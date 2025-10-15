@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 
 const PrimaryButton = forwardRef((props, ref) => {
-  const { text, onClick, className, type = "button", disabled } = props;
+  const { text, children, onClick, className, type = "button", disabled } = props;
 
   return (
     <button
@@ -11,7 +11,7 @@ const PrimaryButton = forwardRef((props, ref) => {
       type={type}
       disabled={disabled}
     >
-      {text}
+      {children || text}
     </button>
   );
 });

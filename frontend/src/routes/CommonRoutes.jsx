@@ -4,7 +4,6 @@ import Signup from "../pages/Signup";
 import VerifyEmail from "../pages/VerifyEmail";
 import NotFound from "../pages/NotFound";
 import AdminLogin from "../pages/admin/AdminLogin";
-import ResetPassword from "../pages/ResetPassword";
 
 const CommonRoutes = [
   { path: "/", element: <Home /> },
@@ -13,7 +12,7 @@ const CommonRoutes = [
   { path: "/verify-email", element: <VerifyEmail /> },
   { path: "/admin/login", element: <AdminLogin /> },
   { path: "/page-not-found", element: <NotFound /> },
-  {path: '/reset-password', element:<ResetPassword/>},
+  {path: '/reset-password', element:<VerifyEmail />},
 ];
 
 export default CommonRoutes;

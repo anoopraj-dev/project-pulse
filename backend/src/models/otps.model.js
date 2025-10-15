@@ -10,6 +10,9 @@ const otpSchema = new Schema({
   expiresAt: {
     type: Date,
   },
+  otpType: {
+    type: String
+  }
 });
 
 // TTL index: document will auto-delete after `expiresAt`

@@ -11,7 +11,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-  
   const {user} = clerkUser();
   const {signOut} = useClerk();
   const isLoggedIn = !!email || !!user;

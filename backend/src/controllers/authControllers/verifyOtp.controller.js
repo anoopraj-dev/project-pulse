@@ -3,17 +3,21 @@ import Doctor from "../../models/doctorModels/doctor.model.js";
 import Otp from "../../models/otps.model.js";
 import { generateOtp } from "../../utils/otpGenerator.js";
 import { sendEmail } from "../../config/nodemailer.js";
+import bcrypt from "bcryptjs";
 
 export const verifyOtp = async (req, res) => {
   try {
-    console.log(req.body);
-    const { otp, email } = req.body;
-    console.log(email)
+    console.log('Session data:', req.session);
+
+    if (!req.session || !req.session.OTP) {
+      return res.status(400).json({ success: false, message: 'Session expired or OTP not generated' });
+    }
+    const { otp} = req.body;
+    const {email,type,role} = req.session.OTP; 
 
     // Check if OTP exists
     const savedOtp = await Otp.findOne({ email });
-    console.log(savedOtp);
-
+  
     if (!savedOtp) {
       return res.status(400).json({
         success: false,
@@ -37,7 +41,9 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // Verify the user
+    //check the type of otp
+    if(type === 'emailVerification'){
+       // Verify the user
     await Patient.findOneAndUpdate({ email }, { isVerified: true });
     await Doctor.findOneAndUpdate({ email }, { isVerified: true });
 
@@ -45,6 +51,19 @@ export const verifyOtp = async (req, res) => {
       success: true,
       message: 'Email verified successfully!'
     });
+    } else if (type === 'resetPassword'){
+
+      req.session.emailInfo = {
+        email,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+        type
+      }
+      return res.status(200).json({
+        success: true,
+        message:'OTP verified. Set your new Password',
+        type:'resetPassword'
+      })
+    } 
 
   } catch (error) {
     console.error(error);
@@ -60,7 +79,10 @@ export const verifyOtp = async (req, res) => {
 export const resetPassword = async (req, res) => {
 
   try {
-    const { email, role } = req.body;
+    const { email, role,type } = req.body;
+
+    console.log(email,role,type)
+
     const Model = role ==='doctor'? Doctor: Patient;
     const user = await Model.findOne({email})
     if(!user){
@@ -71,14 +93,19 @@ export const resetPassword = async (req, res) => {
       })
     }
 
-
     //generate otp
     const otpCode = generateOtp();
     await Otp.create({
       email,
       otp: otpCode,
-      expiresAt: new Date(Date.now() + 2 * 60 * 1000) // 2 minutes
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 2 minutes
     });
+
+    req.session.OTP = {
+      email,
+      type,
+      role
+    }
 
     //send mail
     const mailOptions = {
@@ -105,3 +132,100 @@ export const resetPassword = async (req, res) => {
   }
 
 }
+
+
+//Set new password
+
+export const setNewPassword =async (req,res) => {
+  const {newPassword,confirmPassword} = req.body;
+  const {email,role} = req.session.OTP;
+  console.log(newPassword,confirmPassword)
+  
+ try {
+   const Model = role === 'patient'? Patient:Doctor;
+  const user = await Model.findOne({email});
+
+  if(!user){
+    return res.status(404).json({
+      success: false,
+      message: 'User not found!'
+    })
+  }
+
+  if(newPassword !== confirmPassword){
+    return res.status(400).json({
+      success: false,
+      message: 'Passwords do not match'
+    })
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword,10);
+
+  user.password = hashedPassword;
+  await user.save();
+
+  return res.status(200).json({
+  success: true,
+  message: 'Password updated successfully!'
+});
+
+ } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
+ }
+
+}
+
+
+//resend otp
+
+export const resendOtp = async (req, res) => {
+  try {
+    const { email, type } = req.body;
+
+    console.log(email,type)
+
+    if (!email || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and verification type are required."
+      });
+    }
+
+    // Generate a new OTP code
+    const otpCode = generateOtp();
+
+    // You can either update existing OTP document or create new one
+    const otpRecord = await Otp.findOneAndUpdate(
+      { email },
+      { otp: otpCode, expiresAt: new Date(Date.now() + 2 * 60 * 1000) }, // 2 minutes expiration
+      { new: true, upsert: true }
+    );
+
+    // Prepare email content
+    const mailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: 'Resend Email verification OTP',
+      text: `Hello, your new OTP is ${otpCode}. It will expire in 2 minutes.`
+    };
+
+    // Send email with new OTP
+    await sendEmail(mailOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "A new OTP has been sent to your email."
+    });
+
+  } catch (error) {
+    console.error("Error in resendOtp:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to resend OTP. Please try again."
+    });
+  }
+};

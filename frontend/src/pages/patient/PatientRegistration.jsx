@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DynamicForm from "../../components/DynamicForm";
-import { formSteps } from "../../constants/formStepConfig";
+import { formSteps } from "../../formConfigs/formStepConfig";
 import Headings from "../../components/Headings";
 import { useUser } from "../../contexts/UserContext";
 import { api } from "../../api/api";
