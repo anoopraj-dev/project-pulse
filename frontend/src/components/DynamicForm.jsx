@@ -1,9 +1,13 @@
 import { useForm, useFieldArray } from "react-hook-form";
-import React from "react";
+import React, { useState } from "react";
+import { api } from "../api/api";
 
 const DynamicForm = ({ config, onSubmit, defaultValues,mode,loading }) => {
   const { watch, register, control, handleSubmit, formState: { errors } } = useForm({ defaultValues });
+  const [uploadingFiles, setUploadingFiles] = useState({});
   const isModal = mode === 'modal'
+
+
   // --- declare useFieldArray for each repeatable ---
   const { fields: experienceItems, append: appendExperience, remove: removeExperience } = useFieldArray({
     control,
@@ -17,6 +21,7 @@ const DynamicForm = ({ config, onSubmit, defaultValues,mode,loading }) => {
 
   const watchedServices = watch("services", []);
   const selectedServices = Array.isArray(watchedServices) ? watchedServices :[watchedServices]
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

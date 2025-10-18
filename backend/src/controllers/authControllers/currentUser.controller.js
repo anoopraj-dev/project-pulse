@@ -29,11 +29,12 @@ export const getCurrentUserInfo = async (req, res) => {
                 id,
                 name: user.name,
                 email: user.email,
-                role
+                role,
+                profilePicture: user.profilePicture || ''
             }
         })
     } catch (error) {
-        console.error(err);
+        console.error(error);
         return res.status(500).json({
             success: false,
             message: "Server error"

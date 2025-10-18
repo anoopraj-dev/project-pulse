@@ -8,63 +8,98 @@ import { api } from "../../api/api";
 import { useModal } from "../../contexts/ModalContext";
 import ShimmerCard from "../../components/ShimmerCard";
 
+import toast from 'react-hot-toast'
+
 const PatientRegistration = () => {
   const stepKeys = Object.keys(formSteps);
   const [currentStep, setCurrentStep] = useState(0);
-  const { email, id,isLoading} = useUser();
+  const { email, id, isLoading } = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
 
-
-
   const handleNext = async (data) => {
-    if (isLoading||!email || !id) {
+    if (isLoading || !email || !id) {
       openModal("User data not loaded yet. Please wait.");
       return;
     }
+
+
 
     if (currentStep >= stepKeys.length) return;
 
     try {
       const formData = new FormData();
-      const payload = {...data}
-      console.log(payload)
+      const payload = { ...data }
 
+      //send data to backend
       Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
+        if (!Array.isArray(value)) {
+
+          formData.append(key, value);
+        }
       });
+
+      formData.forEach((value, key) => {
+        console.log(key, value);
+      });
+
 
       if (currentStep === 0) {
         const response = await api.post("/api/patient/personal-info", formData);
         console.log("Step 0 response:", response.data);
 
         if (!response.data.success) {
-          openModal(response.data.message);
+          toast.error(response.data.message)
           return;
         }
 
-        openModal(response.data.message);
+        toast.success(response.data.message)
         setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1));
 
 
 
       } else if (currentStep === 1) {
-        const response = await api.post("/api/patient/medical-info",payload);
+        const response = await api.post("/api/patient/medical-info", payload);
         console.log("Step 1 response:", response.data);
 
         if (!response.data.success) {
-          openModal(response.data.message);
+          toast.success(response.data.message)
           return;
         }
 
-        openModal(response.data.message);
-        navigate("/patient/profile");
-      }
+        toast.success(response.data.success)
+        setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1))
 
-      
+      } else if (currentStep === 2) {
+        if (!data.picture) {
+          toast.error('Please upload a picture!')
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('picture', data.picture[0])
+
+
+        const response = await api.post('/api/patient/upload-picture', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+        if (!response.success) toast.error(response.data.message);
+        toast.success(response.data.message)
+
+        navigate('/patient/profile')
+      }
     } catch (error) {
-      console.log("API error:", error);
-      openModal("Something went wrong. Please try again.");
+      if (error.response) {
+        console.log(error.response)
+        toast.error(error.response.data.message || "Something went wrong on the server.");
+      } else if (error.request) {
+        toast.error("No response from the server. Please check your connection.");
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 
@@ -84,11 +119,10 @@ const PatientRegistration = () => {
           {stepKeys.map((key, index) => (
             <div key={key} className="flex items-center">
               <div
-                className={`rounded-full flex items-center justify-center w-12 h-12 ${
-                  currentStep === index
+                className={`rounded-full flex items-center justify-center w-12 h-12 ${currentStep === index
                     ? "bg-[#0096C7] text-white"
                     : "border border-[#0096C7]"
-                }`}
+                  }`}
               >
                 <span className="font-bold">{index + 1}</span>
               </div>
@@ -100,11 +134,11 @@ const PatientRegistration = () => {
         </div>
 
         {/* Dynamic Form */}
-        {isLoading? (
+        {isLoading ? (
           <>
-            <ShimmerCard/>
-            <ShimmerCard/>
-            <ShimmerCard/>
+            <ShimmerCard />
+            <ShimmerCard />
+            <ShimmerCard />
           </>
 
         ) : (

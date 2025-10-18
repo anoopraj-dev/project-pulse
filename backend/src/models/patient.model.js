@@ -32,8 +32,11 @@ const PatientSchema = new Schema(
     address: {
       type: String,
     },
-    profile_pic: {
+    profilePicture: {
       type: String,
+    },
+    cloudinary_id: {
+      type: String
     },
     medical_history: medicalSchema
     ,

@@ -37,7 +37,7 @@ const RegisterUser = () => {
         openModal(response.data.message);
       } else {
         openModal(response.data.message);
-        navigate("/patient/profile");
+        navigate("/patient/profile",{replace:true});
       }
     } catch (error) {
       console.log(error);
