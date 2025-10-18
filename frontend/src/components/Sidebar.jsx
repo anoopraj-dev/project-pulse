@@ -1,11 +1,14 @@
 import { Icon, loadIcon } from '@iconify/react';
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
+
 
 
 const Sidebar = () => {
-  const [selected,setSelected] = useState(false)
-
+  
+  const {profilePicture,isLoading} = useUser();
+  console.log(profilePicture)
+  
   const location = useLocation();
    const menuItems = [
     { name: "Dashboard", icon: "mdi:home", path: "/patient/dashboard" },
@@ -18,15 +21,17 @@ const Sidebar = () => {
     { name: "Wallet", icon: "mdi:wallet", path: "/patient/wallet" },
     { name: "Settings", icon: "mdi:settings", path: "/patient/settings" },
   ];
+
+
  
-  
 
   return (
     <div className="h-screen w-64 bg-[#0096C7] text-gray-100 flex flex-col mt-19">
       <nav className="flex-1">
         <div className="flex p-6">
+
           <img
-            src="/profile.png"
+            src={!isLoading && profilePicture ? profilePicture : "/profile.png"}
             alt="Profile"
             className="rounded-full w-30 h-30 object-cover"
           />

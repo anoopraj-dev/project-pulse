@@ -10,6 +10,7 @@ const initialState = {
   token: "",
   firstLogin:true,
   name:'',
+  profilePicture:'',
   isLoading: true
 };
 

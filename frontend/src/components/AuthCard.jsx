@@ -96,7 +96,7 @@ const AuthCard = ({ role: initialRole }) => {
         if (response.data.success) {
           const { admin } = response.data;
           dispatch({ type: "SET_USER", payload: { ...admin } });
-          navigate("/admin/profile");
+          navigate("/admin/profile",{replace: true});
         } else {
           openModal(response.data.message)
         }
@@ -117,10 +117,10 @@ const AuthCard = ({ role: initialRole }) => {
         dispatch({ type: "SET_USER", payload: { ...user, token } });
 
         if (user.firstLogin) {
-          if (role === "doctor") navigate("/doctor/personal-info");
-          else if (role === "patient") navigate("/patient/personal-info");
+          if (role === "doctor") navigate("/doctor/personal-info",{replace: true});
+          else if (role === "patient") navigate("/patient/personal-info",{replace: true});
         } else {
-          navigate(`/${role}/profile`);
+          navigate(`/${role}/profile`,{replace: true});
         }
       } else {
         toast.error(response.data.message)
@@ -181,8 +181,8 @@ const AuthCard = ({ role: initialRole }) => {
 
 
   return (
-    <form className="my-16 mx-auto max-w-md sm:max-w-lg md:max-w-xl lg:max-w-[550px] p-4 sm:p-6 md:p-8 bg-white rounded-xl" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col items-center w-[550px] h-auto bg-white rounded-xl p-6 px-16 ">
+    <form className="my-16 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 sm:p-6 md:p-8 bg-white rounded-xl " onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex flex-col items-center w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white rounded-xl p-4 sm:p-6 md:px-12">
         <div className="flex flex-col items-center ">
           {!isAdmin && <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />}
           <Headings

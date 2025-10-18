@@ -7,7 +7,7 @@ export const formSteps = {
       { name: "work", label: "Work", type: "text" },
       { name: "address", label: "Address", type: "textarea" },
       { name: "dob", label: "Date of Birth", type: "date" },
-      { name: "picture", label: "Profile Picture", type: "file" },
+      
     ],
   },
   medicalInfo: {
@@ -23,4 +23,10 @@ export const formSteps = {
       { name: "allergies", label: "Allergies", type: "textarea" },
     ],
   },
+  profilePicture:{
+    title: 'Upload your picture',
+    fields:[
+      { name: "picture", label: "Profile Picture", type: "file" },
+    ]
+  }
 };

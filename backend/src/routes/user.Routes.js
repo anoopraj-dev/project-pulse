@@ -8,6 +8,7 @@ import multer from 'multer'
 import { authenticateUser } from '../middlewares/authenticateUser.js';
 import { getCurrentUserInfo } from '../controllers/authControllers/currentUser.controller.js';
 
+
 const router = Router();
 
 const upload = multer();
@@ -22,5 +23,7 @@ router.post('/reset-password', resetPassword);
 router.post('/verify-email',verifyOtp)
 router.post('/set-password',setNewPassword);
 router.post('/resend-otp',resendOtp);
+
+
 
 export default router;
