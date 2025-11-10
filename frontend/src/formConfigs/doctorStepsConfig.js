@@ -9,8 +9,8 @@ const doctorPersonalInfoConfig = {
     { name: "clinicName", label: "Clinic Name", type: "text", required: true },
     { name: "clinicAddress", label: "Clinic Address", type: "textarea", required: true },
     { name: "about", label: "About Yourself", type: "textarea", required: false },
-    { name: "profilePic", label: "Profile Picture", type: "file", accept: "image/*", required: false },
-    { name: "location", label: "Clinic Location", type: "text", required: true }
+    { name: "picture", label: "Profile Picture", type: "file", required: false ,uploadButton: true},
+    { name: "location", label: "Clinic Location", type: "text", required: true}
   ],
 };
 
@@ -31,6 +31,7 @@ const doctorProfessionalInfoConfig = {
         { name: "years", label: "Years", type: "number", required: true },
         { name: "hospital", label: "Hospital Name", type: "text", required: true },
         { name: "location", label: "Location", type: "text", required: true },
+        { name: "picture", label: "Certificate Upload", type: "file", accept: "application/pdf,image/*", required: false },
 
       ]
     },
@@ -44,7 +45,7 @@ const doctorProfessionalInfoConfig = {
         { name: "degree", label: "Degree", type: "text", required: true },
         { name: "college", label: "College Name", type: "text", required: true },
         { name: "completionYear", label: "Completion Year", type: "number", required: true },
-        { name: "certificate", label: "Certificate Upload", type: "file", accept: "application/pdf,image/*", required: false },
+        { name: "picture", label: "Certificate Upload", type: "file", accept: "application/pdf,image/*", required: false },
       ]
     }
   ],

@@ -1,44 +1,45 @@
 
 import Doctor from '../../models/doctorModels/doctor.model.js'
+import { uploadToCloudinary } from '../../utils/cloudinaryUtility.js';
 
 export const registerDoctor = async (req, res) => {
 
 
-    try {
-        const { gender, phone, dob, clinicName, clinicAddress, about, location } = req.body;
-        const personalInfo = {
-            gender,
-            phone,
-            dob,
-            clinicName,
-            clinicAddress,
-            location,
-            about
-        }
-
-
-        const doctor = await Doctor.findByIdAndUpdate(req.user.id, personalInfo, { new: true });
-
-
-        if (!doctor) {
-            return res.status(404).json({
-                success: false,
-                message: 'Doctor not found!'
-
-            })
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Personal information updated succesfully'
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        })
+  try {
+    const { gender, phone, dob, clinicName, clinicAddress, about, location } = req.body;
+    const personalInfo = {
+      gender,
+      phone,
+      dob,
+      clinicName,
+      clinicAddress,
+      location,
+      about
     }
+
+
+    const doctor = await Doctor.findByIdAndUpdate(req.user.id, personalInfo, { new: true });
+
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found!'
+
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Personal information updated succesfully'
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
+  }
 
 
 }
@@ -71,12 +72,12 @@ export const updateProfessionalInfo = async (req, res) => {
     }
 
     if (education) {
-      education =JSON.parse(education)
+      education = JSON.parse(education)
       updateData["professionalInfo.education"] = education.map(edu => ({
         degree: edu.degree,
         college: edu.college,
         completionYear: edu.completionYear,
-        certificate:''
+        certificate: ''
       }));
     }
 
@@ -110,18 +111,18 @@ export const updateProfessionalInfo = async (req, res) => {
 
 
 
-export const servicesInfo = async(req,res) => {
+export const servicesInfo = async (req, res) => {
   try {
-    const {servicesTypes,fees} =req.body;
+    const { servicesTypes, fees } = req.body;
 
     const serviceInfo = {
       servicesTypes,
       fees
     }
 
-    const doctor = await Doctor.findByIdAndUpdate(req.user.id, serviceInfo,{new: true});
+    const doctor = await Doctor.findByIdAndUpdate(req.user.id, serviceInfo, { new: true });
 
-    if(!doctor){
+    if (!doctor) {
       return res.status(404).json({
         success: false,
         message: 'Doctor not found!'
@@ -136,8 +137,46 @@ export const servicesInfo = async(req,res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      success:false,
+      success: false,
       message: 'Server error'
+    })
+  }
+}
+
+export const uploadPicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Choose an image to upload'
+      })
+    }
+
+    console.log(req.file);
+    const response = await uploadToCloudinary(req.file);
+    const doctor = await Doctor.findByIdAndUpdate(req.user.id, {
+      profilePicture: response.secure_url
+    },
+      { new: true, runValidators: true }
+    )
+
+    if(!doctor){
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor not found!'
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:'File uploaded successfully'
+    })
+
+  } catch (error) {
+    console.error('Upload error',error);
+    res.status(500).json({
+      success:false,
+      message:'Server error during file uploaded'
     })
   }
 }

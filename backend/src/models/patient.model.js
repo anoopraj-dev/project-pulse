@@ -1,68 +1,56 @@
 import mongoose, { Schema } from "mongoose";
-import { medicalSchema } from "./medicalHistory.js";
 
 const PatientSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
+    // ---Basic Info---
+    name: { type: String, required: true },
+    patientId: { type: String, required: true },
+    gender: { type: String,enum: ['male', 'female', 'other'] },
+    dob: { type: Date },
+    profilePicture: { type: String },
+    email: { type: String, required: true },
+    phone: { type: String },
+    work: { type: String },
+    address: {type: [String]},
+
+    // ---Authentication & Role---
+    password: { type: String, required: true },
+    role: { type: String, required: true },
+    isVerified: { type: Boolean, default: false },
+    firstLogin: { type: Boolean, default: true },
+
+    //---Medical Information--
+    medical_history: {
+      bloodGroup: { type: String},
+      height: { type: Number },
+      weight: { type: Number },
+      sugarLevel: { type: String},
+      bloodPressure: { type: String},
+      cholesterol: { type: String },
+      allergies: { type: [String] },
+      medicalConditions: { type: [String] }
+
     },
-    patientId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"],
-    },
-    dob: Date,
-    email: {
-      type: String,
-      unique: true,
-      required: true,
-    },
-    phone: {
-      type: String,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    address: {
-      type: String,
-    },
-    profilePicture: {
-      type: String,
-    },
-    cloudinary_id: {
-      type: String
-    },
-    medical_history: medicalSchema
-    ,
-    status: {
-      type: String,
-      enum: ["active", "blocked"],
-      default: "active",
-    },
-    role: {
-      type: String,
-      required: true,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    firstLogin: {
-      type: Boolean,
-      default: true,
-    },
-    work:{
-      type: String,
+
+    //---LifeStyle & Habits Information
+    lifestyle_habits: {
+      smoking: { type: String, enum: ['No','Occasionally','Regularly']},
+      alcohol: { type: String, enum: ['No','Occasionally', 'Regularly']},
+      exerciseFrequency: { type: String },
+      diet: { type: [String]},
+      sleepHours: { type: Number },
+      stressLevel: { type: String },
+      waterIntake: { type: Number },
+      caffeineIntake: { type: String },
+      physicalActivityType: { type: [String]},
+      screenTime: { type: Number},
+      otherHabits: { type: [String] }
     }
-  },
-  { collection: "patients", timestamps: true }
-);
+
+
+
+  }, { collection: 'patients', timestamps: true }
+)
 
 const Patient = mongoose.model("Patient", PatientSchema);
 

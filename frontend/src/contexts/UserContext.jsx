@@ -14,7 +14,6 @@ const initialState = {
   isLoading: true
 };
 
-
 //reducer function
 const userReducer = (state, action) => {
   switch (action.type) {
@@ -40,22 +39,32 @@ export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
 
   useEffect(() => {
+
+    const controller = new AbortController();
     const fetchUser = async () => {
       try {
+        console.log('Start api call inside context')
         const res = await api.get("/api/auth/me");
-        console.log(res.data)
+    
         if (res.data.success) {
+          console.log('api fetched inside context')
           dispatch({ type: "SET_USER", payload: res.data.user });
         } else {
           dispatch({ type: "SET_LOADING", payload: false });
         }
       } catch (err) {
-        dispatch({ type: "SET_LOADING", payload: false });
+        dispatch({ type: "SET_LOADING", payload: false});
       }
     };
 
     fetchUser();
+    
+    return () => {
+    controller.abort();
+  };
+
   }, []);
+  
 
   return (
     <UserContext.Provider value={{ ...state, dispatch }}>

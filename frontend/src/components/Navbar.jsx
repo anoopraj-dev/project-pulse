@@ -10,7 +10,7 @@ import logo from '../assets/logoPrimary.png'
 
 
 const Navbar = () => {
-  const { email, role, name, dispatch, isLoading } = useUser();
+  const { email, role, name, dispatch, isLoading,profilePicture} = useUser();
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -148,7 +148,17 @@ const Navbar = () => {
                             }}
                           >
                             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                              <span className="text-md font-bold text-gray-700">{name.charAt(0).toUpperCase()}</span>
+                              {
+                                profilePicture ?(
+                                  <img
+                                    src={profilePicture}
+                                    alt="Profile"
+                                    className="rounded-full w-10 h-10 object-cover"
+                                  />
+                                ):
+                                <span className="text-md font-bold text-gray-700">{name.charAt(0).toUpperCase()}</span>
+                              }
+                              
                             </div>
                             {!isMobile && <span className="text-gray-700 text-xl font-semibold">{name.toUpperCase()}</span>}
                           </div>

@@ -16,6 +16,8 @@ const PatientRegistration = () => {
   const { email, id, isLoading } = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const [loading,setLoading] = useState(false);
+
 
   const handleNext = async (data) => {
     if (isLoading || !email || !id) {
@@ -23,6 +25,7 @@ const PatientRegistration = () => {
       return;
     }
 
+    setLoading(true);
 
 
     if (currentStep >= stepKeys.length) return;
@@ -45,6 +48,8 @@ const PatientRegistration = () => {
 
 
       if (currentStep === 0) {
+        
+
         const response = await api.post("/api/patient/personal-info", formData);
         console.log("Step 0 response:", response.data);
 
@@ -63,34 +68,30 @@ const PatientRegistration = () => {
         console.log("Step 1 response:", response.data);
 
         if (!response.data.success) {
-          toast.success(response.data.message)
+          toast.error(response.data.message)
           return;
         }
 
-        toast.success(response.data.success)
+        toast.success(response.data.message)
         setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1))
 
-      } else if (currentStep === 2) {
-        if (!data.picture) {
-          toast.error('Please upload a picture!')
-          return;
+      }else if(currentStep ===2){
+
+        const response = await api.post('/api/patient/lifestyle-info',payload)
+        console.log('Step 2 response', response.data)
+
+        if(!response.data.success){
+          toast.error(response.data.message)
         }
-
-        const formData = new FormData();
-        formData.append('picture', data.picture[0])
-
-
-        const response = await api.post('/api/patient/upload-picture', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        })
-
-        if (!response.success) toast.error(response.data.message);
         toast.success(response.data.message)
-
-        navigate('/patient/profile')
+        setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1))
       }
+       else if (currentStep === 3) {
+        toast.success('User Information updated successfully')
+        navigate('/patient/profile')
+        
+      }
+      setLoading(false)
     } catch (error) {
       if (error.response) {
         console.log(error.response)
@@ -100,8 +101,43 @@ const PatientRegistration = () => {
       } else {
         toast.error("An unexpected error occurred.");
       }
+    }finally{
+      setLoading(false)
     }
   };
+
+
+   const handleUpload = async(data) => {
+    try {
+      setLoading(true)
+      if(!data.picture){
+        toast.error('Please choose an image to upload!')
+        return
+      }
+       const formData = new FormData();
+        formData.append('picture', data.picture[0])
+
+
+      const response = await api.post('/api/patient/upload-picture',formData,{
+        headers: {
+          'Content-Type' : 'multipart/form-data'
+        }
+      })
+
+      if(response.data.success){
+        toast.success(response.data.message)
+        return
+      }else{
+        toast.error(response.data.message)
+        return
+      }
+    } catch (error) {
+      toast.error('Failed to upload image')
+    }finally{
+      setLoading(false)
+    }
+  }
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -127,7 +163,7 @@ const PatientRegistration = () => {
                 <span className="font-bold">{index + 1}</span>
               </div>
               {index < stepKeys.length - 1 && (
-                <hr className="w-96 border border-gray-300 mx-2" />
+                <hr className="w-52 border border-gray-300 mx-2" />
               )}
             </div>
           ))}
@@ -145,6 +181,8 @@ const PatientRegistration = () => {
           <DynamicForm
             config={formSteps[stepKeys[currentStep]]}
             onSubmit={handleNext}
+            loading={loading}
+            handleUpload={handleUpload}
           />
         )}
       </div>

@@ -1,15 +1,17 @@
-import { Icon, loadIcon } from '@iconify/react';
+import { Icon} from '@iconify/react';
 import { Link, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-
-
+import { useEffect } from 'react';
+import ShimmerCard from './ShimmerCard';
 
 const Sidebar = () => {
   
   const {profilePicture,isLoading} = useUser();
+  const location = useLocation();
   console.log(profilePicture)
   
-  const location = useLocation();
+
+
    const menuItems = [
     { name: "Dashboard", icon: "mdi:home", path: "/patient/dashboard" },
     { name: "Profile", icon: "mdi:account", path: "/patient/profile" },
@@ -22,19 +24,25 @@ const Sidebar = () => {
     { name: "Settings", icon: "mdi:settings", path: "/patient/settings" },
   ];
 
-
  
-
   return (
     <div className="h-screen w-64 bg-[#0096C7] text-gray-100 flex flex-col mt-19">
       <nav className="flex-1">
         <div className="flex p-6">
 
-          <img
-            src={!isLoading && profilePicture ? profilePicture : "/profile.png"}
-            alt="Profile"
-            className="rounded-full w-30 h-30 object-cover"
-          />
+          {isLoading ? (
+            <ShimmerCard/>  
+          ) : (
+      
+            <img
+              src={profilePicture || "/profile.png"}
+              alt="Profile"
+              className="rounded-full w-30 h-30 object-cover"
+
+            />
+       
+       
+          )}
         </div>
 
         <ul className="space-y-3 gap-3">

@@ -5,14 +5,14 @@ import Headings from "../../components/Headings";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../api/api";
 import { doctorStepsConfig } from "../../formConfigs/doctorStepsConfig";
-import { useUser } from "../../contexts/UserContext";
+import toast from "react-hot-toast";
 
 const DoctorRegistration = () => {
   const stepKeys = Object.keys(doctorStepsConfig);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const {email} = useUser();
+  
 
 const handleNext = async (data) => {
   try {
@@ -34,14 +34,11 @@ const handleNext = async (data) => {
       }
     });
 
-   
-    for (let [key, val] of formData.entries()) {
-      console.log(`${key}:`, val);
-    }
 
 
     let response;
     if (currentStep === 0) {
+
       response = await api.post("/api/doctor/personal-info", formData);
     } else if (currentStep === 1) {
       response = await api.post("/api/doctor/professional-info", formData);
@@ -50,16 +47,16 @@ const handleNext = async (data) => {
     }
 
     if (!response.data.success) {
-      openModal(response.data.message);
+      toast.error(response.data.message)
       return;
     }
 
-    openModal(response.data.message);
+    toast.success(response.data.message)
 
     if (currentStep < stepKeys.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      navigate("/doctor/dashboard");
+      navigate("/doctor/profile");
     }
   } catch (error) {
     console.error("API error:", error);
@@ -69,6 +66,33 @@ const handleNext = async (data) => {
 
 
 
+  const handleUpload = async(data) => {
+    try {
+      if(!data || data.length ===0){
+        toast.error('Please choose an image to upload!')
+        return
+      }
+       const formData = new FormData();
+        formData.append('picture', data[0])
+
+
+      const response = await api.post('/api/doctor/upload-picture',formData,{
+        headers: {
+          'Content-Type' : 'multipart/form-data'
+        }
+      })
+
+      if(response.data.success){
+        toast.success(response.data.message)
+        return
+      }else{
+        toast.error(response.data.message)
+        return
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
 
   const handlePrev = () => {
@@ -112,6 +136,7 @@ const handleNext = async (data) => {
         <DynamicForm
           config={doctorStepsConfig[stepKeys[currentStep]]}
           onSubmit={handleNext}
+          handleUpload={handleUpload}
         />
 
         {/* Navigation buttons */}

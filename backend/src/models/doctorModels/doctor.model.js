@@ -8,7 +8,7 @@ const DoctorSchema = new Schema(
     doctorId: { type: String, unique: true, required: true },
     gender: { type: String, enum: ["male", "female", "other"] },
     dob: { type: Date },
-    profilePic: { type: String },
+    profilePicture: { type: String },
     email: { type: String, unique: true, required: true },
     phone: { type: String },
     location: { type: String },

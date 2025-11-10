@@ -20,9 +20,8 @@ const PatientProfile = () => {
     fetchUser();
   }, []);
 
-  
   const userData = user
-  ? Object.entries(user).reduce((acc, [key, value]) => {
+  ? Object.entries(user)?.reduce((acc, [key, value]) => {
       let displayValue;
       if (Array.isArray(value)) displayValue = value.length ? value.join(", ") : "None";
       else if (typeof value === "boolean") displayValue = value ? "Yes" : "No";
