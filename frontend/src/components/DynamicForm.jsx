@@ -20,6 +20,8 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
     name: "education",
   });
 
+
+  
   // --- Handle file previews ---
   useEffect(() => {
     const newPreviews = {};
@@ -86,7 +88,7 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
                             />
                             <button
                               type="button"
-                              onClick={() => handleUpload(`experience[${index}].${subField.name}`)}
+                              onClick={() => handleUpload(watchedValues.experience[index][subField.name], `experience[${index}].${subField.name}`,index)}
                               className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0096C7] hover:text-[#0077A7]"
                             >
                               <Icon icon="mdi:upload" width="22" height="22" />
@@ -213,15 +215,15 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
               <div key={field.name}>
                 <label className="block text-sm font-medium text-gray-700 mb-2">{field.label}</label>
                 <div className="flex items-center space-x-6">
-                  {field.options.map((opt) => (
-                    <label key={opt} className="flex items-center space-x-2">
+                  {field.options.map((op) => (
+                    <label key={op} className="flex items-center space-x-2">
                       <input
                         type="radio"
-                        value={opt}
+                        value={op}
                         {...register(field.name, { required: `${field.label} is required` })}
                         className="accent-[#0096C7]"
                       />
-                      <span>{opt.charAt(0).toUpperCase() + opt.slice(1)}</span>
+                      <span>{op.charAt(0).toUpperCase() + op.slice(1)}</span>
                     </label>
                   ))}
                 </div>
@@ -293,7 +295,7 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
                   {field.uploadButton && (
                     <button
                       type="button"
-                      onClick={() => handleUpload(watchedValues)}
+                      onClick={() => handleUpload(watchedValues[field.name], field.name)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-[#0096C7] hover:text-[#0077A7]"
                     >
                       {loading ? 'Uploading...' : <Icon icon="mdi:upload" width="22" height="22" />}
@@ -305,12 +307,15 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
                 {filePreviews && (
                   <div className="mt-3 flex flex-wrap gap-3">
                     {filePreviews.map((url, i) => (
-                      <img
+                      <div className="flex border border-sky-400 rounded-sm p-3">
+                        <img
                         key={i}
                         src={url}
                         alt={`${field.name}-preview-${i}`}
-                        className="h-20 w-20 rounded-md object-cover border"
+                        className="h-50 w-50 rounded-md object-cover  "
                       />
+                      <p>X</p>
+                      </div>
                     ))}
                   </div>
                 )}

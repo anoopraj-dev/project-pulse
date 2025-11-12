@@ -122,7 +122,7 @@ const AuthCard = ({ role: initialRole }) => {
           if (role === "doctor") navigate("/doctor/personal-info",{replace: true});
           else if (role === "patient") navigate("/patient/personal-info",{replace: true});
         } else {
-          navigate(`/${role}/profile`,{replace: true});
+          navigate(`/${role}/profile`,{replace:true});
         }
       } else {
         toast.error(response.data.message)

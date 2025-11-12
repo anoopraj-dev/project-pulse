@@ -15,10 +15,10 @@ export const getDoctorProfile = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const doctor = await Doctor.findOne({ doctorId: req.user.id }).select(
+    const doctor = await Doctor.findById( req.user.id ).select(
       "-password"
     );
-    console.log(doctor);
+    console.log('doctor',doctor);
 
     if (!doctor) {
       return res.status(404).json({

@@ -9,7 +9,7 @@ const doctorPersonalInfoConfig = {
     { name: "clinicName", label: "Clinic Name", type: "text", required: true },
     { name: "clinicAddress", label: "Clinic Address", type: "textarea", required: true },
     { name: "about", label: "About Yourself", type: "textarea", required: false },
-    { name: "picture", label: "Profile Picture", type: "file", required: false ,uploadButton: true},
+    { name: "profilePicture", label: "Profile Picture", type: "file", required: false ,uploadButton: true},
     { name: "location", label: "Clinic Location", type: "text", required: true}
   ],
 };
@@ -31,7 +31,7 @@ const doctorProfessionalInfoConfig = {
         { name: "years", label: "Years", type: "number", required: true },
         { name: "hospital", label: "Hospital Name", type: "text", required: true },
         { name: "location", label: "Location", type: "text", required: true },
-        { name: "picture", label: "Certificate Upload", type: "file", accept: "application/pdf,image/*", required: false },
+        { name: "experienceCertificate", label: "Certificate Upload", type: "file", accept: "application/pdf,image/*", required: false },
 
       ]
     },

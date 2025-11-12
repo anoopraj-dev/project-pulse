@@ -8,10 +8,7 @@ const Sidebar = () => {
   
   const {profilePicture,isLoading} = useUser();
   const location = useLocation();
-  console.log(profilePicture)
   
-
-
    const menuItems = [
     { name: "Dashboard", icon: "mdi:home", path: "/patient/dashboard" },
     { name: "Profile", icon: "mdi:account", path: "/patient/profile" },

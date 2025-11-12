@@ -22,6 +22,9 @@ const Navbar = () => {
   const isMobile = width < 768;
   const isTablet = width > 768 && width < 1300;
 
+ 
+  
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -31,6 +34,8 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  
 
   const handleLogout = async () => {
     try {
@@ -48,6 +53,7 @@ const Navbar = () => {
       console.error(error);
     }
   };
+
 
   return (
     <nav className="bg-white fixed w-full z-50 shadow-md">
@@ -149,7 +155,7 @@ const Navbar = () => {
                           >
                             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
                               {
-                                profilePicture ?(
+                                profilePicture?(
                                   <img
                                     src={profilePicture}
                                     alt="Profile"

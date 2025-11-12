@@ -115,7 +115,7 @@ const PatientRegistration = () => {
         return
       }
        const formData = new FormData();
-        formData.append('picture', data.picture[0])
+        formData.append('profilePicture', data.picture[0])
 
 
       const response = await api.post('/api/patient/upload-picture',formData,{

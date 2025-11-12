@@ -145,6 +145,7 @@ export const servicesInfo = async (req, res) => {
 
 export const uploadPicture = async (req, res) => {
   try {
+    console.log(req.file)
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -180,3 +181,54 @@ export const uploadPicture = async (req, res) => {
     })
   }
 }
+
+export const uploadHandler = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: 'No files uploaded' });
+    }
+
+    // Extract the upload type from query or body
+    const uploadType = req.query.type || req.body.type;
+
+    const uploadResults = [];
+
+    for (const file of req.files) {
+      console.log(file)
+      const response = await uploadToCloudinary(file);
+      uploadResults.push({ fieldname: file.fieldname, url: response.secure_url });
+    }
+
+    // Dynamically update DB based on uploadType or file.fieldname
+    let updatedDoc;
+    console.log(uploadType)
+    if (uploadType === 'profilePicture') {
+      updatedDoc = await Doctor.findByIdAndUpdate(req.user.id, 
+        { profilePicture: uploadResults[0].url }, 
+        { new: true }
+      );
+    } else if (uploadType === 'experienceCertificate') {
+      const index = parseInt(req.query.index || req.body.index, 10);
+      const fieldToUpdate = `professionalInfo.experience.${index}.experienceCertificate`;
+      updatedDoc = await Doctor.findByIdAndUpdate(req.user.id, 
+        { $set:{[fieldToUpdate]:uploadResults[0].url}},
+        {new: true}
+      )
+
+      console.log('updated document',updatedDoc)
+    } else if (uploadType === 'educationDocument') {
+      // update education documents
+    } else {
+       return res.status(400).json({ success: false, message: 'Invalid upload type' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Files uploaded successfully',
+      data: updatedDoc ?? uploadResults
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    return res.status(500).json({ success: false, message: 'Server error during file upload' });
+  }
+};

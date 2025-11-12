@@ -33,16 +33,17 @@ const DoctorSchema = new Schema(
       specializations: { type: [String], default: [] },
       experience: [
         {
-          years: { type: Number, required: true, min: 0 },
-          hospitalName: { type: String, required: true },
-          location: { type: String, required: true },
+          years: { type: Number},
+          hospitalName: { type: String},
+          location: { type: String, },
+          experienceCertificate:{ type: String}
         }
       ],
       education: [
         {
-          degree: { type: String, required: true },
-          college: { type: String, required: true },
-          completionYear: { type: Number, required: true, min: 1900 },
+          degree: { type: String},
+          college: { type: String },
+          completionYear: { type: Number },
           certificate: { type: String },
         }
       ],

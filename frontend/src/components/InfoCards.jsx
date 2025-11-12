@@ -11,8 +11,6 @@ const InfoCards = ({ data }) => {
     </div>
   );
 
-  console.log(data.Lifestyle_habits)
-
   return (
     <div className="w-full flex flex-col gap-8">
       {/* Header Section */}
