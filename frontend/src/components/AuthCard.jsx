@@ -97,8 +97,9 @@ const AuthCard = ({ role: initialRole }) => {
           const { admin } = response.data;
           dispatch({ type: "SET_USER", payload: { ...admin } });
           navigate("/admin/profile",{replace: true});
+          toast.success(response.data.message)
         } else {
-          openModal(response.data.message)
+          toast.error(response.data.message)
         }
         return;
       }
@@ -115,12 +116,13 @@ const AuthCard = ({ role: initialRole }) => {
       if (response.data.success) {
         const { user, token } = response.data;
         dispatch({ type: "SET_USER", payload: { ...user, token } });
+        toast.success(response.data.message)
 
         if (user.firstLogin) {
           if (role === "doctor") navigate("/doctor/personal-info",{replace: true});
           else if (role === "patient") navigate("/patient/personal-info",{replace: true});
         } else {
-          navigate(`/${role}/profile`,{replace: true});
+          navigate(`/${role}/profile`,{replace:true});
         }
       } else {
         toast.error(response.data.message)
@@ -130,15 +132,13 @@ const AuthCard = ({ role: initialRole }) => {
         error?.response?.data?.message ||
         error?.message ||
         "Something went wrong";
-      openModal(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
   };
 
 
-
-  
 
 //forgot password - password reset
   const handleForgotPassword = () => {
@@ -181,18 +181,19 @@ const AuthCard = ({ role: initialRole }) => {
 
 
   return (
-    <form className="my-16 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 sm:p-6 md:p-8 bg-white rounded-xl " onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex flex-col items-center w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl bg-white rounded-xl p-4 sm:p-6 md:px-12">
-        <div className="flex flex-col items-center ">
+    <div className="flex flex-col">
+     <div className="flex flex-col items-center ">
           {!isAdmin && <SliderToggle isChecked={isDoctor} onToggle={setIsDoctor} />}
-          <Headings
-            text={`${isAdmin ? "Admin" : isDoctor ? "DOCTOR" : "PATIENT"} ${isSignup ? "SIGNUP" : "LOGIN"
-              }`}
-            className="flex justify-center"
-          />
-
+          <h1 className="text-2xl font-bold my-2 ">{`${isAdmin ? "ADMIN" : isDoctor ? "DOCTOR" : "PATIENT"} ${isSignup ? "SIGNUP" : "LOGIN"
+              }`}</h1>
+          
 
         </div>
+    <form className="my-2   bg-white rounded-xl " onSubmit={handleSubmit(onSubmit)}>
+      <div className={`flex flex-col items-center w-sm bg-white rounded-xl ${
+    isAdmin ? 'p-10' : 'p-2'
+  }`}>
+       
 
         {/* Name (only for signup, non-admin) */}
         {!isAdmin && isSignup && (
@@ -323,6 +324,7 @@ const AuthCard = ({ role: initialRole }) => {
         </div>
       </div>
     </form>
+    </div>
   );
 };
 

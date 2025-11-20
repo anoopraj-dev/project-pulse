@@ -5,70 +5,121 @@ import Headings from "../../components/Headings";
 import { useModal } from "../../contexts/ModalContext";
 import { api } from "../../api/api";
 import { doctorStepsConfig } from "../../formConfigs/doctorStepsConfig";
-import { useUser } from "../../contexts/UserContext";
+import toast from "react-hot-toast";
 
 const DoctorRegistration = () => {
   const stepKeys = Object.keys(doctorStepsConfig);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const {email} = useUser();
-
-const handleNext = async (data) => {
-  try {
-    const formData = new FormData();
 
 
-    Object.entries(data).forEach(([key, value]) => {
-      if (value instanceof FileList) {
-      
-        if (value.length > 0) {
-          formData.append(key, value[0]);
+  const handleNext = async (data) => {
+    try {
+      const formData = new FormData();
+
+
+      Object.entries(data).forEach(([key, value]) => {
+        if (value instanceof FileList) {
+
+          if (value.length > 0) {
+            formData.append(key, value[0]);
+          }
+        } else if (Array.isArray(value) || typeof value === "object") {
+          // Convert arrays or objects to JSON strings
+          formData.append(key, JSON.stringify(value));
+        } else {
+          // For normal strings, numbers, etc.
+          formData.append(key, value);
         }
-      } else if (Array.isArray(value) || typeof value === "object") {
-        // Convert arrays or objects to JSON strings
-        formData.append(key, JSON.stringify(value));
-      } else {
-        // For normal strings, numbers, etc.
-        formData.append(key, value);
+      });
+
+
+
+      let response;
+      if (currentStep === 0) {
+        response = await api.post("/api/doctor/personal-info", formData);
+      } else if (currentStep === 1) {
+        response = await api.post("/api/doctor/professional-info", formData);
+      } else if (currentStep === 2) {
+        response = await api.post("/api/doctor/services-info", formData);
+        
       }
-    });
 
-   
-    for (let [key, val] of formData.entries()) {
-      console.log(`${key}:`, val);
+      if (!response.data.success) {
+        toast.error(response.data.message)
+        return;
+      }
+
+      toast.success(response.data.message)
+
+      if (currentStep < stepKeys.length - 1) {
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        navigate("/doctor/profile");
+      }
+    } catch (error) {
+      console.error("API error:", error);
+      openModal("Something went wrong. Please try again.");
     }
+  };
 
 
-    let response;
-    if (currentStep === 0) {
-      response = await api.post("/api/doctor/personal-info", formData);
-    } else if (currentStep === 1) {
-      response = await api.post("/api/doctor/professional-info", formData);
-    } else if (currentStep === 2) {
-      response = await api.post("/api/doctor/services-info", formData);
+
+  function extractUploadType(fieldPath) {
+  if (!fieldPath) return '';
+
+  // Remove array indices, e.g. experience[0].certificate -> experience.certificate
+  const cleanedPath = fieldPath.replace(/\[\d+\]/g, '');
+
+  // Take the last part after the last dot, which often indicates type
+  const parts = cleanedPath.split('.');
+  const lastPart = parts[parts.length - 1];
+
+  // Optionally map or normalize field names to your uploadType keys
+  const mapping = {
+    profilePicture: 'profilePicture',
+    certificate: 'experienceCertificate',
+    educationDocument: 'educationDocument',
+    // add more mappings as needed
+  };
+
+  // Return mapped value or fallback to lastPart directly
+  return mapping[lastPart] || lastPart;
+}
+
+
+
+  const handleUpload = async (fileList, fieldPath, index) => {
+    const uploadType = extractUploadType(fieldPath)
+    try {
+      if (!fileList || fileList.length === 0) {
+        toast.error('Please choose an image to upload!')
+        return
+      }
+      const formData = new FormData();
+      formData.append(fieldPath, fileList[0]);
+      formData.append('index',index);
+
+
+      const response = await api.post(`/api/doctor/file-upload?type=${uploadType}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      if (response.data.success) {
+        toast.success(response.data.message)
+        return
+      } else {
+        toast.error(response.data.message)
+        return
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error('Upload failed. Try agian')
     }
-
-    if (!response.data.success) {
-      openModal(response.data.message);
-      return;
-    }
-
-    openModal(response.data.message);
-
-    if (currentStep < stepKeys.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-    } else {
-      navigate("/doctor/dashboard");
-    }
-  } catch (error) {
-    console.error("API error:", error);
-    openModal("Something went wrong. Please try again.");
   }
-};
-
-
-
 
 
   const handlePrev = () => {
@@ -83,8 +134,8 @@ const handleNext = async (data) => {
             currentStep === 0
               ? "Tell us about yourself"
               : currentStep === 1
-              ? "Professional Information"
-              : "Services & Availability"
+                ? "Professional Information"
+                : "Services & Availability"
           }
         />
 
@@ -93,11 +144,10 @@ const handleNext = async (data) => {
           {stepKeys.map((key, index) => (
             <div key={key} className="flex items-center">
               <div
-                className={`rounded-full flex items-center justify-center w-12 h-12 ${
-                  currentStep === index
+                className={`rounded-full flex items-center justify-center w-12 h-12 ${currentStep === index
                     ? "bg-[#0096C7] text-white"
                     : "border border-[#0096C7]"
-                }`}
+                  }`}
               >
                 <span className="font-bold">{index + 1}</span>
               </div>
@@ -112,6 +162,7 @@ const handleNext = async (data) => {
         <DynamicForm
           config={doctorStepsConfig[stepKeys[currentStep]]}
           onSubmit={handleNext}
+          handleUpload={handleUpload}
         />
 
         {/* Navigation buttons */}

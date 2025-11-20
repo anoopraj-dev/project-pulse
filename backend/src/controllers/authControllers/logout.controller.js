@@ -1,5 +1,6 @@
 
 export const userLogout = async (req,res) =>{
+    
     res.clearCookie('token',{
         httpOnly: true,
         sameSite: 'strict'

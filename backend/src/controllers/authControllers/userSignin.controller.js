@@ -45,7 +45,7 @@ export const userSignin = async (req, res) => {
       customId: role === 'doctor' ? user.doctorId : user.patientId,
       email: user.email,
       role,
-      name:user.name
+      name:user.name,
     };
 
     // Create token
@@ -71,7 +71,8 @@ export const userSignin = async (req, res) => {
         email: user.email,
         role,
         firstLogin: user.firstLogin,
-        name:user.name
+        name:user.name,
+        profilePicture:user.profilePicture
       }
     });
 

@@ -1,47 +1,46 @@
 import Patient from "../../models/patient.model.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
-export const personalInfo = async (req, res) => {
+export const updatePersonalInfo = async (req, res) => {
 
-    try {
-        const { gender, address, phone, dob, work} = req.body;
+  try {
+    const { gender, address, phone, dob, work } = req.body;
 
-        const updateData = { gender, address, phone, dob, work};
+    const updateData = { gender, address, phone, dob, work };
 
-        const patient = await Patient.findByIdAndUpdate(req.user.id, updateData);
+    const patient = await Patient.findByIdAndUpdate(req.user.id, updateData);
 
-        if (!patient) {
-            return res.status(404).json({
-                success: false,
-                message: 'Patient not found'
-            })
-        }
-        
-        return res.status(200).json({
-            success: true,
-            message: 'Personal information updated successfully'
-        })
-
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json('Internal Server error')
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient not found'
+      })
     }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Personal information updated successfully'
+    })
+
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json('Internal Server error')
+  }
 
 }
 
-export const medicalInfo = async (req, res) => {
+export const updateMedicalInfo = async (req, res) => {
   try {
     const {
       bloodGroup,
       height,
       weight,
-      allergies =[],
-      medicalConditions=[],
-      cholesterolLevel,
+      allergies = [],
+      medicalConditions = [],
+      cholesterol,
       bloodPressure,
-      glucoseLevel,
-      work
+      sugarLevel,
     } = req.body;
 
     const medicalData = {
@@ -50,15 +49,14 @@ export const medicalInfo = async (req, res) => {
       weight,
       allergies,
       medicalConditions,
-      cholesterolLevel,
+      cholesterol,
       bloodPressure,
-      glucoseLevel,
-      work
+      sugarLevel,
     };
 
     const patient = await Patient.findByIdAndUpdate(
-       req.user.id ,
-      { $set:{medical_history: medicalData}},
+      req.user.id,
+      { $set: { medical_history: medicalData } },
       { new: true, runValidators: true }
     );
 
@@ -69,7 +67,7 @@ export const medicalInfo = async (req, res) => {
       });
     }
 
-   
+
     return res.status(200).json({
       success: true,
       message: "Medical information updated successfully"
@@ -80,34 +78,92 @@ export const medicalInfo = async (req, res) => {
   }
 };
 
+
+export const updateLifeStyleInfo = async (req, res) => {
+  try {
+    const{
+      smoking,
+      alcohol,
+      exerciseFrequency,
+      diet = [],
+      sleepHours,
+      stressLevel,
+      waterIntake,
+      caffeineIntake,
+      physicalActivityType,
+      screenTime,
+      otherHabits =[]
+    } = req.body
+
+    const lifeStyleData = {
+      smoking,
+      alcohol,
+      exerciseFrequency,
+      diet,
+      sleepHours,
+      stressLevel,
+      waterIntake,
+      caffeineIntake,
+      physicalActivityType,
+      screenTime,
+      otherHabits
+    }
+
+    const patient = await Patient.findByIdAndUpdate(
+      req.user.id,
+      {$set: { lifestyle_habits: lifeStyleData}},
+      {new: true, runValidators: true }
+    )
+
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: "Patient not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Medical information updated successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Internal Server error" });
+  }
+}
+
 //image upload
 
-export const uploadPicture = async (req,res)=>{
+export const uploadPicture = async (req, res) => {
+ 
   try {
-    if(!req.file){
+    if (!req.file) {
       return res.status(400).json({
-        success:false,
-        message:'No file uploaded'
+        success: false,
+        message: 'Choose an image to upload'
       })
     }
 
     console.log(req.file)
     const response = await uploadToCloudinary(req.file);
 
-    const patient = await Patient.findByIdAndUpdate(req.user.id,{firstLogin:false},
-      {$set: {profilePicture:response.secure_url}},
-      {new: true,runValidators:true}
+    const patient = await Patient.findByIdAndUpdate(req.user.id,
+      {
+        firstLogin: false,
+        profilePicture: response.secure_url
+      },
+      { new: true, runValidators: true }
     );
-    if(!patient){
+    if (!patient) {
       return res.status(404).json({
         success: true,
-        message:''
+        message: 'Patient not found!'
       })
     }
 
     return res.status(200).json({
       success: true,
-      message:'Profile picture uploaded succefully'
+      message: 'Profile picture uploaded succefully'
     })
 
   } catch (error) {

@@ -6,11 +6,10 @@ import { api } from "../api/api.js";
 import { useNavigate } from "react-router-dom";
 import { useUser as clerkUser, useClerk } from "@clerk/clerk-react";
 import useWindowSize from "../customHooks/useWindowSize.jsx";
-import logo from '../assets/logoPrimary.png'
-
+import logo from "../assets/logoPrimary.png";
 
 const Navbar = () => {
-  const { email, role, name, dispatch, isLoading } = useUser();
+  const { email, role, name, dispatch, isLoading, profilePicture } = useUser();
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -26,6 +25,7 @@ const Navbar = () => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setProfileMenuOpen(false);
+        setNavMenuOpen(false)
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -39,7 +39,7 @@ const Navbar = () => {
         navigate("/signin");
         return;
       }
-      const res = await api.post("/api/auth/logout");
+      const res = await api.post("/api/auth/logout", {});
       dispatch({ type: "CLEAR_USER" });
       setProfileMenuOpen(false);
       if (!res.data.success) console.log("Logout failed");
@@ -50,15 +50,17 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white fixed w-full z-50 shadow-md">
+    <nav className="bg-white fixed w-full z-50 shadow-sm">
       <div className="max-w-8xl mx-auto">
-        <div className="flex justify-between items-center py-4 px-4">
+        <div className="flex justify-between items-center py-3 px-4 lg:px-32">
           {/* Left Section */}
           <div className="flex items-center space-x-3">
             {/* Hamburger Icon */}
             <Icon
               icon={"mdi:hamburger-menu"}
-              className={`${isMobile ? "block" : "hidden"} text-[#0096C7] cursor-pointer h-8 w-8`}
+              className={`${
+                isMobile ? "block" : "hidden"
+              } text-[#0096C7] cursor-pointer h-8 w-8`}
               onClick={() => {
                 setNavMenuOpen((prev) => !prev);
                 setProfileMenuOpen(false);
@@ -88,37 +90,78 @@ const Navbar = () => {
                       <option>Bangalore</option>
                       <option>Kochi</option>
                     </select>
-                    <Icon icon={"mdi:search"} className="w-8 h-8 m-2 bg-[#0096C7] text-white rounded-3xl px-1" />
+                    <Icon
+                      icon={"mdi:search"}
+                      className="w-8 h-8 m-2 bg-[#0096C7] text-white rounded-3xl px-1"
+                    />
                   </div>
-                  {
-                    isTablet ? (
-                      <ul className="flex space-x-6 text-lg font-md text-[#0096C7]">
-                        <Link to="/"><Icon icon="mdi:home-outline" className="w-7 h-7 cursor-pointer hover:text-[#0077A3]" /></Link>
-                        <Icon icon="mdi:information-outline" className="w-7 h-7 cursor-pointer hover:text-[#0077A3]" />
-                        <Icon icon="mdi:cog-outline" className="w-7 h-7 cursor-pointer hover:text-[#0077A3]" />
-                        <Icon icon="mdi:account-search-outline" className="w-7 h-7 cursor-pointer hover:text-[#0077A3]" />
-                        <Link to="/signin"><Icon icon="mdi:login" className="w-7 h-7 cursor-pointer hover:text-[#0077A3]" /></Link>
-                        <Link to="/admin/login"><Icon icon="mdi:shield-account-outline" className="w-7 h-7 cursor-pointer hover:text-[#0077A3]" /></Link>
-                      </ul>
-                    ) : (
-                      <ul className="flex space-x-6 text-lg font-md">
-                        <Link to="/"><li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">Home</li></Link>
-                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">About Us</li>
-                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">Services</li>
-                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">Find a Doctor</li>
-                        <Link to="/signin"><li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">Login</li></Link>
-                        <Link to="/admin/login"><li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">Admin</li></Link>
-                      </ul>
-                    )
-                  }
-
+                  {isTablet ? (
+                    <ul className="flex space-x-6 text-lg font-md text-[#0096C7]">
+                      <Link to="/">
+                        <Icon
+                          icon="mdi:home-outline"
+                          className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                        />
+                      </Link>
+                      <Icon
+                        icon="mdi:information-outline"
+                        className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                      />
+                      <Icon
+                        icon="mdi:cog-outline"
+                        className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                      />
+                      <Icon
+                        icon="mdi:account-search-outline"
+                        className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                      />
+                      <Link to="/signin">
+                        <Icon
+                          icon="mdi:login"
+                          className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                        />
+                      </Link>
+                      <Link to="/admin/login">
+                        <Icon
+                          icon="mdi:shield-account-outline"
+                          className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                        />
+                      </Link>
+                    </ul>
+                  ) : (
+                    <ul className="flex space-x-6 text-lg font-md">
+                      <Link to="/">
+                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                          Home
+                        </li>
+                      </Link>
+                      <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                        About Us
+                      </li>
+                      <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                        Services
+                      </li>
+                      <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                        Find a Doctor
+                      </li>
+                      <Link to="/signin">
+                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                          Login
+                        </li>
+                      </Link>
+                      <Link to="/admin/login">
+                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                          Admin
+                        </li>
+                      </Link>
+                    </ul>
+                  )}
                 </>
               ) : (
-
                 // Logged In or Mobile View
                 <div className="flex items-center space-x-6 relative">
                   {/* Search Bar (Desktop Only) */}
-                  {!isMobile &&
+                  {!isMobile && (
                     <>
                       <div className="flex items-center space-x-2 flex-grow max-w-3xl">
                         <input
@@ -131,13 +174,17 @@ const Navbar = () => {
                           <option>Bangalore</option>
                           <option>Kochi</option>
                         </select>
-                        <button className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]">Search</button>
+                        <button className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]">
+                          Search
+                        </button>
                       </div>
-
 
                       {/* Notification + Avatar */}
                       <div className="flex items-center space-x-6 relative">
-                        <Icon icon="mdi-notifications" className="w-7 h-7 text-[#0096C7] cursor-pointer" />
+                        <Icon
+                          icon="mdi-notifications"
+                          className="w-7 h-7 text-[#0096C7] cursor-pointer"
+                        />
 
                         <div ref={menuRef} className="relative">
                           <div
@@ -148,9 +195,23 @@ const Navbar = () => {
                             }}
                           >
                             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                              <span className="text-md font-bold text-gray-700">{name.charAt(0).toUpperCase()}</span>
+                              {profilePicture ? (
+                                <img
+                                  src={profilePicture}
+                                  alt="Profile"
+                                  className="rounded-full w-10 h-10 object-cover"
+                                />
+                              ) : (
+                                <span className="text-md font-bold text-gray-700">
+                                  {name.charAt(0).toUpperCase()}
+                                </span>
+                              )}
                             </div>
-                            {!isMobile && <span className="text-gray-700 text-xl font-semibold">{name.toUpperCase()}</span>}
+                            {!isMobile && (
+                              <span className="text-gray-700 text-xl font-semibold">
+                                {name.toUpperCase()}
+                              </span>
+                            )}
                           </div>
 
                           {/* Profile Menu */}
@@ -167,47 +228,52 @@ const Navbar = () => {
                         </div>
                       </div>
                     </>
-                  }
+                  )}
                 </div>
-
               )}
             </>
           )}
         </div>
 
-        {/* Mobile Nav Menu */}
-        {navMenuOpen && isMobile && (
-          <div className="absolute top-15 left-0 w-full bg-white shadow-md border-t border-gray-200 z-40">
-            <ul className="flex flex-col items-center space-y-4 py-4 text-lg font-medium">
-              <Link to="/" onClick={() => setNavMenuOpen(false)}>
-                <li className="hover:text-[#0096C7]">Home</li>
-              </Link>
-              <li className="hover:text-[#0096C7]">About Us</li>
-              <li className="hover:text-[#0096C7]">Services</li>
-              <li className="hover:text-[#0096C7]">Find a Doctor</li>
+        {/* Mobile Nav Menu
+        {navMenuOpen && isMobile && ( */}
+        <div
+          className={`overflow-hidden absolute top-13 left-0 w-full bg-gradient-to-b from-white via-blue-100 to-blue-200 shadow-md border-t border-gray-200 z-40
+    transition-[max-height,opacity,transform] duration-400 ease-[cubic-bezier(0.1,0,0.2,1)]
+    ${
+      navMenuOpen && isMobile ? "max-h-96 opacity-100 " : "max-h-0 opacity-0 "
+    }`}
+        >
+          <ul className="flex flex-col items-center space-y-4 py-4 text-md font-medium">
+            <Link to="/" onClick={() => setNavMenuOpen(false)}>
+              <li className="hover:text-[#0096C7]">Home</li>
+            </Link>
+            <li className="hover:text-[#0096C7]">About Us</li>
+            <li className="hover:text-[#0096C7]">Services</li>
+            <li className="hover:text-[#0096C7]">Find a Doctor</li>
 
-              {!isLoggedIn && (
-                <>
-                  <Link to="/signin" onClick={() => setNavMenuOpen(false)}>
-                    <li className="hover:text-[#0096C7]">Login</li>
-                  </Link>
-                  <Link to="/admin/login" onClick={() => setNavMenuOpen(false)}>
-                    <li className="hover:text-[#0096C7]">Admin</li>
-                  </Link>
-                </>
-              )}
+            {!isLoggedIn && (
+              <>
+                <Link to="/signin" onClick={() => setNavMenuOpen(false)}>
+                  <li className="hover:text-[#0096C7]">Login</li>
+                </Link>
+                <Link to="/admin/login" onClick={() => setNavMenuOpen(false)}>
+                  <li className="hover:text-[#0096C7]">Admin</li>
+                </Link>
+              </>
+            )}
 
-              {isLoggedIn && (
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]"
-                >
-                  Logout
-                </button>
-              )}
-            </ul>
-          </div>
-        )}
+            {isLoggedIn && (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]"
+              >
+                Logout
+              </button>
+            )}
+          </ul>
+        </div>
+        {/* )} */}
       </div>
     </nav>
   );
