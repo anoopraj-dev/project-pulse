@@ -19,7 +19,6 @@ export const getPatientProfile = async (req, res) => {
     const patient = await Patient.findById(req.user.id ).select(
       "-password"
     );
-    console.log(patient);
 
     if (!patient) {
       return res.status(404).json({

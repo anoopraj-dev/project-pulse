@@ -17,7 +17,7 @@ const upload = multer();
 router.post('/signup',upload.none(),generateId(),userSignup);
 router.post('/signin',userSignin);
 router.get('/me',authenticateUser,getCurrentUserInfo)
-router.post('/logout',userLogout);
+router.post('/logout',authenticateUser,userLogout);
 router.get('/authenticate',authenticateUser,authCheck)
 router.post('/reset-password', resetPassword);
 router.post('/verify-email',verifyOtp)

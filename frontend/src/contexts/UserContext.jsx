@@ -43,11 +43,11 @@ export const UserProvider = ({ children }) => {
     const controller = new AbortController();
     const fetchUser = async () => {
       try {
-        console.log('Start api call inside context')
         const res = await api.get("/api/auth/me");
+      
     
         if (res.data.success) {
-          console.log('api fetched inside context')
+          console.log(res.data.user)
           dispatch({ type: "SET_USER", payload: res.data.user });
         } else {
           dispatch({ type: "SET_LOADING", payload: false });
