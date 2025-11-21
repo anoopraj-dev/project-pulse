@@ -2,7 +2,7 @@ export const formSteps = {
   personalInfo: {
     title: "Personal Information",
     fields: [
-      { name: "gender", label: "Gender", type: "radio", options: ["Male", "Female", "Other"] },
+      { name: "gender", label: "Gender", type: "radio", options: ["male", "female", "other"] },
       { name: "phone", label: "Phone Number", type: "text" },
       { name: "work", label: "Work", type: "text" },
       { name: "address", label: "Address", type: "textarea" },
