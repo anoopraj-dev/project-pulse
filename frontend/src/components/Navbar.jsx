@@ -18,8 +18,8 @@ const Navbar = () => {
   const { signOut } = useClerk();
   const isLoggedIn = !!email || !!user;
   const { width } = useWindowSize();
-  const isMobile = width < 768;
-  const isTablet = width > 768 && width < 1300;
+  const isMobile = width <= 768;
+  const isTablet = width >= 768 && width < 1300;
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -50,7 +50,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white fixed w-full z-50 shadow-sm">
+    <nav className="bg-white fixed w-full z-50 shadow-md">
       <div className="max-w-8xl mx-auto">
         <div className="flex justify-between items-center py-3 px-4 lg:px-32">
           {/* Left Section */}
@@ -79,17 +79,16 @@ const Navbar = () => {
               {/* Logged Out Desktop View */}
               {!isLoggedIn && !isMobile ? (
                 <>
-                  <div className="flex items-center space-x-2 w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 ml-4 mr-auto">
+                  <div className="flex items-center space-x-2 w-full sm:w-3/4  lg:w-1/2 xl:w-2/5 ml-4 mr-auto">
                     <input
                       type="text"
                       placeholder="Search doctors, services..."
-                      className="flex-1 min-w-[100px] sm:min-w-[140px] px-3 py-2 text-sm sm:text-base rounded-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#0096C7]"
+                      className="flex-1 min-w-[80px]  px-3 py-2 text-sm sm:text-base rounded-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#0096C7]"
                     />
-                    <select className="px-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#0096C7]">
-                      <option>Location</option>
-                      <option>Bangalore</option>
-                      <option>Kochi</option>
-                    </select>
+                    <Icon
+                      icon={"mingcute-location-2-line"}
+                      className="w-8 h-8 m-2 bg-[#0096C7] text-white rounded-3xl px-1"
+                    />
                     <Icon
                       icon={"mdi:search"}
                       className="w-8 h-8 m-2 bg-[#0096C7] text-white rounded-3xl px-1"
@@ -99,32 +98,32 @@ const Navbar = () => {
                     <ul className="flex space-x-6 text-lg font-md text-[#0096C7]">
                       <Link to="/">
                         <Icon
-                          icon="mdi:home-outline"
-                          className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                          icon="mingcute:home-2-line"
+                          className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
                         />
                       </Link>
                       <Icon
-                        icon="mdi:information-outline"
-                        className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                        icon="mingcute:user-info-line"
+                        className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
                       />
                       <Icon
-                        icon="mdi:cog-outline"
-                        className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                        icon="mingcute:hand-heart-line"
+                        className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
                       />
                       <Icon
-                        icon="mdi:account-search-outline"
-                        className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                        icon="mingcute-user-search-line"
+                        className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
                       />
                       <Link to="/signin">
                         <Icon
                           icon="mdi:login"
-                          className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                          className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
                         />
                       </Link>
                       <Link to="/admin/login">
                         <Icon
                           icon="mdi:shield-account-outline"
-                          className="w-7 h-7 cursor-pointer hover:text-[#0077A3]"
+                          className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
                         />
                       </Link>
                     </ul>

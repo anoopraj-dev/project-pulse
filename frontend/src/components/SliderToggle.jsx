@@ -24,9 +24,9 @@ const SliderToggle = ({ isChecked, onToggle }) => {
 
       {/* Knob */}
       <div
-        className={`absolute top-1 left-1 w-17 h-6 rounded-full border-2 border-white bg-white shadow-md transition-transform duration-300 z-10
+        className={`absolute top-1 left-1 w-17 h-6 flex items-center justify-center text-[#1B365D] font-semibold rounded-full border-2 border-white bg-white shadow-md transition-transform duration-300 z-10
           ${isChecked ? "translate-x-[70px]" : "translate-x-0"}`}
-      ></div>
+      >{isChecked? 'Doctor' :'Patient'}</div>
     </label>
   );
 };
