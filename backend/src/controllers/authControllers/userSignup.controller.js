@@ -175,7 +175,7 @@ export const clerkUserSignup = async(req,res) => {
     console.log(user)
     res.status(200).json({
       success: true
-    })
+    }) 
 
   }
 }
