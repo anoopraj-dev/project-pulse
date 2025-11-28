@@ -7,8 +7,10 @@ import { userLogout } from '../controllers/authControllers/logout.controller.js'
 import multer from 'multer'
 import { authenticateUser } from '../middlewares/authenticateUser.js';
 import { getCurrentUserInfo } from '../controllers/authControllers/currentUser.controller.js';
-
-
+import { verifyClerkSignature } from '../middlewares/clerkMiddleware.js';
+import { clerkUserSignup } from '../controllers/authControllers/userSignup.controller.js';
+import { updateClerKUserRole } from '../controllers/authControllers/userSignup.controller.js';
+import { rawBodyMiddleware } from '../middlewares/clerkMiddleware.js';
 const router = Router();
 
 const upload = multer();
@@ -23,6 +25,8 @@ router.post('/reset-password', resetPassword);
 router.post('/verify-email',verifyOtp)
 router.post('/set-password',setNewPassword);
 router.post('/resend-otp',resendOtp);
+router.post('/clerk-webhook',rawBodyMiddleware,verifyClerkSignature, clerkUserSignup)
+router.post('/update-user-role', updateClerKUserRole )
 
 
 
