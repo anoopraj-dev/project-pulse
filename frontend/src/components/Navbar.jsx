@@ -19,7 +19,7 @@ const Navbar = () => {
   const isLoggedIn = !!email || !!user;
   const { width } = useWindowSize();
   const isMobile = width <= 768;
-  const isTablet = width >= 768 && width < 1300;
+  const isTablet = width >= 768 && width < 1024;
 
   useEffect(() => {
     const handleClickOutside = (e) => {

@@ -6,7 +6,6 @@ import ShimmerCard from "./ShimmerCard";
 const Sidebar = ({ toggleSidebar }) => {
   const { profilePicture, isLoading } = useUser();
   const location = useLocation();
-  const [device,setDevice] = useState()
 
   //-------Sidbar Navigation Menu config-------
   const menuItems = [
