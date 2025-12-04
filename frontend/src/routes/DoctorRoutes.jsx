@@ -5,7 +5,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 
 const DoctorRoutes = [
   { path: "/doctor/profile", element: ( <ProtectedRoute> <Layout> <DoctorProfile /> </Layout> </ProtectedRoute> ),},
-  {path:'doctor/personal-info', element: (<ProtectedRoute><DoctorRegistration/></ProtectedRoute>)},
+  {path:'/doctor/personal-info', element: (<ProtectedRoute><DoctorRegistration/></ProtectedRoute>)},
 ];
 
 export default DoctorRoutes;

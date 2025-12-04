@@ -6,33 +6,31 @@ import { useModal } from "../contexts/ModalContext";
 import PrimaryButton from "./PrimaryButton";
 import SliderToggle from "./SliderToggle";
 import { useUser } from "../contexts/UserContext";
-import { useClerk, useUser as clerkUser , useAuth, SignUp} from "@clerk/clerk-react";
+import { useClerk, useUser as clerkUser, useAuth } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
-import { PropagateLoader } from "react-spinners";
-import ShimmerCard from "./ShimmerCard";
+import { ClipLoader } from "react-spinners";
 import { EmailModal } from "./ModalInputs";
 import toast from "react-hot-toast";
 
 const AuthCard = ({ role: initialRole }) => {
-  const [isDoctor, setIsDoctor] = useState(()=> {
-    const storedRole = sessionStorage.getItem('userRole');
-    return storedRole === 'doctor'
+  const [isDoctor, setIsDoctor] = useState(() => {
+    const storedRole = sessionStorage.getItem("userRole");
+    return storedRole === "doctor";
   });
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const { dispatch } = useUser();
+  const { dispatch, email, refreshUser } = useUser();
   const { user, isSignedIn, isLoaded } = clerkUser();
-  const { openSignIn } = useClerk();
+  const { openSignIn, signOut } = useClerk();
   const buttonRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const isSignup = location.pathname === "/signup";
   const isAdmin =
     initialRole === "admin" || location.pathname.includes("/admin");
 
-  const { getToken } = useAuth()
-
+  const { getToken } = useAuth();
 
   const {
     register,
@@ -68,7 +66,7 @@ const AuthCard = ({ role: initialRole }) => {
           firstLogin: true,
         };
 
-        // ---------- SESSION STORAGE USED IDENTIFYING TYPE OF VERIFICATION-----------
+        // ---------- SESSION STORAGE USED FOR IDENTIFYING TYPE OF VERIFICATION-----------
         const response = await api.post("/api/auth/signup", signupData);
         if (response.data.success) {
           toast.success(response.data.message);
@@ -94,10 +92,13 @@ const AuthCard = ({ role: initialRole }) => {
         });
 
         if (response.data.success) {
-          const { admin } = response.data;
-          dispatch({ type: "SET_USER", payload: { ...admin } });
-          navigate("/admin/profile", { replace: true });
+          // Use server response immediately to update UI, then refresh context
+          const serverAdmin = response.data.admin;
+          dispatch({ type: "SET_USER", payload: serverAdmin });
           toast.success(response.data.message);
+          // refresh in background to normalize data
+          refreshUser().catch((e) => console.warn("refreshUser failed", e));
+          navigate("/admin/profile", { replace: true });
         } else {
           toast.error(response.data.message);
         }
@@ -112,19 +113,21 @@ const AuthCard = ({ role: initialRole }) => {
       });
 
       if (response.data.success) {
-        localStorage.setItem('loginMethod', 'manual')
-        const { user, token } = response.data;
-        dispatch({ type: "SET_USER", payload: { ...user, token } });
+        const fetchedUser = response.data.user;
+        dispatch({ type: "SET_USER", payload: fetchedUser });
         toast.success(response.data.message);
 
-        if (user.firstLogin) {
-          if (role === "doctor")
-            navigate("/doctor/personal-info", { replace: true });
-          else if (role === "patient")
-            navigate("/patient/personal-info", { replace: true });
-        } else {
-          navigate(`/${role}/profile`, { replace: true });
-        }
+        const firstLoginFlag = fetchedUser?.firstLogin;
+        const target = firstLoginFlag
+          ? role === "doctor"
+            ? "/doctor/personal-info"
+            : "/patient/personal-info"
+          : `/${role}/profile`;
+
+        // refresh context in background
+        refreshUser().catch((e) => console.warn("refreshUser failed", e));
+        navigate(target, { replace: true });
+
       } else {
         toast.error(response.data.message);
       }
@@ -139,10 +142,9 @@ const AuthCard = ({ role: initialRole }) => {
     }
   };
 
-  const toggleRole = () =>{
-    setIsDoctor(prev=>!prev)
-    console.log(isDoctor)
-  }
+  const toggleRole = () => {
+    setIsDoctor((prev) => !prev);
+  };
 
   //------------FORGOT PASSWROD (PASSWORD RESETTING)------------
   const handleForgotPassword = () => {
@@ -155,51 +157,111 @@ const AuthCard = ({ role: initialRole }) => {
 
   //--------------- USERS AUTHENTICATED WITH CLERK--------------
 
-  const handleGoogleSignin = async() => {
-    const role = isDoctor ? 'doctor' : 'patient';
-     sessionStorage.setItem('userRole',role)
-     openSignIn();
-  }
- 
+  const handleGoogleSignin = async () => {
+    const role = isDoctor ? "doctor" : "patient";
+    sessionStorage.setItem("userRole", role);
+    openSignIn();
+  };
 
-    useEffect(()=>{
-      if (!isLoaded || !user || !isSignedIn) return ;    
+  useEffect(() => {
+    if (!isLoaded || !user || !isSignedIn) return;
 
-      const currentRole = sessionStorage.getItem('userRole')
-      if(!currentRole) return ;
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-      const userData  = {
-        id: user.id,
-        role: currentRole,
+    const updateClerkUser = async () => {
+      try {
+        const token = await getToken();
 
-      }
+        const userData = {
+          id: user.id,
+          email: user.emailAddresses[0].emailAddress,
+          name: user.fullName || user.name,
+          role: sessionStorage.getItem("userRole"),
+          profilePicture: user.imageUrl,
+        };
 
-      const updateUserRole = async () => {
-        try{
-          const token = await getToken();
-          console.log(token)
-
-          const response = await api.post('/api/auth/update-user-role', userData,
-            {                                          
-        headers: {
-          'Authorization': `Bearer ${token}`,      
-          'Content-Type': 'application/json'
+        const currentRole = sessionStorage.getItem("userRole");
+        if (!currentRole) {
+          return;
         }
-      }
-        )
-        }catch(err){
-          console.log('error updating role',err)
+
+        const response = await api.post(
+          "/api/auth/update-clerkUser",
+          userData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            signal,
+          }
+        );
+
+        console.log("response from updateClerkUser", response.data.user);
+        if (response.data.success) {
+          const fetchedUser = response.data.user;
+          dispatch({ type: "SET_USER", payload: fetchedUser }); // Update ui immediately with server reponse
+          toast.success(response.data.message);
+          sessionStorage.removeItem("userRole");
+
+          const firstLoginFlag = fetchedUser?.firstLogin;
+          const role = fetchedUser?.role;
+          const target = firstLoginFlag
+            ? role === "doctor"
+              ? "/doctor/personal-info"
+              : "/patient/personal-info"
+            : `/${role}/profile`;
+
+          refreshUser().catch((e) => console.warn("refreshUser failed", e)); // Refresh context in background
+          navigate(target, { replace: true });
+        } else {
+          toast.error(response.data.message || "Authentication failed");
+          sessionStorage.removeItem("userRole");
         }
+      } catch (err) {
+        if (signal.aborted) return;
+
+        const status = err.response?.status;
+        const errorCode = err.response?.data?.code;
+        const errorMessage =
+          err.response?.data?.message || err.message || "Authentication failed";
+
+        if (
+          status === 409 ||
+          errorCode === "ROLE_CONFLICT" ||
+          status === 401 ||
+          status === 403
+        ) {
+          toast.error(errorMessage);
+
+          try {
+            await signOut({ redirectUrl: "/signin" });
+          } catch (signErr) {
+            console.error("Error signing out from Clerk:", signErr);
+          }
+
+          sessionStorage.removeItem("userRole");
+          dispatch({ type: "CLEAR_USER" });
+
+          return;
+        }
+
+        toast.error(errorMessage);
+        sessionStorage.removeItem("userRole");
       }
+    };
+    ``;
 
-      updateUserRole();
-
-    },[isLoaded,isSignedIn,user])
+    updateClerkUser();
+    return () => {
+      controller.abort();
+    };
+  }, [isLoaded, user, isSignedIn]);
 
   return (
     <div className="flex flex-col">
       <div className="flex flex-col items-center ">
-        {!isAdmin && (
+        {!isAdmin && !email && (
           <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />
         )}
         <h1 className="text-2xl font-bold my-2 ">{`${
@@ -313,19 +375,21 @@ const AuthCard = ({ role: initialRole }) => {
             />
           ) : (
             <div className="my-4">
-              <PropagateLoader color="#0096C7" />
+              <ClipLoader color="#0096C7" />
             </div>
           )}
 
           {/* ----------GOOGLE SIGNIN (PATIENT/DOCTOR)----------- */}
-          {!isSignup && !isAdmin && (
+          {!isSignup && !isAdmin && isLoaded ? (
             <PrimaryButton
               onClick={handleGoogleSignin}
               text="SIGNIN WITH GOOGLE"
               className="w-full  bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
             />
-
-            //  <SignUp unsafeMetadata={isDoctor ? 'doctor' :'patient'} path="/sign-up" routing="path" />
+          ) : (
+            <div className="my-4">
+              <ClipLoader color="#0096C7" />
+            </div>
           )}
 
           {/* ------------ADMIN (SIGNIN)------------ */}

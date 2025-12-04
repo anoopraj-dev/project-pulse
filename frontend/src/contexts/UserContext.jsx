@@ -2,7 +2,7 @@ import { createContext, useContext, useReducer } from "react";
 import { useEffect } from "react";
 import { api } from "../api/api.js";
 
-//initial state
+//-----------INITIAL STATE----------------
 const initialState = {
   email: "",
   id: "",
@@ -14,7 +14,7 @@ const initialState = {
   isLoading: true
 };
 
-//reducer function
+//-----------REDUCER FUNCTION----------------
 const userReducer = (state, action) => {
   switch (action.type) {
     case "SET_USER":
@@ -29,45 +29,57 @@ const userReducer = (state, action) => {
   }
 };
 
-//creating context
+//-----------CONTEXT & PROVIDER----------------
 const UserContext = createContext({
   ...initialState,
   dispatch: () => null,
 });
-//provider
+
+
 export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
 
-  useEffect(() => {
+  // ----------- REFRESH USER FUNCTION ----------------
+  const refreshUser = async () => {
+    try {
+      const res = await api.get("/api/auth/me", { withCredentials: true });
+      if (res.data?.success) {
+        dispatch({ type: "SET_USER", payload: res.data.user });
+        return res.data.user;
+      }
+      dispatch({ type: "CLEAR_USER" });
+      return null;
+    } catch (err) {
+      dispatch({ type: "CLEAR_USER" });
+      return null;
+    }
+  };
 
+  useEffect(() => {
     const controller = new AbortController();
     const fetchUser = async () => {
       try {
-        const res = await api.get("/api/auth/me");
-      
-    
-        if (res.data.success) {
-          console.log(res.data.user)
+        const res = await api.get("/api/auth/me", { signal: controller.signal });
+
+        if (res.data?.success) {
           dispatch({ type: "SET_USER", payload: res.data.user });
         } else {
           dispatch({ type: "SET_LOADING", payload: false });
         }
       } catch (err) {
-        dispatch({ type: "SET_LOADING", payload: false});
+        dispatch({ type: "SET_LOADING", payload: false });
       }
     };
 
     fetchUser();
-    
-    return () => {
-    controller.abort();
-  };
 
+    return () => {
+      controller.abort();
+    };
   }, []);
-  
 
   return (
-    <UserContext.Provider value={{ ...state, dispatch }}>
+    <UserContext.Provider value={{ ...state, dispatch, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

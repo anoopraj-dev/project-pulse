@@ -16,7 +16,7 @@ const Navbar = () => {
   const menuRef = useRef(null);
   const { user } = clerkUser();
   const { signOut } = useClerk();
-  const isLoggedIn = !!email || !!user;
+  const isLoggedIn = !!email;
   const { width } = useWindowSize();
   const isMobile = width <= 768;
   const isTablet = width >= 768 && width < 1024;
@@ -35,7 +35,11 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       if (user) {
-        await signOut();
+        await signOut({ redirectUrl: '/signin' });
+        await api.post("/api/auth/logout", {});
+        dispatch({type:'CLEAR_USER'});
+        sessionStorage.clear();
+        setProfileMenuOpen(false)
         navigate("/signin");
         return;
       }
@@ -68,8 +72,9 @@ const Navbar = () => {
             />
 
             {/* Logo */}
-            <span className={`${isMobile ? "w-24" : "w-32"} h-auto`}>
+            <span className={`${isMobile ? "w-24" : "w-32"} h-auto`} onClick={handleLogout}>
               <img src={logo} alt="Logo" />
+  
             </span>
           </div>
 
@@ -105,6 +110,7 @@ const Navbar = () => {
                       <Icon
                         icon="mingcute:user-info-line"
                         className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
+              
                       />
                       <Icon
                         icon="mingcute:hand-heart-line"
@@ -124,6 +130,7 @@ const Navbar = () => {
                         <Icon
                           icon="mdi:shield-account-outline"
                           className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
+    
                         />
                       </Link>
                     </ul>

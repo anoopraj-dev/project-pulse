@@ -4,11 +4,11 @@ const PatientSchema = new Schema(
   {
     // ---Basic Info---
     name: { type: String, required: true },
-    patientId: { type: String, required: true },
+    patientId: { type: String, required: true, unique: true },
     gender: { type: String,enum: ['male', 'female', 'other'] },
     dob: { type: Date },
     profilePicture: { type: String },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
     phone: { type: String },
     work: { type: String },
     address: {type: [String]},
