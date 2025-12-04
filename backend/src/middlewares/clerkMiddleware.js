@@ -1,17 +1,30 @@
-import crypto from 'crypto';
-import express from 'express';
-export const rawBodyMiddleware = express.raw({ type: 'application/json' });
+import { Webhook } from "svix";
 
 export const verifyClerkSignature = (req, res, next) => {
-  const signature = req.headers['clerk-signature'];
-  if (!signature) return res.status(401).send('Missing signature');
+  const svixId = req.headers["svix-id"];
+  const svixTimestamp = req.headers["svix-timestamp"];
+  const svixSignature = req.headers["svix-signature"];
 
-  // Use raw body buffer for HMAC calculation, don’t stringify
-  const expected = crypto
-    .createHmac('sha256', process.env.CLERK_WEBHOOK_SECRET)
-    .update(req.body) // req.body is Buffer here because of raw middleware
-    .digest('hex');
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return res.status(401).send("Missing Svix headers");
+  }
 
-  if (signature !== expected) return res.status(401).send('Invalid signature');
-  next();
+  const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
+
+  try {
+    // req.body MUST be a raw buffer (NOT JSON-parsed)
+    const evt = wh.verify(req.body, {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    });
+
+    // Attach parsed event payload
+    req.clerkEvent = evt;
+
+    next();
+  } catch (err) {
+    console.error("Clerk signature verification failed:", err.message);
+    return res.status(401).send("Invalid signature");
+  }
 };

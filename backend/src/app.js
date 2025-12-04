@@ -11,6 +11,9 @@ const app = express();
 
 
 //middlewares
+
+
+
 app.use(cookieParser())
 app.use(express.json())
 
