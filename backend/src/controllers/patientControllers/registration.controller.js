@@ -132,7 +132,7 @@ export const updateLifeStyleInfo = async (req, res) => {
   }
 }
 
-//image upload
+//----------- UPLOAD PICTURE ----------------
 
 export const uploadPicture = async (req, res) => {
  
@@ -147,10 +147,11 @@ export const uploadPicture = async (req, res) => {
     console.log(req.file)
     const response = await uploadToCloudinary(req.file);
 
-    const patient = await Patient.findByIdAndUpdate(req.user.id,
+    const patient = await Patient.findByIdAndUpdate(
+      req.user.id,
       {
         firstLogin: false,
-        profilePicture: response.secure_url
+        profilePicture: response.secure_url,
       },
       { new: true, runValidators: true }
     );
@@ -163,8 +164,10 @@ export const uploadPicture = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Profile picture uploaded succefully'
-    })
+      message: 'Profile picture uploaded successfully',
+      imageUrl: response.secure_url,
+      user: patient,
+    });
 
   } catch (error) {
     console.error("Upload error:", error);

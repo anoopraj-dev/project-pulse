@@ -9,6 +9,7 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
 
   // Watch the whole form for file fields
   const watchedValues = watch();
+  console.log('watched values', watchedValues)
 
   // --- Repeatable fields ---
   const { fields: experienceItems, append: appendExperience, remove: removeExperience } = useFieldArray({
@@ -40,6 +41,7 @@ const DynamicForm = ({ config, onSubmit, defaultValues, mode, loading, handleUpl
         }
       }
     };
+
 
     collectFiles(watchedValues);
     setPreviews((prev) => {

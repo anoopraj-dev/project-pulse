@@ -9,7 +9,7 @@ import useWindowSize from "../customHooks/useWindowSize.jsx";
 import logo from "../assets/logoPrimary.png";
 
 const Navbar = () => {
-  const { email, role, name, dispatch, isLoading, profilePicture } = useUser();
+  const { email, role, name, dispatch, isLoading, profilePicture} = useUser();
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -20,6 +20,8 @@ const Navbar = () => {
   const { width } = useWindowSize();
   const isMobile = width <= 768;
   const isTablet = width >= 768 && width < 1024;
+  const profileImage = user?.imageUrl || profilePicture || '';
+  
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -201,9 +203,9 @@ const Navbar = () => {
                             }}
                           >
                             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                              {profilePicture ? (
+                              {profileImage ? (
                                 <img
-                                  src={profilePicture}
+                                  src={`${profileImage}?t=${Date.now()}`}
                                   alt="Profile"
                                   className="rounded-full w-10 h-10 object-cover"
                                 />
