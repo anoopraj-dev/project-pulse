@@ -13,12 +13,12 @@ import toast from 'react-hot-toast'
 const PatientRegistration = () => {
   const stepKeys = Object.keys(formSteps);
   const [currentStep, setCurrentStep] = useState(0);
-  const { email, id, isLoading } = useUser();
+  const { email, id, isLoading,dispatch} = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [loading,setLoading] = useState(false);
 
-
+// ----------- HANDLE NEXT REGISTRATION STEP ----------------
   const handleNext = async (data) => {
     if (isLoading || !email || !id) {
       openModal("User data not loaded yet. Please wait.");
@@ -33,8 +33,6 @@ const PatientRegistration = () => {
     try {
       const formData = new FormData();
       const payload = { ...data }
-
-      //send data to backend
       Object.entries(data).forEach(([key, value]) => {
         if (!Array.isArray(value)) {
 
@@ -46,6 +44,7 @@ const PatientRegistration = () => {
         console.log(key, value);
       });
 
+      //----------- API CALLS BASED ON CURRENT STEP ----------------
 
       if (currentStep === 0) {
         
@@ -106,16 +105,19 @@ const PatientRegistration = () => {
     }
   };
 
+  // ----------- HANDLE IMAGE UPLOAD ----------------
 
-   const handleUpload = async(data) => {
+   const handleUpload = async(files) => {
+  
     try {
       setLoading(true)
-      if(!data.picture){
-        toast.error('Please choose an image to upload!')
-        return
-      }
-       const formData = new FormData();
-        formData.append('profilePicture', data.picture[0])
+      if (!files || files.length === 0) {
+      toast.error('Please choose an image to upload!');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('picture', files[0]);
 
 
       const response = await api.post('/api/patient/upload-picture',formData,{
@@ -124,15 +126,21 @@ const PatientRegistration = () => {
         }
       })
 
-      if(response.data.success){
-        toast.success(response.data.message)
-        return
-      }else{
-        toast.error(response.data.message)
-        return
+      if (response.data.success) {
+        toast.success(response.data.message);
+        if (response.data.user) {
+          dispatch({ type: "SET_USER", payload: response.data.user }); //  Update the global context, if backend returns the updated user.
+        } else if (response.data.imageUrl) {
+          dispatch({ type: "UPDATE_PROFILE_PICTURE", payload: response.data.imageUrl }); // Update only the profile picture in the global context.
+        }
+        return;
+      } else {
+        toast.error(response.data.message);
+        return;
       }
     } catch (error) {
       toast.error('Failed to upload image')
+      console.error('Image upload error', error)
     }finally{
       setLoading(false)
     }

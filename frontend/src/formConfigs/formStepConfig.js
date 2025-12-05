@@ -101,7 +101,7 @@ export const formSteps = {
   profilePicture:{
     title: 'Upload your picture',
     fields:[
-      { name: "profilePicture", label: "Profile Picture", type: "file",uploadButton:true },
+      { name: "picture", label: "Profile Picture", type: "file",uploadButton:true },
     ]
   }
 };

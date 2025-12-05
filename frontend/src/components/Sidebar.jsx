@@ -54,7 +54,7 @@ const Sidebar = ({ toggleSidebar }) => {
             <ShimmerCard />
           ) : (
             <img
-              src={profilePicture || "/profile.png"}
+              src={`${profilePicture || "/profile.png"}?t=${Date.now()}`}
               alt="Profile"
               className="rounded-full w-30 h-30 object-cover"
             />

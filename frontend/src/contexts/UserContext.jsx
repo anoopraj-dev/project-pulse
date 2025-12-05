@@ -24,6 +24,8 @@ const userReducer = (state, action) => {
 
     case 'SET_LOADING':
       return { ...state,isLoading:action.payload}
+    case 'UPDATE_PROFILE_PICTURE':
+      return { ...state, profilePicture: action.payload };
     default:
       return state;
   }
