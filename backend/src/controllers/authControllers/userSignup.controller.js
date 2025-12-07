@@ -8,7 +8,7 @@ import { generateOtp } from "../../utils/otpGenerator.js";
 import Otp from "../../models/otps.model.js";
 import { sendEmail } from "../../config/nodemailer.js";
 
-
+//------- USER SIGNUP CONTROLLER -------//
 export const userSignup = async (req, res) => {
   try {
     const {

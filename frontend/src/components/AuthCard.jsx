@@ -79,6 +79,7 @@ const AuthCard = ({ role: initialRole }) => {
           navigate("/verify-email");
         } else {
           toast.error(response.data.message);
+          console.error("Signup error:", response.error.message);
         }
 
         return;
@@ -220,6 +221,18 @@ const AuthCard = ({ role: initialRole }) => {
         }
       } catch (err) {
         if (signal.aborted) return;
+
+        console.error("=== FULL ERROR OBJECT ===", {
+    message: err.message,
+    status: err.response?.status,
+    statusText: err.response?.statusText,
+    data: err.response?.data,
+    headers: err.response?.headers,
+    url: err.config?.url,
+    method: err.config?.method,
+    request: err.request,
+    stack: err.stack
+  });
 
         const status = err.response?.status;
         const errorCode = err.response?.data?.code;
