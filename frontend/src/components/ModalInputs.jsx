@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {toast} from 'react-hot-toast'
-import DynamicForm from "./DynamicForm";
-import { emailInputConfig, setPasswordFormConfig } from "../formConfigs/modalConfigs";
+import DynamicForm from "../components/forms/engines/DynamicForm";
+import { emailInputConfig, setPasswordFormConfig } from "../components/forms/config/modalFormConfig";
 import { api } from "../api/api";
 
 
@@ -26,7 +26,6 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
         toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       toast.error(
         error.response?.data?.message || "Failed to submit form. Try again."
       );
@@ -37,7 +36,7 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
 
   return (
     <div className="flex flex-col">
-      <DynamicForm config={emailInputConfig} onSubmit={handleSubmit} mode="modal" loading={loading} />
+      <DynamicForm config={emailInputConfig} onSubmit={handleSubmit}  mode='modal' loading={loading}/>
     </div>
   );
 };
@@ -62,7 +61,6 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
         toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       toast.error(
         error.response?.data?.message || "Failed to submit form. Try again."
       );
@@ -72,7 +70,7 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   };
 
   return (
-    <DynamicForm config={setPasswordFormConfig} onSubmit={handleSubmit} mode="modal" loading={loading}
+    <DynamicForm mode="modal" config={setPasswordFormConfig} onSubmit={handleSubmit}  loading={loading}
     />
   );
 };

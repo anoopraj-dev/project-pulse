@@ -1,35 +1,32 @@
 import Patient from "../../models/patient.model.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
-export const updatePersonalInfo = async (req, res) => {
+//------- PATIENT ONBOARDING CONTROLLERS -------//
 
+//-------- PERSONAL INFO -------//
+export const updatePersonalInfo = async (req, res) => {
   try {
     const { gender, address, phone, dob, work } = req.body;
-
     const updateData = { gender, address, phone, dob, work };
-
     const patient = await Patient.findByIdAndUpdate(req.user.id, updateData);
 
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: 'Patient not found'
-      })
+        message: "Patient not found",
+      });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Personal information updated successfully'
-    })
-
-
+      message: "Personal information updated successfully",
+    });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json('Internal Server error')
+    return res.status(500).json("Internal Server error");
   }
+};
 
-}
-
+//-------- MEDICAL INFO -------//
 export const updateMedicalInfo = async (req, res) => {
   try {
     const {
@@ -63,25 +60,26 @@ export const updateMedicalInfo = async (req, res) => {
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: "Patient not found"
+        message: "Patient not found",
       });
     }
 
-
     return res.status(200).json({
       success: true,
-      message: "Medical information updated successfully"
+      message: "Medical information updated successfully",
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ success: false, message: "Internal Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server error" });
   }
 };
 
+//-------- LIFE STYLE INFO -------//
 
 export const updateLifeStyleInfo = async (req, res) => {
   try {
-    const{
+    const {
       smoking,
       alcohol,
       exerciseFrequency,
@@ -92,8 +90,8 @@ export const updateLifeStyleInfo = async (req, res) => {
       caffeineIntake,
       physicalActivityType,
       screenTime,
-      otherHabits =[]
-    } = req.body
+      otherHabits = [],
+    } = req.body;
 
     const lifeStyleData = {
       smoking,
@@ -106,45 +104,45 @@ export const updateLifeStyleInfo = async (req, res) => {
       caffeineIntake,
       physicalActivityType,
       screenTime,
-      otherHabits
-    }
+      otherHabits,
+    };
 
     const patient = await Patient.findByIdAndUpdate(
       req.user.id,
-      {$set: { lifestyle_habits: lifeStyleData}},
-      {new: true, runValidators: true }
-    )
+      { $set: { lifestyle_habits: lifeStyleData } },
+      { new: true, runValidators: true }
+    );
 
     if (!patient) {
       return res.status(404).json({
         success: false,
-        message: "Patient not found"
+        message: "Patient not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Medical information updated successfully"
+      message: "Medical information updated successfully",
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ success: false, message: "Internal Server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server error" });
   }
-}
+};
 
 //----------- UPLOAD PICTURE ----------------
 
 export const uploadPicture = async (req, res) => {
- 
   try {
+    
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'Choose an image to upload'
-      })
+        message: "Choose an image to upload",
+      });
     }
 
-    console.log(req.file)
     const response = await uploadToCloudinary(req.file);
 
     const patient = await Patient.findByIdAndUpdate(
@@ -158,21 +156,19 @@ export const uploadPicture = async (req, res) => {
     if (!patient) {
       return res.status(404).json({
         success: true,
-        message: 'Patient not found!'
-      })
+        message: "Patient not found!",
+      });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Profile picture uploaded successfully',
+      message: "Profile picture uploaded successfully",
       imageUrl: response.secure_url,
       user: patient,
     });
-
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ success: false, message: "Server error during file upload" });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error during file upload" });
   }
-}
-
-
+};

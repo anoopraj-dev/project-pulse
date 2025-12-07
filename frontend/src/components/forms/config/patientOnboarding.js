@@ -1,4 +1,4 @@
-export const formSteps = {
+export const patientOnboarding = {
   personalInfo: {
     title: "Personal Information",
     fields: [
@@ -101,7 +101,7 @@ export const formSteps = {
   profilePicture:{
     title: 'Upload your picture',
     fields:[
-      { name: "picture", label: "Profile Picture", type: "file",uploadButton:true },
+      { name: "profilePicture", label: "Profile Picture", type: "file",uploadButton:true },
     ]
   }
 };

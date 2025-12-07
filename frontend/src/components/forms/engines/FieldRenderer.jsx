@@ -1,0 +1,41 @@
+
+import FieldArrayGroup from "./FieldArrayGroup";
+import TextInput from "../form-components/fields/TextInput";
+import SelectInput from "../form-components/fields/SelectInput";
+import FileInput from "../form-components/fields/FileInput";
+import CheckboxGroup from "../form-components/fields/CheckboxGroup";
+import RadioGroup from "../form-components/fields/RadioGroup";
+import TextArea from "../form-components/fields/TextArea";
+import GroupField from "../form-components/fields/GroupField";
+
+export default function FieldRenderer({ field, formMethods, handleUpload, previews, watch, loading,visibleFields}) {
+  const {register, formState: { errors },control} = formMethods;
+
+  const components = {
+    text: TextInput,
+    select: SelectInput,
+    file: FileInput,
+    checkbox: CheckboxGroup,
+    radio: RadioGroup,
+    textarea: TextArea,
+    repeatable: FieldArrayGroup,
+    group: GroupField
+  };
+
+  const Component = components[field.type] || TextInput;
+
+  return (
+    <Component
+      field={field}
+      formMethods={formMethods}
+      register={register}
+      control={control}
+      errors={errors}
+      handleUpload={handleUpload}
+      previews={previews}
+      watch={watch}
+      loading={loading}
+      visibleFields={visibleFields}
+    />
+  );
+}
