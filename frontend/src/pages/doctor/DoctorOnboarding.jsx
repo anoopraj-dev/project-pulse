@@ -10,11 +10,11 @@ import { doctorOnboarding } from "../../components/forms/config/doctorOnboarding
 import { useFileUpload } from "../../customHooks/useFileUpload";
 
 const DoctorOnboarding = () => {
-  const stepKeys = Object.keys(doctorStepsConfig);
+  const stepKeys = Object.keys(doctorOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const { dispatch, isLoading } = useUser();
+  const { dispatch, isLoading,firstLogin } = useUser();
 
   const {uploadFile,loading} = useFileUpload('doctor')
 

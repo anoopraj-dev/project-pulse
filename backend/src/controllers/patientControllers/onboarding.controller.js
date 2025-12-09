@@ -109,7 +109,7 @@ export const updateLifeStyleInfo = async (req, res) => {
 
     const patient = await Patient.findByIdAndUpdate(
       req.user.id,
-      { $set: { lifestyle_habits: lifeStyleData } },
+      { $set: { lifestyle_habits: lifeStyleData,firstLogin: false } },
       { new: true, runValidators: true }
     );
 
@@ -131,44 +131,44 @@ export const updateLifeStyleInfo = async (req, res) => {
   }
 };
 
-//----------- UPLOAD PICTURE ----------------
+// //----------- UPLOAD PICTURE ----------------
 
-export const uploadPicture = async (req, res) => {
-  try {
+// export const uploadPicture = async (req, res) => {
+//   try {
     
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Choose an image to upload",
-      });
-    }
+//     if (!req.file) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Choose an image to upload",
+//       });
+//     }
 
-    const response = await uploadToCloudinary(req.file);
+//     const response = await uploadToCloudinary(req.file);
 
-    const patient = await Patient.findByIdAndUpdate(
-      req.user.id,
-      {
-        firstLogin: false,
-        profilePicture: response.secure_url,
-      },
-      { new: true, runValidators: true }
-    );
-    if (!patient) {
-      return res.status(404).json({
-        success: true,
-        message: "Patient not found!",
-      });
-    }
+//     const patient = await Patient.findByIdAndUpdate(
+//       req.user.id,
+//       {
+//         firstLogin: false,
+//         profilePicture: response.secure_url,
+//       },
+//       { new: true, runValidators: true }
+//     );
+//     if (!patient) {
+//       return res.status(404).json({
+//         success: true,
+//         message: "Patient not found!",
+//       });
+//     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile picture uploaded successfully",
-      imageUrl: response.secure_url,
-      user: patient,
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Server error during file upload" });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "Profile picture uploaded successfully",
+//       imageUrl: response.secure_url,
+//       user: patient,
+//     });
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Server error during file upload" });
+//   }
+// };
