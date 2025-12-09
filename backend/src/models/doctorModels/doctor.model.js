@@ -140,6 +140,7 @@ const DoctorSchema = new Schema(
     email: { type: String, unique: true, required: true },
     phone: { type: String },
     location: { type: String },
+    about:{type:String},
 
     // --- Authentication & Role (unchanged) ---
     password: { type: String, required: true },

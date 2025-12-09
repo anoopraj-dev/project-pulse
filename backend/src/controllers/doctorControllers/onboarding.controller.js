@@ -159,7 +159,7 @@ export const updateServicesInfo = async (req, res) => {
 
     const doctor = await Doctor.findByIdAndUpdate(
       req.user.id,
-      { services: servicesArray },
+      { services: servicesArray,firstLogin:false },
       { new: true }
     );
 

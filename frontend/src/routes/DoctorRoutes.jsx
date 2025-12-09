@@ -1,10 +1,11 @@
-import DoctorProfile from "../pages/doctor/DoctorProfile";
+// import DoctorProfile from "../pages/doctor/DoctorProfile";
 import DoctorOnboarding from '../pages/doctor/DoctorOnboarding'
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import DoctorsProfile from "../pages/doctor/DoctorsProfile";
 
 const DoctorRoutes = [
-  { path: "/doctor/profile", element: ( <ProtectedRoute> <Layout> <DoctorProfile /> </Layout> </ProtectedRoute> ),},
+  { path: "/doctor/profile", element: ( <ProtectedRoute> <Layout> <DoctorsProfile /> </Layout> </ProtectedRoute> ),},
   {path:'/doctor/personal-info', element: (<ProtectedRoute><DoctorOnboarding/></ProtectedRoute>)},
 ];
 

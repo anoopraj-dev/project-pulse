@@ -106,7 +106,7 @@ const InfoCards = ({ data }) => {
       </div>
 
       {/* LifeStyle & Habits */}
-      <div className="bg-white border border-[#c3d6fc] rounded-xl shadow-sm p-6">
+      <div className="bg-white border border-[#c3d6fc] rounded-xl shadow-sm p-6 mb-8">
         <div className="flex items-center gap-3 mb-5 border-b border-[#c3d6fc]/50 pb-3">
           <Icon icon="healthicons:exercise" className="w-6 h-6 text-[#0096C7]" />
           <h3 className="text-xl font-semibold text-[#0096C7]">
