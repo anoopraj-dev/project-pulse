@@ -5,6 +5,7 @@ import VerifyEmail from "../pages/VerifyEmail";
 import NotFound from "../pages/NotFound";
 import AdminLogin from "../pages/admin/AdminLogin";
 import PublicRoute from "../components/PublicRoute";
+import AboutUs from '../pages/AboutUs'
 
 
 const CommonRoutes = [
@@ -15,6 +16,7 @@ const CommonRoutes = [
   { path: "/admin/login", element: <AdminLogin /> },
   { path: "/page-not-found", element: <NotFound /> },
   {path: '/reset-password', element:<VerifyEmail />},
+  {path: '/about-us',element:<AboutUs/>}
   
 ];
 

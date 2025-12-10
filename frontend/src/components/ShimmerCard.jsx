@@ -1,6 +1,6 @@
 const ShimmerCard = () => {
   return (
-    <div className="animate-pulse space-y-4 p-4 border border-gray-200 rounded-md bg-white shadow-md w-full min-h-[200px]">
+    <div className="mt-18 min-h-screen w-2xl animate-pulse space-y-4 p-4 border border-gray-200 rounded-md bg-white shadow-md w-full min-h-[200px]">
       <div className="flex items-center gap-4">
         <div className="bg-gray-300 rounded-full w-16 h-16"></div>
         <div className="h-6 bg-gray-300 rounded w-1/3"></div>

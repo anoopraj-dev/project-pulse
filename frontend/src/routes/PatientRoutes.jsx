@@ -1,7 +1,6 @@
 import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/Layout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
-import PatientProfile from "../pages/patient/PatientProfile";
 import PatientOnboarding from "../pages/patient/PatientOnboarding";
 import PatientsProfile from "../pages/patient/PatientsProfile";
 

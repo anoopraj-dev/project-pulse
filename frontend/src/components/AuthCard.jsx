@@ -50,7 +50,7 @@ const AuthCard = ({ role: initialRole }) => {
       setLoading(true);
       const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-      // ---------- SIGNUP FLOW (ADMIN/PATIENT)------
+      // ---------- SIGNUP FLOW (DOCTOR/PATIENT)------
       if (isSignup && !isAdmin) {
         if (data.password !== data.confirmPassword) {
           openModal("Passwords do not match!");
@@ -85,21 +85,19 @@ const AuthCard = ({ role: initialRole }) => {
         return;
       }
       // -----------SIGNIN FLOWS----------
-      // ---------- (ADMIM)---------
+      // ---------- (ADMIN)---------
       if (isAdmin) {
-        const response = await api.post("/api/admin/login", {
+        const response = await api.post("/api/auth/login", {
           email: data.email,
           password: data.password,
         });
 
         if (response.data.success) {
-          // Use server response immediately to update UI, then refresh context
           const serverAdmin = response.data.admin;
           dispatch({ type: "SET_USER", payload: serverAdmin });
           toast.success(response.data.message);
-          // refresh in background to normalize data
           refreshUser().catch((e) => console.warn("refreshUser failed", e));
-          navigate("/admin/profile", { replace: true });
+          navigate("/admin/dashboard", { replace: true });
         } else {
           toast.error(response.data.message);
         }
@@ -128,7 +126,6 @@ const AuthCard = ({ role: initialRole }) => {
         // refresh context in background
         refreshUser().catch((e) => console.warn("refreshUser failed", e));
         navigate(target, { replace: true });
-
       } else {
         toast.error(response.data.message);
       }
@@ -223,16 +220,16 @@ const AuthCard = ({ role: initialRole }) => {
         if (signal.aborted) return;
 
         console.error("=== FULL ERROR OBJECT ===", {
-    message: err.message,
-    status: err.response?.status,
-    statusText: err.response?.statusText,
-    data: err.response?.data,
-    headers: err.response?.headers,
-    url: err.config?.url,
-    method: err.config?.method,
-    request: err.request,
-    stack: err.stack
-  });
+          message: err.message,
+          status: err.response?.status,
+          statusText: err.response?.statusText,
+          data: err.response?.data,
+          headers: err.response?.headers,
+          url: err.config?.url,
+          method: err.config?.method,
+          request: err.request,
+          stack: err.stack,
+        });
 
         const status = err.response?.status;
         const errorCode = err.response?.data?.code;
@@ -393,17 +390,19 @@ const AuthCard = ({ role: initialRole }) => {
           )}
 
           {/* ----------GOOGLE SIGNIN (PATIENT/DOCTOR)----------- */}
-          {!isSignup && !isAdmin && isLoaded ? (
-            <PrimaryButton
-              onClick={handleGoogleSignin}
-              text="SIGNIN WITH GOOGLE"
-              className="w-full  bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
-            />
-          ) : (
-            <div className="my-4">
-              <ClipLoader color="#0096C7" />
-            </div>
-          )}
+          {!isSignup &&
+            !isAdmin &&
+            (loading ? (
+              <div className="my-4">
+                <ClipLoader color="#0096C7" />
+              </div>
+            ) : (
+              <PrimaryButton
+                onClick={handleGoogleSignin}
+                text="SIGN IN WITH GOOGLE"
+                className="w-full bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
+              />
+            ))}
 
           {/* ------------ADMIN (SIGNIN)------------ */}
           <div className="my-5 text-center">

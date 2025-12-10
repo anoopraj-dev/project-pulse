@@ -5,6 +5,7 @@ import Headings from "../../components/Headings";
 import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../components/BasicInfoCard";
 import DynamicInfoSection from "../../components/DynamicInfoSection";
+import ShimmerCard from "../../components/ShimmerCard";
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);
@@ -26,11 +27,15 @@ const PatientsProfile = () => {
   useEffect(() => {
     fetchPatient();
   }, []);
+
+  if(loading) return <ShimmerCard/>
+  if(!user) return <ShimmerCard/>
+
   return (
     <div className=" mt-18  flex flex-col items-center">
       <Headings
         text={`Welcome ${
-          user?.name.charAt(0).toUpperCase() + user?.name.slice(1)
+          user?.name?.charAt(0).toUpperCase() + user?.name.slice(1)
         }`}
       />
       <div className="flex flex-col w-md md:w-3xl lg:w-4xl border border-blue-100 p-10 rounded-md">
@@ -47,7 +52,7 @@ const PatientsProfile = () => {
                 className="h-12 w-12 text-[#0096C7]"
               />
               <h1 className="font-bold text-3xl text-[#0096C7]">
-               {user?.name.charAt(0).toUpperCase() + user?.name.slice(1)}
+               {user?.name?.charAt(0).toUpperCase() + user?.name.slice(1)}
               </h1>
             </div>
 

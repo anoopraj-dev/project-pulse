@@ -16,6 +16,7 @@ const generateRandomPassword = (length = 16) => {
 //---------------- UPDATE CLERK USER CONTROLLER ----------------
 
 export const updateClerKUser = async (req, res) => {
+  console.log('update clerk route hit')
   try {
     const { name, email, id, role } = req.body;
     const authHeader = req.headers.authorization;
@@ -118,15 +119,19 @@ export const updateClerKUser = async (req, res) => {
     }
 
     // Build a canonical user object to return (include firstLogin/profilePicture)
-    const responseUser = {
-      id: user._id,
-      customId: user[uniqueIdKey],
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      firstLogin: user.firstLogin,
-      profilePicture: user.profilePicture,
-    };
+    // const responseUser = {
+    //   id: user._id,
+    //   customId: user[uniqueIdKey],
+    //   email: user.email,
+    //   name: user.name,
+    //   role: user.role,
+    //   firstLogin: user.firstLogin,
+    //   profilePicture: user.profilePicture,
+    // };
+
+    const responseUser = user.toObject();
+delete responseUser.password; // remove password
+
 
     res.status(200).json({
       success: true,
@@ -134,6 +139,7 @@ export const updateClerKUser = async (req, res) => {
       user: responseUser,
       accessToken,
     });
+    console.log('response send from updateclerk')
   } catch (error) {
     console.error("updateClerKUser error:", error);
     let status = 500;

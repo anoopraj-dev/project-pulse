@@ -4,7 +4,6 @@ import { api } from "../api/api";
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
-  const role = localStorage.getItem("userRole");
   useEffect(() => {
     api
       .get("/api/auth/authenticate")

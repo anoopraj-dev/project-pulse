@@ -8,15 +8,16 @@ import multer from 'multer'
 import { authenticateUser } from '../middlewares/authenticateUser.js';
 import { getCurrentUserInfo } from '../controllers/authControllers/currentUser.controller.js';
 import { updateClerKUser } from '../controllers/authControllers/clerkUser.controller.js';
-
+import { adminLogin } from '../controllers/authControllers/adminLogin.controller.js';
 
 const router = Router();
 
 const upload = multer();
 
-//signup route
+
 router.post('/signup',upload.none(),generateId(),userSignup);
 router.post('/signin',userSignin);
+router.post('/login',adminLogin)
 router.get('/me',authenticateUser,getCurrentUserInfo)
 router.post('/logout',userLogout);
 router.get('/authenticate',authenticateUser,authCheck)
@@ -24,7 +25,8 @@ router.post('/reset-password', resetPassword);
 router.post('/verify-email',verifyOtp)
 router.post('/set-password',setNewPassword);
 router.post('/resend-otp',resendOtp);
-router.post('/update-clerkUser',  updateClerKUser )
+router.post('/update-clerkUser' ,  updateClerKUser )
+
 
 
 

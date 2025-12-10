@@ -4,14 +4,19 @@ import { getDoctorProfile } from "../controllers/doctorControllers/profile.contr
 import {updatePersonlInfo,updateProfessionalInfo, updateServicesInfo} from '../controllers/doctorControllers/onboarding.controller.js'
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 
 const router = Router();
 
-router.get('/profile',authenticateUser,getDoctorProfile);
-router.post('/personal-info',authenticateUser,updatePersonlInfo);
-router.post('/professional-info',authenticateUser,updateProfessionalInfo);
-router.post('/services-info',authenticateUser,updateServicesInfo);
-router.post ('/file-upload', authenticateUser,upload.single('profilePicture'),  uploadImage) ;
+//----------- MIDDLEWARES---------------
+router.use(authenticateUser,authorizeRoles('doctor'))
+
+//------------- ROUTES---------------
+router.get('/profile',getDoctorProfile);
+router.post('/personal-info',updatePersonlInfo);
+router.post('/professional-info',updateProfessionalInfo);
+router.post('/services-info',updateServicesInfo);
+router.post ('/file-upload', upload.single('profilePicture'),  uploadImage) ;
 
 
 export default router;

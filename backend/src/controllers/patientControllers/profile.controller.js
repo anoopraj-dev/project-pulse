@@ -2,7 +2,8 @@ import Patient from "../../models/patient.model.js";
 
 export const getPatientProfile = async (req, res) => {
   const token = req.cookies.token;
- 
+  
+  console.log('patient profile route hit')
 
   if (!token) {
     return res.status(401).json({
@@ -15,7 +16,6 @@ export const getPatientProfile = async (req, res) => {
     if (!req.user || req.user.role !== "patient") {
       return res.status(403).json({ message: "Not authorized" });
     }
-
     const patient = await Patient.findById(req.user.id ).select(
       "-password"
     );

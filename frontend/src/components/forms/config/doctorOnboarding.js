@@ -79,15 +79,6 @@ const doctorProfessionalInfoConfig = {
   max: new Date().getFullYear(),
   required: true,
 },
-{
-  name: "proofDocument",
-  label: "License Proof (PDF/JPG)",
-  type: "file",
-  accept: "image/*,.pdf",
-  uploadButton: true,
-  uploadType: "licenseProof",
-  required: false
-},
 
     // Existing fields...
     {
