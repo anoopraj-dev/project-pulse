@@ -57,13 +57,13 @@ const DynamicForm = ({
           ) : null
         )}
       </div>
-        <div className="w-full flex justify-center">
-          <PrimaryButton
-        type="submit"
-        text={loading ? "Processing..." : config.buttonText || "Submit"}
-        className="w-48 mt-4"
-      />
-        </div>
+      <div className="w-full flex justify-center">
+        <PrimaryButton
+          type="submit"
+          text={loading ? "Processing..." : config.buttonText || "Submit"}
+          className="w-48 mt-4"
+        />
+      </div>
     </form>
   );
 };

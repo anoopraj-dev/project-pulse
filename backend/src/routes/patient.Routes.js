@@ -16,6 +16,6 @@ router.get('/profile', getPatientProfile);
 router.post('/personal-info', upload.none(), updatePersonalInfo)
 router.post('/medical-info', upload.none(), updateMedicalInfo)
 router.post('/lifeStyle-info', upload.none(), updateLifeStyleInfo)
-router.post('/file-upload', upload.single('profilePicture'), uploadImage);
+router.post('/file-upload', upload.any(), uploadImage);
 
 export default router;

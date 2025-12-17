@@ -7,16 +7,14 @@ import { api } from "../../api/api";
 import toast from "react-hot-toast";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { doctorOnboarding } from "../../components/forms/config/doctorOnboarding";
-import { useFileUpload } from "../../customHooks/useFileUpload";
 
 const DoctorOnboarding = () => {
   const stepKeys = Object.keys(doctorOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const { dispatch, isLoading,firstLogin } = useUser();
+  const { dispatch } = useUser();
 
-  const {uploadFile,loading} = useFileUpload('doctor')
 
   // ----------- HANDLE NEXT REGISTRATION STEP ----------------
 
@@ -69,16 +67,28 @@ const DoctorOnboarding = () => {
 
   // ----------- HANDLE FILE UPLOAD ----------------
 
-    const handleUpload = async (fileList, fieldPath, index) => {
-    const imageUrl = await uploadFile(fileList, fieldPath, index);
-    
-    
-    if (imageUrl) {
-      dispatch({ type: 'UPDATE_PROFILE_PICTURE', payload: imageUrl });
-    }
-    
-    return imageUrl; 
-  };
+    // const handleUpload = async (fieldName,fieldPath,index) => {
+    //   console.log('handle upload called')
+    //   console.log("fieldFiles:", fieldFiles);
+    //   const selectedFiles = files[fieldName];
+    //   if( !selectedFiles || !selectedFiles.length) return null;
+
+    //   const uploaddedUrl = await uploadFile({
+    //     file: selectedFiles[index ?? 0],
+    //     fieldPath,
+    //     userType:'doctor',
+    //     index
+    // });
+
+    //   if(fieldPath === 'profilePicture' && uploaddedUrl) {
+    //     dispatch({
+    //       type: 'UPDATE_PROFILE_PICTURE',
+    //       payload: uploaddedUrl
+    //     })
+    //   }
+
+    //   return uploaddedUrl;
+    // }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -117,8 +127,6 @@ const DoctorOnboarding = () => {
         <DynamicForm
           config={doctorOnboarding[stepKeys[currentStep]]}
           onSubmit={handleNext}
-          loading={loading}
-          handleUpload={handleUpload}
         />
 
       </div>

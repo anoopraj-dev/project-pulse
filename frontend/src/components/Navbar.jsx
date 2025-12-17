@@ -9,7 +9,7 @@ import useWindowSize from "../customHooks/useWindowSize.jsx";
 import logo from "../assets/logoPrimary.png";
 
 const Navbar = () => {
-  const { email, role, name, dispatch, isLoading, profilePicture} = useUser();
+  const { email, role, name, dispatch, isLoading, profilePicture } = useUser();
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -20,14 +20,13 @@ const Navbar = () => {
   const { width } = useWindowSize();
   const isMobile = width <= 768;
   const isTablet = width >= 768 && width < 1024;
-  const profileImage = user?.imageUrl || profilePicture || '';
-  
+  const profileImage = user?.imageUrl || profilePicture || "";
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setProfileMenuOpen(false);
-        setNavMenuOpen(false)
+        setNavMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -37,11 +36,11 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       if (user) {
-        await signOut({ redirectUrl: '/signin' });
+        await signOut({ redirectUrl: "/signin" });
         await api.post("/api/auth/logout", {});
-        dispatch({type:'CLEAR_USER'});
+        dispatch({ type: "CLEAR_USER" });
         sessionStorage.clear();
-        setProfileMenuOpen(false)
+        setProfileMenuOpen(false);
         navigate("/signin");
         return;
       }
@@ -74,9 +73,11 @@ const Navbar = () => {
             />
 
             {/* Logo */}
-            <span className={`${isMobile ? "w-24" : "w-32"} h-auto`} onClick={handleLogout}>
+            <span
+              className={`${isMobile ? "w-24" : "w-32"} h-auto`}
+              onClick={handleLogout}
+            >
               <img src={logo} alt="Logo" />
-  
             </span>
           </div>
 
@@ -112,7 +113,6 @@ const Navbar = () => {
                       <Icon
                         icon="mingcute:user-info-line"
                         className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-              
                       />
                       <Icon
                         icon="mingcute:hand-heart-line"
@@ -132,7 +132,6 @@ const Navbar = () => {
                         <Icon
                           icon="mdi:shield-account-outline"
                           className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-    
                         />
                       </Link>
                     </ul>
@@ -281,7 +280,6 @@ const Navbar = () => {
             )}
           </ul>
         </div>
-        {/* )} */}
       </div>
     </nav>
   );

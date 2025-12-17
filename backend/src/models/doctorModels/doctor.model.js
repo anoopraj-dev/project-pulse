@@ -32,13 +32,13 @@ const DoctorSchema = new Schema(
         years: { type: Number },
         hospitalName: { type: String },
         location: { type: String },
-        experienceCertificate: { type: String }
+        experienceCertificate: { type: [String],default:[] }
       }],
       education: [{
         degree: { type: String },
         college: { type: String },
         completionYear: { type: Number },
-        certificate: { type: String }
+        educationCertificate: { type: [String], default:[] }
       }],
 
       medicalLicense: {
@@ -69,7 +69,10 @@ const DoctorSchema = new Schema(
           max: 2026, 
           default: 2024 
         },
-        proofDocument: { type: String },
+        proofDocument:{
+          type:[String],
+          default:[]
+        },
       },
     },
 

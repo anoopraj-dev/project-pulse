@@ -5,6 +5,8 @@ import { generateOtp } from "../../utils/otpGenerator.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import bcrypt from "bcryptjs";
 
+
+//------------------ VERIFY OTP CONTROLLER -------------------
 export const verifyOtp = async (req, res) => {
   try {
     console.log('Session data:', req.session);
@@ -15,7 +17,7 @@ export const verifyOtp = async (req, res) => {
     const { otp} = req.body;
     const {email,type,role} = req.session.OTP; 
 
-    // Check if OTP exists
+    //------------ Check if OTP exists --------------------
     const savedOtp = await Otp.findOne({ email });
   
     if (!savedOtp) {
@@ -25,7 +27,7 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // Check if OTP expired
+    //------------- Check if OTP expired -----------------------
     if (savedOtp.expiresAt < new Date()) {
       return res.status(400).json({
         success: false,
@@ -33,7 +35,7 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    // Check if OTP matches
+    // --------------- Check if OTP matches -------------------
     if (savedOtp.otp !== otp) {
       return res.status(400).json({
         success: false,
@@ -41,9 +43,10 @@ export const verifyOtp = async (req, res) => {
       });
     }
 
-    //check the type of otp
+    await Otp.deleteOne({ email });
+
+    // ---------------- check the type of otp --------------------
     if(type === 'emailVerification'){
-       // Verify the user
     await Patient.findOneAndUpdate({ email }, { isVerified: true });
     await Doctor.findOneAndUpdate({ email }, { isVerified: true });
 
@@ -65,6 +68,8 @@ export const verifyOtp = async (req, res) => {
       })
     } 
 
+    
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -75,7 +80,7 @@ export const verifyOtp = async (req, res) => {
 };
 
 
-// reset password controller
+// ------------------------- RESET PASSWORD CONTROLLER ---------------------
 export const resetPassword = async (req, res) => {
 
   try {
@@ -93,12 +98,12 @@ export const resetPassword = async (req, res) => {
       })
     }
 
-    //generate otp
+    //---------- generate otp ----------
     const otpCode = generateOtp();
     await Otp.create({
       email,
       otp: otpCode,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 2 minutes
+      expiresAt: new Date(Date.now() + 2 * 60 * 1000) // 2 minutes
     });
 
     req.session.OTP = {
@@ -107,7 +112,7 @@ export const resetPassword = async (req, res) => {
       role
     }
 
-    //send mail
+    //------------- send mail ------------------
     const mailOptions = {
       from: `"PULSE360" <${process.env.GMAIL_USER}>`,
       to: email,
@@ -118,11 +123,15 @@ export const resetPassword = async (req, res) => {
 
     await sendEmail(mailOptions);
 
+    await Otp.deleteOne({ email });
+
+
     return res.status(200).json({
       success: true,
       message: 'OTP sent successfully'
     })
 
+    
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -132,9 +141,7 @@ export const resetPassword = async (req, res) => {
   }
 
 }
-
-
-//Set new password
+//---------------- Set new password---------------
 
 export const setNewPassword =async (req,res) => {
   const {newPassword,confirmPassword} = req.body;
@@ -180,7 +187,7 @@ export const setNewPassword =async (req,res) => {
 }
 
 
-//resend otp
+//--------------- RESEND OTP CONTROLLER ---------------------
 
 export const resendOtp = async (req, res) => {
   try {
@@ -195,17 +202,14 @@ export const resendOtp = async (req, res) => {
       });
     }
 
-    // Generate a new OTP code
+    //----------------- Generate a new OTP code --------------
     const otpCode = generateOtp();
-
-    // You can either update existing OTP document or create new one
     const otpRecord = await Otp.findOneAndUpdate(
       { email },
       { otp: otpCode, expiresAt: new Date(Date.now() + 2 * 60 * 1000) }, // 2 minutes expiration
       { new: true, upsert: true }
     );
 
-    // Prepare email content
     const mailOptions = {
       from: `"PULSE360" <${process.env.GMAIL_USER}>`,
       to: email,
@@ -213,7 +217,7 @@ export const resendOtp = async (req, res) => {
       text: `Hello, your new OTP is ${otpCode}. It will expire in 2 minutes.`
     };
 
-    // Send email with new OTP
+    // ----------------- Send email with new OTP ----------------
     await sendEmail(mailOptions);
 
     return res.status(200).json({

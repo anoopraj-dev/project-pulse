@@ -8,7 +8,6 @@ import { api } from "../../api/api";
 import { useModal } from "../../contexts/ModalContext";
 import ShimmerCard from "../../components/ShimmerCard";
 import DynamicForm from '../../components/forms/engines/DynamicForm';
-import { useFileUpload } from "../../customHooks/useFileUpload";
 
 import toast from "react-hot-toast";
 
@@ -18,7 +17,7 @@ const PatientOnboarding = () => {
   const { email, id, isLoading, dispatch } = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const {uploadFile,loading} = useFileUpload('patient')
+ 
 
   // ----------- HANDLE NEXT REGISTRATION STEP ----------------
   const handleNext = async (data) => {
@@ -97,15 +96,15 @@ const PatientOnboarding = () => {
 
   // ----------- HANDLE IMAGE UPLOAD ----------------
 
-  const handleUpload = async (fileList, fieldPath, index) => {
-    const imageUrl = await uploadFile(fileList, fieldPath, index);
+  // const handleUpload = async (fileList, fieldPath, index) => {
+  //   const imageUrl = await uploadFile(fileList, fieldPath, index);
 
-      if (imageUrl) {
-      dispatch({ type: 'UPDATE_PROFILE_PICTURE', payload: imageUrl });
-    }
+  //     if (imageUrl) {
+  //     dispatch({ type: 'UPDATE_PROFILE_PICTURE', payload: imageUrl });
+  //   }
     
-    return imageUrl;  
-  };
+  //   return imageUrl;  
+  // };
 
 
   return (
@@ -150,8 +149,7 @@ const PatientOnboarding = () => {
           <DynamicForm config={patientOnboarding[stepKeys[currentStep]]} onSubmit={handleNext}
         defaultValues={{}}
         mode="page"
-        loading={loading}
-        handleUpload={handleUpload}/>
+       />
         )}
       </div>
     </div>

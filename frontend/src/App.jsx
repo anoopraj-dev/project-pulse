@@ -3,14 +3,17 @@ import Navbar from "./components/Navbar";
 import AppRoutes from "./routes";
 import ModalProvider from "./contexts/ModalContext";
 import { Toaster } from "react-hot-toast";
+import { FileUploadProvider } from "./contexts/FileUploadContext";
 
 const App = () => {
   return (
     <Router>
+      <FileUploadProvider>
       <ModalProvider>
         <Navbar />
         <AppRoutes />
       </ModalProvider>
+      </FileUploadProvider>
       <Toaster
         position="top-center"
         toastOptions={{
