@@ -12,11 +12,12 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const handleSubmit = async (formData) => {
     try {
       setLoading(true);
-
-      const payload = {...formData,type};
+      const expiryTime = Date.now() + 60 * 1000;
+      const payload = {...formData,type,expiryTime};
 
       const { data } = await api.post(endPoint, payload);
       sessionStorage.setItem('otpSession', JSON.stringify(payload));
+      
 
       if (data.success) {
         toast.success(data.message || "Submitted successfully!");

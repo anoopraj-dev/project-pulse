@@ -5,32 +5,21 @@ import { api } from "../api/api";
 import { useModal } from "../contexts/ModalContext";
 import { SetPasswordModal } from "./ModalInputs";
 import toast from "react-hot-toast";
+import { Icon } from "@iconify/react";
 
-const  OtpInputs = () => {
-  const [secondsLeft, setSecondsLeft] = useState(60);
-  const [otp, setOtp] = useState(new Array(6).fill(''));
+const OtpInputs = () => {
+  const [loading,setLoading]= useState(false);
+  const [otp, setOtp] = useState(new Array(6).fill(""));
   const navigate = useNavigate();
-  const {openModal} = useModal();
-  const [resendDisabled, setResendDisabled] = useState(true);
+  const { openModal } = useModal();
+  const sessionData = JSON.parse(sessionStorage.getItem("otpSession" || "{}"));
+  const type = sessionData.type || "";
+  const email = sessionData.email || "";
 
-  const sessionData = JSON.parse(sessionStorage.getItem('otpSession' || '{}'))
-  const type = sessionData.type || '';
-  const email = sessionData.email || '';
-  
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSecondsLeft(prev => {
-        if(prev<=1){
-          clearInterval(timer);
-          return 0;
-        }
-        return prev-1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [secondsLeft]);
+  const initialSeconds = sessionData.expiryTime
+    ? Math.max(Math.floor((sessionData.expiryTime - Date.now()) / 1000), 0)
+    : 0;
+  const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
 
 
   const handleInputs = (e, index) => {
@@ -46,84 +35,101 @@ const  OtpInputs = () => {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       nextInput?.focus();
     }
-  }
+  };
 
-  // resend otp
+  // --------------- RESEND OTP --------------------
+const OTP_EXPIRY_SECONDS = 60;
 
-  const handleResendOtp = async () => {
-  if (resendDisabled) return;
-
-  setResendDisabled(true);
-  setSecondsLeft(60); 
-
+const handleResendOtp = async () => {
   try {
-    
-    const payload = { email,type};
-    const response = await api.post('/api/auth/resend-otp', payload);
+    setLoading(true);
+    const payload = { email, type };
+    const response = await api.post("/api/auth/resend-otp", payload);
 
     if (response.data.success) {
-      toast.success('OTP has been resent!');
+      toast.success("OTP has been resent!");
+
+      const newExpiryTime = Date.now() + OTP_EXPIRY_SECONDS * 1000;
+
+      sessionStorage.setItem(
+        "otpSession",
+        JSON.stringify({
+          ...sessionData,
+          expiryTime: newExpiryTime,
+        })
+      );
+
+      setSecondsLeft(OTP_EXPIRY_SECONDS); 
     } else {
-      toast.error(response.data.message || 'Failed to resend OTP');
-      setResendDisabled(false);  // Allow retry on fail
+      toast.error(response.data.message || "Failed to resend OTP");
       setSecondsLeft(0);
     }
   } catch (err) {
-    toast.error('Error resending OTP. Please try again.');
-    setResendDisabled(false);
+    toast.error("Error resending OTP. Please try again.");
     setSecondsLeft(0);
+  }finally{
+    setLoading(false)
   }
 };
 
-useEffect(() => {
-  if (secondsLeft === 0) {
-    setResendDisabled(false);
-  } else {
-    setResendDisabled(true);
-  }
+
+ useEffect(() => {
+  if (secondsLeft <= 0) return;
+
+  const timer = setInterval(() => {
+    setSecondsLeft(prev => {
+      if (prev <= 1) {
+        clearInterval(timer);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
 }, [secondsLeft]);
 
 
-
-//submit otp
+  //--------- SUBMIT OTP -----------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const otpCode = otp.join('');
-    const payload = {otp:otpCode,type,email};
-   
+    const otpCode = otp.join("");
+    const payload = { otp: otpCode, type, email };
+
     try {
-      const {data} = await api.post('/api/auth/verify-email', payload);
-      
+      const { data } = await api.post("/api/auth/verify-email", payload);
+
       if (!data.success) {
-        console.log('error sending payload');
+        console.log("error sending payload");
         toast.error(data.message);
         return;
       }
 
-      if(type === 'emailVerification'){
-        toast.success(data.message)
-        navigate('/signin');
-      }else if( type === 'resetPassword'){
-          toast.success(data.message)
-          openModal("Forgot your password?", SetPasswordModal, {
-            endPoint: "/api/auth/set-password",
-            type:'resetPassword',
-            onSubmit: (res) => navigate("/signin"),
-          });
-        
-      }   
-      setOtp(new Array(6).fill(''));
-
+      if (type === "emailVerification") {
+        toast.success(data.message);
+        navigate("/signin");
+      } else if (type === "resetPassword") {
+        toast.success(data.message);
+        openModal("Forgot your password?", SetPasswordModal, {
+          endPoint: "/api/auth/set-password",
+          type: "resetPassword",
+          onSubmit: (res) => navigate("/signin"),
+        });
+      }
+      setOtp(new Array(6).fill(""));
     } catch (error) {
-      const message = error?.response?.data?.message || error?.message || 'Something went wrong';
-      setOtp(new Array(6).fill(''));
-      toast.error(message)
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      setOtp(new Array(6).fill(""));
+      toast.error(message);
     }
-  }
+  };
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-  const time = `${minutes} : ${seconds < 10 ? '0' : ''}${seconds}`;
+  const time = `${minutes} : ${seconds < 10 ? "0" : ""}${seconds}`;
 
   return (
     <div className="flex flex-col">
@@ -154,15 +160,21 @@ useEffect(() => {
           <div className="flex justify-evenly">
             <p className="mt-4 text-sm text-gray-600 text-center">
               Didn’t receive the OTP?{" "}
-              <button  className="text-blue-500" onClick={handleResendOtp}>
-                {secondsLeft === 0 ? "Resend" : time} 
+              {
+                !loading ? (
+                  <button className="text-blue-500 cursor-pointer " onClick={handleResendOtp}>
+                {secondsLeft === 0 ? "Resend" : time}
               </button>
+                ) : (
+                  <Icon icon={'line-md:loading-twotone-loop'} className=" inline w-5 h-5"/>
+                )
+              }
             </p>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default OtpInputs;

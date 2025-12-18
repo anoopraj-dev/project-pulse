@@ -9,8 +9,7 @@ import bcrypt from "bcryptjs";
 //------------------ VERIFY OTP CONTROLLER -------------------
 export const verifyOtp = async (req, res) => {
   try {
-    console.log('Session data:', req.session);
-
+    
     if (!req.session || !req.session.OTP) {
       return res.status(400).json({ success: false, message: 'Session expired or OTP not generated' });
     }
@@ -86,8 +85,6 @@ export const resetPassword = async (req, res) => {
   try {
     const { email, role,type } = req.body;
 
-    console.log(email,role,type)
-
     const Model = role ==='doctor'? Doctor: Patient;
     const user = await Model.findOne({email})
     if(!user){
@@ -120,10 +117,7 @@ export const resetPassword = async (req, res) => {
       text: `Hello , verify your email with this one-time password: ${otpCode}`
     };
 
-
     await sendEmail(mailOptions);
-
-    await Otp.deleteOne({ email });
 
 
     return res.status(200).json({
@@ -146,8 +140,7 @@ export const resetPassword = async (req, res) => {
 export const setNewPassword =async (req,res) => {
   const {newPassword,confirmPassword} = req.body;
   const {email,role} = req.session.OTP;
-  console.log(newPassword,confirmPassword)
-  
+
  try {
    const Model = role === 'patient'? Patient:Doctor;
   const user = await Model.findOne({email});
@@ -192,8 +185,6 @@ export const setNewPassword =async (req,res) => {
 export const resendOtp = async (req, res) => {
   try {
     const { email, type } = req.body;
-
-    console.log(email,type)
 
     if (!email || !type) {
       return res.status(400).json({
