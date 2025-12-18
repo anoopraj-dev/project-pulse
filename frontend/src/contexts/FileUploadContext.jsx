@@ -13,7 +13,7 @@ const FileUploadContext = createContext();
 export const useFileUploadContext = () => useContext(FileUploadContext);
 
 export const FileUploadProvider = ({ children }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({});
   const [files, setFiles] = useState({});
   const [previews, setPreviews] = useState({});
   const { dispatch } = useUser();
@@ -92,7 +92,7 @@ export const FileUploadProvider = ({ children }) => {
       return null;
     }
     try {
-      setLoading(true);
+      setLoading((prev) => ({...prev,[fieldPath]: true}))
 
       const formData = new FormData();
 
@@ -136,7 +136,7 @@ export const FileUploadProvider = ({ children }) => {
       toast.error(err.response?.data?.message || "Upload failed");
       return null;
     } finally {
-      setLoading(false);
+      setLoading((prev) => ({...prev, [fieldPath]: false}))
     }
   }, []);
 

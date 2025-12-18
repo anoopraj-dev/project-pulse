@@ -1,8 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../api/api";
-import Headings from "../../components/Headings";
 import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../components/BasicInfoCard";
 import DynamicInfoSection from "../../components/DynamicInfoSection";
@@ -10,114 +9,104 @@ import ShimmerCard from "../../components/ShimmerCard";
 import toast from "react-hot-toast";
 import { useModal } from "../../contexts/ModalContext";
 import PrimaryButton from "../../components/PrimaryButton";
-import Modal from "../../components/Modal";
+import { useAsyncAction } from "../../customHooks/useAsyncAction";
 
 const DoctorsProfile = () => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [viewMore, setViewmore] = useState(false);
   const { id } = useParams();
   const isProfileReview = !!id;
   const navigate = useNavigate();
-  const {openModal,closeModal} = useModal();
+  const { openModal, closeModal } = useModal();
+  const fetchDoctorAction = useAsyncAction();
+  const approveAction = useAsyncAction();
+  const rejectAction = useAsyncAction();
 
   //------------ FETCH DOCTOR --------------
   const fetchDoctor = async () => {
     try {
-      setLoading(true);
-
-      let response;
-      if (id) {
-        //---------for admin profile review -------------
-        response = await api.get(`/api/admin/doctor/${id}`);
-        setUser(response.data.user);
-      } else {
-        //--------- when logged in as doctor---------------
-        response = await api.get("/api/doctor/profile");
-        setUser(response.data.user);
-      }
+      await fetchDoctorAction.executeAsyncFn(async () => {
+        let response;
+        if (id) {
+          //---------for admin profile review -------------
+          response = await api.get(`/api/admin/doctor/${id}`);
+          setUser(response.data.user);
+        } else {
+          //--------- when logged in as doctor---------------
+          response = await api.get("/api/doctor/profile");
+          setUser(response.data.user);
+        }
+      });
     } catch (error) {
       console.log(error);
-    } finally {
-      setLoading(false);
     }
   };
-
-
 
   //-------------APPROVE DOCTORS-------------
 
   const handleApprove = async () => {
-  try {
-    setLoading(true)
-    const res = await api.post(`/api/admin/doctor/approve/${user._id}`);
-    if (res.data.success) {
-      toast.success(res.data.message);
-      navigate('/admin/dashboard')      
+    try {
+      await approveAction.executeAsyncFn(async () => {
+        const res = await api.post(`/api/admin/doctor/approve/${user._id}`);
+        if (res.data.success) {
+          toast.success(res.data.message);
+          navigate("/admin/dashboard");
+        }
+      });
+    } catch (err) {
+      toast("Request Approval Failed");
     }
-    setLoading(false)
-  } catch (err) {
-    console.log(err);
-    toast('Request Approval Failed')
-  }finally{
-    setLoading(false)
-  }
-};
+  };
 
-// ------------------REJECT DOCTORS------------
+  // ------------------REJECT DOCTORS------------
 
-const handleReject = async () => {
-  try {
-    setLoading(true)
-    openModal(
-      "Reject this request?",
-      PrimaryButton,
-      {
-        text: "Continue",
+  const handleReject = async () => {
+    try {
+      openModal("Reject this request?", PrimaryButton, {
+        text: rejectAction.loading ? "Processing.." : "Continue",
+        disabled: rejectAction.loading,
         onClick: async () => {
           try {
             // ------------DELETE DOCTOR FROM DB--------------
-            const response = await api.delete(
-              `/api/admin/doctor/reject/${user._id}`
-            );
+            await rejectAction.executeAsyncFn(async () => {
+              const response = await api.delete(
+                `/api/admin/doctor/reject/${user._id}`
+              );
 
-            if (response.data.success) {
-              toast.success(`Rejected request from ${user.name}`);
-              navigate('/admin/dashboard')
-            } else {
-              toast.error("Request rejection failed");
-            }
+              if (response.data.success) {
+                toast.success(`Rejected request from ${user.name}`);
+                navigate("/admin/dashboard");
+              } else {
+                toast.error("Request rejection failed");
+              }
+            });
           } catch (err) {
             toast.error("Request rejection failed");
           }
 
           closeModal();
         },
-      }
-    );
-    setLoading(false)
-  } catch (err) {
-    console.log(err);
-    toast.error("Something went wrong");
-  }finally{
-    setLoading(false)
-  }
-};
-
-
+      });
+    } catch (err) {
+      toast.error("Something went wrong");
+    }
+  };
 
   useEffect(() => {
     fetchDoctor();
   }, [id]);
 
-  if (loading) return <ShimmerCard />;
+  if (fetchDoctorAction.loading) return <ShimmerCard />;
 
   return (
     <div className="min-h-screen mt-18  flex flex-col items-center">
       {/* ------------Welcome text------- */}
       {!isProfileReview && (
-         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold">Welcome back {user?.name.charAt(0).toUpperCase() + user?.name.slice(1)}!</h1>
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-bold">
+            Welcome back{" "}
+            {user?.name.charAt(0).toUpperCase() + user?.name.slice(1)}!
+          </h1>
           <p className="text-gray-600">
             Your profile is all set. You can update your details anytime.
           </p>
@@ -128,22 +117,24 @@ const handleReject = async () => {
         <div className="flex flex-col p-5 rounded-sm hover:rounded-4xl shodow-none hover:shadow-lg gap-5 hover:bg-blue-100 transition-all duration-300 ease-in-out">
           <div className="flex  px-5 items-center gap-5 justify-between">
             <div className="flex items-center gap-8">
-              {
-                isProfileReview ? (
-                  <div className="w-32 h-32 rounded-full border border-blue-300">
-                    <img src={user?.profilePicture} alt="" className="object-cover h-32 w-32 rounded-full" />
-                  </div>
-                ) :(
-                  <Icon
-                icon={
-                  user?.gender === "male"
-                    ? "healthicons:doctor-male"
-                    : "healthicons:doctor-female"
-                }
-                className="h-12 w-12 text-[#0096C7]"
-              />
-                )
-              }
+              {isProfileReview ? (
+                <div className="w-32 h-32 rounded-full border border-blue-300">
+                  <img
+                    src={user?.profilePicture}
+                    alt=""
+                    className="object-cover h-32 w-32 rounded-full"
+                  />
+                </div>
+              ) : (
+                <Icon
+                  icon={
+                    user?.gender === "male"
+                      ? "healthicons:doctor-male"
+                      : "healthicons:doctor-female"
+                  }
+                  className="h-12 w-12 text-[#0096C7]"
+                />
+              )}
               <h1 className="font-bold text-3xl text-[#0096C7]">
                 Dr. {user?.name.charAt(0).toUpperCase() + user?.name.slice(1)}
               </h1>
@@ -178,7 +169,7 @@ const handleReject = async () => {
 
         {/* --------------- Conditional Section (doctor/admin) ---------------------- */}
 
-           <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-3">
           {!isProfileReview && (
             <>
               <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition">
@@ -194,17 +185,22 @@ const handleReject = async () => {
 
           {isProfileReview && (
             <>
-              <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition" onClick={handleApprove}>
-               {
-                loading ? (
-                  <Icon icon={'line:md-uploading'} className="w-5 h-5"/>
-                ):(
-                   <Icon icon="mdi:check-bold" className="w-5 h-5" />
-                )
-               }
+              <button
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition"
+                onClick={handleApprove}
+                disabled={approveAction.loading}
+              >
+                {approveAction.loading ? (
+                  <Icon icon={"line:md-uploading"} className="w-5 h-5" />
+                ) : (
+                  <Icon icon="mdi:check-bold" className="w-5 h-5" />
+                )}
                 Approve
               </button>
-              <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition" onClick={handleReject}>
+              <button
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition"
+                onClick={handleReject}
+              >
                 <Icon icon="mdi:close-bold" className="w-5 h-5" />
                 Reject
               </button>

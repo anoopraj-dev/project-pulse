@@ -11,8 +11,6 @@ const PatientsProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  console.log(user)
-
   const fetchPatient = async () => {
     try {
       setLoading(true);

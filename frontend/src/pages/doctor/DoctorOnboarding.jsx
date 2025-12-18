@@ -2,25 +2,27 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Headings from "../../components/Headings";
 import { useModal } from "../../contexts/ModalContext";
-import { useUser } from "../../contexts/UserContext";
 import { api } from "../../api/api";
 import toast from "react-hot-toast";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { doctorOnboarding } from "../../components/forms/config/doctorOnboarding";
+import { useAsyncAction } from "../../customHooks/useAsyncAction";
 
 const DoctorOnboarding = () => {
   const stepKeys = Object.keys(doctorOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const { dispatch } = useUser();
+  const submitAction = useAsyncAction();
 
 
   // ----------- HANDLE NEXT REGISTRATION STEP ----------------
 
   const handleNext = async (data) => {
     try {
-      const formData = new FormData();
+
+      await submitAction.executeAsyncFn( async () => {
+        const formData = new FormData();
 
       Object.entries(data).forEach(([key, value]) => {
         if (value instanceof FileList) {
@@ -60,35 +62,14 @@ const DoctorOnboarding = () => {
       } else {
         navigate("/doctor/profile");
       }
+      })
+
+      
     } catch (error) {
-      openModal("Something went wrong. Please try again.");
+      toast.error('Something went wrong')
     }
   };
 
-  // ----------- HANDLE FILE UPLOAD ----------------
-
-    // const handleUpload = async (fieldName,fieldPath,index) => {
-    //   console.log('handle upload called')
-    //   console.log("fieldFiles:", fieldFiles);
-    //   const selectedFiles = files[fieldName];
-    //   if( !selectedFiles || !selectedFiles.length) return null;
-
-    //   const uploaddedUrl = await uploadFile({
-    //     file: selectedFiles[index ?? 0],
-    //     fieldPath,
-    //     userType:'doctor',
-    //     index
-    // });
-
-    //   if(fieldPath === 'profilePicture' && uploaddedUrl) {
-    //     dispatch({
-    //       type: 'UPDATE_PROFILE_PICTURE',
-    //       payload: uploaddedUrl
-    //     })
-    //   }
-
-    //   return uploaddedUrl;
-    // }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -127,6 +108,7 @@ const DoctorOnboarding = () => {
         <DynamicForm
           config={doctorOnboarding[stepKeys[currentStep]]}
           onSubmit={handleNext}
+          loading={submitAction.loading}
         />
 
       </div>

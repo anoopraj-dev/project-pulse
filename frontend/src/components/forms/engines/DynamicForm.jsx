@@ -60,6 +60,7 @@ const DynamicForm = ({
       <div className="w-full flex justify-center">
         <PrimaryButton
           type="submit"
+          disabled={loading}
           text={loading ? "Processing..." : config.buttonText || "Submit"}
           className="w-48 mt-4"
         />

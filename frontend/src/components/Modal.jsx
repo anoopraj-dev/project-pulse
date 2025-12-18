@@ -23,7 +23,7 @@ const Modal = ({ isOpen, onClose, message, children, onConfirm }) => {
   if (!show) return null;
 
 
-  //portal content
+  //-------- Portal content -------------------
   const modalContent = (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-xs transition-opacity duration-500 ${animateIn ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"

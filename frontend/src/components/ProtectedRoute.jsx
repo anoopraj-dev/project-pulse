@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { api } from "../api/api";
+import ShimmerCard from "./ShimmerCard";
+
 
 const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -12,7 +14,7 @@ const ProtectedRoute = ({ children }) => {
   }, []);
 
   if (isAuthenticated === null)
-    return <div className="flex items-center min-h-screen">Loading...</div>;
+    return <div className="flex items-center min-h-screen"><ShimmerCard/></div>;
 
   return isAuthenticated ? children : <Navigate to="/signin" />;
 };

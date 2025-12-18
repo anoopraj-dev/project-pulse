@@ -10,6 +10,7 @@ import { useClerk, useUser as clerkUser, useAuth } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
 import { ClipLoader } from "react-spinners";
 import { EmailModal } from "./ModalInputs";
+import { useAsyncAction } from "../customHooks/useAsyncAction";
 import toast from "react-hot-toast";
 
 const AuthCard = ({ role: initialRole }) => {
@@ -17,6 +18,10 @@ const AuthCard = ({ role: initialRole }) => {
     const storedRole = sessionStorage.getItem("userRole");
     return storedRole === "doctor";
   });
+
+  const oauthProgress =
+  sessionStorage.getItem("oauthProgress") === "true";
+
   const [showPassword, setShowPassword] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,19 +30,20 @@ const AuthCard = ({ role: initialRole }) => {
   const { user, isSignedIn, isLoaded } = clerkUser();
   const { openSignIn, signOut } = useClerk();
   const buttonRef = useRef(null);
-  const [loading, setLoading] = useState(false);
   const isSignup = location.pathname === "/signup";
   const isAdmin =
     initialRole === "admin" || location.pathname.includes("/admin");
 
   const { getToken } = useAuth();
-
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
   } = useForm();
+
+  const authFormAction = useAsyncAction();
+  
 
   //------- SHOW PASSWORD ----------
   const handleShowPassword = () => {
@@ -47,96 +53,94 @@ const AuthCard = ({ role: initialRole }) => {
   //--------SUBMIT FORM ----------
   const onSubmit = async (data) => {
     try {
-      setLoading(true);
-      const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
+      await authFormAction.executeAsyncFn(async () => {
+        const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-      // ---------- SIGNUP FLOW (DOCTOR/PATIENT)------
-      if (isSignup && !isAdmin) {
-        if (data.password !== data.confirmPassword) {
-          openModal("Passwords do not match!");
+        // ---------- SIGNUP FLOW (DOCTOR/PATIENT)------
+        if (isSignup && !isAdmin) {
+          if (data.password !== data.confirmPassword) {
+            openModal("Passwords do not match!");
+            return;
+          }
+
+          const signupData = {
+            name: data.name,
+            email: data.email,
+            password: data.password,
+            confirmPassword: data.confirmPassword,
+            role,
+            firstLogin: true,
+          };
+
+          // ---------- SESSION STORAGE USED FOR IDENTIFYING TYPE OF VERIFICATION-----------
+          const response = await api.post("/api/auth/signup", signupData);
+          if (response.data.success) {
+            toast.success(response.data.message);
+            const payload = {
+              email: data.email,
+              type: "emailVerification",
+              role: data.role,
+            };
+            sessionStorage.setItem("otpSession", JSON.stringify(payload));
+            navigate("/verify-email");
+          } else {
+            toast.error(response.data.message);
+          }
+
+          return;
+        }
+        // -----------SIGNIN FLOWS----------
+        // ---------- (ADMIN)---------
+        if (isAdmin) {
+          const response = await api.post("/api/auth/login", {
+            email: data.email,
+            password: data.password,
+          });
+
+          if (response.data.success) {
+            const serverAdmin = response.data.admin;
+            dispatch({ type: "SET_USER", payload: serverAdmin });
+            toast.success(response.data.message);
+            refreshUser().catch((e) => console.warn("refreshUser failed", e));
+            navigate("/admin/dashboard", { replace: true });
+          } else {
+            toast.error(response.data.message);
+          }
           return;
         }
 
-        const signupData = {
-          name: data.name,
+        // ---------- (DOCTOR / PATIENT)-----------
+        const response = await api.post("/api/auth/signin", {
           email: data.email,
           password: data.password,
-          confirmPassword: data.confirmPassword,
           role,
-          firstLogin: true,
-        };
-
-        // ---------- SESSION STORAGE USED FOR IDENTIFYING TYPE OF VERIFICATION-----------
-        const response = await api.post("/api/auth/signup", signupData);
-        if (response.data.success) {
-          toast.success(response.data.message);
-          const payload = {
-            email: data.email,
-            type: "emailVerification",
-            role: data.role,
-          };
-          sessionStorage.setItem("otpSession", JSON.stringify(payload));
-          navigate("/verify-email");
-        } else {
-          toast.error(response.data.message);
-          console.error("Signup error:", response.error.message);
-        }
-
-        return;
-      }
-      // -----------SIGNIN FLOWS----------
-      // ---------- (ADMIN)---------
-      if (isAdmin) {
-        const response = await api.post("/api/auth/login", {
-          email: data.email,
-          password: data.password,
         });
 
         if (response.data.success) {
-          const serverAdmin = response.data.admin;
-          dispatch({ type: "SET_USER", payload: serverAdmin });
+          const fetchedUser = response.data.user;
+          dispatch({ type: "SET_USER", payload: fetchedUser });
           toast.success(response.data.message);
+
+          const firstLoginFlag = fetchedUser?.firstLogin;
+          const target = firstLoginFlag
+            ? role === "doctor"
+              ? "/doctor/personal-info"
+              : "/patient/personal-info"
+            : `/${role}/profile`;
+
+          // refresh context in background
           refreshUser().catch((e) => console.warn("refreshUser failed", e));
-          navigate("/admin/dashboard", { replace: true });
+          navigate(target, { replace: true });
         } else {
           toast.error(response.data.message);
         }
-        return;
-      }
-
-      // ---------- (DOCTOR / PATIENT)-----------
-      const response = await api.post("/api/auth/signin", {
-        email: data.email,
-        password: data.password,
-        role,
       });
-
-      if (response.data.success) {
-        const fetchedUser = response.data.user;
-        dispatch({ type: "SET_USER", payload: fetchedUser });
-        toast.success(response.data.message);
-
-        const firstLoginFlag = fetchedUser?.firstLogin;
-        const target = firstLoginFlag
-          ? role === "doctor"
-            ? "/doctor/personal-info"
-            : "/patient/personal-info"
-          : `/${role}/profile`;
-
-        // refresh context in background
-        refreshUser().catch((e) => console.warn("refreshUser failed", e));
-        navigate(target, { replace: true });
-      } else {
-        toast.error(response.data.message);
-      }
     } catch (error) {
       const message =
         error?.response?.data?.message ||
         error?.message ||
         "Something went wrong";
       toast.error(message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -156,9 +160,11 @@ const AuthCard = ({ role: initialRole }) => {
   //--------------- USERS AUTHENTICATED WITH CLERK--------------
 
   const handleGoogleSignin = async () => {
-    const role = isDoctor ? "doctor" : "patient";
-    sessionStorage.setItem("userRole", role);
-    openSignIn();
+      const role = isDoctor ? "doctor" : "patient";
+      sessionStorage.setItem("userRole", role);
+      sessionStorage.setItem('oauthProgress','true')
+      openSignIn();
+   
   };
 
   useEffect(() => {
@@ -195,12 +201,12 @@ const AuthCard = ({ role: initialRole }) => {
           }
         );
 
-        console.log("response from updateClerkUser", response.data.user);
         if (response.data.success) {
           const fetchedUser = response.data.user;
           dispatch({ type: "SET_USER", payload: fetchedUser }); // Update ui immediately with server reponse
           toast.success(response.data.message);
           sessionStorage.removeItem("userRole");
+          sessionStorage.removeItem('oauthProgress')
 
           const firstLoginFlag = fetchedUser?.firstLogin;
           const role = fetchedUser?.role;
@@ -215,22 +221,12 @@ const AuthCard = ({ role: initialRole }) => {
         } else {
           toast.error(response.data.message || "Authentication failed");
           sessionStorage.removeItem("userRole");
+          sessionStorage.removeItem('oauthProgress')
         }
+
+        
       } catch (err) {
         if (signal.aborted) return;
-
-        console.error("=== FULL ERROR OBJECT ===", {
-          message: err.message,
-          status: err.response?.status,
-          statusText: err.response?.statusText,
-          data: err.response?.data,
-          headers: err.response?.headers,
-          url: err.config?.url,
-          method: err.config?.method,
-          request: err.request,
-          stack: err.stack,
-        });
-
         const status = err.response?.status;
         const errorCode = err.response?.data?.code;
         const errorMessage =
@@ -251,6 +247,7 @@ const AuthCard = ({ role: initialRole }) => {
           }
 
           sessionStorage.removeItem("userRole");
+          sessionStorage.removeItem('oauthProgress')
           dispatch({ type: "CLEAR_USER" });
 
           return;
@@ -258,6 +255,8 @@ const AuthCard = ({ role: initialRole }) => {
 
         toast.error(errorMessage);
         sessionStorage.removeItem("userRole");
+      } finally{
+        sessionStorage.removeItem('oauthProgress')
       }
     };
     ``;
@@ -376,7 +375,7 @@ const AuthCard = ({ role: initialRole }) => {
             </div>
           )}
 
-          {!loading ? (
+          {!authFormAction.loading ? (
             <PrimaryButton
               ref={buttonRef}
               text={isSignup ? "SIGN UP" : "SIGN IN"}
@@ -392,17 +391,19 @@ const AuthCard = ({ role: initialRole }) => {
           {/* ----------GOOGLE SIGNIN (PATIENT/DOCTOR)----------- */}
           {!isSignup &&
             !isAdmin &&
-            (loading ? (
-              <div className="my-4">
-                <ClipLoader color="#0096C7" />
-              </div>
-            ) : (
+              (
               <PrimaryButton
+                type='button'
                 onClick={handleGoogleSignin}
-                text="SIGN IN WITH GOOGLE"
+                disabled={oauthProgress}
+                text={
+                  oauthProgress ?
+                  'Signing in..'
+                  : ' SIGN IN WITH GOOGLE'
+                }
                 className="w-full bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
               />
-            ))}
+            )}
 
           {/* ------------ADMIN (SIGNIN)------------ */}
           <div className="my-5 text-center">
