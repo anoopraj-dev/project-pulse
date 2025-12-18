@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
+import { useUser } from "../../../contexts/UserContext.jsx";
 import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
-import { api } from "../api/api.js";
+import { api } from "../../../api/axiosInstance.js";
 import { useNavigate } from "react-router-dom";
 import { useUser as clerkUser, useClerk } from "@clerk/clerk-react";
-import useWindowSize from "../customHooks/useWindowSize.jsx";
-import logo from "../assets/logoPrimary.png";
+import useWindowSize from "../../../hooks/useWindowSize.jsx";
+import logo from "../../../assets/logoPrimary.png";
 
 const Navbar = () => {
   const { email, role, name, dispatch, isLoading, profilePicture } = useUser();

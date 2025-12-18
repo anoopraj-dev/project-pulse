@@ -1,6 +1,6 @@
 import React from 'react'
-import AuthCard from '../../components/AuthCard'
-import Footer from '../../components/Footer'
+import AuthCard from '../../features/auth/components/AuthCard'
+import Footer from '../../components/layout/components/Footer'
 
 const AdminLogin = () => {
   return (

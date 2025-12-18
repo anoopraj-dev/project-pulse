@@ -1,7 +1,7 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom';
 import { useState,useEffect} from 'react';
-import { api } from '../api/api';
+import { api } from '../../../api/axiosInstance';
 
 const PublicRoute = ({children}) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);

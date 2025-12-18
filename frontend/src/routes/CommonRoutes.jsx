@@ -4,7 +4,7 @@ import Signup from "../pages/Signup";
 import VerifyEmail from "../pages/VerifyEmail";
 import NotFound from "../pages/NotFound";
 import AdminLogin from "../pages/admin/AdminLogin";
-import PublicRoute from "../components/PublicRoute";
+import PublicRoute from "../features/auth/routes/PublicRoute";
 import AboutUs from '../pages/AboutUs'
 
 

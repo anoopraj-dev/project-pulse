@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from 'react-dom';
-import PrimaryButton from "./PrimaryButton";
+import PrimaryButton from "../../shared/components/PrimaryButton";
 import { Icon } from "@iconify/react";
 
 const Modal = ({ isOpen, onClose, message, children, onConfirm }) => {

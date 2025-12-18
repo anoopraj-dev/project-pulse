@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import FieldRenderer from "./FieldRenderer";
 import useFilePreview from "../form-components/hooks/useFilePreview";
-import PrimaryButton from "../../PrimaryButton";
+import PrimaryButton from "../../shared/components/PrimaryButton";
 import useConditionalFields from "../form-components/hooks/useConditionalFields"; // Fixed import
 
 const DynamicForm = ({

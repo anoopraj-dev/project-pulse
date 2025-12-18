@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {toast} from 'react-hot-toast'
-import DynamicForm from "../components/forms/engines/DynamicForm";
-import { emailInputConfig, setPasswordFormConfig } from "../components/forms/config/modalFormConfig";
-import { api } from "../api/api";
+import DynamicForm from "../../forms/engines/DynamicForm";
+import { emailInputConfig, setPasswordFormConfig } from "../../forms/config/modalFormConfig";
+import { api } from "../../../api/axiosInstance";
 
 
 

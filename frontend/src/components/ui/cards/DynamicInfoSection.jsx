@@ -1,5 +1,5 @@
 import React from "react";
-import { formatLabel } from "../utilis/formLabelFormat";
+import { formatLabel } from "../../../utilis/formLabelFormat";
 import { DetailsDisplayCard } from "./BasicInfoCard";
 
 const DynamicInfoSection = ({ data, title = "Information", variant = "default" }) => {

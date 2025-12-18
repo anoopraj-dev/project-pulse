@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { api } from "../api/api";
-import ShimmerCard from "./ShimmerCard";
+import { api } from "../../../api/axiosInstance";
+import ShimmerCard from '../../../components/ui/loaders/ShimmerCard'
 
 
 const ProtectedRoute = ({ children }) => {

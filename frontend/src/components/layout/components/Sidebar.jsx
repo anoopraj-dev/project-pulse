@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import { Link, useLocation } from "react-router-dom";
-import { useUser } from "../contexts/UserContext";
-import ShimmerCard from "./ShimmerCard";
+import { useUser } from "../../../contexts/UserContext";
+import ShimmerCard from "../../ui/loaders/ShimmerCard";
 
 const Sidebar = ({ toggleSidebar }) => {
   const { profilePicture, isLoading } = useUser();

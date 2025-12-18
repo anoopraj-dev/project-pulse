@@ -1,5 +1,5 @@
 import { BrowserRouter as Router } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/layout/components/Navbar";
 import AppRoutes from "./routes";
 import ModalProvider from "./contexts/ModalContext";
 import { Toaster } from "react-hot-toast";

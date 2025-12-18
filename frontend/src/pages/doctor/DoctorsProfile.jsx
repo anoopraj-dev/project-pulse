@@ -1,15 +1,15 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { api } from "../../api/api";
+import { api } from "../../api/axiosInstance";
 import { Icon } from "@iconify/react";
-import BasicInfoCard from "../../components/BasicInfoCard";
-import DynamicInfoSection from "../../components/DynamicInfoSection";
-import ShimmerCard from "../../components/ShimmerCard";
+import BasicInfoCard from "../../components/ui/cards/BasicInfoCard";
+import DynamicInfoSection from "../../components/ui/cards/DynamicInfoSection";
+import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 import toast from "react-hot-toast";
 import { useModal } from "../../contexts/ModalContext";
-import PrimaryButton from "../../components/PrimaryButton";
-import { useAsyncAction } from "../../customHooks/useAsyncAction";
+import PrimaryButton from "../../components/shared/components/PrimaryButton";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 
 const DoctorsProfile = () => {
   const [user, setUser] = useState(null);

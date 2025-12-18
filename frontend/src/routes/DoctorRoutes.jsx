@@ -1,7 +1,7 @@
 // import DoctorProfile from "../pages/doctor/DoctorProfile";
 import DoctorOnboarding from '../pages/doctor/DoctorOnboarding'
-import Layout from "../components/Layout";
-import ProtectedRoute from "../components/ProtectedRoute";
+import Layout from "../components/layout/components/Layout";
+import ProtectedRoute from "../features/auth/routes/ProtectedRoute";
 import DoctorsProfile from "../pages/doctor/DoctorsProfile";
 
 const DoctorRoutes = [

@@ -1,11 +1,11 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { api } from "../../api/api";
-import Headings from "../../components/Headings";
+import { api } from "../../api/axiosInstance";
+import Headings from "../../components/shared/components/Headings";
 import { Icon } from "@iconify/react";
-import BasicInfoCard from "../../components/BasicInfoCard";
-import DynamicInfoSection from "../../components/DynamicInfoSection";
-import ShimmerCard from "../../components/ShimmerCard";
+import BasicInfoCard from "../../components/ui/cards/BasicInfoCard";
+import DynamicInfoSection from "../../components/ui/cards/DynamicInfoSection";
+import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);

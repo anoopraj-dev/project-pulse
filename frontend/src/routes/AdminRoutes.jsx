@@ -1,6 +1,6 @@
 
-import Layout from "../components/Layout";
-import ProtectedRoute from "../components/ProtectedRoute";
+import Layout from "../components/layout/components/Layout";
+import ProtectedRoute from "../features/auth/routes/ProtectedRoute";
 import Dashboard from "../pages/admin/Dashboard";
 import ApproveDoctors from "../pages/admin/ApproveDoctors";
 

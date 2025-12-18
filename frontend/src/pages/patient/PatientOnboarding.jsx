@@ -2,11 +2,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { patientOnboarding } from "../../components/forms/config/patientOnboarding";
-import Headings from "../../components/Headings";
+import Headings from "../../components/shared/components/Headings";
 import { useUser } from "../../contexts/UserContext";
-import { api } from "../../api/api";
+import { api } from "../../api/axiosInstance";
 import { useModal } from "../../contexts/ModalContext";
-import ShimmerCard from "../../components/ShimmerCard";
+import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 import DynamicForm from '../../components/forms/engines/DynamicForm';
 
 import toast from "react-hot-toast";
@@ -94,17 +94,6 @@ const PatientOnboarding = () => {
     } 
   };
 
-  // ----------- HANDLE IMAGE UPLOAD ----------------
-
-  // const handleUpload = async (fileList, fieldPath, index) => {
-  //   const imageUrl = await uploadFile(fileList, fieldPath, index);
-
-  //     if (imageUrl) {
-  //     dispatch({ type: 'UPDATE_PROFILE_PICTURE', payload: imageUrl });
-  //   }
-    
-  //   return imageUrl;  
-  // };
 
 
   return (

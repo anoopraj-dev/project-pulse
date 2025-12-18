@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import PrimaryButton from "./PrimaryButton";
+import PrimaryButton from "../../../components/shared/components/PrimaryButton";
 import { useNavigate } from "react-router-dom";
-import { api } from "../api/api";
-import { useModal } from "../contexts/ModalContext";
-import { SetPasswordModal } from "./ModalInputs";
+import { api } from "../../../api/axiosInstance";
+import { useModal } from "../../../contexts/ModalContext";
+import { SetPasswordModal } from "../../../components/ui/modals/ModalInputs";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
 

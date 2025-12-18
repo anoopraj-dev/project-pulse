@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Headings from "../../components/Headings";
+import Headings from "../../components/shared/components/Headings";
 import { useModal } from "../../contexts/ModalContext";
-import { api } from "../../api/api";
+import { api } from "../../api/axiosInstance";
 import toast from "react-hot-toast";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { doctorOnboarding } from "../../components/forms/config/doctorOnboarding";
-import { useAsyncAction } from "../../customHooks/useAsyncAction";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 
 const DoctorOnboarding = () => {
   const stepKeys = Object.keys(doctorOnboarding);

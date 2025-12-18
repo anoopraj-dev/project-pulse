@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardInfoCards from "../../components/adminComponents/DashboardInfoCards";
+import DashboardInfoCards from "../../features/admin/components/DashboardInfoCards";
 import { Icon } from "@iconify/react";
-import { api } from "../../api/api";
+import { api } from "../../api/axiosInstance";
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
