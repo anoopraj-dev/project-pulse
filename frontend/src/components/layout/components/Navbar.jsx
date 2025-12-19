@@ -2,11 +2,11 @@ import { Link } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext.jsx";
 import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
-import { api } from "../../../api/axiosInstance.js";
 import { useNavigate } from "react-router-dom";
 import { useUser as clerkUser, useClerk } from "@clerk/clerk-react";
 import useWindowSize from "../../../hooks/useWindowSize.jsx";
 import logo from "../../../assets/logoPrimary.png";
+import { logoutUser } from "../../../api/auth/authService.js"; 
 
 const Navbar = () => {
   const { email, role, name, dispatch, isLoading, profilePicture } = useUser();
@@ -19,7 +19,6 @@ const Navbar = () => {
   const isLoggedIn = !!email;
   const { width } = useWindowSize();
   const isMobile = width <= 768;
-  const isTablet = width >= 768 && width < 1024;
   const profileImage = user?.imageUrl || profilePicture || "";
 
   useEffect(() => {
@@ -37,17 +36,18 @@ const Navbar = () => {
     try {
       if (user) {
         await signOut({ redirectUrl: "/signin" });
-        await api.post("/api/auth/logout", {});
+        await logoutUser(); 
         dispatch({ type: "CLEAR_USER" });
         sessionStorage.clear();
         setProfileMenuOpen(false);
         navigate("/signin");
         return;
       }
-      const res = await api.post("/api/auth/logout", {});
+
+      const res = await logoutUser(); 
       dispatch({ type: "CLEAR_USER" });
       setProfileMenuOpen(false);
-      if (!res.data.success) console.log("Logout failed");
+      if (!res.success) console.log("Logout failed");
       navigate(role === "admin" ? "/admin/login" : "/signin");
     } catch (error) {
       console.error(error);
@@ -84,7 +84,6 @@ const Navbar = () => {
           {/* Center + Right Section */}
           {!isLoading && (
             <>
-              {/* Logged Out Desktop View */}
               {!isLoggedIn && !isMobile ? (
                 <>
                   <div className="flex items-center space-x-2 w-full sm:w-3/4  lg:w-1/2 xl:w-2/5 ml-4 mr-auto">
@@ -93,148 +92,71 @@ const Navbar = () => {
                       placeholder="Search doctors, services..."
                       className="flex-1 min-w-[80px]  px-3 py-2 text-sm sm:text-base rounded-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#0096C7]"
                     />
-                    <Icon
-                      icon={"mingcute-location-2-line"}
-                      className="w-8 h-8 m-2 bg-[#0096C7] text-white rounded-3xl px-1"
-                    />
-                    <Icon
-                      icon={"mdi:search"}
-                      className="w-8 h-8 m-2 bg-[#0096C7] text-white rounded-3xl px-1"
-                    />
                   </div>
-                  {isTablet ? (
-                    <ul className="flex space-x-6 text-lg font-md text-[#0096C7]">
-                      <Link to="/">
-                        <Icon
-                          icon="mingcute:home-2-line"
-                          className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-                        />
-                      </Link>
-                      <Icon
-                        icon="mingcute:user-info-line"
-                        className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-                      />
-                      <Icon
-                        icon="mingcute:hand-heart-line"
-                        className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-                      />
-                      <Icon
-                        icon="mingcute-user-search-line"
-                        className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-                      />
-                      <Link to="/signin">
-                        <Icon
-                          icon="mdi:login"
-                          className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-                        />
-                      </Link>
-                      <Link to="/admin/login">
-                        <Icon
-                          icon="mdi:shield-account-outline"
-                          className="w-6 h-6 cursor-pointer hover:text-[#0077A3]"
-                        />
-                      </Link>
-                    </ul>
-                  ) : (
-                    <ul className="flex space-x-6 text-lg font-md">
-                      <Link to="/">
-                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
-                          Home
-                        </li>
-                      </Link>
+                  <ul className="flex space-x-6 text-lg font-md ml-4">
+                    <Link to="/">
                       <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
-                        About Us
+                        Home
                       </li>
+                    </Link>
+                    <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                      About Us
+                    </li>
+                    <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                      Services
+                    </li>
+                    <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
+                      Find a Doctor
+                    </li>
+                    <Link to="/signin">
                       <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
-                        Services
+                        Login
                       </li>
+                    </Link>
+                    <Link to="/admin/login">
                       <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
-                        Find a Doctor
+                        Admin
                       </li>
-                      <Link to="/signin">
-                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
-                          Login
-                        </li>
-                      </Link>
-                      <Link to="/admin/login">
-                        <li className="p-2 hover:bg-[#0096C7] hover:text-white rounded-3xl">
-                          Admin
-                        </li>
-                      </Link>
-                    </ul>
-                  )}
+                    </Link>
+                  </ul>
                 </>
               ) : (
-                // Logged In or Mobile View
                 <div className="flex items-center space-x-6 relative">
-                  {/* Search Bar (Desktop Only) */}
                   {!isMobile && (
-                    <>
-                      <div className="flex items-center space-x-2 flex-grow max-w-3xl">
-                        <input
-                          type="text"
-                          placeholder="Search doctors, services..."
-                          className="flex-grow px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0096C7]"
-                        />
-                        <select className="px-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0096C7]">
-                          <option>Location</option>
-                          <option>Bangalore</option>
-                          <option>Kochi</option>
-                        </select>
-                        <button className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]">
-                          Search
-                        </button>
+                    <div ref={menuRef} className="relative flex items-center space-x-2 cursor-pointer">
+                      <div
+                        className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center"
+                        onClick={() => setProfileMenuOpen((prev) => !prev)}
+                      >
+                        {profileImage ? (
+                          <img
+                            src={`${profileImage}?t=${Date.now()}`}
+                            alt="Profile"
+                            className="rounded-full w-10 h-10 object-cover"
+                          />
+                        ) : (
+                          <span className="text-md font-bold text-gray-700">
+                            {name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
                       </div>
+                      {!isMobile && (
+                        <span className="text-gray-700 text-xl font-semibold">
+                          {name.toUpperCase()}
+                        </span>
+                      )}
 
-                      {/* Notification + Avatar */}
-                      <div className="flex items-center space-x-6 relative">
-                        <Icon
-                          icon="mdi-notifications"
-                          className="w-7 h-7 text-[#0096C7] cursor-pointer"
-                        />
-
-                        <div ref={menuRef} className="relative">
-                          <div
-                            className="flex items-center space-x-2 cursor-pointer"
-                            onClick={() => {
-                              setProfileMenuOpen((prev) => !prev);
-                              setNavMenuOpen(false);
-                            }}
+                      {profileMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100"
                           >
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                              {profileImage ? (
-                                <img
-                                  src={`${profileImage}?t=${Date.now()}`}
-                                  alt="Profile"
-                                  className="rounded-full w-10 h-10 object-cover"
-                                />
-                              ) : (
-                                <span className="text-md font-bold text-gray-700">
-                                  {name.charAt(0).toUpperCase()}
-                                </span>
-                              )}
-                            </div>
-                            {!isMobile && (
-                              <span className="text-gray-700 text-xl font-semibold">
-                                {name.toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Profile Menu */}
-                          {profileMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-50">
-                              <button
-                                onClick={handleLogout}
-                                className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                              >
-                                Logout
-                              </button>
-                            </div>
-                          )}
+                            Logout
+                          </button>
                         </div>
-                      </div>
-                    </>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -242,35 +164,26 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Nav Menu
-        {navMenuOpen && isMobile && ( */}
-        <div
-          className={`overflow-hidden absolute top-13 left-0 w-full bg-gradient-to-b from-white via-blue-100 to-blue-200 shadow-md border-t border-gray-200 z-40
-    transition-[max-height,opacity,transform] duration-400 ease-[cubic-bezier(0.1,0,0.2,1)]
-    ${
-      navMenuOpen && isMobile ? "max-h-96 opacity-100 " : "max-h-0 opacity-0 "
-    }`}
-        >
-          <ul className="flex flex-col items-center space-y-4 py-4 text-md font-medium">
+        {/* Mobile Nav Menu */}
+        {navMenuOpen && isMobile && (
+          <div className="bg-white shadow-md border-t border-gray-200 flex flex-col items-center py-4 space-y-4">
             <Link to="/" onClick={() => setNavMenuOpen(false)}>
-              <li className="hover:text-[#0096C7]">Home</li>
+              <li className="hover:text-[#0096C7] list-none">Home</li>
             </Link>
-            <li className="hover:text-[#0096C7]">About Us</li>
-            <li className="hover:text-[#0096C7]">Services</li>
-            <li className="hover:text-[#0096C7]">Find a Doctor</li>
+            <li className="hover:text-[#0096C7] list-none">About Us</li>
+            <li className="hover:text-[#0096C7] list-none">Services</li>
+            <li className="hover:text-[#0096C7] list-none">Find a Doctor</li>
 
-            {!isLoggedIn && (
+            {!isLoggedIn ? (
               <>
                 <Link to="/signin" onClick={() => setNavMenuOpen(false)}>
-                  <li className="hover:text-[#0096C7]">Login</li>
+                  <li className="hover:text-[#0096C7] list-none">Login</li>
                 </Link>
                 <Link to="/admin/login" onClick={() => setNavMenuOpen(false)}>
-                  <li className="hover:text-[#0096C7]">Admin</li>
+                  <li className="hover:text-[#0096C7] list-none">Admin</li>
                 </Link>
               </>
-            )}
-
-            {isLoggedIn && (
+            ) : (
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 bg-[#0096C7] text-white rounded-full hover:bg-[#0077A3]"
@@ -278,8 +191,8 @@ const Navbar = () => {
                 Logout
               </button>
             )}
-          </ul>
-        </div>
+          </div>
+        )}
       </div>
     </nav>
   );

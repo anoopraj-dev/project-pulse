@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import Doctor from "../../models/doctorModels/doctor.model.js";
+import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

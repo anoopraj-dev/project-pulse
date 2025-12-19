@@ -1,75 +1,63 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Headings from "../../components/shared/components/Headings";
-import { useModal } from "../../contexts/ModalContext";
-import { api } from "../../api/axiosInstance";
-import toast from "react-hot-toast";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { doctorOnboarding } from "../../components/forms/config/doctorOnboarding";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
+import toast from "react-hot-toast";
+
+import {
+  submitDoctorPersonalInfo,
+  submitDoctorProfessionalInfo,
+  submitDoctorServicesInfo,
+} from "../../api/doctor/doctorApis";
+
+import { buildFormData } from "../../utilis/buildFormData";
 
 const DoctorOnboarding = () => {
   const stepKeys = Object.keys(doctorOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
-  const { openModal } = useModal();
   const submitAction = useAsyncAction();
-
-
-  // ----------- HANDLE NEXT REGISTRATION STEP ----------------
 
   const handleNext = async (data) => {
     try {
+      await submitAction.executeAsyncFn(async () => {
+        const formData = buildFormData(data);
 
-      await submitAction.executeAsyncFn( async () => {
-        const formData = new FormData();
+        let response;
 
-      Object.entries(data).forEach(([key, value]) => {
-        if (value instanceof FileList) {
-          if (value.length > 0) {
-            formData.append(key, value[0]);
-          }
-        } else if (Array.isArray(value) || typeof value === "object") {
-          // Convert arrays or objects to JSON strings
-          formData.append(key, JSON.stringify(value));
-        } else if( typeof value === 'number'){
-          formData.append(key, value.toString());
-        } 
-         else {
-          // For normal strings, numbers, etc.
-          formData.append(key, value);
+        switch (currentStep) {
+          case 0:
+            response = await submitDoctorPersonalInfo(formData);
+            break;
+          case 1:
+            response = await submitDoctorProfessionalInfo(formData);
+            break;
+          case 2:
+            response = await submitDoctorServicesInfo(formData);
+            break;
+          default:
+            return;
+        }
+
+        if (!response.data.success) {
+          toast.error(response.data.message);
+          return;
+        }
+
+        toast.success(response.data.message);
+
+        if (currentStep < stepKeys.length - 1) {
+          setCurrentStep((prev) => prev + 1);
+        } else {
+          navigate("/doctor/profile");
         }
       });
-
-      let response;
-      if (currentStep === 0) {
-        response = await api.post("/api/doctor/personal-info", formData);
-      } else if (currentStep === 1) {
-        response = await api.post("/api/doctor/professional-info", formData);
-      } else if (currentStep === 2) {
-        response = await api.post("/api/doctor/services-info", formData);
-      }
-
-      if (!response.data.success) {
-        toast.error(response.data.message);
-        return;
-      }
-
-      toast.success(response.data.message);
-
-      if (currentStep < stepKeys.length - 1) {
-        setCurrentStep((prev) => prev + 1);
-      } else {
-        navigate("/doctor/profile");
-      }
-      })
-
-      
     } catch (error) {
-      toast.error('Something went wrong')
+      toast.error("Something went wrong");
     }
   };
-
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -84,7 +72,7 @@ const DoctorOnboarding = () => {
           }
         />
 
-        {/* ------------Step Indicator --------------*/}
+        {/* Step Indicator */}
         <div className="flex items-center justify-center my-6 space-x-6">
           {stepKeys.map((key, index) => (
             <div key={key} className="flex items-center">
@@ -104,13 +92,11 @@ const DoctorOnboarding = () => {
           ))}
         </div>
 
-        {/*----------------- Dynamic------------------ Form */}
         <DynamicForm
           config={doctorOnboarding[stepKeys[currentStep]]}
           onSubmit={handleNext}
           loading={submitAction.loading}
         />
-
       </div>
     </div>
   );

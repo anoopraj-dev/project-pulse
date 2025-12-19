@@ -3,7 +3,7 @@ import Headings from "../components/shared/components/Headings";
 import PrimaryButton from "../components/shared/components/PrimaryButton";
 import SubHeadings from "../components/shared/components/SubHeadings";
 import Subtext from "../components/shared/components/Subtext";
-import { aboutUs, whyChooseUs, welcomeText } from '../formConfigs/homePageData';
+import { aboutUs, whyChooseUs, welcomeText } from '../constants/homePageData';
 
 const Home = () => {
     return (

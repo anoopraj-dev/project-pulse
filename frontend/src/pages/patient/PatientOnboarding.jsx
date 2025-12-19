@@ -1,23 +1,27 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { patientOnboarding } from "../../components/forms/config/patientOnboarding";
 import Headings from "../../components/shared/components/Headings";
 import { useUser } from "../../contexts/UserContext";
-import { api } from "../../api/axiosInstance";
 import { useModal } from "../../contexts/ModalContext";
 import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
-import DynamicForm from '../../components/forms/engines/DynamicForm';
-
+import DynamicForm from "../../components/forms/engines/DynamicForm";
 import toast from "react-hot-toast";
+
+import { buildFormData } from "../../utilis/buildFormData";
+import {
+  submitPatientPersonalInfo,
+  submitPatientMedicalInfo,
+  submitPatientLifestyleInfo,
+} from "../../api/patient/patientApis";
 
 const PatientOnboarding = () => {
   const stepKeys = Object.keys(patientOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
-  const { email, id, isLoading, dispatch } = useUser();
+
+  const { email, id, isLoading } = useUser();
   const navigate = useNavigate();
   const { openModal } = useModal();
- 
 
   // ----------- HANDLE NEXT REGISTRATION STEP ----------------
   const handleNext = async (data) => {
@@ -29,23 +33,9 @@ const PatientOnboarding = () => {
     if (currentStep >= stepKeys.length) return;
 
     try {
-      const formData = new FormData();
-      const payload = { ...data };
-      Object.entries(data).forEach(([key, value]) => {
-        if (!Array.isArray(value)) {
-          formData.append(key, value);
-        }
-      });
-
-      formData.forEach((value, key) => {
-        console.log(key, value);
-      });
-
-      //----------- API CALLS BASED ON CURRENT STEP ----------------
-
       if (currentStep === 0) {
-        const response = await api.post("/api/patient/personal-info", formData);
-        console.log("Step 0 response:", response.data);
+        const formData = buildFormData(data);
+        const response = await submitPatientPersonalInfo(formData);
 
         if (!response.data.success) {
           toast.error(response.data.message);
@@ -53,10 +43,11 @@ const PatientOnboarding = () => {
         }
 
         toast.success(response.data.message);
-        setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1));
-      } else if (currentStep === 1) {
-        const response = await api.post("/api/patient/medical-info", payload);
-        console.log("Step 1 response:", response.data);
+        setCurrentStep((prev) => prev + 1);
+      }
+
+      else if (currentStep === 1) {
+        const response = await submitPatientMedicalInfo(data);
 
         if (!response.data.success) {
           toast.error(response.data.message);
@@ -64,37 +55,38 @@ const PatientOnboarding = () => {
         }
 
         toast.success(response.data.message);
-        setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1));
-      } else if (currentStep === 2) {
-        const response = await api.post("/api/patient/lifestyle-info", payload);
-        console.log("Step 2 response", response.data);
+        setCurrentStep((prev) => prev + 1);
+      }
+
+      else if (currentStep === 2) {
+        const response = await submitPatientLifestyleInfo(data);
 
         if (!response.data.success) {
           toast.error(response.data.message);
+          return;
         }
+
         toast.success(response.data.message);
-        setCurrentStep((prev) => Math.min(prev + 1, stepKeys.length - 1));
-      } else if (currentStep === 3) {
+        setCurrentStep((prev) => prev + 1);
+      }
+
+      else if (currentStep === 3) {
         toast.success("User Information updated successfully");
         navigate("/patient/profile");
       }
+
     } catch (error) {
       if (error.response) {
-        console.log(error.response);
         toast.error(
           error.response.data.message || "Something went wrong on the server."
         );
       } else if (error.request) {
-        toast.error(
-          "No response from the server. Please check your connection."
-        );
+        toast.error("No response from the server. Please check your connection.");
       } else {
         toast.error("An unexpected error occurred.");
       }
-    } 
+    }
   };
-
-
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -135,10 +127,12 @@ const PatientOnboarding = () => {
             <ShimmerCard />
           </>
         ) : (
-          <DynamicForm config={patientOnboarding[stepKeys[currentStep]]} onSubmit={handleNext}
-        defaultValues={{}}
-        mode="page"
-       />
+          <DynamicForm
+            config={patientOnboarding[stepKeys[currentStep]]}
+            onSubmit={handleNext}
+            defaultValues={{}}
+            mode="page"
+          />
         )}
       </div>
     </div>
@@ -146,4 +140,3 @@ const PatientOnboarding = () => {
 };
 
 export default PatientOnboarding;
-

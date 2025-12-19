@@ -15,7 +15,10 @@ const App = () => {
       </ModalProvider>
       </FileUploadProvider>
       <Toaster
-        position="top-center"
+        position="top-right"
+        containerStyle={{
+          top:'10%'
+        }}
         toastOptions={{
           style: {
             background: "#0096C7",  // primary color
@@ -32,6 +35,9 @@ const App = () => {
             }
           },
           error: {
+            style:{
+              background: '#f44336'
+            },
             iconTheme: {
               primary: "#fff",
               secondary: "#f44336"  // red for error

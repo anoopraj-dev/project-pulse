@@ -1,4 +1,4 @@
-import { api } from "./axiosInstance";
+import { api } from "../axiosInstance";
 
 //----------- AUTH SERVICE FUNCTIONS ----------------
 
@@ -30,3 +30,14 @@ export const updateClerkUser = async (userData,token,signal) => {
     });
     return response.data;
 };  
+
+//----------- logout user --------------
+export const logoutUser = async () => {
+  try {
+    const res = await api.post("/api/auth/logout", {});
+    return res.data;
+  } catch (error) {
+    console.error("Logout failed:", error);
+    throw error;
+  }
+};

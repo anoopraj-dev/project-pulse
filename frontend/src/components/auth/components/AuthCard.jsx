@@ -2,18 +2,18 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useModal } from "../../../contexts/ModalContext";
-import PrimaryButton from "../../../components/shared/components/PrimaryButton";
+import PrimaryButton from "../../shared/components/PrimaryButton";
 import SliderToggle from "./SliderToggle";
 import { useUser } from "../../../contexts/UserContext";
 import { useClerk, useUser as clerkUser, useAuth } from "@clerk/clerk-react";
 import { Icon } from "@iconify/react";
 import { ClipLoader } from "react-spinners";
-import { EmailModal } from "../../../components/ui/modals/ModalInputs";
+import { EmailModal } from "../../ui/modals/ModalInputs";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
 
 //------------- AUTH SERVICES ---------------
-import { signup, signin, adminLogin, updateClerkUser } from "../../../api/authService";
+import { signup, signin, adminLogin, updateClerkUser } from "../../../api/auth/authService";
 
 const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(() => {

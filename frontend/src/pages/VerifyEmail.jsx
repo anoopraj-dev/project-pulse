@@ -1,5 +1,5 @@
 import Footer from "../components/layout/components/Footer";
-import OtpInputs from "../features/auth/components/OtpInputs";
+import OtpInputs from "../components/auth/components/OtpInputs";
 
 const VerifyEmail = () => {
   return (

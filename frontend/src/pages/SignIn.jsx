@@ -1,5 +1,5 @@
-import AuthCard from "../features/auth/components/AuthCard";
-import AuthImage from "../features/auth/components/AuthImage";
+import AuthCard from "../components/auth/components/AuthCard";
+import AuthImage from "../components/auth/components/AuthImage";
 
 
 

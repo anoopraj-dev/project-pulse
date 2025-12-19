@@ -1,5 +1,5 @@
 import Admin from "../../models/admin.model.js";
-import Doctor from "../../models/doctorModels/doctor.model.js";
+import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 
 

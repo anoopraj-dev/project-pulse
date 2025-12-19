@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardInfoCards from "../../features/admin/components/DashboardInfoCards";
+import DashboardInfoCards from "../../components/user/admin/DashboardInfoCards";
 import { Icon } from "@iconify/react";
-import { api } from "../../api/axiosInstance";
 import toast from "react-hot-toast";
+
+import {
+  fetchDashboardStats,
+  fetchDoctorById
+} from "../../api/admin/adminApis";
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -11,24 +15,30 @@ const Dashboard = () => {
 
   //------------ REVIEW PENDING APPROVAL---------------
   const handleReview = async (id) => {
-      console.log(id)
     try {
-      const response = await api.get(`/api/admin/doctor/${id}`);
-      const doctor = await response.data
-      if (doctor) {
-        console.log('success')
-        navigate(`/admin/doctor/${id}`);
-      } else {
-        toast.error(response.error.message);
+      const doctor = await fetchDoctorById(id);
+
+      if (!doctor) {
+        toast.error("Doctor not found");
+        return;
       }
-    } catch (error) {}
+
+      navigate(`/admin/doctor/${id}`);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch doctor"
+      );
+    }
   };
 
   //------------ FETCH DATA-----------------
   const fetchStats = async () => {
-    const response = await api.get("/api/admin/dashboard");
-    console.log(response.data);
-    setData(response.data);
+    try {
+      const stats = await fetchDashboardStats();
+      setData(stats);
+    } catch (error) {
+      toast.error("Failed to load dashboard data");
+    }
   };
 
   useEffect(() => {

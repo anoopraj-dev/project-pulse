@@ -1,5 +1,5 @@
 import React from 'react'
-import AuthCard from '../../features/auth/components/AuthCard'
+import AuthCard from '../../components/auth/components/AuthCard'
 import Footer from '../../components/layout/components/Footer'
 
 const AdminLogin = () => {
