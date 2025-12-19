@@ -51,7 +51,7 @@ const BasicInfoCard = ({ field, val }) => {
 export default BasicInfoCard;
 
 
-// Updated DetailsDisplayCard to match BasicInfoCard styling
+// --------- DetailsDisplayCard --------
 export const DetailsDisplayCard = ({ label, value }) => {
   return (
     <div className="group relative p-4 border border-gray-200/50 rounded-md bg-white/60 backdrop-blur-sm 

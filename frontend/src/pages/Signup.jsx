@@ -1,5 +1,5 @@
-import AuthCard from "../components/AuthCard";
-import AuthImage from "../components/AuthImage";
+import AuthCard from "../components/auth/components/AuthCard";
+import AuthImage from "../components/auth/components/AuthImage";
 
 const Signup = () => {
   return (

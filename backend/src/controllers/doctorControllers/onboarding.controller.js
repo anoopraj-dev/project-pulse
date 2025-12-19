@@ -1,5 +1,4 @@
-import Doctor from "../../models/doctorModels/doctor.model.js";
-import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
+import Doctor from "../../models/doctor.model.js";
 
 //-------DOCTOR ONBOARDING CONTROLLERS-------//
 

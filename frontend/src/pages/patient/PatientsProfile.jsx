@@ -1,11 +1,12 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { api } from "../../api/api";
-import Headings from "../../components/Headings";
+import Headings from "../../components/shared/components/Headings";
 import { Icon } from "@iconify/react";
-import BasicInfoCard from "../../components/BasicInfoCard";
-import DynamicInfoSection from "../../components/DynamicInfoSection";
-import ShimmerCard from "../../components/ShimmerCard";
+import BasicInfoCard from "../../components/ui/cards/BasicInfoCard";
+import DynamicInfoSection from "../../components/ui/cards/DynamicInfoSection";
+import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
+
+import { fetchPatientProfile } from "../../api/patient/patientApis";
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);
@@ -14,7 +15,7 @@ const PatientsProfile = () => {
   const fetchPatient = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/patient/profile");
+      const response = await fetchPatientProfile();
       setUser(response.data.user);
     } catch (error) {
       console.log(error);
@@ -22,12 +23,13 @@ const PatientsProfile = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchPatient();
   }, []);
 
-  if(loading) return <ShimmerCard/>
-  if(!user) return <ShimmerCard/>
+  if (loading) return <ShimmerCard />;
+  if (!user) return <ShimmerCard />;
 
   return (
     <div className=" mt-18  flex flex-col items-center">
@@ -50,7 +52,7 @@ const PatientsProfile = () => {
                 className="h-12 w-12 text-[#0096C7]"
               />
               <h1 className="font-bold text-3xl text-[#0096C7]">
-               {user?.name?.charAt(0).toUpperCase() + user?.name.slice(1)}
+                {user?.name?.charAt(0).toUpperCase() + user?.name.slice(1)}
               </h1>
             </div>
 
@@ -71,24 +73,24 @@ const PatientsProfile = () => {
           <BasicInfoCard val={user?.gender} field="gender" />
           <BasicInfoCard val={user?.dob} field="dob" />
           <BasicInfoCard val={user?.address} field="location" />
-          <BasicInfoCard val={user?.work} field='work'/>
+          <BasicInfoCard val={user?.work} field="work" />
         </div>
-
-      
 
         {/* ------------- Medical History ------------*/}
         <div>
-          <DynamicInfoSection data={user?.medical_history} title="Vitals Overview"/>
+          <DynamicInfoSection
+            data={user?.medical_history}
+            title="Vitals Overview"
+          />
         </div>
 
-        {/* -------------- Experience Information */}
+        {/* -------------- Lifestyle Information */}
         <div>
-              <DynamicInfoSection data={user?.lifestyle_habits} title="LifeStyle & Habits"/>
+          <DynamicInfoSection
+            data={user?.lifestyle_habits}
+            title="LifeStyle & Habits"
+          />
         </div>
-       
-
-        {/* ----------------------Educational Information---------------------- */}
-       
       </div>
     </div>
   );
