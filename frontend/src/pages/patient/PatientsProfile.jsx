@@ -7,6 +7,7 @@ import DynamicInfoSection from "../../components/ui/cards/DynamicInfoSection";
 import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 
 import { fetchPatientProfile } from "../../api/patient/patientApis";
+import SidebarShimmer from "../../components/ui/loaders/SidebarShimmer";
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);
@@ -28,8 +29,8 @@ const PatientsProfile = () => {
     fetchPatient();
   }, []);
 
-  if (loading) return <ShimmerCard />;
-  if (!user) return <ShimmerCard />;
+  if (loading) return <div className="flex"> <SidebarShimmer/> <ShimmerCard/></div>;
+  if (!user) return <div className="flex"> <SidebarShimmer/> <ShimmerCard/></div>;
 
   return (
     <div className=" mt-18  flex flex-col items-center">
