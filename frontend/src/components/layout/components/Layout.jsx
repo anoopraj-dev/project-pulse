@@ -2,8 +2,20 @@ import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
+import { useUser } from "../../../contexts/UserContext";
+import { adminSidebarMenu, doctorSidebarMenu, patientSidebarMenu } from "../configs/sidebarConfig";
 
 const Layout = ({ children }) => {
+  const {role} = useUser();
+  const config = role === 'patient'?
+                            patientSidebarMenu 
+                            : role === 'doctor' ?
+                            doctorSidebarMenu
+                            :adminSidebarMenu
+  
+
+  
+
   //------- State variable dependent on screensize------
   const [openSidebar, setSidebarOpen] = useState(() => {
     if (typeof window !== "undefined") {
@@ -39,7 +51,7 @@ const Layout = ({ children }) => {
         }`}
       >
         {openSidebar ? (
-          <Sidebar toggleSidebar={toggleSidebar} />
+          <Sidebar toggleSidebar={toggleSidebar} config={config} />
         ) : (
           <div
             className="flex mt-16 justify-center h-full w-8 cursor-pointer"
