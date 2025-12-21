@@ -1,5 +1,4 @@
 export const emailInputConfig = {
-    title:'Tell us who you are!',
     fields: [
         {name:'email',label:'Email',type:'email', required: true},
         {name:'role',label:'Role', type:'select',options:['patient','doctor'],required:true}
@@ -9,7 +8,6 @@ export const emailInputConfig = {
 
 
 export const setPasswordFormConfig = {
-  title: "Set Your New Password",
   fields: [
     {
       name: "newPassword",
@@ -26,3 +24,14 @@ export const setPasswordFormConfig = {
   ],
   buttonText: "Update Password",
 };
+
+export const updateProfilePictureConfig = {
+  fields: [
+    {
+      name:'profilePicture',
+      label:'Choose a picture',
+      type: 'file',
+      uploadButton: true
+    }
+  ]
+}

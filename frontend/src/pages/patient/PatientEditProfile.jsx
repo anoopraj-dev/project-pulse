@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { patientEditProfileConfig } from "../../components/forms/config/editProfile";
 import { fetchPatientProfile, updatePatientProfile } from "../../api/patient/patientApis";
-import { useNavigate } from "react-router-dom";
+import { replace, useNavigate } from "react-router-dom";
+
+
+//----------- EDIT PROFILE ------------
 
 const PatientEditProfile = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-
+ // -------- Prefill user data --------
   const getUser = async () => {
     try {
       const response = await fetchPatientProfile();
@@ -21,9 +24,10 @@ const PatientEditProfile = () => {
     }
   };
 
-  const handleUpdateProfile =async () =>{
+  //------------ Update Profile ----------------
+  const handleUpdateProfile =async (data) =>{
     try {
-      const response = await updatePatientProfile();
+      const response = await updatePatientProfile(data);
       if(response.data.success) {
         navigate('/patient/profile');
       }

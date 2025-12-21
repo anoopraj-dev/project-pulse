@@ -8,7 +8,8 @@ import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchPatientProfile } from "../../api/patient/patientApis";
 import SidebarShimmer from "../../components/ui/loaders/SidebarShimmer";
-
+import {useModal} from '../../contexts/ModalContext'
+import { UpdateProfilePictureModal } from "../../components/ui/modals/ModalInputs";
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);
@@ -16,6 +17,7 @@ const PatientsProfile = () => {
   const { id } = useParams();
   const isProfileReview = !!id;
   const navigate = useNavigate();
+  const {openModal} = useModal();
 
   const fetchPatient = async () => {
     try {
@@ -29,8 +31,14 @@ const PatientsProfile = () => {
     }
   };
 
+  //--------- Edit profile -------------
   const handleProfileEdit = () => {
     navigate('/patient/edit-profile');
+  }
+
+  //------------ Update Profile Picture --------------
+  const handleUpdateProfilePicture = () => {
+    openModal('Update your profile picture',UpdateProfilePictureModal)
   }
 
   useEffect(() => {
@@ -86,14 +94,14 @@ const PatientsProfile = () => {
         </div>
 
          {/* --------------- Conditional Section ---------------------- */}
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-3 m-5">
           {!isProfileReview && (
             <>
               <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition" onClick={handleProfileEdit}>
                 <Icon icon="mdi:pencil" className="w-5 h-5" />
                 Edit Profile
               </button>
-              <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition">
+              <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition" onClick={handleUpdateProfilePicture}>
                 <Icon icon="mdi:camera" className="w-5 h-5" />
                 Update Photo
               </button>

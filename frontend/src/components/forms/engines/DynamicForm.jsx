@@ -14,6 +14,7 @@ const DynamicForm = ({
   handleUpload,
   loading,
   mode,
+  hideSubmit = false,
 }) => {
   const formMethods = useForm({ defaultValues });
   const {
@@ -32,11 +33,11 @@ const DynamicForm = ({
     return <p className="text-red-600">Invalid configuration provided.</p>;
   }
 
-  useEffect(()=>{
-    if(values){
-      reset(values)
+  useEffect(() => {
+    if (values) {
+      reset(values);
     }
-  },[values,reset])
+  }, [values, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
@@ -66,14 +67,16 @@ const DynamicForm = ({
           ) : null
         )}
       </div>
-      <div className="w-full flex justify-center">
-        <PrimaryButton
-          type="submit"
-          disabled={loading}
-          text={loading ? "Processing..." : config.buttonText || "Submit"}
-          className="w-48 mt-4"
-        />
-      </div>
+      {!hideSubmit && (
+        <div className="w-full flex justify-center">
+          <PrimaryButton
+            type="submit"
+            disabled={loading}
+            text={loading ? "Processing..." : config.buttonText || "Submit"}
+            className="w-48 mt-4"
+          />
+        </div>
+      )}
     </form>
   );
 };

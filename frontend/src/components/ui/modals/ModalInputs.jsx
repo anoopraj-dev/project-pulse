@@ -1,8 +1,10 @@
 import { useState } from "react";
 import {toast} from 'react-hot-toast'
 import DynamicForm from "../../forms/engines/DynamicForm";
-import { emailInputConfig, setPasswordFormConfig } from "../../forms/config/modalFormConfig";
+import { emailInputConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
 import { api } from "../../../api/axiosInstance";
+import { uploadFileService } from "../../../api/fileUpload/fileUploadService";
+import { useUser } from "../../../contexts/UserContext";
 
 
 
@@ -72,6 +74,31 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
 
   return (
     <DynamicForm mode="modal" config={setPasswordFormConfig} onSubmit={handleSubmit}  loading={loading}
+    />
+  );
+};
+
+
+
+export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
+  const { role } = useUser(); 
+
+  const handleSubmit = async (formData) => {
+    await uploadFileService({
+      file: formData.profilePicture,
+      fieldPath: "profilePicture",
+      userType: role,
+    });
+
+    closeModal();
+  };
+
+  return (
+    <DynamicForm
+      mode="modal"
+      config={updateProfilePictureConfig}
+      onSubmit={handleSubmit}
+      hideSubmit
     />
   );
 };
