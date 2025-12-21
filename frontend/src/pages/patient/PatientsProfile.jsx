@@ -5,13 +5,17 @@ import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../components/ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../components/ui/cards/DynamicInfoSection";
 import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
-
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchPatientProfile } from "../../api/patient/patientApis";
 import SidebarShimmer from "../../components/ui/loaders/SidebarShimmer";
+
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const isProfileReview = !!id;
+  const navigate = useNavigate();
 
   const fetchPatient = async () => {
     try {
@@ -24,6 +28,10 @@ const PatientsProfile = () => {
       setLoading(false);
     }
   };
+
+  const handleProfileEdit = () => {
+    navigate('/patient/edit-profile');
+  }
 
   useEffect(() => {
     fetchPatient();
@@ -76,6 +84,22 @@ const PatientsProfile = () => {
           <BasicInfoCard val={user?.address} field="location" />
           <BasicInfoCard val={user?.work} field="work" />
         </div>
+
+         {/* --------------- Conditional Section ---------------------- */}
+        <div className="flex justify-center gap-3">
+          {!isProfileReview && (
+            <>
+              <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition" onClick={handleProfileEdit}>
+                <Icon icon="mdi:pencil" className="w-5 h-5" />
+                Edit Profile
+              </button>
+              <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition">
+                <Icon icon="mdi:camera" className="w-5 h-5" />
+                Update Photo
+              </button>
+            </>
+          )}
+          </div>
 
         {/* ------------- Medical History ------------*/}
         <div>

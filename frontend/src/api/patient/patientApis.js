@@ -24,3 +24,9 @@ export const submitPatientLifestyleInfo = (payload) => {
 export const fetchPatientProfile = () => {
   return api.get("/api/patient/profile");
 };
+
+
+//------------- Update Patient Profile ------------
+export const updatePatientProfile = () => {
+  return api.put('/api/patient/update-profile');
+}
