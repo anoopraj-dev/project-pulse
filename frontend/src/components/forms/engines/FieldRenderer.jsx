@@ -11,7 +11,8 @@ import Titles from "../form-components/fields/Titles";
 
 
 export default function FieldRenderer({ field, formMethods, handleUpload, previews, watch, loading,visibleFields}) {
-  const {register, formState: { errors },control} = formMethods;
+  const {register, formState: { errors },control,getValues} = formMethods;
+  
 
   const components = {
     text: TextInput,
@@ -27,9 +28,16 @@ export default function FieldRenderer({ field, formMethods, handleUpload, previe
 
   const Component = components[field.type] || TextInput;
 
+  const modifiedField = 
+    field.type === 'file' ?
+     {
+      ...field,
+      getValue: getValues
+     } : field
+
   return (
     <Component
-      field={field}
+      field={modifiedField}
       formMethods={formMethods}
       register={register}
       control={control}

@@ -10,7 +10,6 @@ const resolveUploadType = (role, type) =>
 //----------------------- UPLOAD IMAGE CONTROLLER -------------------
 export const uploadImage = async (req, res) => {
   try {
-    console.log("FILES FROM FRONTEND:", req.files);
 
     const files = req.files || [];
 
@@ -41,6 +40,7 @@ export const uploadImage = async (req, res) => {
 
     const urls = uploaded.map((r) => r.secure_url);
     let updatedDoc;
+
 
     switch (uploadType) {
       // ---------- SINGLE ----------

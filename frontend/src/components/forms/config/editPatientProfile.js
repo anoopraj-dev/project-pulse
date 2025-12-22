@@ -1,7 +1,7 @@
 export const patientEditProfileConfig = {
   title: "Edit Profile",
   fields: [
-    // ─────────────── Basic Information ───────────────
+    // ------------------- Basic Information --------------------
 
     {
       name: "basicInfo",
@@ -23,7 +23,7 @@ export const patientEditProfileConfig = {
     { name: "work", label: "Occupation", type: "text" },
     { name: "address", label: "Address", type: "textarea" },
 
-    // ─────────────── Medical Information ───────────────
+    // ---------------------- Medical Information ---------------------
     {
       name: "medicalInfo",
       type: "title",
@@ -53,7 +53,7 @@ export const patientEditProfileConfig = {
     },
     { name: "medical_history.allergies", label: "Allergies", type: "textarea" },
 
-    // ─────────────── Lifestyle & Habits ───────────────
+    // -------------------- Lifestyle & Habits -------------------------
     {
       name: "lifeStyle",
       type: "title",

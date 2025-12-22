@@ -1,3 +1,5 @@
+
+// -------------Email Input Config-------------
 export const emailInputConfig = {
     fields: [
         {name:'email',label:'Email',type:'email', required: true},
@@ -7,6 +9,7 @@ export const emailInputConfig = {
 };
 
 
+//------------- Set Password Config ------------
 export const setPasswordFormConfig = {
   fields: [
     {
@@ -25,6 +28,8 @@ export const setPasswordFormConfig = {
   buttonText: "Update Password",
 };
 
+
+//------------- Update Profile Picture config-------
 export const updateProfilePictureConfig = {
   fields: [
     {
@@ -35,3 +40,35 @@ export const updateProfilePictureConfig = {
     }
   ]
 }
+
+//---------- Certificate upload config --------------
+
+export const certificateUploadConfig = (closeModal) => ({
+  fields: [
+    {
+      name: "certificateCategory",
+      label: "Certificate Category",
+      type: "select",
+      required: true,
+      options: ["Experience", "Education", "ID Proof"],
+    },
+    {
+      name: "file",
+      label: "Upload Certificate",
+      type: "file",
+      uploadButton: true,
+      accept: "image/*,.pdf",
+
+      uploadPathFrom: "certificateCategory",
+      uploadPathMap: {
+        Experience: "experienceCertificate",
+        Education: "educationCertificate",
+        "ID Proof": "proofDocument",
+      },
+
+      onUploadComplete: closeModal,
+    },
+  ],
+});
+
+

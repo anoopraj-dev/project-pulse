@@ -5,8 +5,6 @@ import Patient from "../../models/patient.model.js";
 export const getPatientProfile = async (req, res) => {
   const token = req.cookies.token;
 
-  console.log("patient profile route hit");
-
   if (!token) {
     return res.status(401).json({
       success: false,
@@ -41,7 +39,6 @@ export const getPatientProfile = async (req, res) => {
 
 export const updatePatientProfile = async (req, res) => {
   const { _id, ...updatedData } = req.body;
-  console.log('updated Data', updatedData)
   try {
     const patient = await Patient.findByIdAndUpdate(_id, { $set: updatedData}, {
       new: true,
@@ -53,7 +50,6 @@ export const updatePatientProfile = async (req, res) => {
         message: "Patient not found",
       });
     }
-    console.log(patient);
     return res.status(200).json({
       success: true,
       user: patient,

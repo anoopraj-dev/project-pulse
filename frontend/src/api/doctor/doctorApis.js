@@ -40,3 +40,9 @@ export const approveDoctorProfile = (doctorId) => {
 export const rejectDoctorProfile = (doctorId) => {
   return api.delete(`/api/admin/doctor/reject/${doctorId}`);
 };
+
+//------------- Update Profile --------------
+
+export const updateDoctorProfile = (formData) => {
+  return api.patch('/api/doctor/update-profile',formData)
+}

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateUser } from "../middlewares/authenticateUser.js";
-import { getDoctorProfile } from "../controllers/doctorControllers/profile.controller.js";
+import { getDoctorProfile, updateDoctorProfile } from "../controllers/doctorControllers/profile.controller.js";
 import {updatePersonlInfo,updateProfessionalInfo, updateServicesInfo} from '../controllers/doctorControllers/onboarding.controller.js'
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
@@ -17,7 +17,6 @@ router.post('/personal-info',updatePersonlInfo);
 router.post('/professional-info',updateProfessionalInfo);
 router.post('/services-info',updateServicesInfo);
 router.post ('/file-upload', upload.any(), uploadImage) ;
-
-
+router.patch ('/update-profile', updateDoctorProfile)
 
 export default router;

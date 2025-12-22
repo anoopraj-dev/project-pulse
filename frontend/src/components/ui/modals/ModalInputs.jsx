@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState,useMemo } from "react";
 import {toast} from 'react-hot-toast'
 import DynamicForm from "../../forms/engines/DynamicForm";
 import { emailInputConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
 import { api } from "../../../api/axiosInstance";
 import { uploadFileService } from "../../../api/fileUpload/fileUploadService";
 import { useUser } from "../../../contexts/UserContext";
+import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
 
-
-
+//------------- email modal-----------------
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +45,7 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
 };
 
 
+//----------------- set Password modal
 
 export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
@@ -79,25 +80,29 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
 };
 
 
-
+//------------- Profile Picture upload ---------------
 export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
-  const { role } = useUser(); 
-
-  const handleSubmit = async (formData) => {
-    await uploadFileService({
-      file: formData.profilePicture,
-      fieldPath: "profilePicture",
-      userType: role,
-    });
-
-    closeModal();
-  };
 
   return (
     <DynamicForm
       mode="modal"
       config={updateProfilePictureConfig}
-      onSubmit={handleSubmit}
+      hideSubmit
+    />
+  );
+};
+
+
+//------------- Certificate upload ---------------
+
+
+export const CertificateUploadModal = ({ closeModal }) => {
+
+  return (
+    <DynamicForm
+      mode="modal"
+      config={certificateUploadConfig(closeModal)}
+  
       hideSubmit
     />
   );

@@ -2,15 +2,30 @@ import { Icon } from "@iconify/react";
 import { useRef } from "react";
 import { useFileUploadContext } from "../../../../contexts/FileUploadContext";
 import { useUser } from "../../../../contexts/UserContext";
+
+//------- FILE INPUT -------------------
 export default function FileInput({ field }) {
   const { previews, files, handleFileSelect, removeFile, uploadFile, loading } =
     useFileUploadContext();
 
   const { role } = useUser();
   const inputRef = useRef(null);
+
+  //------- RESOLVE UPLOAD PATH -------------------
+  const resolveUploadPath = () => {
+    if (!field.uploadPathFrom) return field.name;
+
+    const selectedValue = field.getValue?.(field.uploadPathFrom);
+    if (!selectedValue) return field.name;
+
+    return field.uploadPathMap?.[selectedValue] || field.name;
+  };
+
+  const uploadPath = resolveUploadPath();
+  const isUploading = loading[uploadPath];
+
   const fieldPreviews = previews[field.name] || [];
   const fieldFiles = files[field.name] || [];
-  const isUploading = loading[field.name];
 
   const onFileChange = (e) => {
     handleFileSelect(field.name, e.target.files, {
@@ -22,7 +37,7 @@ export default function FileInput({ field }) {
   //--------------- UPLOAD FILE -----------------------
   const handleUpload = async () => {
     for (let i = 0; i < fieldFiles.length; i++) {
-      await uploadFile(fieldFiles[i], field.name, role || "doctor", i);
+      await uploadFile(fieldFiles[i], uploadPath, role || "doctor", i, field.onUploadComplete);
     }
   };
 
@@ -42,7 +57,7 @@ export default function FileInput({ field }) {
         </label>
       )}
 
-      {/* ------------- File Input Box ----------------- */}
+      {/* -------- FILE INPUT BOX ---------------- */}
       <div className="relative rounded-xl border-2 border-dashed border-gray-300 bg-white p-4">
         <input
           ref={inputRef}
@@ -53,7 +68,6 @@ export default function FileInput({ field }) {
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
 
-        {/* --------------- Empty State ------------------ */}
         {fieldPreviews.length === 0 && (
           <div className="flex flex-col items-center py-8 text-gray-500">
             <Icon icon="mdi:cloud-upload-outline" width={42} />
@@ -61,7 +75,6 @@ export default function FileInput({ field }) {
           </div>
         )}
 
-        {/* ------------------ Previews -------------------- */}
         {fieldPreviews.length > 0 && (
           <div className="grid grid-cols-3 gap-4">
             {fieldPreviews.map((src, i) => (
@@ -84,7 +97,7 @@ export default function FileInput({ field }) {
         )}
       </div>
 
-      {/* ------------------------- Upload Button ---------------------- */}
+      {/* -------- UPLOAD BUTTON ---------------- */}
       {fieldFiles.length > 0 && (
         <div className="flex justify-end mt-3">
           <button

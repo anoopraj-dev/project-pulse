@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
-import { patientEditProfileConfig } from "../../components/forms/config/editProfile";
+import { patientEditProfileConfig } from "../../components/forms/config/editPatientProfile";
 import { fetchPatientProfile, updatePatientProfile } from "../../api/patient/patientApis";
 import { replace, useNavigate } from "react-router-dom";
 
 
-//----------- EDIT PROFILE ------------
+//----------- EDIT & UPDATE PROFILE ------------
 
 const PatientEditProfile = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
+  
 
  // -------- Prefill user data --------
   const getUser = async () => {
@@ -28,9 +30,9 @@ const PatientEditProfile = () => {
   const handleUpdateProfile =async (data) =>{
     try {
       const response = await updatePatientProfile(data);
-      if(response.data.success) {
-        navigate('/patient/profile');
-      }
+      if(!response.data.success) return toast.error('Failed to update profile')
+      navigate('/patient/profile');
+      
     } catch (error) {
       console.log(error)
     }

@@ -57,6 +57,7 @@ export const FileUploadProvider = ({ children }) => {
   };
 
   // ---------- CLEAR FIELD ----------
+
   const clearField = (fieldName) => {
     setFiles((prev) => {
       const updated = { ...prev };
@@ -72,8 +73,9 @@ export const FileUploadProvider = ({ children }) => {
   };
 
   // ---------- UPLOAD ----------
+
   const uploadFile = useCallback(
-    async (file, fieldPath, userType, index) => {
+    async (file, fieldPath, userType, index,onComplete) => {
       if (!file) {
         toast.error("Please select a file");
         return null;
@@ -95,6 +97,9 @@ export const FileUploadProvider = ({ children }) => {
         }
 
         toast.success(res.message);
+        if(onComplete){
+          onComplete(res);
+        }
 
         const uploadedUrl = res.urls?.[0] || null;
 
