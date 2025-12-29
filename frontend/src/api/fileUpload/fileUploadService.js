@@ -29,6 +29,7 @@ export const uploadFileService = async ({
   }
 
   const uploadType = extractUploadType(fieldPath);
+  console.log(uploadType)
 
   const res = await api.post(
     `${endpoint}?type=${uploadType}`,

@@ -1,3 +1,4 @@
+import { Controller } from "react-hook-form";
 
 import FieldArrayGroup from "./FieldArrayGroup";
 import TextInput from "../form-components/fields/TextInput";
@@ -7,34 +8,53 @@ import CheckboxGroup from "../form-components/fields/CheckboxGroup";
 import RadioGroup from "../form-components/fields/RadioGroup";
 import TextArea from "../form-components/fields/TextArea";
 import GroupField from "../form-components/fields/GroupField";
+import Titles from "../form-components/fields/Titles";
 
-export default function FieldRenderer({ field, formMethods, handleUpload, previews, watch, loading,visibleFields}) {
-  const {register, formState: { errors },control} = formMethods;
+export default function FieldRenderer({ field, formMethods, visibleFields }) {
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = formMethods;
 
   const components = {
     text: TextInput,
     select: SelectInput,
-    file: FileInput,
     checkbox: CheckboxGroup,
     radio: RadioGroup,
     textarea: TextArea,
     repeatable: FieldArrayGroup,
-    group: GroupField
+    group: GroupField,
+    title: Titles,
   };
 
+  // ---------------- FILE FIELD ----------------
+  if (field.type === "file") {
+    return (
+      <Controller
+        name={field.name}
+        control={control}
+        defaultValue={field.multiple ? [] : null}
+        render={({ field: controllerField }) => (
+          <FileInput
+            field={field}
+            value={controllerField.value}
+            onChange={controllerField.onChange}
+            error={errors[field.name]}
+          />
+        )}
+      />
+    );
+  }
+
+  // ---------------- OTHER FIELDS ----------------
   const Component = components[field.type] || TextInput;
 
   return (
     <Component
       field={field}
       formMethods={formMethods}
-      register={register}
-      control={control}
       errors={errors}
-      handleUpload={handleUpload}
-      previews={previews}
-      watch={watch}
-      loading={loading}
       visibleFields={visibleFields}
     />
   );

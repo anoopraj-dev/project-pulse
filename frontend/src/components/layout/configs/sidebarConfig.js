@@ -76,6 +76,11 @@ export const doctorSidebarMenu = [
     path: "/doctor/consultations",
   },
   {
+    label: "Documents",
+    icon: "mingcute:folder-fill",
+    path: "/doctor/documents",
+  },
+  {
     label: "Payments",
     icon: "mdi:credit-card-outline",
     path: "/doctor/payments",

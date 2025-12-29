@@ -1,15 +1,21 @@
 import Patient from "../../models/patient.model.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
-//------- PATIENT ONBOARDING CONTROLLERS -------//
 
-//-------- PERSONAL INFO -------//
+
+// ---------------------- PERSONAL INFO -------------------
 export const updatePersonalInfo = async (req, res) => {
   try {
-    const { gender, address, phone, dob, work } = req.body;
-    const updateData = { gender, address, phone, dob, work };
-    const patient = await Patient.findByIdAndUpdate(req.user.id, updateData);
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
 
+    const { gender, address, phone, dob, work } = req.body;
+
+    const patient = await Patient.findById(req.user.id);
     if (!patient) {
       return res.status(404).json({
         success: false,
@@ -17,18 +23,50 @@ export const updatePersonalInfo = async (req, res) => {
       });
     }
 
+    // -------- PROFILE PICTURE --------
+    let profilePictureUrl = patient.profilePicture || "";
+
+    console.log('file recievied in backend', req.file)
+
+    if (req.file) {
+      const uploaded = await uploadToCloudinary(req.file);
+      profilePictureUrl = uploaded.secure_url;
+    }
+
+    // -------- UPDATE DATA --------
+    patient.gender = gender;
+    patient.address = address;
+    patient.phone = phone;
+    patient.dob = dob;
+    patient.work = work;
+    patient.profilePicture = profilePictureUrl;
+
+    await patient.save();
+
     return res.status(200).json({
       success: true,
       message: "Personal information updated successfully",
+      data: patient,
     });
   } catch (error) {
-    return res.status(500).json("Internal Server error");
+    console.error("updatePersonalInfo error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
-//-------- MEDICAL INFO -------//
+// ---------------------- MEDICAL INFO --------------------
 export const updateMedicalInfo = async (req, res) => {
   try {
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
     const {
       bloodGroup,
       height,
@@ -53,7 +91,9 @@ export const updateMedicalInfo = async (req, res) => {
 
     const patient = await Patient.findByIdAndUpdate(
       req.user.id,
-      { $set: { medical_history: medicalData } },
+      {
+        $set: { medical_history: medicalData },
+      },
       { new: true, runValidators: true }
     );
 
@@ -67,18 +107,27 @@ export const updateMedicalInfo = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Medical information updated successfully",
+      data: patient.medical_history,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal Server error" });
+    console.error("updateMedicalInfo error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
-//-------- LIFE STYLE INFO -------//
-
+// ---------------------- LIFESTYLE INFO ------------------
 export const updateLifeStyleInfo = async (req, res) => {
   try {
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
     const {
       smoking,
       alcohol,
@@ -93,7 +142,7 @@ export const updateLifeStyleInfo = async (req, res) => {
       otherHabits = [],
     } = req.body;
 
-    const lifeStyleData = {
+    const lifestyleData = {
       smoking,
       alcohol,
       exerciseFrequency,
@@ -109,7 +158,12 @@ export const updateLifeStyleInfo = async (req, res) => {
 
     const patient = await Patient.findByIdAndUpdate(
       req.user.id,
-      { $set: { lifestyle_habits: lifeStyleData,firstLogin: false } },
+      {
+        $set: {
+          lifestyle_habits: lifestyleData,
+          firstLogin: false,
+        },
+      },
       { new: true, runValidators: true }
     );
 
@@ -122,53 +176,14 @@ export const updateLifeStyleInfo = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Medical information updated successfully",
+      message: "Lifestyle information updated successfully",
+      data: patient.lifestyle_habits,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal Server error" });
+    console.error("updateLifeStyleInfo error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
-
-// //----------- UPLOAD PICTURE ----------------
-
-// export const uploadPicture = async (req, res) => {
-//   try {
-    
-//     if (!req.file) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Choose an image to upload",
-//       });
-//     }
-
-//     const response = await uploadToCloudinary(req.file);
-
-//     const patient = await Patient.findByIdAndUpdate(
-//       req.user.id,
-//       {
-//         firstLogin: false,
-//         profilePicture: response.secure_url,
-//       },
-//       { new: true, runValidators: true }
-//     );
-//     if (!patient) {
-//       return res.status(404).json({
-//         success: true,
-//         message: "Patient not found!",
-//       });
-//     }
-
-//     return res.status(200).json({
-//       success: true,
-//       message: "Profile picture uploaded successfully",
-//       imageUrl: response.secure_url,
-//       user: patient,
-//     });
-//   } catch (error) {
-//     res
-//       .status(500)
-//       .json({ success: false, message: "Server error during file upload" });
-//   }
-// };

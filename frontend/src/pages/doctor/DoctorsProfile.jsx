@@ -10,6 +10,10 @@ import PrimaryButton from "../../components/shared/components/PrimaryButton";
 
 import { useModal } from "../../contexts/ModalContext";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
+import {
+  CertificateUploadModal,
+  UpdateProfilePictureModal,
+} from "../../components/ui/modals/ModalInputs";
 
 import {
   fetchDoctorProfile,
@@ -84,6 +88,22 @@ const DoctorsProfile = () => {
     } catch {
       toast.error("Something went wrong");
     }
+  };
+
+  //--------------- EDIT PROFILE ---------------
+
+  const handleProfileEdit = () => {
+    navigate("/doctor/edit-profile");
+  };
+
+  //--------------- UPLOAD PROFILE PICTURE ---------------
+
+  const handleUpdateProfilePicture = () => {
+    openModal("Update your profile picture", UpdateProfilePictureModal);
+  };
+
+  const handleUploadCertificates = () => {
+    openModal("Upload a certificate", CertificateUploadModal);
   };
 
   useEffect(() => {
@@ -167,13 +187,26 @@ const DoctorsProfile = () => {
         <div className="flex justify-center gap-3">
           {!isProfileReview && (
             <>
-              <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition">
+              <button
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition"
+                onClick={handleProfileEdit}
+              >
                 <Icon icon="mdi:pencil" className="w-5 h-5" />
                 Edit Profile
               </button>
-              <button className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition">
+              <button
+                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition"
+                onClick={handleUpdateProfilePicture}
+              >
                 <Icon icon="mdi:camera" className="w-5 h-5" />
                 Update Photo
+              </button>
+              <button
+                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-xl transition"
+                onClick={handleUploadCertificates}
+              >
+                <Icon icon="mdi:document" className="w-5 h-5" />
+                Upload certifiactes
               </button>
             </>
           )}
@@ -229,10 +262,7 @@ const DoctorsProfile = () => {
           <div className="flex flex-col w-96 border border-blue-100 px-10 rounded-sm">
             <h1 className="font-bold p-5 text-center">Services</h1>
             {user?.services?.map((service, index) => (
-              <div
-                key={index}
-                className="flex justify-between py-1 border-b"
-              >
+              <div key={index} className="flex justify-between py-1 border-b">
                 <span>{service.serviceType}</span>
                 <span>₹ {service.fees}</span>
               </div>

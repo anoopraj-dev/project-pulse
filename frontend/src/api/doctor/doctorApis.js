@@ -5,20 +5,22 @@ import { api } from "../axiosInstance";
 
 //--------------- Personal Info-------------
 export const submitDoctorPersonalInfo = (formData) => {
-  return api.post("/api/doctor/personal-info", formData);
+  return api.post("/api/doctor/personal-info", formData,{
+    headers:{'Content-Type': 'multipart/form-data'}
+  });
 };
 
 //-------------- Professional Info --------------
 export const submitDoctorProfessionalInfo = (formData) => {
-  return api.post("/api/doctor/professional-info", formData);
+  return api.post("/api/doctor/professional-info", formData,{
+    headers:{'Content-Type': 'multipart/form-data'}
+  });
 };
 
 //---------------- Service Info -----------------
 export const submitDoctorServicesInfo = (formData) => {
   return api.post("/api/doctor/services-info", formData);
 };
-
-
 
 // ------------------- PROFILE  PAGE APIS --------------
 
@@ -40,3 +42,12 @@ export const approveDoctorProfile = (doctorId) => {
 export const rejectDoctorProfile = (doctorId) => {
   return api.delete(`/api/admin/doctor/reject/${doctorId}`);
 };
+
+//------------- Update Profile --------------
+
+export const updateDoctorProfile = (formData) => {
+  return api.patch('/api/doctor/update-profile',formData,{
+    headers:{'Content-Type': 'multipart/form-data'}
+  })
+}
+

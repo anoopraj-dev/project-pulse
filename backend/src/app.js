@@ -30,16 +30,11 @@ app.use(
 )
 
 
-// app.use(cors({
-//     origin: 'http://localhost:5173',
-//     credentials:true,
-// }));
 
-// app.js or main server file - Add BEFORE routes:
 app.use(cors({
   origin: 'http://localhost:5173',  // Vite default port
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 

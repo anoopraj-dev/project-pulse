@@ -4,20 +4,24 @@ import FieldRenderer from "./FieldRenderer";
 import useFilePreview from "../form-components/hooks/useFilePreview";
 import PrimaryButton from "../../shared/components/PrimaryButton";
 import useConditionalFields from "../form-components/hooks/useConditionalFields"; // Fixed import
+import { useEffect } from "react";
 
 const DynamicForm = ({
   config,
   defaultValues = {},
+  values,
   onSubmit,
   handleUpload,
   loading,
   mode,
+  hideSubmit = false,
 }) => {
   const formMethods = useForm({ defaultValues });
   const {
     handleSubmit,
     watch,
     control,
+    reset,
     formState: { errors },
   } = formMethods;
 
@@ -28,6 +32,12 @@ const DynamicForm = ({
   if (!config || !Array.isArray(config.fields)) {
     return <p className="text-red-600">Invalid configuration provided.</p>;
   }
+
+  useEffect(() => {
+    if (values) {
+      reset(values);
+    }
+  }, [values, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
@@ -57,14 +67,16 @@ const DynamicForm = ({
           ) : null
         )}
       </div>
-      <div className="w-full flex justify-center">
-        <PrimaryButton
-          type="submit"
-          disabled={loading}
-          text={loading ? "Processing..." : config.buttonText || "Submit"}
-          className="w-48 mt-4"
-        />
-      </div>
+      {!hideSubmit && (
+        <div className="w-full flex justify-center">
+          <PrimaryButton
+            type="submit"
+            disabled={loading}
+            text={loading ? "Processing..." : config.buttonText || "Submit"}
+            className="w-48 mt-4"
+          />
+        </div>
+      )}
     </form>
   );
 };

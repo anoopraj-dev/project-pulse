@@ -5,6 +5,19 @@ import { DetailsDisplayCard } from "./BasicInfoCard";
 const isPlainObject = (val) =>
   typeof val === "object" && val !== null && !Array.isArray(val);
 
+/* ---------- IGNORE FILE FIELDS ---------- */
+const IGNORED_KEYS = [
+  "educationCertificate",
+  "experienceCertificate",
+  "proofDocument",
+];
+
+const ignoreKey = (key) =>
+  IGNORED_KEYS.some((ignored) =>
+    key.toLowerCase().includes(ignored.toLowerCase())
+  );
+
+/* ---------- MAIN COMPONENT ---------- */
 const DynamicInfoSection = ({ data, title = "Information" }) => {
   const isEmpty =
     data == null ||
@@ -36,19 +49,20 @@ const DynamicInfoSection = ({ data, title = "Information" }) => {
   );
 };
 
+/* ---------- DATA GRID ---------- */
 const DataGrid = ({ data }) => {
   if (typeof data === "string" || typeof data === "number") {
-    return (
-      <DetailsDisplayCard
-        label="Value"
-        value={data ?? "Data not available"}
-      />
-    );
+    return <DetailsDisplayCard label="Value" value={data} />;
   }
 
+  /* -------- OBJECT -------- */
   if (isPlainObject(data)) {
     const entries = Object.entries(data).filter(
-      ([key]) => !key.match(/^(id|_id|Id|ID)$/i)
+      ([key, value]) =>
+        !key.match(/^(id|_id|Id|ID)$/i) &&
+        !ignoreKey(key) &&
+        value != null &&
+        value !== ""
     );
 
     return (
@@ -63,13 +77,14 @@ const DataGrid = ({ data }) => {
           <DetailsDisplayCard
             key={key}
             label={formatLabel(key)}
-            value={value ?? "Data not available"}
+            value={value}
           />
         ))}
       </div>
     );
   }
 
+  /* -------- ARRAY -------- */
   if (Array.isArray(data)) {
     return (
       <div className="space-y-4">
@@ -86,19 +101,21 @@ const DataGrid = ({ data }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {Object.entries(item)
                     .filter(
-                      ([key]) => !key.match(/^(id|_id|Id|ID)$/i)
+                      ([key, value]) =>
+                        !key.match(/^(id|_id|Id|ID)$/i) &&
+                        !ignoreKey(key) &&
+                        value != null &&
+                        value !== ""
                     )
                     .map(([key, value]) => (
                       <DetailsDisplayCard
                         key={key}
                         label={formatLabel(key)}
-                        value={value ?? "Data not available"}
+                        value={value}
                       />
                     ))}
                 </div>
-              ) : (
-                <DetailsDisplayCard value="Data not available" />
-              )}
+              ) : null}
             </div>
           ))}
       </div>

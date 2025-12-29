@@ -1,49 +1,80 @@
 import Doctor from "../../models/doctor.model.js";
+import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
 //-------DOCTOR ONBOARDING CONTROLLERS-------//
 
 //-------- PERSONAL INFO -------//
 
-export const updatePersonlInfo = async (req, res) => {
+export const updatePersonalInfo = async (req, res) => {
   try {
-    const { gender, phone, dob, clinicName, clinicAddress, about, location } =
-      req.body;
-    const personalInfo = {
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: "Unauthorized access" });
+    }
+
+    const {
       gender,
       phone,
       dob,
       clinicName,
       clinicAddress,
-      location,
       about,
-    };
+      location,
+      mode= 'replace',
+    } = req.body;
 
-    const doctor = await Doctor.findByIdAndUpdate(req.user.id, personalInfo, {
-      new: true,
-    });
-
+    const doctor = await Doctor.findById(req.user.id);
     if (!doctor) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found!",
-      });
+      return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    res.status(200).json({
+    console.log(doctor.profilePicture)
+    let profilePictureUrl = doctor.profilePicture || "";
+    console.log('req.file', req.file)
+    if (req.file) {
+      console.log(req.file)
+      const uploaded = await uploadToCloudinary(req.file);
+      profilePictureUrl = uploaded.secure_url;
+    }
+
+    const updateData = {
+      gender,
+      phone,
+      dob,
+      clinicName,
+      clinicAddress,
+      about,
+      location,
+      profilePicture: profilePictureUrl,
+    };
+
+    const updatedDoctor = await Doctor.findByIdAndUpdate(
+      req.user.id,
+      { $set: updateData },
+      { new: true }
+    );
+
+    return res.status(200).json({
       success: true,
-      message: "Personal information updated succesfully",
+      message: "Personal information updated successfully",
+      data: updatedDoctor,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Server error",
+      error: error.message,
     });
   }
 };
 
-//------- PROFESSIONAL INFO  ( qualification/ education / specialization/ liscence)-------//
+//------- PROFESSIONAL INFO  (qualification / education / specialization / license)-------//
+
 export const updateProfessionalInfo = async (req, res) => {
   try {
+    if (!req.user?.id) {
+      return res.status(401).json({ success: false, message: "Unauthorized access" });
+    }
+
     let {
       qualifications,
       specializations,
@@ -52,76 +83,107 @@ export const updateProfessionalInfo = async (req, res) => {
       registrationNumber,
       stateCouncil,
       yearOfRegistration,
-      liscenceProof,
+      mode = "replace", // 👈 important
     } = req.body;
 
-    // --- Validation ---
-    if (!req.user?.id) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Unauthorized access" });
+    const doctor = await Doctor.findById(req.user.id);
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    // --- Build update object dynamically ---
-    const updateData = {};
+    const setData = {};
+    const pushData = {};
 
+    // ---------------- BASIC INFO (REPLACE) ----------------
     if (qualifications)
-      updateData["professionalInfo.qualifications"] = qualifications;
+      setData["professionalInfo.qualifications"] = qualifications;
+
     if (specializations)
-      updateData["professionalInfo.specializations"] = specializations;
+      setData["professionalInfo.specializations"] = specializations;
 
-    if (experience) {
-      experience = JSON.parse(experience);
-      updateData["professionalInfo.experience"] = experience.map((exp) => ({
-        years: exp.years,
-        hospitalName: exp.hospital || exp.hospitalName,
-        location: exp.location,
-      }));
-    }
+    // ---------------- MEDICAL LICENSE (REPLACE) ----------------
+    if (req.files?.proofDocument?.length > 0) {
+      const uploadedProofs = await Promise.all(
+        req.files.proofDocument.map(file =>
+          uploadToCloudinary(file).then(r => r.secure_url)
+        )
+      );
 
-    if (education) {
-      education = JSON.parse(education);
-      updateData["professionalInfo.education"] = education.map((edu) => ({
-        degree: edu.degree,
-        college: edu.college,
-        completionYear: edu.completionYear,
-        certificate: "",
-      }));
-    }
-
-    if (
-      registrationNumber ||
-      stateCouncil ||
-      yearOfRegistration ||
-      liscenceProof
-    ) {
-      updateData["professionalInfo.medicalLicense"] = {
+      setData["professionalInfo.medicalLicense"] = {
         registrationNumber: registrationNumber || "",
         stateCouncil: stateCouncil || "",
-        yearOfRegistration: Number(yearOfRegistration) || 2024,
-        liscenceProof: liscenceProof || "",
+        yearOfRegistration: Number(yearOfRegistration) || null,
+        proofDocument: uploadedProofs,
       };
     }
 
-    // --- Update doctor record ---
+    // ---------------- EXPERIENCE (APPEND / REPLACE) ----------------
+    if (experience) {
+      const parsedExperience =
+        typeof experience === "string" ? JSON.parse(experience) : experience;
+
+      const expFiles = req.files?.experienceCertificate || [];
+
+      const preparedExperience = await Promise.all(
+        parsedExperience.map(async (exp, index) => ({
+          years: Number(exp.years) || 0,
+          hospitalName: exp.hospital || "",
+          location: exp.location || "",
+          experienceCertificate: expFiles[index]
+            ? (await uploadToCloudinary(expFiles[index])).secure_url
+            : "",
+        }))
+      );
+
+      if (mode === "append") {
+        pushData["professionalInfo.experience"] = { $each: preparedExperience };
+      } else {
+        setData["professionalInfo.experience"] = preparedExperience;
+      }
+    }
+
+    // ---------------- EDUCATION (APPEND / REPLACE) ----------------
+    if (education) {
+      const parsedEducation =
+        typeof education === "string" ? JSON.parse(education) : education;
+
+      const eduFiles = req.files?.educationCertificate || [];
+
+      const preparedEducation = await Promise.all(
+        parsedEducation.map(async (edu, index) => ({
+          degree: edu.degree || "",
+          college: edu.college || "",
+          completionYear: Number(edu.completionYear) || 0,
+          educationCertificate: eduFiles[index]
+            ? (await uploadToCloudinary(eduFiles[index])).secure_url
+            : "",
+        }))
+      );
+
+      if (mode === "append") {
+        pushData["professionalInfo.education"] = { $each: preparedEducation };
+      } else {
+        setData["professionalInfo.education"] = preparedEducation;
+      }
+    }
+
+    // ---------------- FINAL UPDATE ----------------
+    const updateQuery = {};
+    if (Object.keys(setData).length) updateQuery.$set = setData;
+    if (Object.keys(pushData).length) updateQuery.$push = pushData;
+
     const updatedDoctor = await Doctor.findByIdAndUpdate(
       req.user.id,
-      { $set: updateData },
+      updateQuery,
       { new: true }
     );
 
-    if (!updatedDoctor) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Doctor not found" });
-    }
-
-    // --- Response ---
     return res.status(200).json({
       success: true,
       message: "Professional information updated successfully",
       data: updatedDoctor.professionalInfo,
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -131,53 +193,77 @@ export const updateProfessionalInfo = async (req, res) => {
   }
 };
 
-//------- SERVICE INFO ( online/ offline consultation)-------//
+
+
+//----------------- SERVICE INFO -------------------
 
 export const updateServicesInfo = async (req, res) => {
   try {
-    const { services, online_fee, offline_fee } = req.body;
-
-    let servicesArray = [];
-
-    // services come as ["online","offline"]
-    const parsedServices = JSON.parse(services);
-
-    if (parsedServices.includes("online")) {
-      servicesArray.push({
-        serviceType: "online",
-        fees: Number(online_fee),
+    if (!req.user?.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
       });
     }
 
-    if (parsedServices.includes("offline")) {
-      servicesArray.push({
-        serviceType: "offline",
-        fees: Number(offline_fee),
+    const { services } = req.body;
+
+    if (!services) {
+      return res.status(400).json({
+        success: false,
+        message: "Services data missing",
+      });
+    }
+
+    let parsedServices;
+
+    try {
+      parsedServices = typeof services === "string"
+        ? JSON.parse(services)
+        : services;
+    } catch {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid services format",
+      });
+    }
+
+    if (!Array.isArray(parsedServices)) {
+      return res.status(400).json({
+        success: false,
+        message: "Services must be an array",
       });
     }
 
     const doctor = await Doctor.findByIdAndUpdate(
       req.user.id,
-      { services: servicesArray,firstLogin:false },
+      {
+        $set: {
+          services: parsedServices,
+          firstLogin: false,
+        },
+      },
       { new: true }
     );
 
     if (!doctor) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Doctor not found!" });
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found",
+      });
     }
 
     return res.status(200).json({
       success: true,
       message: "Service info updated successfully",
-      data: doctor,
+      data: doctor.services,
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Server error",
+      error: error.message,
     });
   }
 };
-

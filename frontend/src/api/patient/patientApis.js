@@ -3,8 +3,10 @@ import { api } from "../axiosInstance";
 //------------ ONBOARDING APIS ----------
 
 // -------- Personal Info----------
-export const submitPatientPersonalInfo = (formData) => {
-  return api.post("/api/patient/personal-info", formData);
+export const submitPatientPersonalInfo = (payload) => {
+  return api.post("/api/patient/personal-info", payload,{
+    headers:{'Content-Type': 'multipart/form-data'}
+  });
 };
 
 // -------- Medical Info ----------
@@ -24,3 +26,9 @@ export const submitPatientLifestyleInfo = (payload) => {
 export const fetchPatientProfile = () => {
   return api.get("/api/patient/profile");
 };
+
+
+//------------- Update Patient Profile ------------
+export const updatePatientProfile = (payload) => {
+  return api.put('/api/patient/update-profile', payload);
+}

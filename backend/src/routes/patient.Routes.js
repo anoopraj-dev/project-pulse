@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateUser } from "../middlewares/authenticateUser.js";
-import { getPatientProfile } from "../controllers/patientControllers/profile.controller.js";
+import { getPatientProfile, updatePatientProfile } from "../controllers/patientControllers/profile.controller.js";
 import {  updateLifeStyleInfo, updatePersonalInfo, updateMedicalInfo } from '../controllers/patientControllers/onboarding.controller.js'
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
@@ -13,9 +13,10 @@ router.use(authenticateUser,authorizeRoles('patient'))
 
 //------------- ROUTES----------------
 router.get('/profile', getPatientProfile);
-router.post('/personal-info', upload.none(), updatePersonalInfo)
-router.post('/medical-info', upload.none(), updateMedicalInfo)
-router.post('/lifeStyle-info', upload.none(), updateLifeStyleInfo)
+router.post('/personal-info', upload.single('profilePicture'), updatePersonalInfo)
+router.post('/medical-info', updateMedicalInfo)
+router.post('/lifeStyle-info', updateLifeStyleInfo)
 router.post('/file-upload', upload.any(), uploadImage);
+router.put('/update-profile', updatePatientProfile);
 
 export default router;

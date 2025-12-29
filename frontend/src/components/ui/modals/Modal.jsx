@@ -30,14 +30,14 @@ const Modal = ({ isOpen, onClose, message, children, onConfirm }) => {
         }`}
     >
       <div
-        className={`bg-white max-w-md w-full border border-gray-300 p-5 rounded-lg shadow-xl transform transition-all duration-500 pointer-events-auto ${animateIn ? "scale-100 opacity-100" : "scale-90 opacity-0"
+        className={`bg-white max-w-md w-full border border-gray-300 p-5 rounded-xl shadow-xl transform transition-all duration-500 pointer-events-auto ${animateIn ? "scale-100 opacity-100" : "scale-90 opacity-0"
           }`}
       >
         <div className="flex flex-col justify-center items-center">
           <div className="flex justify-center items-center w-full">
             <h3 className="text-lg font-semibold text-center ">{children ? '' : "Message"}</h3>
             <div className="flex justify-end w-full">
-              <Icon icon={'mingcute:close-circle-fill'} color="red" className="w-10 h-10" onClick={onClose}/>
+              <Icon icon={'mingcute:close-circle-fill'} color="red" className="w-6 h-6" onClick={onClose}/>
             </div>
           </div>
           <p className={`mt-4 mb-6 ${!children ? '' : 'font-semibold text-lg'}`}>{message}</p>
