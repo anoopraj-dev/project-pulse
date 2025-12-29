@@ -40,65 +40,66 @@ export const getDoctorProfile = async (req, res) => {
 
 // --------------- UPDATE PROFILE -----------------
 
+const safeParse = (value) => {
+  if (!value) return undefined;
+
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return undefined;
+    }
+  }
+
+  return value; 
+};
+
 export const updateDoctorProfile = async (req, res) => {
   try {
-    const { _id, professionalInfo, services, ...rest } = req.body;
+    const { _id, professionalInfo, services, qualifications, specializations, ...rest } = req.body;
 
     const updatePayload = { ...rest };
 
-    if (professionalInfo) {
-      updatePayload.professionalInfo = JSON.parse(professionalInfo);
-    }
-
+    // Parse services
     if (services) {
-      updatePayload.services = JSON.parse(services);
+      const parsedServices = safeParse(services);
+      updatePayload.services = parsedServices
+        .map((service, index) => {
+          if (!service || service.fees === undefined || service.fees === "") return null;
+          return {
+            serviceType: index === 0 ? "online" : "offline",
+            fees: Number(service.fees),
+          };
+        })
+        .filter(Boolean);
     }
 
-    // FormData type conversions
-    if ("isVerified" in updatePayload)
-      updatePayload.isVerified = updatePayload.isVerified === "true";
-
-    if ("firstLogin" in updatePayload)
-      updatePayload.firstLogin = updatePayload.firstLogin === "true";
-
-    if ("rating" in updatePayload)
-      updatePayload.rating = Number(updatePayload.rating);
+    // Parse qualifications and specializations
+    console.log(qualifications, specializations)
+    if (qualifications) {
+      updatePayload.qualifications = safeParse(qualifications) || [];
+    }
+    if (specializations) {
+      updatePayload.specializations = safeParse(specializations) || [];
+    }
 
     const doctor = await Doctor.findByIdAndUpdate(
       _id,
       { $set: updatePayload },
-      {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }
+      { new: true, runValidators: true, context: "query" }
     );
 
     if (!doctor) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found",
-      });
+      return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    return res.status(200).json({
-      success: true,
-      user: doctor,
-    });
+    return res.status(200).json({ success: true, user: doctor });
 
   } catch (error) {
     console.error("Update doctor profile error:", error);
-
     if (error.name === "ValidationError") {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
+      return res.status(400).json({ success: false, message: error.message });
     }
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

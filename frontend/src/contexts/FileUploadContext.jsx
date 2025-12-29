@@ -1,33 +1,32 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-} from "react";
-import toast from "react-hot-toast";
-import { useUser } from "./UserContext";
-import { uploadFileService } from "../api/fileUpload/fileUploadService";
+import { createContext, useContext, useState } from "react";
 
-const FileUploadContext = createContext();
-export const useFileUploadContext = () => useContext(FileUploadContext);
+const FileUploadContext = createContext(null);
 
+// --------- CUSTOM HOOK ----------
+export const useFileUploadContext = () => {
+  const ctx = useContext(FileUploadContext);
+  if (!ctx) {
+    throw new Error(
+      "useFileUploadContext must be used inside FileUploadProvider"
+    );
+  }
+  return ctx;
+};
+
+// --------- PROVIDER ----------
 export const FileUploadProvider = ({ children }) => {
-  const [loading, setLoading] = useState({});
   const [files, setFiles] = useState({});
   const [previews, setPreviews] = useState({});
-  const { dispatch } = useUser();
 
-  // ---------- FILE SELECT ----------
+  // ---------- SELECT FILE ----------
   const handleFileSelect = (fieldName, fileList, { multiple = false } = {}) => {
-    if (!fileList) return;
-
-    const selectedFiles = Array.from(fileList);
+    const selected = Array.from(fileList || []);
 
     setFiles((prev) => ({
       ...prev,
       [fieldName]: multiple
-        ? [...(prev[fieldName] || []), ...selectedFiles]
-        : selectedFiles,
+        ? [...(prev[fieldName] || []), ...selected]
+        : selected[0] || null,
     }));
 
     setPreviews((prev) => ({
@@ -35,29 +34,46 @@ export const FileUploadProvider = ({ children }) => {
       [fieldName]: multiple
         ? [
             ...(prev[fieldName] || []),
-            ...selectedFiles.map((f) => URL.createObjectURL(f)),
+            ...selected.map((file) => URL.createObjectURL(file)),
           ]
-        : selectedFiles.map((f) => URL.createObjectURL(f)),
+        : selected[0]
+        ? URL.createObjectURL(selected[0])
+        : null,
     }));
   };
 
   // ---------- REMOVE FILE ----------
-  const removeFile = (fieldName, index) => {
+  const removeFile = (fieldName, index = null) => {
     setFiles((prev) => {
-      const updated = [...(prev[fieldName] || [])];
-      updated.splice(index, 1);
-      return { ...prev, [fieldName]: updated };
+      const value = prev[fieldName];
+
+      if (Array.isArray(value)) {
+        const updated = [...value];
+        updated.splice(index, 1);
+        return { ...prev, [fieldName]: updated };
+      }
+
+      const updated = { ...prev };
+      delete updated[fieldName];
+      return updated;
     });
 
     setPreviews((prev) => {
-      const updated = [...(prev[fieldName] || [])];
-      updated.splice(index, 1);
-      return { ...prev, [fieldName]: updated };
+      const value = prev[fieldName];
+
+      if (Array.isArray(value)) {
+        const updated = [...value];
+        updated.splice(index, 1);
+        return { ...prev, [fieldName]: updated };
+      }
+
+      const updated = { ...prev };
+      delete updated[fieldName];
+      return updated;
     });
   };
 
   // ---------- CLEAR FIELD ----------
-
   const clearField = (fieldName) => {
     setFiles((prev) => {
       const updated = { ...prev };
@@ -72,63 +88,12 @@ export const FileUploadProvider = ({ children }) => {
     });
   };
 
-  // ---------- UPLOAD ----------
-
-  const uploadFile = useCallback(
-    async (file, fieldPath, userType, index,onComplete) => {
-      if (!file) {
-        toast.error("Please select a file");
-        return null;
-      }
-
-      try {
-        setLoading((prev) => ({ ...prev, [fieldPath]: true }));
-
-        const res = await uploadFileService({
-          file,
-          fieldPath,
-          userType,
-          index,
-        });
-
-        if (!res.success) {
-          toast.error(res.message);
-          return null;
-        }
-
-        toast.success(res.message);
-        if(onComplete){
-          onComplete(res);
-        }
-
-        const uploadedUrl = res.urls?.[0] || null;
-
-        if (res.type === "profilePicture" && uploadedUrl) {
-          dispatch({
-            type: "UPDATE_PROFILE_PICTURE",
-            payload: uploadedUrl,
-          });
-        }
-
-        return uploadedUrl;
-      } catch (err) {
-        toast.error(err.message || "Upload failed");
-        return null;
-      } finally {
-        setLoading((prev) => ({ ...prev, [fieldPath]: false }));
-      }
-    },
-    [dispatch]
-  );
-
   return (
     <FileUploadContext.Provider
       value={{
-        loading,
         files,
         previews,
         handleFileSelect,
-        uploadFile,
         removeFile,
         clearField,
       }}

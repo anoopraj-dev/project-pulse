@@ -86,7 +86,6 @@ const doctorProfessionalInfoConfig = {
   label : 'Upload Any two valid IDs ( Adhaar/Driving License/ EID)',
   type: 'file',
   multiple:true,
-  uploadButton: true,
 },
 
    
@@ -114,7 +113,7 @@ const doctorProfessionalInfoConfig = {
         { name: "years", label: "Years", type: "number", required: true },
         { name: "hospital", label: "Hospital Name", type: "text", required: true },
         { name: "location", label: "Location", type: "text", required: true },
-        {name:'experienceCertificate', label: 'Upload Certificates', type:'file', multiple: true, uploadButton: true}
+        {name:'experienceCertificate', label: 'Upload Certificates', type:'file', multiple: false}
        
       ],
     },
@@ -128,7 +127,7 @@ const doctorProfessionalInfoConfig = {
         { name: "degree", label: "Degree", type: "text", required: true },
         { name: "college", label: "College Name", type: "text", required: true },
         { name: "completionYear", label: "Completion Year", type: "number", required: true },
-        {name:'educationCertificate', label: 'Upload Certificates', type:'file', multiple: true, uploadButton: true}
+        {name:'educationCertificate', label: 'Upload Certificates', type:'file', multiple: false}
     
       ],
     },

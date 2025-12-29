@@ -1,105 +1,119 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { patientOnboarding } from "../../components/forms/config/patientOnboarding";
 import Headings from "../../components/shared/components/Headings";
-import { useUser } from "../../contexts/UserContext";
-import { useModal } from "../../contexts/ModalContext";
-import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 import DynamicForm from "../../components/forms/engines/DynamicForm";
+import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
 import toast from "react-hot-toast";
 
-import { buildFormData } from "../../utilis/buildFormData";
+import { patientOnboarding } from "../../components/forms/config/patientOnboarding";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { useUser } from "../../contexts/UserContext";
+import { useModal } from "../../contexts/ModalContext";
+import { useFileUploadContext } from "../../contexts/FileUploadContext";
+
 import {
   submitPatientPersonalInfo,
   submitPatientMedicalInfo,
   submitPatientLifestyleInfo,
 } from "../../api/patient/patientApis";
 
+// file fields used in patient onboarding
+const FILE_FIELDS = ["profilePicture"];
+
 const PatientOnboarding = () => {
   const stepKeys = Object.keys(patientOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const { email, id, isLoading } = useUser();
   const navigate = useNavigate();
-  const { openModal } = useModal();
+  const submitAction = useAsyncAction();
 
-  // ----------- HANDLE NEXT REGISTRATION STEP ----------------
+  const { email, id, isLoading } = useUser();
+  const { openModal } = useModal();
+  const { files, clearField } = useFileUploadContext();
+
+  // ---------------- HANDLE NEXT STEP ----------------
   const handleNext = async (data) => {
     if (isLoading || !email || !id) {
       openModal("User data not loaded yet. Please wait.");
       return;
     }
 
-    if (currentStep >= stepKeys.length) return;
-
     try {
-      if (currentStep === 0) {
-        const formData = buildFormData(data);
-        const response = await submitPatientPersonalInfo(formData);
+      await submitAction.executeAsyncFn(async () => {
+        const formData = new FormData();
 
-        if (!response.data.success) {
-          toast.error(response.data.message);
+        // TEXT FIELDS
+        Object.entries(data).forEach(([key, value]) => {
+          if (key === "profilePicture") return;
+          if (value === null || value === undefined) return;
+
+          if (typeof value === "object") {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value);
+          }
+        });
+
+        console.log("files.profilePicture:", files.profilePicture);
+console.log("instanceof File:", files.profilePicture instanceof File);
+
+
+        // FILE FIELD
+        if (files?.profilePicture) {
+          formData.append("profilePicture", files.profilePicture);
+        }
+
+        // ---------- DEBUG ----------
+        console.log("---- PATIENT FORM DATA ----");
+        for (const [key, value] of formData.entries()) {
+          console.log(key, value instanceof File ? value.name : value);
+        }
+
+        // ---------- API CALL ----------
+        let response;
+        switch (currentStep) {
+          case 0:
+            response = await submitPatientPersonalInfo(formData);
+            break;
+          case 1:
+            response = await submitPatientMedicalInfo(formData);
+            break;
+          case 2:
+            response = await submitPatientLifestyleInfo(formData);
+            break;
+          default:
+            return;
+        }
+
+        if (!response?.data?.success) {
+          toast.error(response?.data?.message || "Submission failed");
           return;
         }
 
         toast.success(response.data.message);
-        setCurrentStep((prev) => prev + 1);
-      }
 
-      else if (currentStep === 1) {
-        const response = await submitPatientMedicalInfo(data);
+        // ---------- CLEANUP ----------
+        Object.keys(files).forEach(clearField);
 
-        if (!response.data.success) {
-          toast.error(response.data.message);
-          return;
+        if (currentStep < stepKeys.length - 1) {
+          setCurrentStep((prev) => prev + 1);
+        } else {
+          navigate("/patient/profile");
         }
-
-        toast.success(response.data.message);
-        setCurrentStep((prev) => prev + 1);
-      }
-
-      else if (currentStep === 2) {
-        const response = await submitPatientLifestyleInfo(data);
-
-        if (!response.data.success) {
-          toast.error(response.data.message);
-          return;
-        }
-
-        toast.success(response.data.message);
-        setCurrentStep((prev) => prev + 1);
-      }
-
-      else if (currentStep === 3) {
-        toast.success("User Information updated successfully");
-        navigate("/patient/profile");
-      }
-
+      });
     } catch (error) {
-      if (error.response) {
-        toast.error(
-          error.response.data.message || "Something went wrong on the server."
-        );
-      } else if (error.request) {
-        toast.error("No response from the server. Please check your connection.");
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
+      console.error(error);
+      toast.error("Something went wrong");
     }
   };
 
+  // ---------------- RENDER ----------------
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="w-full max-w-5xl p-10">
-        <Headings
-          text={
-            currentStep === 0
-              ? "Tell us about yourself"
-              : "How are you keeping up"
-          }
-        />
+        <Headings text={patientOnboarding[stepKeys[currentStep]].title} />
 
-        {/*-------------- Step Indicator-------------- */}
+        {/* -------- STEP INDICATOR -------- */}
         <div className="flex items-center justify-center my-6 space-x-6">
           {stepKeys.map((key, index) => (
             <div key={key} className="flex items-center">
@@ -119,7 +133,7 @@ const PatientOnboarding = () => {
           ))}
         </div>
 
-        {/*------------- Dynamic Form -----------------*/}
+        {/* -------- FORM -------- */}
         {isLoading ? (
           <>
             <ShimmerCard />
@@ -130,7 +144,7 @@ const PatientOnboarding = () => {
           <DynamicForm
             config={patientOnboarding[stepKeys[currentStep]]}
             onSubmit={handleNext}
-            defaultValues={{}}
+            loading={submitAction.loading}
             mode="page"
           />
         )}

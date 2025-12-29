@@ -1,30 +1,107 @@
-export const patientOnboarding = {
-  personalInfo: {
-    title: "Personal Information",
-    fields: [
-      { name: "gender", label: "Gender", type: "radio", options: ["male", "female", "other"] },
-      { name: "phone", label: "Phone Number", type: "text" },
-      { name: "work", label: "Work", type: "text" },
-      { name: "address", label: "Address", type: "textarea" },
-      { name: "dob", label: "Date of Birth", type: "date" },
-      
-    ],
-  },
-  medicalInfo: {
-    title: "Medical Information",
-    fields: [
-      { name: "bloodGroup", label: "Blood Group", type: "select",options:["A+","A−","B+","B−","AB+","AB−","O+","O−"] },
-      { name: "bloodPressure", label: "Blood Pressure", type: "text" },
-      { name: "sugarLevel", label: "Sugar Level", type: "text" },
-      { name: "cholesterol", label: "Cholesterol", type: "text" },
-      { name: "height", label: "Height (cm)", type: "number" },
-      { name: "weight", label: "Weight (kg)", type: "number" },
-      { name: "medicalConditions", label: "Medical Conditions", type: "textarea" },
-      { name: "allergies", label: "Allergies", type: "textarea" },
-    ],
-  },
-   lifestyleInfo :{
+// src/components/forms/config/patientOnboarding.js
+
+// ---------- STEP 1 : PERSONAL INFO (WITH PROFILE PICTURE) ----------
+
+const patientPersonalInfoConfig = {
+  title: "Personal Information",
+  buttonText: "Next",
+  fields: [
+    {
+      name: "gender",
+      label: "Gender",
+      type: "radio",
+      options: ["male", "female", "other"],
+      required: true,
+    },
+    {
+      name: "phone",
+      label: "Phone Number",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "work",
+      label: "Work",
+      type: "text",
+      required: false,
+    },
+    {
+      name: "address",
+      label: "Address",
+      type: "textarea",
+      required: true,
+    },
+    {
+      name: "dob",
+      label: "Date of Birth",
+      type: "date",
+      required: true,
+    },
+    {
+      name: "profilePicture",
+      label: "Profile Picture",
+      type: "file",
+      required: false,
+      uploadButton: true,
+    },
+  ],
+};
+
+// ---------- STEP 2 : MEDICAL INFO ----------
+
+const patientMedicalInfoConfig = {
+  title: "Medical Information",
+  buttonText: "Next",
+  fields: [
+    {
+      name: "bloodGroup",
+      label: "Blood Group",
+      type: "select",
+      options: ["A+","A−","B+","B−","AB+","AB−","O+","O−"],
+    },
+    {
+      name: "bloodPressure",
+      label: "Blood Pressure",
+      type: "text",
+    },
+    {
+      name: "sugarLevel",
+      label: "Sugar Level",
+      type: "text",
+    },
+    {
+      name: "cholesterol",
+      label: "Cholesterol",
+      type: "text",
+    },
+    {
+      name: "height",
+      label: "Height (cm)",
+      type: "number",
+    },
+    {
+      name: "weight",
+      label: "Weight (kg)",
+      type: "number",
+    },
+    {
+      name: "medicalConditions",
+      label: "Medical Conditions",
+      type: "textarea",
+    },
+    {
+      name: "allergies",
+      label: "Allergies",
+      type: "textarea",
+    },
+  ],
+};
+
+// ---------- STEP 3 : LIFESTYLE INFO  ----------
+
+const patientLifestyleInfoConfig = {
   title: "Lifestyle & Habits",
+  buttonText: "Submit",
   fields: [
     {
       name: "smoking",
@@ -48,7 +125,7 @@ export const patientOnboarding = {
       name: "diet",
       label: "Dietary Preferences / Restrictions",
       type: "textarea",
-      placeholder: "e.g., Vegetarian, Vegan, Low Carb, Gluten-Free",
+      placeholder: "e.g., Vegetarian, Vegan, Low Carb",
     },
     {
       name: "sleepHours",
@@ -59,15 +136,14 @@ export const patientOnboarding = {
     },
     {
       name: "stressLevel",
-      label: "How would you rate your stress level?",
+      label: "Stress Level",
       type: "select",
       options: ["Low", "Moderate", "High", "Very High"],
     },
     {
       name: "waterIntake",
-      label: "Average Daily Water Intake (liters)",
+      label: "Daily Water Intake (liters)",
       type: "number",
-      min: 0,
       step: 0.1,
     },
     {
@@ -78,9 +154,16 @@ export const patientOnboarding = {
     },
     {
       name: "physicalActivityType",
-      label: "Type of Physical Activity",
+      label: "Physical Activity Type",
       type: "checkbox",
-      options: ["Walking", "Running", "Cycling", "Gym/Weights", "Yoga/Pilates", "Other"],
+      options: [
+        "Walking",
+        "Running",
+        "Cycling",
+        "Gym/Weights",
+        "Yoga/Pilates",
+        "Other",
+      ],
     },
     {
       name: "screenTime",
@@ -91,17 +174,16 @@ export const patientOnboarding = {
     },
     {
       name: "otherHabits",
-      label: "Other Habits or Lifestyle Notes",
+      label: "Other Habits or Notes",
       type: "textarea",
-      placeholder: "Anything else you would like to mention...",
     },
   ],
-},
+};
 
-  profilePicture:{
-    title: 'Upload your picture',
-    fields:[
-      { name: "profilePicture", label: "Profile Picture", type: "file",uploadButton:true },
-    ]
-  }
+// ---------- FINAL EXPORT ----------
+
+export const patientOnboarding = {
+  personalInfo: patientPersonalInfoConfig,
+  medicalInfo: patientMedicalInfoConfig,
+  lifestyleInfo: patientLifestyleInfoConfig,
 };

@@ -6,11 +6,9 @@ import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 const resolveUploadType = (role, type) =>
   `${role}${type.charAt(0).toUpperCase()}${type.slice(1)}`;
 
-
 //----------------------- UPLOAD IMAGE CONTROLLER -------------------
 export const uploadImage = async (req, res) => {
   try {
-
     const files = req.files || [];
 
     if (!files || files.length === 0) {
@@ -41,7 +39,7 @@ export const uploadImage = async (req, res) => {
     const urls = uploaded.map((r) => r.secure_url);
     let updatedDoc;
 
-
+    console.log(uploadType);
     switch (uploadType) {
       // ---------- SINGLE ----------
       case "patientProfilePicture":
@@ -75,31 +73,27 @@ export const uploadImage = async (req, res) => {
         );
         break;
 
-      case 'doctorExperienceCertificate':
+      case "doctorExperienceCertificate":
         updatedDoc = await Doctor.findByIdAndUpdate(
           req.user.id,
           {
-            $push: {
-              "professionalInfo.experience.3.experienceCertificate":{
-                $each: urls,
-              }
-            }
+            $set: {
+              "professionalInfo.experience.experienceCertificate": urls[0], // take the first URL
+            },
           },
-          {new: true}
+          { new: true }
         );
         break;
 
-        case 'doctorEducationCertificate':
+      case "doctorEducationCertificate":
         updatedDoc = await Doctor.findByIdAndUpdate(
           req.user.id,
           {
-            $push: {
-              "professionalInfo.education.3.educationCertificate":{
-                $each: urls,
-              }
-            }
+            $set: {
+              "professionalInfo.education.3.educationCertificate": urls[0],
+            },
           },
-          {new: true}
+          { new: true }
         );
         break;
 

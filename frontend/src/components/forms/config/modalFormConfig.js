@@ -36,15 +36,17 @@ export const updateProfilePictureConfig = {
       name:'profilePicture',
       label:'Choose a picture',
       type: 'file',
-      uploadButton: true
     }
   ]
 }
 
-//---------- Certificate upload config --------------
+
+
+// ---------- Certificate upload config ----------
 
 export const certificateUploadConfig = (closeModal) => ({
   fields: [
+    // ---------- CATEGORY ----------
     {
       name: "certificateCategory",
       label: "Certificate Category",
@@ -52,23 +54,141 @@ export const certificateUploadConfig = (closeModal) => ({
       required: true,
       options: ["Experience", "Education", "ID Proof"],
     },
+
+    // ---------- EXPERIENCE FILE ----------
     {
-      name: "file",
-      label: "Upload Certificate",
+      name: "experienceCertificate",
+      label: "Upload Experience Certificate",
       type: "file",
-      uploadButton: true,
       accept: "image/*,.pdf",
-
-      uploadPathFrom: "certificateCategory",
-      uploadPathMap: {
-        Experience: "experienceCertificate",
-        Education: "educationCertificate",
-        "ID Proof": "proofDocument",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Experience",
       },
+    },
 
-      onUploadComplete: closeModal,
+    // ---------- EDUCATION FILE ----------
+    {
+      name: "educationCertificate",
+      label: "Upload Education Certificate",
+      type: "file",
+      accept: "image/*,.pdf",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Education",
+      },
+    },
+
+    // ---------- ID PROOF FILE (MULTIPLE) ----------
+    {
+      name: "proofDocument",
+      label: "Upload ID Proof / License",
+      type: "file",
+      accept: "image/*,.pdf",
+      multiple: true,
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "ID Proof",
+      },
+    },
+
+    // ---------- EDUCATION FIELDS ----------
+    {
+      name: "degree",
+      label: "Degree",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Education",
+      },
+    },
+    {
+      name: "college",
+      label: "College Name",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Education",
+      },
+    },
+    {
+      name: "completionYear",
+      label: "Year of Completion",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Education",
+      },
+    },
+
+    // ---------- EXPERIENCE FIELDS ----------
+    {
+      name: "hospitalName",
+      label: "Hospital Name",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Experience",
+      },
+    },
+    {
+      name: "hospitalLocation",
+      label: "Hospital Location",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Experience",
+      },
+    },
+    {
+      name: "yearsOfExperience",
+      label: "Years of Experience",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "Experience",
+      },
+    },
+
+    // ---------- ID PROOF / LICENSE FIELDS ----------
+    {
+      name: "registrationNumber",
+      label: "Registration Number",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "ID Proof",
+      },
+    },
+    {
+      name: "stateCouncil",
+      label: "State Council",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "ID Proof",
+      },
+    },
+    {
+      name: "yearOfRegistration",
+      label: "Year of Registration",
+      type: "text",
+      condition: {
+        dependsOn: "certificateCategory",
+        type: "equals",
+        value: "ID Proof",
+      },
     },
   ],
 });
-
-

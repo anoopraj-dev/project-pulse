@@ -1,52 +1,23 @@
 import { Icon } from "@iconify/react";
 import { useRef } from "react";
 import { useFileUploadContext } from "../../../../contexts/FileUploadContext";
-import { useUser } from "../../../../contexts/UserContext";
 
-//------- FILE INPUT -------------------
 export default function FileInput({ field }) {
-  const { previews, files, handleFileSelect, removeFile, uploadFile, loading } =
+  const inputRef = useRef(null);
+  const { handleFileSelect, removeFile, previews } =
     useFileUploadContext();
 
-  const { role } = useUser();
-  const inputRef = useRef(null);
+  const preview = previews[field.name];
 
-  //------- RESOLVE UPLOAD PATH -------------------
-  const resolveUploadPath = () => {
-    if (!field.uploadPathFrom) return field.name;
+  const handleFileChange = (e) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
 
-    const selectedValue = field.getValue?.(field.uploadPathFrom);
-    if (!selectedValue) return field.name;
-
-    return field.uploadPathMap?.[selectedValue] || field.name;
-  };
-
-  const uploadPath = resolveUploadPath();
-  const isUploading = loading[uploadPath];
-
-  const fieldPreviews = previews[field.name] || [];
-  const fieldFiles = files[field.name] || [];
-
-  const onFileChange = (e) => {
-    handleFileSelect(field.name, e.target.files, {
+    handleFileSelect(field.name, fileList, {
       multiple: field.multiple,
     });
+
     e.target.value = "";
-  };
-
-  //--------------- UPLOAD FILE -----------------------
-  const handleUpload = async () => {
-    for (let i = 0; i < fieldFiles.length; i++) {
-      await uploadFile(fieldFiles[i], uploadPath, role || "doctor", i, field.onUploadComplete);
-    }
-  };
-
-  //----------- REMOVE FILE ----------------
-  const handleRemove = (index) => {
-    removeFile(field.name, index);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
   };
 
   return (
@@ -57,66 +28,82 @@ export default function FileInput({ field }) {
         </label>
       )}
 
-      {/* -------- FILE INPUT BOX ---------------- */}
-      <div className="relative rounded-xl border-2 border-dashed border-gray-300 bg-white p-4">
+      {/* ---------- UPLOAD CONTAINER ---------- */}
+      <div
+        onClick={() => inputRef.current?.click()}
+        className="relative cursor-pointer rounded-xl border-2 border-dashed border-gray-300 bg-white p-4 h-40 flex items-center justify-start gap-4 hover:border-blue-400 transition"
+      >
         <input
           ref={inputRef}
           type="file"
           multiple={field.multiple}
           accept={field.accept || "image/*"}
-          onChange={onFileChange}
-          className="absolute inset-0 opacity-0 cursor-pointer"
+          onChange={handleFileChange}
+          className="hidden"
         />
 
-        {fieldPreviews.length === 0 && (
-          <div className="flex flex-col items-center py-8 text-gray-500">
+        {/* ---------- EMPTY STATE ---------- */}
+        {!preview && (
+          <div className="flex flex-col items-center justify-center w-full text-gray-500">
             <Icon icon="mdi:cloud-upload-outline" width={42} />
-            <p className="mt-2 text-sm">Click to upload or drag & drop</p>
+            <p className="mt-2 text-sm">Click to upload</p>
           </div>
         )}
 
-        {fieldPreviews.length > 0 && (
-          <div className="grid grid-cols-3 gap-4">
-            {fieldPreviews.map((src, i) => (
-              <div key={i} className="relative group">
-                <img
-                  src={src}
-                  className="h-28 w-full object-cover rounded-lg"
-                />
-                <button
-                  type="button"
-                  disabled={isUploading}
-                  onClick={() => handleRemove(i)}
-                  className="absolute z-10 top-2 right-2 bg-black/60 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  <Icon icon="mdi:close" width={16} className="text-white" />
-                </button>
-              </div>
-            ))}
+        {/* ---------- SINGLE PREVIEW ---------- */}
+        {!Array.isArray(preview) && preview && (
+          <div className="relative group">
+            <img
+              src={preview}
+              className="h-28  object-contain rounded-lg shadow-md"
+            />
+
+            {/* Hover overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition rounded-lg">
+              <span className="text-white text-xs">Click to replace</span>
+            </div>
+
+            {/* Remove button (hover only) */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                removeFile(field.name);
+              }}
+              className="absolute -top-0 -right-0 bg-black/70 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
+            >
+              <Icon icon="mdi:close" width={14} className="text-white" />
+            </button>
           </div>
         )}
+
+        {/* ---------- MULTIPLE PREVIEW ---------- */}
+        {Array.isArray(preview) && preview.length > 0 && (
+  <div className="flex gap-3 flex-wrap">
+    {preview.map((src, i) => (
+      <div key={src} className="relative group">
+        <img
+          src={src}
+          className="h-26 object-contain rounded-lg shadow-md"
+        />
+
+        {/* Remove button (hover only) */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            removeFile(field.name, i);
+          }}
+          className="absolute -top-0 -right-0 bg-black/70 p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+        >
+          <Icon icon="mdi:close" width={12} className="text-white" />
+        </button>
       </div>
+    ))}
+  </div>
+)}
 
-      {/* -------- UPLOAD BUTTON ---------------- */}
-      {fieldFiles.length > 0 && (
-        <div className="flex justify-end mt-3">
-          <button
-            type="button"
-            onClick={handleUpload}
-            disabled={isUploading}
-            className={`flex items-center gap-2 px-5 py-2 rounded-full bg-sky-600 text-white text-sm ${
-              isUploading ? "opacity-60 cursor-not-allowed" : ""
-            }`}
-          >
-            {isUploading ? (
-              <Icon icon="line-md:loading-twotone-loop" width={18} />
-            ) : (
-              <Icon icon="line-md:upload-loop" width={18} />
-            )}
-            Upload
-          </button>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

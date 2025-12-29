@@ -4,7 +4,9 @@ import { api } from "../axiosInstance";
 
 // -------- Personal Info----------
 export const submitPatientPersonalInfo = (payload) => {
-  return api.post("/api/patient/personal-info", payload);
+  return api.post("/api/patient/personal-info", payload,{
+    headers:{'Content-Type': 'multipart/form-data'}
+  });
 };
 
 // -------- Medical Info ----------

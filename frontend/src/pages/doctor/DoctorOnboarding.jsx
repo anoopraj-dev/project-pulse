@@ -12,7 +12,14 @@ import {
   submitDoctorServicesInfo,
 } from "../../api/doctor/doctorApis";
 
-import { buildFormData } from "../../utilis/buildFormData";
+import { useFileUploadContext } from "../../contexts/FileUploadContext";
+
+const FILE_FIELDS = [
+  "profilePicture",
+  "proofDocument",
+  "experienceCertificate",
+  "educationCertificate",
+];
 
 const DoctorOnboarding = () => {
   const stepKeys = Object.keys(doctorOnboarding);
@@ -20,13 +27,96 @@ const DoctorOnboarding = () => {
   const navigate = useNavigate();
   const submitAction = useAsyncAction();
 
+  const { files, clearField } = useFileUploadContext();
+
   const handleNext = async (data) => {
     try {
       await submitAction.executeAsyncFn(async () => {
-        const formData = buildFormData(data);
+        const formData = new FormData();
 
+        // ---------------- TEXT & NON-FILE FIELDS ----------------
+        Object.entries(data).forEach(([key, value]) => {
+          if (FILE_FIELDS.includes(key)) return;
+          if (value === undefined || value === null) return;
+
+          if (key === "services") return;
+
+          // flatten repeatable fields JSON except file references
+          if (Array.isArray(value)) {
+            formData.append(
+              key,
+              JSON.stringify(
+                value.map(
+                  ({ experienceCertificate, educationCertificate, ...rest }) =>
+                    rest
+                )
+              )
+            );
+          } else if (typeof value === "object") {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, value);
+          }
+        });
+
+        // ---------------- FILE FIELDS ----------------
+        // Profile Picture
+        if (files?.profilePicture) {
+          formData.append("profilePicture", files.profilePicture);
+        }
+
+        // Proof Documents
+        if (files?.proofDocument?.length > 0) {
+          files.proofDocument.forEach((file) =>
+            formData.append("proofDocument", file)
+          );
+        }
+
+        // Experience Certificates
+        data.experience?.forEach((_, index) => {
+          const rhfKey = `experience[${index}].experienceCertificate`;
+          const file = files[rhfKey];
+
+          if (file) {
+            formData.append("experienceCertificate", file);
+          }
+        });
+
+        // Education Certificates
+        data.education?.forEach((_, index) => {
+          const rhfKey = `education[${index}].educationCertificate`;
+          const file = files[rhfKey];
+
+          if (file) {
+            formData.append("educationCertificate", file);
+          }
+        });
+
+        //services
+
+        const services = [];
+
+        if (data.online_fee) {
+          services.push({
+            serviceType: "online",
+            fees: Number(data.online_fee),
+            availableDates: [], // can be filled later
+          });
+        }
+
+        if (data.offline_fee) {
+          services.push({
+            serviceType: "offline",
+            fees: Number(data.offline_fee),
+            availableDates: [],
+          });
+        }
+
+        formData.append("services", JSON.stringify(services));
+
+
+        // ---------------- API CALL ----------------
         let response;
-
         switch (currentStep) {
           case 0:
             response = await submitDoctorPersonalInfo(formData);
@@ -41,12 +131,15 @@ const DoctorOnboarding = () => {
             return;
         }
 
-        if (!response.data.success) {
-          toast.error(response.data.message);
+        if (!response?.data?.success) {
+          toast.error(response?.data?.message || "Submission failed");
           return;
         }
 
         toast.success(response.data.message);
+
+        // ---------------- CLEANUP ----------------
+        Object.keys(files).forEach(clearField);
 
         if (currentStep < stepKeys.length - 1) {
           setCurrentStep((prev) => prev + 1);
@@ -55,6 +148,7 @@ const DoctorOnboarding = () => {
         }
       });
     } catch (error) {
+      console.error(error);
       toast.error("Something went wrong");
     }
   };
@@ -72,7 +166,7 @@ const DoctorOnboarding = () => {
           }
         />
 
-        {/* Step Indicator */}
+        {/* -------- STEP INDICATOR -------- */}
         <div className="flex items-center justify-center my-6 space-x-6">
           {stepKeys.map((key, index) => (
             <div key={key} className="flex items-center">

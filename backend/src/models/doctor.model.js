@@ -32,13 +32,13 @@ const DoctorSchema = new Schema(
         years: { type: Number },
         hospitalName: { type: String },
         location: { type: String },
-        experienceCertificate: { type: [String],default:[] }
+        experienceCertificate: { type:String }
       }],
       education: [{
         degree: { type: String },
         college: { type: String },
         completionYear: { type: Number },
-        educationCertificate: { type: [String], default:[] }
+        educationCertificate: { type: String }
       }],
 
       medicalLicense: {
@@ -60,7 +60,7 @@ const DoctorSchema = new Schema(
             "Tamil Nadu Medical Council (TNMC)",
             "Telangana State Medical Council (TSMC)",
           ],
-          default: "Karnataka Medical Council (KMC)"  // ✅ Valid enum
+          default: "Karnataka Medical Council (KMC)"  // Valid enum
         },
         yearOfRegistration: {
           type: Number,

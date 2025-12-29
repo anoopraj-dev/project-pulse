@@ -1,13 +1,15 @@
-import { useState,useMemo } from "react";
+import { useState} from "react";
 import {toast} from 'react-hot-toast'
 import DynamicForm from "../../forms/engines/DynamicForm";
 import { emailInputConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
 import { api } from "../../../api/axiosInstance";
-import { uploadFileService } from "../../../api/fileUpload/fileUploadService";
-import { useUser } from "../../../contexts/UserContext";
 import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
+import { submitDoctorPersonalInfo,submitDoctorProfessionalInfo} from "../../../api/doctor/doctorApis";
+import { submitPatientPersonalInfo } from "../../../api/patient/patientApis";
+import { useUser } from "../../../contexts/UserContext";
+import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 
-//------------- email modal-----------------
+
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +47,7 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
 };
 
 
-//----------------- set Password modal
+//----------------- set Password modal ---------------------
 
 export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
@@ -82,28 +84,157 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
 
 //------------- Profile Picture upload ---------------
 export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
+  const { role } = useUser();
+  const { files, clearField } = useFileUploadContext();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (data) => {
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      // append file if it exists
+      if (files?.profilePicture) {
+        formData.append("profilePicture", files.profilePicture);
+      } else {
+        toast.error("Please select a file to upload");
+        return;
+      }
+
+      let response;
+      if (role === "patient") {
+        response = await submitPatientPersonalInfo(formData);
+      } else {
+        response = await submitDoctorPersonalInfo(formData);
+      }
+
+      if (!response?.data?.success) {
+        toast.error(response?.data?.message || "Upload failed");
+        return;
+      }
+
+      toast.success(response.data.message || "Profile picture updated!");
+      clearField("profilePicture"); // clear file input
+      if (onSubmit) onSubmit(response.data);
+      closeModal();
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while uploading");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <DynamicForm
       mode="modal"
       config={updateProfilePictureConfig}
-      hideSubmit
+      onSubmit={handleSubmit}
+      loading={loading}
     />
   );
 };
 
 
-//------------- Certificate upload ---------------
-
+// -------- Certificat upload modal --------------
 
 export const CertificateUploadModal = ({ closeModal }) => {
+  const { files, clearField } = useFileUploadContext();
+
+  const handleSubmit = async (data) => {
+    try {
+      const formData = new FormData();
+      const { certificateCategory, ...rest } = data;
+
+      console.log('files',files)
+
+      formData.append("mode", "append");
+
+      // ---------------- EDUCATION ----------------
+      if (certificateCategory === "Education") {
+        formData.append(
+          "education",
+          JSON.stringify([
+            {
+              degree: rest.degree,
+              college: rest.college,
+              completionYear: rest.completionYear,
+            },
+          ])
+        );
+
+        if (files?.educationCertificate) {
+          formData.append(
+            "educationCertificate",
+            files.educationCertificate
+          );
+        }
+      }
+
+      // ---------------- EXPERIENCE ----------------
+      if (certificateCategory === "Experience") {
+        formData.append(
+          "experience",
+          JSON.stringify([
+            {
+              years: rest.yearsOfExperience,
+              hospital: rest.hospitalName,
+              location: rest.hospitalLocation,
+            },
+          ])
+        );
+
+        if (files?.experienceCertificate) {
+          formData.append(
+            "experienceCertificate",
+            files.experienceCertificate
+          );
+        }
+      }
+
+      // ---------------- ID PROOF ----------------
+      if (certificateCategory === "ID Proof") {
+        formData.append("registrationNumber", rest.registrationNumber);
+        formData.append("stateCouncil", rest.stateCouncil);
+        formData.append("yearOfRegistration", rest.yearOfRegistration);
+
+        if (files?.proofDocument?.length > 0) {
+          files.proofDocument.forEach((file) =>
+            formData.append("proofDocument", file)
+          );
+        }
+      }
+
+      // -------- DEBUG --------
+      console.log("---- CERTIFICATE FORM DATA ----");
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value instanceof File ? value.name : value);
+      }
+
+      // -------- API CALL --------
+      const response = await submitDoctorProfessionalInfo(formData);
+
+      if (!response?.data?.success) {
+        toast.error(response?.data?.message || "Certificate upload failed");
+        return;
+      }
+
+      toast.success("Certificate added successfully");
+
+      // -------- CLEANUP --------
+      Object.keys(files).forEach(clearField);
+      closeModal();
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while uploading certificate");
+    }
+  };
 
   return (
     <DynamicForm
       mode="modal"
       config={certificateUploadConfig(closeModal)}
-  
-      hideSubmit
+      onSubmit={handleSubmit}
     />
   );
 };
