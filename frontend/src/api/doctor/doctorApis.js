@@ -52,7 +52,7 @@ export const updateDoctorProfile = (formData) => {
 }
 
 //------------ Delete Certificate --------------
-export const deleteCertificates = (docId) => {
-  return api.delete('/api/doctor/remove-certificate/:id')
+export const deleteDocuments = (id) => {
+  return api.delete(`/api/doctor/delete-documents/${id}`)
 }
 

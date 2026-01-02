@@ -46,7 +46,7 @@ const DoctorSchema = new Schema(
           type: String,
           required: [true, "Registration number required"],
           match: [/^[A-Z]{2,4}\d{4,6}$/i, "Must be KMC12345 format"],
-          default: "KMC0001"  
+    
         },
         stateCouncil: {
           type: String,
@@ -60,14 +60,14 @@ const DoctorSchema = new Schema(
             "Tamil Nadu Medical Council (TNMC)",
             "Telangana State Medical Council (TSMC)",
           ],
-          default: "Karnataka Medical Council (KMC)"  // Valid enum
+    
         },
         yearOfRegistration: {
           type: Number,
           required: [true, "Year of registration required"],
           min: 1950,
           max: 2026, 
-          default: 2024 
+        
         },
         proofDocument:{
           type:[String],
