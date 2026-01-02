@@ -8,6 +8,7 @@ import { submitDoctorPersonalInfo,submitDoctorProfessionalInfo} from "../../../a
 import { submitPatientPersonalInfo } from "../../../api/patient/patientApis";
 import { useUser } from "../../../contexts/UserContext";
 import { useFileUploadContext } from "../../../contexts/FileUploadContext";
+import { Icon } from "@iconify/react";
 
 
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
@@ -238,3 +239,33 @@ export const CertificateUploadModal = ({ closeModal }) => {
     />
   );
 };
+
+//------------- Image Viewer -------------
+
+
+ export const ImageModal = ({ url, label, onClose }) => {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 text-white">
+        <span className="text-lg font-medium">{label}</span>
+        <Icon
+          icon="mingcute:close-circle-fill"
+          className="w-7 h-7 cursor-pointer text-red-400 hover:text-red-500"
+          onClick={onClose}
+        />
+      </div>
+
+      {/* Image */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden">
+        <img
+          src={url}
+          alt="Preview"
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
+    </div>
+  );
+};
+

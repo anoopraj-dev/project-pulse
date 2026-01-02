@@ -12,6 +12,7 @@ import {
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { deleteDocuments } from "../controllers/doctorControllers/documents.controller.js";
 
 const router = Router();
 
@@ -45,5 +46,7 @@ router.patch("/update-profile", upload.fields([
     
   ]),
   updateDoctorProfile);
+
+router.delete('/delete-documents/:id', deleteDocuments)
 
 export default router;

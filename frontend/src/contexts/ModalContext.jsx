@@ -8,10 +8,10 @@ const ModalProvider = ({ children }) => {
     isOpen: false,
     message: "",
     Component:null,
-    props:{}
+    props:{},
   });
 
-  const openModal = (message = "",Component =null,props={}) => {
+  const openModal = (message = "",Component =null,props={}, size='md') => {
     setModal({ isOpen: true, message,Component,props});
   };
 
