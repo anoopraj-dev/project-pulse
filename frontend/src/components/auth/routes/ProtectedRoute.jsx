@@ -5,7 +5,7 @@ import ShimmerCard from "../../ui/loaders/ShimmerCard";
 const ProtectedRoute = ({ allowedRoles, children }) => {
   const { isAuthenticated, role, isLoading } = useUser();
   console.log('logs from protected route ', isAuthenticated, role, isLoading )
-  if (isLoading) return <ShimmerCard />; // Wait for API
+  if (isLoading) return <ShimmerCard />; 
 
   if (!isAuthenticated) {
     return <Navigate to="/signin" replace />;

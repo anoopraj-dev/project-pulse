@@ -1,14 +1,15 @@
 import { useState} from "react";
 import {toast} from 'react-hot-toast'
 import DynamicForm from "../../forms/engines/DynamicForm";
-import { emailInputConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
+import { emailInputConfig, sendCommentConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
 import { api } from "../../../api/axiosInstance";
 import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
-import { submitDoctorPersonalInfo,submitDoctorProfessionalInfo} from "../../../api/doctor/doctorApis";
+import { rejectDoctorProfile, submitDoctorPersonalInfo,submitDoctorProfessionalInfo} from "../../../api/doctor/doctorApis";
 import { submitPatientPersonalInfo } from "../../../api/patient/patientApis";
 import { useUser } from "../../../contexts/UserContext";
 import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 import { Icon } from "@iconify/react";
+import { useAsyncAction } from "../../../hooks/useAsyncAction";
 
 
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
@@ -147,8 +148,6 @@ export const CertificateUploadModal = ({ closeModal }) => {
       const formData = new FormData();
       const { certificateCategory, ...rest } = data;
 
-      console.log('files',files)
-
       formData.append("mode", "append");
 
       // ---------------- EDUCATION ----------------
@@ -268,4 +267,37 @@ export const CertificateUploadModal = ({ closeModal }) => {
     </div>
   );
 };
+
+//----------------- Comment modal --------------
+export const SendCommentModal = ({id,onSubmit,closeModal})=>{
+  const rejectAction = useAsyncAction()
+  const handleSubmit = async(data) =>{
+    try {
+      console.log(data)
+      const formData =  new FormData();
+
+      formData.append(
+        'rejectionReason' , data.rejectionReason
+      )
+
+      //------------- API CALL ------------
+
+      await rejectAction.executeAsyncFn(async ()=>{
+        const res = await rejectDoctorProfile(id,formData);
+        if(res.data.success){
+          toast.success(res.data.message);
+          if(onSubmit) onSubmit(res.data)
+          closeModal();
+        }
+      })
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  return (
+    <DynamicForm config={sendCommentConfig} mode='modal' onSubmit={handleSubmit}/>
+  )
+}
 

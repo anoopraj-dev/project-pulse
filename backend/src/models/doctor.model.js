@@ -14,15 +14,19 @@ const DoctorSchema = new Schema(
     location: { type: String },
     about:{type:String},
 
-    // --- Authentication & Role (unchanged) ---
+    // --- Authentication & Role  ---
     password: { type: String, required: true },
     role: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     firstLogin: { type: Boolean, default: true },
 
-    // --- Ratings & Status (unchanged) ---
+
+    // --- Ratings & Status  ---
     rating: { type: Number, default: 0 },
-    status: { type: String, enum: ["approved", "pending", "rejected", "blocked"], default: "pending" },
+    status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
+    rejectionReason: { type: String, default:''},
+    isBlocked: { type: Boolean, default:false},
+    blockedReason:{type: String, default:''},
 
     // --- Professional Info  ---
     professionalInfo: {
@@ -46,6 +50,7 @@ const DoctorSchema = new Schema(
           type: String,
           required: [true, "Registration number required"],
           match: [/^[A-Z]{2,4}\d{4,6}$/i, "Must be KMC12345 format"],
+          default:'KSMC1234'
     
         },
         stateCouncil: {
@@ -60,6 +65,7 @@ const DoctorSchema = new Schema(
             "Tamil Nadu Medical Council (TNMC)",
             "Telangana State Medical Council (TSMC)",
           ],
+          default:"Kerala State Medical Council (KSMC)"
     
         },
         yearOfRegistration: {
@@ -67,6 +73,7 @@ const DoctorSchema = new Schema(
           required: [true, "Year of registration required"],
           min: 1950,
           max: 2026, 
+          default:2000
         
         },
         proofDocument:{

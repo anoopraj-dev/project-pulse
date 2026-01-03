@@ -3,92 +3,79 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 
-import BasicInfoCard from "../../components/ui/cards/BasicInfoCard";
-import DynamicInfoSection from "../../components/ui/cards/DynamicInfoSection";
-import ShimmerCard from "../../components/ui/loaders/ShimmerCard";
-import PrimaryButton from "../../components/shared/components/PrimaryButton";
-
-import { useModal } from "../../contexts/ModalContext";
-import { useAsyncAction } from "../../hooks/useAsyncAction";
+import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
+import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
+import { useModal } from "../../../../contexts/ModalContext";
+import { useAsyncAction } from "../../../../hooks/useAsyncAction";
 import {
   CertificateUploadModal,
+  SendCommentModal,
   UpdateProfilePictureModal,
-} from "../../components/ui/modals/ModalInputs";
+} from "../../../ui/modals/ModalInputs";
 
 import {
-  fetchDoctorProfile,
+  verifyDoctorDocuments,
   approveDoctorProfile,
   rejectDoctorProfile,
-} from "../../api/doctor/doctorApis";
+} from "../../../../api/doctor/doctorApis";
 
-const DoctorsProfile = () => {
-  const [user, setUser] = useState(null);
+
+const ProfileView = ({user}) => {
   const [viewMore, setViewmore] = useState(false);
-
   const { id } = useParams();
   const isProfileReview = !!id;
   const navigate = useNavigate();
   const { openModal, closeModal } = useModal();
-
-  const fetchDoctorAction = useAsyncAction();
+  const viewDocAction = useAsyncAction();
   const approveAction = useAsyncAction();
-  const rejectAction = useAsyncAction();
 
-  //------------ FETCH DOCTOR --------------
-  const fetchDoctor = async () => {
+
+  //------------- VERIFY DOCUMENTS -------------
+  const handleVerifyDocuments = async (id) => {
     try {
-      await fetchDoctorAction.executeAsyncFn(async () => {
-        const response = await fetchDoctorProfile(id);
-        setUser(response.data.user);
+      await viewDocAction.executeAsyncFn(async () => {
+        const res = await verifyDoctorDocuments(user._id);
+        if (res.data.success) {
+          navigate(`/admin/doctor/${id}/documents`)
+        }
+        
       });
+    } catch(error) {
+      console.log(error)
+      toast("Failed to load documents");
+    }
+  };
+
+  //------------- APPROVE DOCTOR --------------
+  const handleApproveDoctor = async() => {
+    try {
+      await approveAction.executeAsyncFn( async () => {
+        const res = await approveDoctorProfile(user._id);
+        if(res.data.success){
+          toast.success(res.data.message);
+          navigate(`/admin/doctor/${id}`)
+        }
+      })
     } catch (error) {
       console.log(error);
+      toast.error('Request Approval failed')
     }
-  };
-
-  //------------- APPROVE DOCTOR -------------
-  const handleApprove = async () => {
-    try {
-      await approveAction.executeAsyncFn(async () => {
-        const res = await approveDoctorProfile(user._id);
-        if (res.data.success) {
-          toast.success(res.data.message);
-          navigate("/admin/dashboard");
-        }
-      });
-    } catch {
-      toast("Request Approval Failed");
-    }
-  };
+  }
 
   //------------- REJECT DOCTOR -------------
   const handleReject = async () => {
     try {
-      openModal("Reject this request?", PrimaryButton, {
-        text: rejectAction.loading ? "Processing.." : "Continue",
-        disabled: rejectAction.loading,
-        onClick: async () => {
-          try {
-            await rejectAction.executeAsyncFn(async () => {
-              const response = await rejectDoctorProfile(user._id);
-
-              if (response.data.success) {
-                toast.success(`Rejected request from ${user.name}`);
-                navigate("/admin/dashboard");
-              } else {
-                toast.error("Request rejection failed");
-              }
-            });
-          } catch {
-            toast.error("Request rejection failed");
-          }
-          closeModal();
-        },
-      });
+      openModal("Reject this request?", SendCommentModal ,{id : user._id}
+      );
     } catch {
       toast.error("Something went wrong");
     }
   };
+
+  //---------------- BLOCK DOCTOR -------------
+  const handleBlockDoctor = () =>{
+
+  }
 
   //--------------- EDIT PROFILE ---------------
 
@@ -106,14 +93,10 @@ const DoctorsProfile = () => {
     openModal("Upload a certificate", CertificateUploadModal);
   };
 
-  useEffect(() => {
-    fetchDoctor();
-  }, [id]);
-
-  if (fetchDoctorAction.loading) return <ShimmerCard />;
 
   return (
     <div className="min-h-screen mt-18 flex flex-col items-center">
+      
       {/* ------------Welcome text------- */}
       {!isProfileReview && (
         <div className="flex flex-col">
@@ -125,8 +108,9 @@ const DoctorsProfile = () => {
             Your profile is all set. You can update your details anytime.
           </p>
         </div>
+        
       )}
-
+      
       <div className="flex flex-col w-md md:w-3xl lg:w-5xl p-10 rounded-md">
         {/* -----------Header----------- */}
         <div className="flex flex-col p-5 rounded-sm hover:rounded-4xl hover:shadow-lg gap-5 hover:bg-blue-100 transition-all duration-300 ease-in-out">
@@ -214,8 +198,16 @@ const DoctorsProfile = () => {
           {isProfileReview && (
             <>
               <button
+                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl transition"
+                onClick={()=>handleVerifyDocuments(user._id)}
+                disabled={viewDocAction.loading}
+              >
+                <Icon icon="mdi:file-document" className="w-5 h-5" />
+                Documents
+              </button>
+              <button
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition"
-                onClick={handleApprove}
+                onClick={()=>handleApproveDoctor(user._id)}
                 disabled={approveAction.loading}
               >
                 <Icon icon="mdi:check-bold" className="w-5 h-5" />
@@ -228,6 +220,17 @@ const DoctorsProfile = () => {
                 <Icon icon="mdi:close-bold" className="w-5 h-5" />
                 Reject
               </button>
+              {
+                user?.status === 'approved' && user?.isBlocked===false && (
+                  <button
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition"
+                onClick={handleReject}
+              >
+                <Icon icon="mdi:block" className="w-5 h-5" />
+                Block
+              </button>
+                )
+              }
             </>
           )}
         </div>
@@ -292,4 +295,4 @@ const DoctorsProfile = () => {
   );
 };
 
-export default DoctorsProfile;
+export default ProfileView;

@@ -33,14 +33,19 @@ export const fetchDoctorProfile = (id) => {
     return api.get("/api/doctor/profile");  // Doctor viewing own profile
 };
 
+//------------ Verify documents (Admin) ------------
+export const verifyDoctorDocuments = (id) => {
+  return api.get(`/api/admin/doctor/${id}/documents`)
+}
+
 // -------- Approve doctor (Admin) --------
 export const approveDoctorProfile = (doctorId) => {
-  return api.post(`/api/admin/doctor/approve/${doctorId}`);
+  return api.patch(`/api/admin/doctor/approve/${doctorId}`);
 };
 
 // -------- Reject doctor (Admin) --------
-export const rejectDoctorProfile = (doctorId) => {
-  return api.delete(`/api/admin/doctor/reject/${doctorId}`);
+export const rejectDoctorProfile = (id,formData) => {
+  return api.patch(`/api/admin/doctor/reject/${id}`,formData);
 };
 
 //------------- Update Profile --------------
