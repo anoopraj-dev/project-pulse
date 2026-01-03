@@ -83,7 +83,7 @@ export const updateProfessionalInfo = async (req, res) => {
       registrationNumber,
       stateCouncil,
       yearOfRegistration,
-      mode = "replace", // 👈 important
+      mode = "replace", 
     } = req.body;
 
     const doctor = await Doctor.findById(req.user.id);
@@ -117,7 +117,7 @@ export const updateProfessionalInfo = async (req, res) => {
       };
     }
 
-    // ---------------- EXPERIENCE (APPEND / REPLACE) ----------------
+    // ---------------- EXPERIENCE (APPEND ) ----------------
     if (experience) {
       const parsedExperience =
         typeof experience === "string" ? JSON.parse(experience) : experience;

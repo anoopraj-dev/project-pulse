@@ -1,11 +1,12 @@
 import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
+import { sendEmail } from "../../config/nodemailer.js";
 
 
 //------------- GET ADMIN DASHBORD---------------
 
 export const getAdminDashboard = async (req, res) => {
-  console.log("route hit");
   try {
     const [doctorCount, patientCount] = await Promise.all([
       Doctor.countDocuments(),
@@ -50,49 +51,127 @@ export const getPendingDoctorProfile = async (req, res) => {
   }
 };
 
-//---------------- APPROVE DOCTORS ----------------------
-
-export const approveDoctorsRequest = async(req,res) =>{
-  const {id} = req.params;
+// --------------- GET DOCTOR DOCUMENTS ------------------
+export const getDoctorDocuments = async(req,res) => {
   try {
-    const doctor = await Doctor.findByIdAndUpdate(id,{
-      status:'approved'
-    });
-    if(doctor) return res.status(200).json({
-      success: true,
-      message:`Approved Dr ${doctor.name}`
-    })
-      return res.status(404).json({
-        success: false,
-        message:'Doctor not found!'
-      })
-    
-    
+    console.log('document route hit')
+    const id = req.params.id;
+    const doctor = await Doctor.findById(id);
+    if(!doctor) return res.status(404).json({success:false, message:'Doctor not found!'})
+    res.status(200).json({success: true, user : doctor })
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message:'Internal server error'
+    console.log(error)
+    res.status(500).json({
+      success:false,
+      message:'Internal Server Error'
     })
   }
 }
+
+//---------------- APPROVE DOCTORS ----------------------
+
+export const approveDoctorsRequest = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const doctor = await Doctor.findByIdAndUpdate(
+      id,
+      { status: "approved" },
+      { new: true }
+    );
+
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor not found!",
+      });
+    }
+
+    // -------- Send Approval Email --------
+    try {
+      const mailOptions = {
+        from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+        to: doctor.email,
+        subject: "Profile Approved – Welcome to Pulse360 ",
+        html: emailTemplate({
+          title: "Profile Approved",
+          subtitle: "Doctor Profile Review",
+          body: `
+            <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+            <p>We are happy to inform you that your profile has been <strong>approved</strong>.</p>
+            <p>You are now visible on the platform and can start receiving patient requests.</p>
+          `,
+          highlightText: "Your account is now active",
+          highlightType: "success",
+        }),
+      };
+
+      await sendEmail(mailOptions);
+    } catch (emailError) {
+      console.error("Approval email failed:", emailError);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Approved Dr ${doctor.name}`,
+      user: doctor,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
 
 // ----------------------- REJECT DOCTORS -----------------
 
 export const rejectDoctorsRequest = async (req,res) => {
   const {id} = req.params;
+  const {rejectionReason} = req.body;
   try {
-    const doctor = await Doctor.findByIdAndDelete(id);
-    if(doctor){
-      return res.status(200).json({
-        success:true,
-        message:`Rejected request from ${doctor.name}`
+    const doctor = await Doctor.findByIdAndUpdate(id,{
+      status:'rejected'
+    },
+  {new : true});
+    if(!doctor){
+      return res.status(404).json({
+        success:false,
+        message:'Doctor not found!',
       })
     }
     
-    return res.status(404).jsonn({
-      success:false,
-      message:'Rejection failed! Try again'
-    })
+     try {
+      const mailOptions = {
+        from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+        to: doctor.email,
+        subject: "Profile Rejected – Action Required",
+        html: emailTemplate({
+          title: "Profile Rejected",
+          subtitle: "Doctor Profile Review",
+          body: `
+            <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+            <p>Your profile has been reviewed and unfortunately was <strong>rejected</strong>.</p>
+            <p>Please check the reason below and update your profile accordingly.</p>
+          `,
+          highlightText: rejectionReason,
+          highlightType: "error",
+        }),
+      };
+
+      await sendEmail(mailOptions);
+    } catch (emailError) {
+      console.error("Error sending email:", emailError);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Rejected request from ${doctor.name}`,
+      user: doctor,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({

@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { generateOtp } from "../../utils/otpGenerator.js";
 import Otp from "../../models/otps.model.js";
 import { sendEmail } from "../../config/nodemailer.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
 
 //------- USER SIGNUP CONTROLLER -------//
 export const userSignup = async (req, res) => {
@@ -81,8 +82,17 @@ export const userSignup = async (req, res) => {
     const mailOptions = {
       from: `"PULSE360" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: "Email verification",
-      text: `Hello ${name}, verify your email with this one-time password: ${otpCode}`,
+      subject: "Email Verification – OTP",
+      html: emailTemplate({
+        title: "Email Verification",
+        subtitle: "Verify Your Account",
+        body: `
+          <p>Hello <strong>${name}</strong>,</p>
+          <p>Thank you for signing up. Please verify your email with the OTP below:</p>
+        `,
+        highlightText: otpCode,
+        highlightType: "info",
+      }),
     };
 
     try {
@@ -102,6 +112,7 @@ export const userSignup = async (req, res) => {
       message: ` Verify your email with the OTP sent to your email`,
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({
       success: false,
       message: "Internal server error, signup failed!",

@@ -91,6 +91,7 @@ const AuthCard = ({ role: initialRole }) => {
             sessionStorage.setItem("otpSession", JSON.stringify(payload));
             navigate("/verify-email");
           } else {
+        
             toast.error(response.message);
           }
           return;
@@ -133,6 +134,7 @@ const AuthCard = ({ role: initialRole }) => {
         }
       });
     } catch (error) {
+      console.log(error)
       toast.error(error?.message || "Something went wrong");
     }
   };

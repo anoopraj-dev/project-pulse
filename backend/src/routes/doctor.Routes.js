@@ -21,6 +21,7 @@ router.use(authenticateUser, authorizeRoles("doctor"));
 
 //------------- ROUTES---------------
 router.get("/profile", getDoctorProfile);
+
 router.post(
   "/personal-info",
   upload.single("profilePicture"),

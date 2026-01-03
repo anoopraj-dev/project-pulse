@@ -28,6 +28,16 @@ export const setPasswordFormConfig = {
   buttonText: "Update Password",
 };
 
+//------------------ Send Message/Comment config ------------------
+export const sendCommentConfig = {
+  fields:[
+    {name:'rejectionReason',
+      label: 'Reason',
+      type: 'textarea',
+      required: true
+    }
+  ]
+}
 
 //------------- Update Profile Picture config-------
 export const updateProfilePictureConfig = {
