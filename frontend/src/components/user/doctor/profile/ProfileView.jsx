@@ -205,7 +205,10 @@ const ProfileView = ({user}) => {
                 <Icon icon="mdi:file-document" className="w-5 h-5" />
                 Documents
               </button>
-              <button
+              {
+                user.status === 'pending' && user.isBlocked=== false && (
+                  <>
+                    <button
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl transition"
                 onClick={()=>handleApproveDoctor(user._id)}
                 disabled={approveAction.loading}
@@ -220,6 +223,9 @@ const ProfileView = ({user}) => {
                 <Icon icon="mdi:close-bold" className="w-5 h-5" />
                 Reject
               </button>
+                  </>
+                )
+              }
               {
                 user?.status === 'approved' && user?.isBlocked===false && (
                   <button

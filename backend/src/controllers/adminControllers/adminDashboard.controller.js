@@ -180,3 +180,15 @@ export const rejectDoctorsRequest = async (req,res) => {
     })
   }
 }
+
+//--------------- GET ALL DOCTORS --------------
+export const getAllDoctors = async(req,res) => {
+  try {
+    const doctors = await Doctor.find().select('-password')
+    if(!doctors) return res.status(404).json({success:false, message:'Data not found'});
+    return res.status(200).json({success:true, message:'Data loaded successfully', users:doctors})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({success:false, message:'Internal server error'})
+  }
+}
