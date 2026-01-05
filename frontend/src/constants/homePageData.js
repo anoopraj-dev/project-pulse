@@ -11,3 +11,10 @@ export const aboutUs = ['At Pulse360, we believe that healthcare should be simpl
     'We are committed to creating a smarter healthcare experience - one that saves you time, ensures transparency, and empowers you to take control of your health journey.']
 
 
+// constants/userStatus.js
+export const USER_STATUS_OPTIONS = [
+  { label: "Approve", value: "approved" },
+  { label: "Reject", value: "rejected" },
+  { label: "Block", value: "blocked" },
+  { label: "Resubmission", value: "resubmitted" },
+];

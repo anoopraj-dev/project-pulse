@@ -3,6 +3,8 @@ import { authenticateUser } from "../middlewares/authenticateUser.js";
 import {
   getDoctorProfile,
   updateDoctorProfile,
+  requestProfileResubmission,
+  resubmitProfile
 } from "../controllers/doctorControllers/profile.controller.js";
 import {
   updatePersonalInfo,
@@ -10,7 +12,6 @@ import {
   updateServicesInfo,
 } from "../controllers/doctorControllers/onboarding.controller.js";
 import upload from "../middlewares/multer.js";
-import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { deleteDocuments } from "../controllers/doctorControllers/documents.controller.js";
 
@@ -49,5 +50,7 @@ router.patch("/update-profile", upload.fields([
   updateDoctorProfile);
 
 router.delete('/delete-documents/:id', deleteDocuments)
+router.patch('/request-resubmission',requestProfileResubmission)
+router.patch('/resubmit', resubmitProfile)
 
 export default router;

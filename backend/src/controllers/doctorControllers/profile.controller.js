@@ -1,3 +1,4 @@
+import { request } from "express";
 import Doctor from "../../models/doctor.model.js";
 
 // ------------- GET PROFILE ----------
@@ -103,3 +104,83 @@ export const updateDoctorProfile = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+//----------------- PROFILE RESUBMISSION -------------------
+export const requestProfileResubmission = async(req,res) =>{
+  try {
+    const doctorId = req.user.id;
+
+    const doctor = await Doctor.findById(doctorId);
+
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    if (doctor.status !== "rejected") {
+      return res.status(400).json({
+        message: "Resubmission allowed only for rejected profiles",
+      });
+    }
+
+    if (doctor.submissionCount >= 3) {
+      return res.status(403).json({
+        message: "Maximum resubmission attempts reached",
+      });
+    }
+
+    doctor.resubmissionRequested = true;
+    doctor.status = 'requestedResubmission'
+
+
+    await doctor.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Resubmission request sent to admin",
+      user:doctor
+    },{new : true});
+
+    
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({
+      success: false,
+      message:'Resubmission request failed'
+    })
+  }
+}
+
+// ---------------- RESUBMIT PROFILE -------------------
+export const resubmitProfile = async (req, res) => {
+  try {
+    const doctorId = req.user.id;
+
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({
+        success: false,
+        message: "Doctor profile not found",
+      });
+    }
+
+
+    // Update resubmission state
+    doctor.submissionCount = (doctor.submissionCount || 0) + 1;
+    doctor.resubmissionApproved=false;
+    doctor.status = "pending"; 
+    await doctor.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile resubmitted successfully",
+      user: doctor,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to resubmit profile",
+    });
+  }
+};
+

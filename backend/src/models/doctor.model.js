@@ -23,10 +23,13 @@ const DoctorSchema = new Schema(
 
     // --- Ratings & Status  ---
     rating: { type: Number, default: 0 },
-    status: { type: String, enum: ["approved", "pending", "rejected"], default: "pending" },
+    status: { type: String, enum: ["approved", "pending", "rejected","blocked", "resubmit","resubmitted",'requestedResubmission'], default: "pending" },
     rejectionReason: { type: String, default:''},
     isBlocked: { type: Boolean, default:false},
     blockedReason:{type: String, default:''},
+    resubmissionApproved: { type: Boolean, default : false},
+    submissionCount: {type:Number,default:0},
+    lastSubmitted:{type:Date},
 
     // --- Professional Info  ---
     professionalInfo: {

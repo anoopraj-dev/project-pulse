@@ -2,7 +2,9 @@ const DoctorStatusBanner = ({
   approvalStatus,
   rejectionReason,
   blockedReason,
-  variant = "doctor", // default
+  resubmissionApproved,
+  submissionCount,
+  variant = "doctor",
 }) => {
   if (!approvalStatus || approvalStatus === "approved") return null;
 
@@ -15,6 +17,12 @@ const DoctorStatusBanner = ({
       blocked:
         blockedReason ||
         "Your account has been blocked. Please contact support.",
+      resubmit:
+        'You can now edit your profile and request for a profile review',
+      resubmission:
+        "Your profile has been re-submitted with suggested changes. Please wait for admins review",
+      requestedResubmission:
+        "You have requested profile resubmission. Please wait for admin review.",
     },
     admin: {
       pending:
@@ -24,13 +32,40 @@ const DoctorStatusBanner = ({
       blocked:
         blockedReason ||
         "This account is blocked and cannot access the platform.",
+      resubmit: 
+        'This account has been sent for re-submission',
+      resubmission:
+        `This profile has been resubmiited with suggested changes. Resubmissions = ${submissionCount}`,
+      requestedResubmission:
+        'This profile has been sent for resubmission'
     },
   };
 
+
+  // let activeStatus = approvalStatus;
+
+  // if (
+  //   approvalStatus === "rejected" &&
+  //   resubmissionApproved &&
+  //   variant === "doctor"
+  // ) {
+  //   activeStatus = "requestedResubmission";
+  // }
+
+  // if( approvalStatus ==='pending' &&
+  //   resubmissionApproved &&
+  //   variant === 'doctor'
+  // ){
+  //   activeStatus = 'resubmission'
+  // }
+
+
+
+
   const statusConfig = {
     pending: {
-      bg: "bg-yellow-100",
-      text: "text-yellow-800",
+      bg: "bg-yellow-500",
+      text: "text-white",
       title:
         variant === "admin"
           ? "Profile Pending Review"
@@ -38,16 +73,34 @@ const DoctorStatusBanner = ({
       message: copy[variant].pending,
     },
     rejected: {
-      bg: "bg-red-100",
-      text: "text-red-800",
+      bg: "bg-orange-500",
+      text: "text-white",
       title: "Profile Rejected",
       message: copy[variant].rejected,
     },
     blocked: {
-      bg: "bg-gray-900",
+      bg: "bg-red-600",
       text: "text-white",
       title: "Account Blocked",
       message: copy[variant].blocked,
+    },
+    resubmit:{
+      bg: 'bg-cyan-700',
+      text:'text-white',
+      title:'Account Re-Submission Required',
+      message: copy[variant].resubmit
+    },
+    resubmission: {
+      bg:'bg-gray-700',
+      text:'text-white',
+      title:'Profile Resubmission',
+      message:copy[variant].resubmission
+    },
+    requestedResubmission: {
+      bg: "bg-blue-500",
+      text: "text-white",
+      title: "Profile Resubmission Requested",
+      message: copy[variant].requestedResubmission,
     },
   };
 
@@ -56,10 +109,10 @@ const DoctorStatusBanner = ({
 
   return (
     <div
-      className={`w-full  mt-4 px-6 py-4 rounded-xl flex flex-col justify-center items-center ${current.bg} ${current.text}`}
+      className={`w-full mt-4 px-6 py-4 rounded-xl flex flex-col items-center ${current.bg} ${current.text}`}
     >
       <h2 className="font-semibold text-lg">{current.title}</h2>
-      <p className="text-sm mt-1">{current.message}</p>
+      <p className="text-sm mt-1 text-center">{current.message}</p>
     </div>
   );
 };

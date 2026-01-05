@@ -1,3 +1,4 @@
+import { USER_STATUS_OPTIONS } from "../../../constants/homePageData";
 
 // -------------Email Input Config-------------
 export const emailInputConfig = {
@@ -31,7 +32,7 @@ export const setPasswordFormConfig = {
 //------------------ Send Message/Comment config ------------------
 export const sendCommentConfig = {
   fields:[
-    {name:'rejectionReason',
+    {name:'reason',
       label: 'Reason',
       type: 'textarea',
       required: true
@@ -202,3 +203,23 @@ export const certificateUploadConfig = (closeModal) => ({
     },
   ],
 });
+
+// ----------- Revoke Status config -------------
+
+export const revokeStatusConfig = {
+
+  fields: [
+    {
+      name: "status",
+      label: "Select New Status *",
+      type: "select",
+      options: [
+        "approved",
+        "rejected",
+        "pending",
+        'resubmit'
+      ],
+      required: true,
+    },
+  ],
+};
