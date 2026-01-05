@@ -143,6 +143,7 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
 
 export const CertificateUploadModal = ({ closeModal }) => {
   const { files, clearField } = useFileUploadContext();
+  const uploadCertificateAction = useAsyncAction();
 
   const handleSubmit = async (data) => {
     try {
@@ -213,18 +214,20 @@ export const CertificateUploadModal = ({ closeModal }) => {
       }
 
       // -------- API CALL --------
-      const response = await submitDoctorProfessionalInfo(formData);
+      uploadCertificateAction.executeAsyncFn(async()=>{
+        const response = await submitDoctorProfessionalInfo(formData);
 
-      if (!response?.data?.success) {
+        if (!response?.data?.success) {
         toast.error(response?.data?.message || "Certificate upload failed");
         return;
       }
-
       toast.success("Certificate added successfully");
 
       // -------- CLEANUP --------
       Object.keys(files).forEach(clearField);
       closeModal();
+      })
+      
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while uploading certificate");
@@ -236,6 +239,7 @@ export const CertificateUploadModal = ({ closeModal }) => {
       mode="modal"
       config={certificateUploadConfig(closeModal)}
       onSubmit={handleSubmit}
+      loading={uploadCertificateAction.loading}
     />
   );
 };
@@ -297,7 +301,7 @@ export const SendCommentModal = ({id,onSubmit,closeModal,apiCall})=>{
   }
 
   return (
-    <DynamicForm config={sendCommentConfig} mode='modal' onSubmit={handleSubmit}/>
+    <DynamicForm config={sendCommentConfig} mode='modal' onSubmit={handleSubmit} loading={apiAction.loading}/>
   )
 }
 
