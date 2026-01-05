@@ -25,11 +25,11 @@ export const submitDoctorServicesInfo = (formData) => {
 // ------------------- PROFILE  PAGE APIS --------------
 
 // -------- Fetch doctor profile --------
-export const fetchDoctorProfile = (id) => {
-  if (id) {
+export const fetchDoctorProfile = () => {
+  // if (id) {
 
-    return api.get(`/api/admin/doctor/${id}`);  // Admin reviewing doctor profile
-  }
+  //   return api.get(`/api/admin/doctor/${id}`);  // Admin reviewing doctor profile
+  // }
     return api.get("/api/doctor/profile");  // Doctor viewing own profile
 };
 
@@ -48,8 +48,17 @@ export const rejectDoctorProfile = (id,formData) => {
   return api.patch(`/api/admin/doctor/reject/${id}`,formData);
 };
 
-//------------- Update Profile --------------
+//------------ Request Resubmission ------------------
+export const requestResubmission = () => {
+  return api.patch(`/api/doctor/request-resubmission`)
+}
 
+// ------------------- Resubmit Form -----------------
+export const resubmitProfile = () => {
+  return api.patch('/api/doctor/resubmit')
+}
+
+//------------- Update Profile --------------
 export const updateDoctorProfile = (formData) => {
   return api.patch('/api/doctor/update-profile',formData,{
     headers:{'Content-Type': 'multipart/form-data'}

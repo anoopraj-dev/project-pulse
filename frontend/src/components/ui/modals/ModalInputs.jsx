@@ -1,7 +1,7 @@
 import { useState} from "react";
 import {toast} from 'react-hot-toast'
 import DynamicForm from "../../forms/engines/DynamicForm";
-import { emailInputConfig, sendCommentConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
+import { emailInputConfig, revokeStatusConfig, sendCommentConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
 import { api } from "../../../api/axiosInstance";
 import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
 import { rejectDoctorProfile, submitDoctorPersonalInfo,submitDoctorProfessionalInfo} from "../../../api/doctor/doctorApis";
@@ -10,6 +10,7 @@ import { useUser } from "../../../contexts/UserContext";
 import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 import { Icon } from "@iconify/react";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
+import { revokeProfileStatus } from "../../../api/admin/adminApis";
 
 
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
@@ -269,24 +270,23 @@ export const CertificateUploadModal = ({ closeModal }) => {
 };
 
 //----------------- Comment modal --------------
-export const SendCommentModal = ({id,onSubmit,closeModal})=>{
-  const rejectAction = useAsyncAction()
+export const SendCommentModal = ({id,onSubmit,closeModal,apiCall})=>{
+  const apiAction = useAsyncAction()
   const handleSubmit = async(data) =>{
     try {
-      console.log(data)
       const formData =  new FormData();
 
       formData.append(
-        'rejectionReason' , data.rejectionReason
+        'reason' , data.reason
       )
 
       //------------- API CALL ------------
 
-      await rejectAction.executeAsyncFn(async ()=>{
-        const res = await rejectDoctorProfile(id,formData);
+      await apiAction.executeAsyncFn(async ()=>{
+        const res = await apiCall(id,formData);
         if(res.data.success){
           toast.success(res.data.message);
-          if(onSubmit) onSubmit(res.data)
+          if(onSubmit) onSubmit(res.data.user)
           closeModal();
         }
       })
@@ -301,3 +301,38 @@ export const SendCommentModal = ({id,onSubmit,closeModal})=>{
   )
 }
 
+// -------------------- Revoke Status -----------------
+
+  export const RevokeStatusModal = ({ id, onSubmit, closeModal }) => {
+  const apiAction = useAsyncAction();
+
+  const handleSubmit = async (data) => {
+    try {
+      const formData = new FormData();
+      formData.append("status", data.status);
+
+      await apiAction.executeAsyncFn(async () => {
+        const res = await revokeProfileStatus(id, formData);
+
+        if (res?.data?.success) {
+          toast.success(res.data.message);
+
+          if (onSubmit) onSubmit(res.data.user);
+          closeModal();
+        }
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update status");
+    }
+  };
+
+  return (
+    <DynamicForm
+      config={revokeStatusConfig}
+      mode="modal"
+      onSubmit={handleSubmit}
+      loading={apiAction.loading}
+    />
+  );
+}

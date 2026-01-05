@@ -3,7 +3,8 @@ const DoctorStatusTabs = ({ activeTab, setActiveTab }) => {
     { key: "approved", label: "Active Doctors" },
     { key: "blocked", label: "Blocked Doctors" },
     { key: "pending", label: "Pending Request" },
-    { key: 'rejected',label: 'Rejected Request'}
+    { key: 'rejected',label: 'Rejected Request'},
+    { key: 'requestedResubmission', label:'Resubmission Requests'},
   ];
 
   return (

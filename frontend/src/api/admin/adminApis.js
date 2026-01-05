@@ -1,18 +1,34 @@
 import { api } from "../axiosInstance";
 
-// Dashboard stats
+//-------- Dashboard stats -----------
 export const fetchDashboardStats = async () => {
   const response = await api.get("/api/admin/dashboard");
   return response.data;
 };
 
-// Get single doctor for review
+// --------Get doctor for review ------------
 export const fetchDoctorById = async (id) => {
   const response = await api.get(`/api/admin/doctor/${id}`);
   return response.data;
 };
 
-// Get all doctors
+
+// ------------ Block Doctor --------------
+export const blockDoctor = (id,formData) =>{
+   return api.patch(`/api/admin/doctor/block/${id}`,formData);
+}
+//------------- Unblock Doctor ------------
+export const unblockDoctor =async(id) =>{
+  const response = await api.patch(`/api/admin/doctor/unblock/${id}`)
+  return response.data;
+}
+
+// -------------- Revoke Profile Status -----------
+export const revokeProfileStatus = (id,formData) => {
+  return api.patch(`/api/admin/doctor/status/${id}`, formData)
+}
+
+//---------- Get all doctors ------------
 export const getAllDoctors = async () =>{
   const response = await api.get('/api/admin/doctors');
   return response.data;
