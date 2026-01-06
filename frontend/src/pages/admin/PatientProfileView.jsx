@@ -76,7 +76,7 @@ const PatientProfileView = () => {
     <div className="mt-18 min-h-screen">
       <PatientStatusBanner
         status={user?.status}
-        blockedReason={user?.blockedReason}
+        variant="admin"
       />
 
       {user && (

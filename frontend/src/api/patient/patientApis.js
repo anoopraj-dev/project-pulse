@@ -33,3 +33,8 @@ export const updatePatientProfile = (payload) => {
   return api.put('/api/patient/update-profile', payload);
 }
 
+
+//------------- DOCTORS DISPLAY -------------
+export const getAllDoctors = ()=>{
+  return api.get('/api/patient/doctors')
+}

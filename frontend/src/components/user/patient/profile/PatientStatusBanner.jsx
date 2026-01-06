@@ -1,19 +1,17 @@
 const PatientStatusBanner = ({
   status, 
-  blockedReason,
-  variant = "patient", // patient | admin
+  variant = "patient", 
 }) => {
   if (!status || status === "active") return null;
 
   const copy = {
     patient: {
       blocked:
-        blockedReason ||
         "Your account has been blocked. Please contact support for further assistance.",
     },
     admin: {
       blocked:
-        blockedReason ||
+  
         "This patient account is blocked and cannot access the platform.",
     },
   };
