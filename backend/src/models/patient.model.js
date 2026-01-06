@@ -18,6 +18,9 @@ const PatientSchema = new Schema(
     role: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     firstLogin: { type: Boolean, default: true },
+    
+    status: {type: String, enum:['active','blocked'], default:'active'},
+    blockedReason: { type: String, default:''},
 
     //---Medical Information--
     medical_history: {

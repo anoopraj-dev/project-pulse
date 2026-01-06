@@ -32,3 +32,4 @@ export const fetchPatientProfile = () => {
 export const updatePatientProfile = (payload) => {
   return api.put('/api/patient/update-profile', payload);
 }
+

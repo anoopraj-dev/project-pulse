@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticateUser} from "../middlewares/authenticateUser.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { approveDoctorsRequest, getAdminDashboard, getAllDoctors, getDoctorDocuments, getPendingDoctorProfile, rejectDoctorsRequest,blockDoctorProfile, revokeDoctorStatus, unblockDoctorProfile } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------
@@ -17,4 +18,9 @@ router.patch('/doctor/block/:id', blockDoctorProfile)
 router.patch('/doctor/unblock/:id',unblockDoctorProfile)
 router.patch('/doctor/status/:id', revokeDoctorStatus)
 router.get('/doctors', getAllDoctors)
+
+router.get('/patients',getAllPatients)
+router.get('/patient/:id',getPatientProfile)
+router.patch('/patient/block/:id',blockPatientProfile);
+router.patch('/patient/unblock/:id',unblockPatientProfile)
 export default router;

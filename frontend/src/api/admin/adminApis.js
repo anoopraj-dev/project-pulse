@@ -6,6 +6,8 @@ export const fetchDashboardStats = async () => {
   return response.data;
 };
 
+
+
 // --------Get doctor for review ------------
 export const fetchDoctorById = async (id) => {
   const response = await api.get(`/api/admin/doctor/${id}`);
@@ -33,3 +35,25 @@ export const getAllDoctors = async () =>{
   const response = await api.get('/api/admin/doctors');
   return response.data;
 }
+
+
+//------------- Fetch All Patients -----------------
+export const getAllPatients = () =>{
+  return api.get('/api/admin/patients')
+}
+
+//----------------- Get Patient for review --------
+export const fetchPatientById = (id) => {
+  return api.get(`/api/admin/patient/${id}`)
+}
+
+//----------------- Block Patient -----------------
+export const blockPatientProfile = (id,formData) => {
+  return api.patch(`/api/admin/patient/block/${id}`,formData)
+}
+
+//----------------- Unblock Patient -----------------
+export const unblockPatientProfile = (id) => {
+  return api.patch(`/api/admin/patient/unblock/${id}`)
+}
+

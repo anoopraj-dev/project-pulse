@@ -2,7 +2,6 @@ const DoctorStatusBanner = ({
   approvalStatus,
   rejectionReason,
   blockedReason,
-  resubmissionApproved,
   submissionCount,
   variant = "doctor",
 }) => {
@@ -40,25 +39,6 @@ const DoctorStatusBanner = ({
         'This profile has been sent for resubmission'
     },
   };
-
-
-  // let activeStatus = approvalStatus;
-
-  // if (
-  //   approvalStatus === "rejected" &&
-  //   resubmissionApproved &&
-  //   variant === "doctor"
-  // ) {
-  //   activeStatus = "requestedResubmission";
-  // }
-
-  // if( approvalStatus ==='pending' &&
-  //   resubmissionApproved &&
-  //   variant === 'doctor'
-  // ){
-  //   activeStatus = 'resubmission'
-  // }
-
 
 
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import DoctorStatusTabs from "../../components/user/admin/doctors/DoctorStatusTabs";
-import DoctorsTable from "../../components/user/admin/doctors/DoctorsTable";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import { getAllDoctors } from "../../api/admin/adminApis";
 import toast from "react-hot-toast";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
+import DataTable from "../../components/shared/components/DataTable";
+import { doctorColumns } from "../../components/shared/configs/TableConfigs";
 
 const ViewDoctors = () => {
   const [activeTab, setActiveTab] = useState("approved");
@@ -28,18 +29,24 @@ const ViewDoctors = () => {
   }, []);
 
   const handleView = (id) => {
-    navigate(`/admin/doctor/${id}`)
+    navigate(`/admin/doctor/${id}`);
   };
-  console.log('data from api',doctors)
+  console.log("data from api", doctors);
   const filteredDoctors = doctors?.filter((doc) => doc.status === activeTab);
-  console.log(filteredDoctors)
+  console.log(filteredDoctors);
 
   return (
     <div className="p-12 mt-18 min-h-screen">
       <DoctorStatusTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <DoctorsTable
+      {/* <DoctorsTable
         doctors={filteredDoctors}
+        onView={handleView}
+      /> */}
+
+      <DataTable
+        data={filteredDoctors}
+        columns={doctorColumns}
         onView={handleView}
       />
     </div>
