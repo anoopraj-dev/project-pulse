@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import DoctorCard from '../../components/shared/components/DoctorCard';
 import toast from 'react-hot-toast';
 import { Icon } from '@iconify/react';
+import { useNavigate } from 'react-router-dom';
 
 const PatientDoctors = () => {
   const [doctors, setDoctors] = useState([]);
   const fetchDoctorsAction = useAsyncAction();
+  const navigate = useNavigate();
 
   const fetchAllDoctors = () => {
     fetchDoctorsAction.executeAsyncFn(async () => {
@@ -25,6 +27,11 @@ const PatientDoctors = () => {
       }
     });
   };
+
+  const handleProfileView = (id) => {
+    navigate(`/patient/doctor/${id}`)
+    
+  }
 
   const approvedDoctors = doctors.filter(doc => doc.status === 'approved');
 
@@ -116,7 +123,7 @@ const PatientDoctors = () => {
             <DoctorCard
               key={doc._id}
               doctor={doc}
-              onView={() => console.log(doc._id)}
+              onView={()=>handleProfileView(doc._id)}
             />
           ))}
         </div>

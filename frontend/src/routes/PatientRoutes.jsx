@@ -1,6 +1,7 @@
 import ProtectedRoute from "../components/auth/routes/ProtectedRoute";
 import Layout from "../components/layout/components/Layout";
 import PatientDashboard from "../pages/patient/PatientDashboard";
+import PatientDoctorProfile from "../pages/patient/PatientDoctorProfile";
 import PatientDoctors from "../pages/patient/PatientDoctors";
 import PatientEditProfile from "../pages/patient/PatientEditProfile";
 import PatientOnboarding from "../pages/patient/PatientOnboarding";
@@ -11,7 +12,8 @@ const PatientRoutes = [
   { path: "/patient/personal-info", element: <ProtectedRoute allowedRoles={['patient']}><PatientOnboarding /></ProtectedRoute> },
   { path: "/patient/profile", element: <ProtectedRoute allowedRoles={['patient']}><Layout><PatientsProfile /></Layout></ProtectedRoute> },
   { path: '/patient/edit-profile', element: <ProtectedRoute allowedRoles={['patient']}><Layout><PatientEditProfile/></Layout></ProtectedRoute>},
-  { path: '/patient/doctors', element: <ProtectedRoute allowedRoles={['patient']}><Layout><PatientDoctors/></Layout></ProtectedRoute>}
+  { path: '/patient/doctors', element: <ProtectedRoute allowedRoles={['patient']}><Layout><PatientDoctors/></Layout></ProtectedRoute>},
+  { path: "/patient/doctor/:id", element: <ProtectedRoute allowedRoles={['patient']}><Layout><PatientDoctorProfile/></Layout></ProtectedRoute>}
 ];
 
 export default PatientRoutes;

@@ -37,4 +37,9 @@ export const updatePatientProfile = (payload) => {
 //------------- DOCTORS DISPLAY -------------
 export const getAllDoctors = ()=>{
   return api.get('/api/patient/doctors')
+  
+}
+//---------------- View Doctor ------------------
+export const viewDoctorProfile = (id) => {
+  return api.get(`/api/patient/doctor/${id}`)
 }

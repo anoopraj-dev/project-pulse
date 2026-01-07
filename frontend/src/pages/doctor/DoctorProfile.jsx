@@ -131,6 +131,7 @@ const DoctorProfile = () => {
 
       {!user.isBlocked && (
         <ProfileView
+          viewer= 'doctor'
           user={user}
           onEdit={handleProfileEdit}
           onProfilePictureUpload={handleUpdateProfilePicture}

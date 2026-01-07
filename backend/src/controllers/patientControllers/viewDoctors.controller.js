@@ -23,3 +23,31 @@ export const getApprovedDoctors = async (req,res)=>{
     }
 
 }
+
+export const viewDoctorProfile = async (req,res) => {
+    console.log('view doctor profile')
+    const {id} = req.params
+
+    try {
+        const doctor = await Doctor.findById(id);
+        console.log(doctor)
+        if(!doctor) {
+            return res.status(404).json({
+                success: false,
+                message: 'Doctor not found',
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:'Data loaded successfully',
+            user:doctor
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:'Internal server error'
+        })
+    }
+}

@@ -7,6 +7,7 @@ import ActionButton from "../../../shared/components/ActionButton";
 
 //----------------------- DOCTOR PROFILE COMPONENT ---------------------
 const ProfileView = ({
+  viewer,
   user,
   onApprove,
   onVerify,
@@ -38,11 +39,11 @@ const ProfileView = ({
   return (
     <div className="min-h-screen mt-18 flex flex-col items-center">
       {/* ------------Welcome text------- */}
-      {!isProfileReview && (
+      {!viewer === 'doctor' && (
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold">
             Welcome back{" "}
-            {user?.name.charAt(0).toUpperCase() + user?.name.slice(1)}!
+            {user?.name?.charAt(0).toUpperCase() + user?.name?.slice(1)}!
           </h1>
           <p className="text-gray-600">
             Your profile is all set. You can update your details anytime.
@@ -55,7 +56,7 @@ const ProfileView = ({
         <div className="flex flex-col p-5 rounded-sm hover:rounded-4xl hover:shadow-lg gap-5 hover:bg-blue-100 transition-all duration-300 ease-in-out">
           <div className="flex px-5 items-center gap-5 justify-between">
             <div className="flex items-center gap-8">
-              {isProfileReview ? (
+              {viewer==='admin' || 'patient' ? (
                 <div className="w-32 h-32 rounded-full border border-blue-300">
                   <img
                     src={user?.profilePicture}
@@ -74,7 +75,7 @@ const ProfileView = ({
                 />
               )}
               <h1 className="font-bold text-3xl text-[#0096C7]">
-                Dr. {user?.name.charAt(0).toUpperCase() + user?.name.slice(1)}
+                Dr. {user?.name?.charAt(0).toUpperCase() + user?.name?.slice(1)}
               </h1>
             </div>
 
@@ -109,7 +110,7 @@ const ProfileView = ({
         {/* --------------- Conditional Section ---------------------- */}
 
         <div className="flex justify-center gap-3">
-          {!isProfileReview && (
+          {viewer==='doctor' && (
             <>
               <ActionButton
                 action="edit"
@@ -118,7 +119,7 @@ const ProfileView = ({
                 text="Edit Profile"
                 onClick={() => handleAction("edit", onEdit)}
                 disabled={
-                  !(user.status === "approved" || user.status === "resubmit")
+                  !(user?.status === "approved" || user?.status === "resubmit")
                 }
                 className="bg-[#0096C7] hover:bg-blue-600"
               />
@@ -130,7 +131,7 @@ const ProfileView = ({
                 text="Update Photo"
                 onClick={() => handleAction("photo", onProfilePictureUpload)}
                 disabled={
-                  !(user.status === "approved" || user.status === "resubmit")
+                  !(user?.status === "approved" || user?.status === "resubmit")
                 }
                 className="bg-[#0096C7] hover:bg-blue-600"
               />
@@ -142,12 +143,12 @@ const ProfileView = ({
                 text="Upload Certificates"
                 onClick={() => handleAction("certificate", onCerticateUpload)}
                 disabled={
-                  !(user.status === "approved" || user.status === "resubmit")
+                  !(user?.status === "approved" || user?.status === "resubmit")
                 }
                 className="bg-[#0096C7] hover:bg-blue-600"
               />
 
-              {user.status === "rejected" && (
+              {user?.status === "rejected" && (
                 <ActionButton
                   action="request-resubmit"
                   activeAction={activeAction}
@@ -160,7 +161,7 @@ const ProfileView = ({
                 />
               )}
 
-              {user.status === "resubmit" && (
+              {user?.status === "resubmit" && (
                 <ActionButton
                   action="resubmit"
                   activeAction={activeAction}
@@ -173,7 +174,34 @@ const ProfileView = ({
             </>
           )}
 
-          {isProfileReview && (
+          {
+            viewer==='patient' && (
+              <>
+              <ActionButton
+                action="documents"
+                activeAction={activeAction}
+                icon="mdi:file-document"
+                text="Book Appointment"
+                onClick={() =>
+                  handleAction("documents", () => onVerify(user?._id))
+                }
+                className="bg-blue-500 hover:bg-blue-600"
+              />
+              <ActionButton
+                action="documents"
+                activeAction={activeAction}
+                icon="mdi:file-document"
+                text="Message"
+                onClick={() =>
+                  handleAction("documents", () => onVerify(user?._id))
+                }
+                className="bg-blue-500 hover:bg-blue-600"
+              />
+              </>
+            )
+          }
+
+          {viewer==='admin' && (
             <>
               <ActionButton
                 action="documents"
@@ -181,14 +209,14 @@ const ProfileView = ({
                 icon="mdi:file-document"
                 text="Documents"
                 onClick={() =>
-                  handleAction("documents", () => onVerify(user._id))
+                  handleAction("documents", () => onVerify(user?._id))
                 }
                 className="bg-blue-500 hover:bg-blue-600"
               />
 
-              {user.status === "pending" &&
-                !user.isBlocked &&
-                !user.resubmission && (
+              {user?.status === "pending" &&
+                !user?.isBlocked &&
+                !user?.resubmission && (
                   <>
                     <ActionButton
                       action="approve"
@@ -197,7 +225,7 @@ const ProfileView = ({
                       text="Approve"
                       loadingText="Approving..."
                       onClick={() =>
-                        handleAction("approve", () => onApprove(user._id))
+                        handleAction("approve", () => onApprove(user?._id))
                       }
                       className="bg-green-600 hover:bg-green-700"
                     />
@@ -214,7 +242,7 @@ const ProfileView = ({
                   </>
                 )}
 
-              {user.status === "approved" && !user.isBlocked && (
+              {user?.status === "approved" && !user?.isBlocked && (
                 <ActionButton
                   action="block"
                   activeAction={activeAction}
@@ -226,7 +254,7 @@ const ProfileView = ({
                 />
               )}
 
-              {user.status === "requestedResubmission" && !user.isBlocked && (
+              {user?.status === "requestedResubmission" && !user?.isBlocked && (
                 <ActionButton
                   action="revoke"
                   activeAction={activeAction}
@@ -238,7 +266,7 @@ const ProfileView = ({
                 />
               )}
 
-              {user.isBlocked && (
+              {user?.isBlocked && (
                 <ActionButton
                   action="unblock"
                   activeAction={activeAction}
