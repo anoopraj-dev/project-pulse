@@ -37,7 +37,7 @@ const ProfileView = ({
   };
 
   return (
-    <div className="min-h-screen mt-18 flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center">
       {/* ------------Welcome text------- */}
       {!viewer === 'doctor' && (
         <div className="flex flex-col">

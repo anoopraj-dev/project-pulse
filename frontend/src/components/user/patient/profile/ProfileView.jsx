@@ -18,7 +18,7 @@ const ProfileView = ({
   if (!user) return null;
 
   return (
-    <div className=" mt-18  flex flex-col items-center">
+    <div className=" flex flex-col items-center">
       {/* ------------Welcome text------- */}
       {!isProfileReview && (
         <div className="flex flex-col">

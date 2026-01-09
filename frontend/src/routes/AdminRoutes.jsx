@@ -8,13 +8,22 @@ import ViewDoctors from "../pages/admin/ViewDoctors";
 import ViewPatients from "../pages/admin/ViewPatients";
 import PatientProfileView from "../pages/admin/PatientProfileView";
 
-const AdminRoutes = [
-  { path: "/admin/dashboard", element: ( <ProtectedRoute allowedRoles={['admin']}><Layout><Dashboard /> </Layout></ProtectedRoute> ), }, 
-  { path:'/admin/doctor/:id',element: (<ProtectedRoute allowedRoles={['admin']}><Layout><DoctorProfileView/></Layout></ProtectedRoute>)},
-  { path: '/admin/doctor/:id/documents', element: (<ProtectedRoute allowedRoles={['admin']}><Layout><ViewDocuments/></Layout></ProtectedRoute>)},
-  { path: '/admin/doctors', element: (<ProtectedRoute allowedRoles={['admin']}><Layout><ViewDoctors/></Layout></ProtectedRoute>)},
-  { path: '/admin/patients', element: (<ProtectedRoute allowedRoles={['admin']}><Layout><ViewPatients/></Layout></ProtectedRoute>)},
-  { path:'/admin/patient/:id',element: (<ProtectedRoute allowedRoles={['admin']}><Layout><PatientProfileView/></Layout></ProtectedRoute>)},
-]
+const AdminRoutes = {
+  element: (
+
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <Layout/>
+    </ProtectedRoute>
+    
+  ),
+  children: [
+    { path: "/admin/dashboard", element: <Dashboard /> },
+    { path: "/admin/doctors", element: <ViewDoctors /> },
+    { path: "/admin/doctor/:id", element: <DoctorProfileView /> },
+    { path: "/admin/doctor/:id/documents", element: <ViewDocuments /> },
+    { path: "/admin/patients", element: <ViewPatients /> },
+    { path: "/admin/patient/:id", element: <PatientProfileView /> },
+  ],
+};
 
 export default AdminRoutes;

@@ -12,7 +12,7 @@ const Sidebar = ({ toggleSidebar , config }) => {
   if (isLoading) return <SidebarShimmer />;
 
   return (
-    <aside className="h-screen bg-[#0096C7] text-white flex flex-col mt-15">
+    <aside className="h-screen bg-[#0096C7] text-white flex flex-col ">
       {/* Header */}
       <div className="flex justify-end p-4">
         <Icon

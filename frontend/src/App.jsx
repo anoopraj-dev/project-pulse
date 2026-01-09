@@ -1,5 +1,4 @@
 import { BrowserRouter as Router } from "react-router-dom";
-import Navbar from "./components/layout/components/Navbar";
 import AppRoutes from "./routes";
 import ModalProvider from "./contexts/ModalContext";
 import { Toaster } from "react-hot-toast";
@@ -12,7 +11,6 @@ const App = () => {
       <FileUploadProvider>
         <ImageModalProvider>
           <ModalProvider>
-            <Navbar />
             <AppRoutes />
           </ModalProvider>
         </ImageModalProvider>

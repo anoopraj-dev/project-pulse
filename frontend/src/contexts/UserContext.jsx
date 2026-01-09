@@ -11,7 +11,7 @@ const initialState = {
   name: "",
   profilePicture: "",
   isLoading: true,
-  isAuthenticated:false
+  isAuthenticated:null
 };
 
 // -------- REDUCER --------
@@ -21,7 +21,7 @@ const userReducer = (state, action) => {
       return { ...state, ...action.payload, isAuthenticated:true, isLoading: false };
 
     case "CLEAR_USER":
-      return { ...initialState, isAuthenticated:false, isLoading: false };
+      return { ...initialState, isAuthenticated:null, isLoading: false };
 
     case "SET_LOADING":
       return { ...state, isLoading: action.payload };
@@ -60,10 +60,14 @@ export const UserProvider = ({ children }) => {
 
       dispatch({ type: "CLEAR_USER" });
       return null;
-    } catch {
+    } catch (error){
+      
+        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+        return;
+      }
       dispatch({ type: "CLEAR_USER" });
-      return null;
     }
+    
   };
 
   // -------- INITIAL LOAD --------
@@ -77,11 +81,15 @@ export const UserProvider = ({ children }) => {
         if (data?.success) {
           dispatch({ type: "SET_USER", payload: data.user });
         } else {
-          dispatch({ type: "SET_LOADING", payload: false });
+          dispatch({ type:'CLEAR_USER' });
         }
-      } catch {
-        dispatch({ type: "SET_LOADING", payload: false });
+      } catch (error){
+        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+        return;
+        }
+         dispatch({ type:'CLEAR_USER' });
       }
+     
     };
     
 
