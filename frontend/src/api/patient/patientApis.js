@@ -43,3 +43,13 @@ export const getAllDoctors = ()=>{
 export const viewDoctorProfile = (id) => {
   return api.get(`/api/patient/doctor/${id}`)
 }
+
+//----------------- Search -----------------------
+export const searchApi = ({ searchKey, filters = {}, type }) => {
+  return api.get(`/api/patient/search/${type}`, {
+    params: {
+      searchKey,
+      ...filters,
+    },
+  });
+};

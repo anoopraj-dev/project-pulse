@@ -10,6 +10,7 @@ import { getCurrentUserInfo } from '../controllers/authControllers/currentUser.c
 import { updateClerKUser } from '../controllers/authControllers/clerkUser.controller.js';
 import { adminLogin } from '../controllers/authControllers/adminLogin.controller.js';
 
+
 const router = Router();
 
 const upload = multer();
@@ -26,6 +27,7 @@ router.post('/verify-email',verifyOtp)
 router.post('/set-password',setNewPassword);
 router.post('/resend-otp',resendOtp);
 router.post('/update-clerkUser' ,  updateClerKUser )
+
 
 
 
