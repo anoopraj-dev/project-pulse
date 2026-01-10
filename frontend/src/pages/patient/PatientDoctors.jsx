@@ -87,7 +87,7 @@ const PatientDoctors = () => {
 
   const approvedDoctors = doctors.filter((doc) => doc.status === "approved");
   const searchedDoctors =
-    query.trim().length > 0 && results.length > 0 ? results : approvedDoctors;
+    query.trim().length >0 ? results : approvedDoctors;
 
   const visibleDoctors = applyAllFilters(searchedDoctors, searchFilters);
   const isInitialLoading = fetchDoctorsAction.loading;
