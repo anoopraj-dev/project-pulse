@@ -11,7 +11,7 @@ const initialState = {
   name: "",
   profilePicture: "",
   isLoading: true,
-  isAuthenticated:null
+  isAuthenticated:null,
 };
 
 // -------- REDUCER --------

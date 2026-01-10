@@ -7,13 +7,21 @@ import DataTable from "../../components/shared/components/DataTable";
 import { patientColumns } from "../../components/shared/configs/TableConfigs";
 import PatientStatusTabs from "../../components/user/admin/patients/PatientStatusTabs";
 import { useNavigate } from "react-router-dom";
+import SearchInput from "../../components/shared/components/SearchInput";
+import { useSearch } from "../../hooks/useSearch";
+import { fetchSearchSuggestions } from "../../api/user/userApis";
 
 const ViewPatients = () => {
   const [activeTab, setActiveTab] = useState("active");
   const [patients, setPatients] = useState(null);
   const navigate = useNavigate();
   const fetchPatientsAction = useAsyncAction();
+  const { query, setQuery, results ,loading:searchLoading} = useSearch({
+    type: "patients",
+    role: "admin",
+  });
 
+  //------------- Get all patients -----------------
   const fetchAllPatients = () => {
     fetchPatientsAction.executeAsyncFn(async () => {
       try {
@@ -35,13 +43,36 @@ const ViewPatients = () => {
     fetchAllPatients();
   }, []);
 
+  //---------------- Search Suggestions ---------
+  const fetchSuggestions = (query) => {
+    return fetchSearchSuggestions({
+      role:'admin',
+      query,
+      type:'patient'
+    })
+  }
+
+  const handleSelectSuggestion = (item) => {
+    setQuery(item.name)
+  }
+  //--------------- View Patients --------------
   const handleView = (id) => {
     navigate(`/admin/patient/${id}`);
   };
 
+
+
   const filteredPatients = patients?.filter(
     (patient) => patient?.status === activeTab
   );
+
+  const filteredSearchResult = results?.filter(
+    (patient) => patient?.status === activeTab
+  );
+
+  const displayedPatients = query.trim()
+    ? filteredSearchResult
+    : filteredPatients;
 
   const isLoading = fetchPatientsAction.loading;
 
@@ -103,6 +134,22 @@ const ViewPatients = () => {
         </div>
       </div>
 
+      <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+        <SearchInput
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search patients"
+          fetchSuggestions={fetchSuggestions}
+          onSelectSuggestion={handleSelectSuggestion}
+        />
+        {searchLoading && (
+            <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+              <Icon icon="mdi:loading" className="animate-spin" />
+              Searching…
+            </div>
+          )}
+      </div>
+
       {/* Content section */}
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
@@ -132,7 +179,7 @@ const ViewPatients = () => {
           <div className="px-2 py-3 sm:px-4">
             {filteredPatients && filteredPatients.length > 0 ? (
               <DataTable
-                data={filteredPatients}
+                data={displayedPatients}
                 columns={patientColumns}
                 onView={handleView}
               />
