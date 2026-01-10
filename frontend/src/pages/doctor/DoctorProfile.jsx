@@ -17,7 +17,7 @@ import {
 } from "../../components/ui/modals/ModalInputs";
 import PrimaryButton from "../../components/shared/components/PrimaryButton";
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
-import BlockedProfile from "../../components/user/doctor/profile/BlockedProfile";
+import BlockedProfile from "../../components/shared/components/BlockedProfile";
 
 const DoctorProfile = () => {
   const [user, setUser] = useState(null);
@@ -131,6 +131,7 @@ const DoctorProfile = () => {
 
       {!user.isBlocked && (
         <ProfileView
+          viewer= 'doctor'
           user={user}
           onEdit={handleProfileEdit}
           onProfilePictureUpload={handleUpdateProfilePicture}

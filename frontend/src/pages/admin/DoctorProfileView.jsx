@@ -121,7 +121,7 @@ const DoctorProfileView = () => {
   return (
     <div className='flex flex-col mt-18'>
       <DoctorStatusBanner approvalStatus={user?.status} resubmissionApproved={user.resubmissionApproved} submissionCount={user.submissionCount} variant="admin"/>
-      <ProfileView user= {user} onApprove={handleApproveDoctor} onVerify={handleVerifyDocuments} onReject ={handleReject} onBlock={handleBlock} onRevokeStatus={handleRevokeStatus} onUnblock={handleUnblock}/>
+      <ProfileView viewer='admin' user= {user} onApprove={handleApproveDoctor} onVerify={handleVerifyDocuments} onReject ={handleReject} onBlock={handleBlock} onRevokeStatus={handleRevokeStatus} onUnblock={handleUnblock}/>
     </div>
   )
 }

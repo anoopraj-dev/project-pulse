@@ -21,7 +21,7 @@ const AuthCard = ({ role: initialRole }) => {
     return storedRole === "doctor";
   });
 
-  const oauthProgress = sessionStorage.getItem("oauthProgress") === "true";
+  const [oauthProgress, setOauthProgress] = useState(() => sessionStorage.getItem("oauthProgress") === "true");
   const [showPassword, setShowPassword] = useState(false);
 
   const location = useLocation();
@@ -54,6 +54,7 @@ const AuthCard = ({ role: initialRole }) => {
     const role = isDoctor ? "doctor" : "patient";
     sessionStorage.setItem("userRole", role);
     sessionStorage.setItem("oauthProgress", "true");
+   
     openSignIn();
   };
 
@@ -141,7 +142,7 @@ const AuthCard = ({ role: initialRole }) => {
 
   useEffect(() => {
     if (!isLoaded || !user || !isSignedIn) return;
-
+     setOauthProgress(true)
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -186,6 +187,7 @@ const AuthCard = ({ role: initialRole }) => {
         dispatch({ type: "CLEAR_USER" });
       } finally {
         sessionStorage.removeItem("oauthProgress");
+        setOauthProgress(false)
       }
     };
 

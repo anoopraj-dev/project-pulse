@@ -1,6 +1,6 @@
 const SidebarShimmer = () => {
   return (
-    <div className="h-screen bg-[#0096C7] animate-pulse p-4 space-y-6 mt-15">
+    <div className="h-screen animate-pulse bg-gray-300 p-4 space-y-6 mt-15">
       <div className="flex justify-end">
         <div className="w-8 h-8 bg-white/30 rounded-md" />
       </div>

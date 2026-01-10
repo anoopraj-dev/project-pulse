@@ -32,3 +32,24 @@ export const fetchPatientProfile = () => {
 export const updatePatientProfile = (payload) => {
   return api.put('/api/patient/update-profile', payload);
 }
+
+
+//------------- DOCTORS DISPLAY -------------
+export const getAllDoctors = ()=>{
+  return api.get('/api/patient/doctors')
+  
+}
+//---------------- View Doctor ------------------
+export const viewDoctorProfile = (id) => {
+  return api.get(`/api/patient/doctor/${id}`)
+}
+
+//----------------- Search -----------------------
+export const searchApi = ({ searchKey, filters = {}, type }) => {
+  return api.get(`/api/patient/search/${type}`, {
+    params: {
+      searchKey,
+      ...filters,
+    },
+  });
+};

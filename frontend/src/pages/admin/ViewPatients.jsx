@@ -1,30 +1,29 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import DoctorStatusTabs from "../../components/user/admin/doctors/DoctorStatusTabs";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
-import { getAllDoctors } from "../../api/admin/adminApis";
+import { getAllPatients } from "../../api/admin/adminApis";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/shared/components/DataTable";
-import { doctorColumns } from "../../components/shared/configs/TableConfigs";
+import { patientColumns } from "../../components/shared/configs/TableConfigs";
+import PatientStatusTabs from "../../components/user/admin/patients/PatientStatusTabs";
+import { useNavigate } from "react-router-dom";
 
-const ViewDoctors = () => {
-  const [activeTab, setActiveTab] = useState("approved");
-  const [doctors, setDoctors] = useState([]);
-  const fetchAllDoctorsAction = useAsyncAction();
+const ViewPatients = () => {
+  const [activeTab, setActiveTab] = useState("active");
+  const [patients, setPatients] = useState(null);
   const navigate = useNavigate();
+  const fetchPatientsAction = useAsyncAction();
 
-  const fetchAllDoctors = () => {
-    fetchAllDoctorsAction.executeAsyncFn(async () => {
+  const fetchAllPatients = () => {
+    fetchPatientsAction.executeAsyncFn(async () => {
       try {
-        const response = await getAllDoctors();
+        const res = await getAllPatients();
 
-        if (!response?.success) {
-          toast.error(response?.message || "Failed to load data");
-          return;
+        if (!res?.data?.success) {
+          return toast.error(res?.data?.message || "Failed to load data");
         }
 
-        setDoctors(response.users || []);
+        setPatients(res?.data?.users || []);
       } catch (error) {
         console.error(error);
         toast.error("Something went wrong");
@@ -33,60 +32,46 @@ const ViewDoctors = () => {
   };
 
   useEffect(() => {
-    fetchAllDoctors();
+    fetchAllPatients();
   }, []);
 
   const handleView = (id) => {
-    navigate(`/admin/doctor/${id}`);
+    navigate(`/admin/patient/${id}`);
   };
 
-  const filteredDoctors = doctors.filter(
-    (doc) => doc.status === activeTab
+  const filteredPatients = patients?.filter(
+    (patient) => patient?.status === activeTab
   );
 
-  const isLoading = fetchAllDoctorsAction.loading;
+  const isLoading = fetchPatientsAction.loading;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* ---------- Header band ---------- */}
+      {/* Header band */}
       <div className="bg-gradient-to-br from-sky-50 via-white to-cyan-50">
         <div className="mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            {/* Title */}
+            {/* Title + subtitle */}
             <div>
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-                <Icon icon="mdi:shield-account" className="h-4 w-4" />
-                Admin · Doctors
+                <Icon icon="mdi:shield-account-outline" />
+                Admin · Patients
               </p>
-
-              <h1 className="mt-2 text-xl font-semibold text-slate-900 sm:text-4xl">
-                Manage Doctors
+              <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
+                Manage Patients
               </h1>
-
               <p className="mt-2 max-w-xl text-sm text-slate-600">
-                Review, approve, or reject doctors using a clear status-based
-                management view.
+                View and manage patient accounts by status with a clean, tabbed
+                table view.
               </p>
             </div>
 
-            {/* Status + loading */}
+            {/* Status meta + loading */}
             <div className="flex flex-col items-start gap-2 sm:items-end">
               <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm ring-1 ring-slate-200">
                 <Icon
-                  icon={
-                    activeTab === "approved"
-                      ? "mdi:check-circle"
-                      : activeTab === "pending"
-                      ? "mdi:clock-outline"
-                      : "mdi:close-circle"
-                  }
-                  className={
-                    activeTab === "approved"
-                      ? "text-emerald-500"
-                      : activeTab === "pending"
-                      ? "text-amber-500"
-                      : "text-red-500"
-                  }
+                  icon="mdi:circle"
+                  className="text-[10px] text-emerald-500"
                 />
                 <span>
                   Active tab:{" "}
@@ -100,9 +85,9 @@ const ViewDoctors = () => {
                 <span className="inline-flex items-center gap-2 text-[11px] text-slate-500">
                   <Icon
                     icon="mdi:loading"
-                    className="h-4 w-4 animate-spin text-sky-500"
+                    className="animate-spin text-sky-500"
                   />
-                  Loading doctors...
+                  Loading patients...
                 </span>
               )}
             </div>
@@ -110,7 +95,7 @@ const ViewDoctors = () => {
 
           {/* Tabs */}
           <div className="mt-5">
-            <DoctorStatusTabs
+            <PatientStatusTabs
               activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
@@ -118,54 +103,53 @@ const ViewDoctors = () => {
         </div>
       </div>
 
-      {/* ---------- Content ---------- */}
+      {/* Content section */}
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          {/* Table header */}
           <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <Icon icon="mdi:doctor" className="h-4 w-4 text-sky-600" />
-                {activeTab === "approved"
-                  ? "Approved doctors"
-                  : activeTab === "pending"
-                  ? "Pending approval"
-                  : "Rejected doctors"}
+                <Icon icon="mdi:account-multiple-outline" />
+                {activeTab === "active"
+                  ? "Active patients"
+                  : activeTab === "inactive"
+                  ? "Inactive patients"
+                  : activeTab === "blocked"
+                  ? "Blocked patients"
+                  : "Patients"}
               </h2>
 
               <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
-                <Icon icon="mdi:counter" className="h-4 w-4 text-slate-500" />
-                <span className="font-semibold text-slate-900">
-                  {filteredDoctors.length}
+                <Icon icon="mdi:format-list-bulleted" />
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-[11px] font-semibold text-sky-700">
+                  {filteredPatients?.length ?? 0}
                 </span>
-                records
+                records in this view
               </div>
             </div>
           </div>
 
-          {/* Table / empty state */}
           <div className="px-2 py-3 sm:px-4">
-            {filteredDoctors.length > 0 ? (
+            {filteredPatients && filteredPatients.length > 0 ? (
               <DataTable
-                data={filteredDoctors}
-                columns={doctorColumns}
+                data={filteredPatients}
+                columns={patientColumns}
                 onView={handleView}
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
                   <Icon
-                    icon="mdi:clipboard-text-outline"
-                    className="h-6 w-6 text-slate-400"
+                    icon="mdi:account-off-outline"
+                    className="text-xl text-slate-400"
                   />
                 </div>
-
                 <h3 className="mt-4 text-sm font-semibold text-slate-900">
-                  No doctors in this state
+                  No patients in this state
                 </h3>
-
                 <p className="mt-1 max-w-sm text-xs text-slate-500">
-                  Switch tabs to review doctors in other approval states.
+                  Switch tabs to view patients in other statuses or onboard new
+                  patients from the admin panel.
                 </p>
               </div>
             )}
@@ -176,4 +160,4 @@ const ViewDoctors = () => {
   );
 };
 
-export default ViewDoctors;
+export default ViewPatients;
