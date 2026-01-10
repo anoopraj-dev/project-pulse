@@ -9,12 +9,14 @@ import SearchInput from "../../components/shared/components/SearchInput";
 import { useSearch } from "../../hooks/useSearch";
 import ApplyFilters from "../../components/shared/components/ApplyFilters";
 import { doctorFilterConfig } from "../../components/shared/configs/FilterConfigs";
+import { fetchSearchSuggestions} from "../../api/user/userApis";
 
 const PatientDoctors = () => {
   const [doctors, setDoctors] = useState([]);
   const fetchDoctorsAction = useAsyncAction();
   const navigate = useNavigate();
   const [searchFilters, setSearchFilters] = useState({});
+
 
   const {
     query,
@@ -75,6 +77,19 @@ const PatientDoctors = () => {
     );
   };
 
+  //--------------- Search Suggestions -------------
+  const fetchSuggestions = (query) => {
+    return fetchSearchSuggestions({
+      role: "patient",
+      query,
+      type: "doctor",
+    });
+  };
+
+  const handleSelectSuggestion = (item) => {
+    setQuery(item.name);
+  };
+
   //--------------- View Profile ------------------
 
   const handleProfileView = (id) => {
@@ -86,8 +101,7 @@ const PatientDoctors = () => {
   }, []);
 
   const approvedDoctors = doctors.filter((doc) => doc.status === "approved");
-  const searchedDoctors =
-    query.trim().length >0 ? results : approvedDoctors;
+  const searchedDoctors = query.trim().length > 0 ? results : approvedDoctors;
 
   const visibleDoctors = applyAllFilters(searchedDoctors, searchFilters);
   const isInitialLoading = fetchDoctorsAction.loading;
@@ -139,10 +153,13 @@ const PatientDoctors = () => {
 
         {/* Search Bar */}
         <div className="mb-8">
+
           <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search doctors or specialization"
+            fetchSuggestions={fetchSuggestions}
+            onSelectSuggestion={handleSelectSuggestion}
           />
 
           {searchLoading && (
@@ -163,7 +180,7 @@ const PatientDoctors = () => {
           </div>
 
           <div className="flex-1 lg:min-w-0">
-            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
               {visibleDoctors?.map((doc) => (
                 <DoctorCard
                   key={doc._id}

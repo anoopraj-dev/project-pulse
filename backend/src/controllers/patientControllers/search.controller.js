@@ -67,3 +67,61 @@ const searchDoctors = async (regex, filters) => {
     .limit(limit)
     .skip((page - 1) * limit);
 };
+
+
+
+export const searchSuggestionsController = async (req, res) => {
+  try {
+    const { query = "", type, limit = 6 } = req.query;
+
+    if (!query || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Query and type are required",
+      });
+    }
+
+    const regex = new RegExp(`^${query}`, "i"); 
+
+    let data = [];
+
+
+    //--------- Search query --------------
+    if (type === "doctor") {
+      data = await Doctor.find(
+          { name: regex }   
+      )
+        .limit(Number(limit));
+    }
+
+    if (type === 'specialization'){
+      const specs = await Doctor.distinct('professionalInfo.specializations',{
+        'professionalInfo.specializations':regex
+      })
+
+      // send as object 
+      data = specs.map((s)=>({name:s}))
+    }
+
+
+    if ( type === 'location'){
+      const loc = await Doctor.distinct('location',
+        {location: regex})
+
+
+        // send as object
+        data = loc.map((l)=> ({name:l}))
+    }
+
+    return res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error("Suggestion error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Suggestion fetch failed",
+    });
+  }
+};

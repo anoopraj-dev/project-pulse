@@ -4,6 +4,7 @@ export const doctorFilterConfig = [
         label:'Specialization',
         type: 'text',
         placeholder:'e.g. Cardiology',
+        typeahead:true,
         mapToBackend: (value) => {
             value? { specialization: value} : {}
         }
@@ -14,6 +15,7 @@ export const doctorFilterConfig = [
         label:'Location',
         type: 'text',
         placeholder:'e.g. Kochi',
+        typeahead: true,
         mapToBackend: (value) =>{
             value? {location:value} : {}
         }
