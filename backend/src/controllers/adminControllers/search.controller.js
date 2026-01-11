@@ -1,10 +1,13 @@
 import Doctor from "../../models/doctor.model.js";
+import Patient from "../../models/patient.model.js";
 
 //------------- SEARCH CONTROLLER ----------------
 
 export const searchController = async (req, res) => {
   try {
     const { query, type, filters } = req.query;
+
+    console.log(query)
 
     if (!query || !type) {
       return res.status(400).json({
@@ -16,21 +19,40 @@ export const searchController = async (req, res) => {
     const parsedFilters = filters ? JSON.parse(filters) : {};
     const regex = new RegExp(query, "i");
 
-    const doctors = await searchDoctors(regex, parsedFilters);
+    if (type === "doctors") {
+      const doctors = await searchDoctors(regex, parsedFilters);
 
-    if (!doctors.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No matching doctors found",
-        users:[]
+      if (!doctors.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No matching doctors found",
+          users: [],
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Matching doctors found",
+        users: doctors,
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Matching doctors found",
-      users: doctors,
-    });
+    if (type === "patients") {
+      const patients = await searchPatients(regex, parsedFilters);
+      if (!patients.length) {
+        return res.status(404).json({
+          success: false,
+          message: "No matching patients found",
+          users: [],
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Matching patients found",
+        users: patients,
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -68,8 +90,23 @@ const searchDoctors = async (regex, filters) => {
     .skip((page - 1) * limit);
 };
 
+//-------------------- Search Patients ---------------
 
+const searchPatients = async (regex, filters) => {
+  const limit = Number(filters.limit) || 20;
+  const page = Number(filters.page) || 1;
 
+  let query = {
+    name: regex,
+  };
+
+  return Patient.find(query)
+    .select("-password")
+    .limit(limit)
+    .skip((page - 1) * limit);
+};
+
+//----------------- Search Suggestions ---------------
 export const searchSuggestionsController = async (req, res) => {
   try {
     const { query = "", type, limit = 6 } = req.query;
@@ -81,36 +118,33 @@ export const searchSuggestionsController = async (req, res) => {
       });
     }
 
-    const regex = new RegExp(`^${query}`, "i"); 
+    const regex = new RegExp(`^${query}`, "i");
 
     let data = [];
 
-
     //--------- Search query --------------
     if (type === "doctor") {
-      data = await Doctor.find(
-          { name: regex }   
-      )
-        .limit(Number(limit));
+      data = await Doctor.find({ name: regex }).limit(Number(limit));
     }
 
-    if (type === 'specialization'){
-      const specs = await Doctor.distinct('professionalInfo.specializations',{
-        'professionalInfo.specializations':regex
-      })
+    if (type === "specialization") {
+      const specs = await Doctor.distinct("professionalInfo.specializations", {
+        "professionalInfo.specializations": regex,
+      });
 
-      // send as object 
-      data = specs.map((s)=>({name:s}))
+      // send as object
+      data = specs.map((s) => ({ name: s }));
     }
 
+    if (type === "location") {
+      const loc = await Doctor.distinct("location", { location: regex });
 
-    if ( type === 'location'){
-      const loc = await Doctor.distinct('location',
-        {location: regex})
+      // send as object
+      data = loc.map((l) => ({ name: l }));
+    }
 
-
-        // send as object
-        data = loc.map((l)=> ({name:l}))
+    if (type === 'patient') {
+       data = await Patient.find({name:regex}).limit(Number(limit))
     }
 
     return res.status(200).json({

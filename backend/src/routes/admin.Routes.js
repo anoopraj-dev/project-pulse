@@ -3,6 +3,7 @@ import { authenticateUser} from "../middlewares/authenticateUser.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { approveDoctorsRequest, getAdminDashboard, getAllDoctors, getDoctorDocuments, getPendingDoctorProfile, rejectDoctorsRequest,blockDoctorProfile, revokeDoctorStatus, unblockDoctorProfile } from "../controllers/adminControllers/adminDashboard.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
+import { searchController, searchSuggestionsController } from "../controllers/adminControllers/search.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------
@@ -23,4 +24,7 @@ router.get('/patients',getAllPatients)
 router.get('/patient/:id',getPatientProfile)
 router.patch('/patient/block/:id',blockPatientProfile);
 router.patch('/patient/unblock/:id',unblockPatientProfile)
+
+router.get('/search',searchController)
+router.get('/search/suggestions', searchSuggestionsController)
 export default router;

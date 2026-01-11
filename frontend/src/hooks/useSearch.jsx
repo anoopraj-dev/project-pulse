@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAsyncAction } from "./useAsyncAction";
 import { searchApi } from "../api/user/userApis";
 
-export const useSearch = ({ role,type, minLength = 2, debounce = 400,filters={} }) => {
+export const useSearch = ({ role,type, minLength = 1, debounce = 400,filters={} }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const searchAction = useAsyncAction();

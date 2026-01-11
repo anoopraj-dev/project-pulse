@@ -3,7 +3,7 @@ import { authenticateUser } from "../middlewares/authenticateUser.js";
 import { getPatientProfile, updatePatientProfile} from "../controllers/patientControllers/profile.controller.js";
 import {  updateLifeStyleInfo, updatePersonalInfo, updateMedicalInfo } from '../controllers/patientControllers/onboarding.controller.js'
 import { getApprovedDoctors,   viewDoctorProfile } from "../controllers/patientControllers/viewDoctors.controller.js";
-import { searchController } from "../controllers/patientControllers/search.controller.js";
+import { searchController, searchSuggestionsController } from "../controllers/patientControllers/search.controller.js";
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
@@ -24,5 +24,6 @@ router.put('/update-profile', updatePatientProfile);
 router.get('/doctors',getApprovedDoctors);
 router.get('/doctor/:id',viewDoctorProfile)
 router.get('/search',searchController)
+router.get('/search/suggestions',searchSuggestionsController)
 
 export default router;

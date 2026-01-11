@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
+import { useTypeahead } from "../../../hooks/useTypeahead";
+import { fetchSearchSuggestions } from "../../../api/user/userApis";
 
 const ApplyFilters = ({ config, onApply }) => {
+  // ---------------- Initial states ----------------
   const initialEnabled = config.reduce((acc, f) => {
     acc[f.key] = false;
     return acc;
@@ -14,12 +17,34 @@ const ApplyFilters = ({ config, onApply }) => {
 
   const [enabled, setEnabled] = useState(initialEnabled);
   const [values, setValues] = useState(initialValues);
+  const [activeField, setActiveField] = useState(null);
 
+  // ---------------- Typeahead hook  ----------------
+  const activeQuery = activeField ? values[activeField] : "";
+
+  const { suggestions, loading } = useTypeahead({
+    query: activeQuery,
+    apiCall: (query) =>
+      fetchSearchSuggestions({
+        role: "patient",
+        query,
+        type: activeField, 
+      }),
+  });
+
+
+  // ---------------- Toggle filter ----------------
   const handleToggle = (e) => {
     const { name, checked } = e.target;
     setEnabled((prev) => ({ ...prev, [name]: checked }));
+
+    if (!checked) {
+      setValues((prev) => ({ ...prev, [name]: "" }));
+      setActiveField(null);
+    }
   };
 
+  // ---------------- Apply filters ----------------
   const handleApply = () => {
     const filters = {};
 
@@ -29,15 +54,21 @@ const ApplyFilters = ({ config, onApply }) => {
       }
     });
 
-    console.log("ApplyFilters → sending:", filters);
     onApply(filters);
   };
 
+  // ---------------- Clear filters ----------------
   const handleClear = () => {
     setEnabled(initialEnabled);
     setValues(initialValues);
+    setActiveField(null);
     onApply({});
   };
+
+  // ---------------- Hide suggestions if input cleared ----------------
+  useEffect(() => {
+    if (!activeQuery) setActiveField(null);
+  }, [activeQuery]);
 
   return (
     <div className="mt-6 rounded-2xl bg-white/80 backdrop-blur-sm p-6 shadow-sm ring-1 ring-slate-200">
@@ -51,7 +82,7 @@ const ApplyFilters = ({ config, onApply }) => {
 
       <div className="space-y-4">
         {config.map((filter) => (
-          <div key={filter.key} className="group">
+          <div key={filter.key} className="group relative">
             {/* Checkbox */}
             <label className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-50 transition-all group-hover:shadow-sm">
               <input
@@ -86,13 +117,17 @@ const ApplyFilters = ({ config, onApply }) => {
                   <input
                     type={filter.type}
                     placeholder={filter.placeholder}
-                    value={values[filter.key]}
-                    onChange={(e) =>
+                    value={values[filter.key] || ''}
+                    onChange={(e) => {
                       setValues((prev) => ({
                         ...prev,
                         [filter.key]: e.target.value,
-                      }))
-                    }
+                      }));
+
+                      if (filter.typeahead) {
+                        setActiveField(filter.key);
+                      }
+                    }}
                     className={`
                       w-full pr-4 py-2.5 text-sm
                       ${filter.icon ? "pl-10" : "pl-4"}
@@ -103,6 +138,37 @@ const ApplyFilters = ({ config, onApply }) => {
                       shadow-sm transition-all hover:border-slate-300
                     `}
                   />
+
+                  {/* Typeahead suggestions */}
+                  {filter.typeahead &&
+                    activeField === filter.key &&
+                    suggestions.length > 0 && (
+                      <div className="absolute z-30 mt-2 w-full rounded-xl bg-white shadow-lg ring-1 ring-slate-200 overflow-hidden">
+                        {suggestions.map((item,i) => (
+                          <div
+                            key={i}
+                            onClick={() => {
+                              setValues((prev) => ({
+                                ...prev,
+                                [filter.key]: item.name,
+                              }));
+                              setActiveField(null);
+                            }}
+                            className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-50"
+                          >
+                            {item.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  {loading &&
+                    filter.typeahead &&
+                    activeField === filter.key && (
+                      <div className="absolute right-3 top-2 text-xs text-slate-400">
+                        Loading...
+                      </div>
+                    )}
                 </div>
               </div>
             )}
@@ -110,7 +176,7 @@ const ApplyFilters = ({ config, onApply }) => {
         ))}
       </div>
 
-      {/* ACTIONS */}
+      {/* Actions */}
       <div className="flex gap-3 mt-6 pt-4 border-t border-slate-200">
         <button
           onClick={handleApply}

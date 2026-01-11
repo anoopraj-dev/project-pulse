@@ -9,6 +9,8 @@ import SearchInput from "../../components/shared/components/SearchInput";
 import { useSearch } from "../../hooks/useSearch";
 import ApplyFilters from "../../components/shared/components/ApplyFilters";
 import { doctorFilterConfig } from "../../components/shared/configs/FilterConfigs";
+import { fetchSearchSuggestions } from "../../api/user/userApis";
+
 
 const PatientDoctors = () => {
   const [doctors, setDoctors] = useState([]);
@@ -75,7 +77,20 @@ const PatientDoctors = () => {
     );
   };
 
-  //--------------- View Profile ------------------
+  //--------------- Search Suggestions -------------
+  const fetchSuggestions = (query) => {
+    return fetchSearchSuggestions({
+      role: "patient",
+      query,
+      type: "doctor",
+    });
+  };
+
+  const handleSelectSuggestion = (item) => {
+    setQuery(item.name);
+  };
+
+  //------------ View Doctor Profile -------------
 
   const handleProfileView = (id) => {
     navigate(`/patient/doctor/${id}`);
@@ -86,17 +101,15 @@ const PatientDoctors = () => {
   }, []);
 
   const approvedDoctors = doctors.filter((doc) => doc.status === "approved");
-  const searchedDoctors =
-    query.trim().length >0 ? results : approvedDoctors;
-
+  const searchedDoctors = query.trim().length > 0 ? results : approvedDoctors;
   const visibleDoctors = applyAllFilters(searchedDoctors, searchFilters);
   const isInitialLoading = fetchDoctorsAction.loading;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-7xl px-4 pt-20 pb-12 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-12">
+      {/* Full-width Header Banner */}
+      <section className="w-full bg-gradient-to-br from-sky-50 via-white to-cyan-100 pt-20 pb-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="flex items-center gap-2 text-sky-600">
@@ -106,13 +119,12 @@ const PatientDoctors = () => {
                 </span>
               </div>
 
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl lg:text-4xl">
                 Available Doctors
               </h1>
 
               <p className="mt-2 max-w-xl text-sm text-slate-600">
-                Browse verified doctors and compare consultation charges before
-                booking.
+                Browse verified doctors and compare consultation charges before booking.
               </p>
             </div>
 
@@ -121,9 +133,7 @@ const PatientDoctors = () => {
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <span className="text-slate-700">
                   {approvedDoctors.length}{" "}
-                  <span className="font-medium text-slate-900">
-                    doctors available
-                  </span>
+                  <span className="font-medium text-slate-900">doctors available</span>
                 </span>
               </div>
 
@@ -136,13 +146,20 @@ const PatientDoctors = () => {
             </div>
           </div>
         </div>
+      </section>
 
+      {/* Content Area */}
+      <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         {/* Search Bar */}
-        <div className="mb-8">
+        <div className="relative z-40 mb-8">
           <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search doctors or specialization"
+            placeholder="Search doctors "
+            fetchSuggestions={fetchSuggestions}
+            onSelectSuggestion={handleSelectSuggestion}
+            role='patient'
+            entity='doctors'
           />
 
           {searchLoading && (
@@ -155,15 +172,14 @@ const PatientDoctors = () => {
 
         {/* Filters + Grid */}
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* Right Sidebar: ApplyFilters */}
           <div className="lg:w-80 lg:flex-shrink-0 hidden lg:block">
-            <ApplyFilters
-              onApply={setSearchFilters}
-              config={doctorFilterConfig}
-            />
+            <ApplyFilters onApply={setSearchFilters} config={doctorFilterConfig} />
           </div>
 
+          {/* Main Content: Doctors Grid */}
           <div className="flex-1 lg:min-w-0">
-            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
               {visibleDoctors?.map((doc) => (
                 <DoctorCard
                   key={doc._id}
@@ -200,11 +216,9 @@ const PatientDoctors = () => {
           </div>
         </div>
 
+        {/* Mobile Filters */}
         <div className="lg:hidden mt-8">
-          <ApplyFilters
-            onApply={setSearchFilters}
-            config={doctorFilterConfig}
-          />
+          <ApplyFilters onApply={setSearchFilters} config={doctorFilterConfig} />
         </div>
       </div>
     </div>

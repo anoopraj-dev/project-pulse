@@ -125,7 +125,7 @@ const DoctorCard = ({ doctor, onView }) => {
             focus-visible:outline-none focus-visible:ring-2
             focus-visible:ring-sky-500 focus-visible:ring-offset-2
             transition-all duration-200
-            group-hover:translate-y-[1px]
+            group-hover:translate-y-[1px] cursor-pointer
           "
         >
           View Profile
