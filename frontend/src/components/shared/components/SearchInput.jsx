@@ -1,6 +1,7 @@
 import { Icon } from "@iconify/react";
 import { useTypeahead } from "../../../hooks/useTypeahead";
 import { useState, useEffect } from "react";
+import { SEARCH_HINTS } from "../configs/searchInputHintsConfig";
 
 const SearchInput = ({
   value,
@@ -8,8 +9,9 @@ const SearchInput = ({
   placeholder = "Search doctor",
   onSelectSuggestion,
   fetchSuggestions,
+  role,
+  entity,
 }) => {
-  
   const { suggestions, loading } = useTypeahead({
     query: value,
     apiCall: fetchSuggestions,
@@ -18,13 +20,15 @@ const SearchInput = ({
 
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const hint = SEARCH_HINTS?.[role]?.[entity] || SEARCH_HINTS.user.doctors;
+
   // Hide suggestions when input becomes empty
   useEffect(() => {
     if (!value) setShowSuggestions(false);
   }, [value]);
 
   return (
-    <div className=" relative mt-6 rounded-2xl bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm ring-1 ring-slate-200">
+    <div className=" relative  rounded-2xl bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm ring-1 ring-slate-200">
       <div className="flex flex-col gap-4">
         {/* Search bar */}
         <div className="relative">
@@ -61,7 +65,7 @@ const SearchInput = ({
                     {item.name}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {item.specialization}  {item.location}
+                    {item.specialization} {item.location}
                   </p>
                 </div>
               ))}
@@ -76,13 +80,16 @@ const SearchInput = ({
         </div>
 
         {/* Hint */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-50 to-cyan-50 px-3.5 py-1.5 text-[11px] font-medium text-sky-700 shadow-sm ring-1 ring-sky-100 self-start sm:self-auto">
-          <Icon
-            icon="mdi:shield-check-outline"
-            className="h-3.5 w-3.5 flex-shrink-0"
-          />
-          Verified professionals only
-        </div>
+        {hint && (
+          <div
+            className={`inline-flex items-center gap-2 rounded-full bg-gradient-to-r ${hint.bg}
+      px-3.5 py-1.5 text-[11px] font-medium ${hint.textColor}
+      shadow-sm ring-1 ${hint.ring} self-start sm:self-auto`}
+          >
+            <Icon icon={hint.icon} className="h-3.5 w-3.5 flex-shrink-0" />
+            {hint.text}
+          </div>
+        )}
       </div>
     </div>
   );

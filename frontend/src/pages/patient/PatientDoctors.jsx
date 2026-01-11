@@ -158,6 +158,8 @@ const PatientDoctors = () => {
             placeholder="Search doctors "
             fetchSuggestions={fetchSuggestions}
             onSelectSuggestion={handleSelectSuggestion}
+            role='patient'
+            entity='doctors'
           />
 
           {searchLoading && (

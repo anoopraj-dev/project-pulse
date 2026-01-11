@@ -141,6 +141,8 @@ const ViewPatients = () => {
           placeholder="Search patients"
           fetchSuggestions={fetchSuggestions}
           onSelectSuggestion={handleSelectSuggestion}
+          role='admin'
+          entity='patients'
         />
         {searchLoading && (
             <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">

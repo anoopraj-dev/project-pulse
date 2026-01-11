@@ -7,13 +7,21 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/shared/components/DataTable";
 import { doctorColumns } from "../../components/shared/configs/TableConfigs";
+import SearchInput from "../../components/shared/components/SearchInput";
+import { useSearch } from "../../hooks/useSearch";
+import { fetchSearchSuggestions } from "../../api/user/userApis";
 
 const ViewDoctors = () => {
   const [activeTab, setActiveTab] = useState("approved");
   const [doctors, setDoctors] = useState([]);
   const fetchAllDoctorsAction = useAsyncAction();
   const navigate = useNavigate();
+  const { query, setQuery, results } = useSearch({
+    role: "admin",
+    type: "doctors",
+  });
 
+  //------------- Get All Doctors -------------
   const fetchAllDoctors = () => {
     fetchAllDoctorsAction.executeAsyncFn(async () => {
       try {
@@ -36,14 +44,29 @@ const ViewDoctors = () => {
     fetchAllDoctors();
   }, []);
 
+  //------------- Search Suggestions ---------------
+  const fetchSuggestions = (query) =>{
+    return fetchSearchSuggestions ({
+      role: 'admin',
+      query,
+      type: 'doctor',
+  
+    })
+  }
+
+  const handleSelectSuggestions  = (item) => {
+    setQuery(item.name)
+  }
+  // ------------- View Doctors ------------
   const handleView = (id) => {
     navigate(`/admin/doctor/${id}`);
   };
 
-  const filteredDoctors = doctors.filter(
-    (doc) => doc.status === activeTab
-  );
+  const filteredDoctors = doctors?.filter((doc) => doc.status === activeTab);
 
+  const searchedDoctors = results?.filter((doc) => doc.status === activeTab);
+
+  const displayedDoctors = query.trim() ? searchedDoctors : filteredDoctors;
   const isLoading = fetchAllDoctorsAction.loading;
 
   return (
@@ -116,6 +139,17 @@ const ViewDoctors = () => {
             />
           </div>
         </div>
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+          <SearchInput
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search doctors "
+            fetchSuggestions={fetchSuggestions}
+            onSelectSuggestion={handleSelectSuggestions}
+            role= 'admin'
+            entity='doctors'
+          />
+        </div>
       </div>
 
       {/* ---------- Content ---------- */}
@@ -147,9 +181,10 @@ const ViewDoctors = () => {
           <div className="px-2 py-3 sm:px-4">
             {filteredDoctors.length > 0 ? (
               <DataTable
-                data={filteredDoctors}
+                data={displayedDoctors}
                 columns={doctorColumns}
                 onView={handleView}
+
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
