@@ -8,6 +8,8 @@ import { generateOtp } from "../../utils/otpGenerator.js";
 import Otp from "../../models/otps.model.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
+import { Notification } from "../../models/notification.model.js";
+import { getIO } from "../../socket.js";
 
 //------- USER SIGNUP CONTROLLER -------//
 export const userSignup = async (req, res) => {
@@ -21,6 +23,8 @@ export const userSignup = async (req, res) => {
       isVerified,
       firstLogin,
     } = req.body;
+
+    const io = getIO();
 
     // -------Check if user already exists-------
     const existingPatient = await Patient.findOne({ email });
@@ -56,6 +60,16 @@ export const userSignup = async (req, res) => {
       });
 
       await newPatient.save();
+
+      const notification = await Notification.create({
+        title: "New User Joined",
+        message: `${newPatient.name} has registered!`,
+        recipient: "admin",
+        role: "admin",
+        read: false,
+      });
+
+      io.to("role:admin").emit("notification:new", notification);
     } else {
       const newDoctor = new Doctor({
         doctorId: req.registrationId,
@@ -68,6 +82,16 @@ export const userSignup = async (req, res) => {
       });
 
       await newDoctor.save();
+
+      const notification = await Notification.create({
+        title: "New User Joined",
+        message: ` Dr. ${newDoctor.name} has registered!`,
+        recipient: "admin",
+        role: "admin",
+        read: false,
+      });
+
+      io.to("role:admin").emit("notification:new", notification);
     }
 
     //---------- Generate OTP-----------------
@@ -112,14 +136,10 @@ export const userSignup = async (req, res) => {
       message: ` Verify your email with the OTP sent to your email`,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error, signup failed!",
     });
   }
 };
-
-
-
-

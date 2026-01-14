@@ -14,6 +14,7 @@ import {
 import upload from "../middlewares/multer.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { deleteDocuments } from "../controllers/doctorControllers/documents.controller.js";
+import {getDoctorNotifications} from '../controllers/doctorControllers/notifications.controller.js'
 
 const router = Router();
 
@@ -51,6 +52,8 @@ router.patch("/update-profile", upload.fields([
 
 router.delete('/delete-documents/:id', deleteDocuments)
 router.patch('/request-resubmission',requestProfileResubmission)
-router.patch('/resubmit', resubmitProfile)
+router.patch('/resubmit', resubmitProfile);
+
+router.get('/notifications',getDoctorNotifications)
 
 export default router;

@@ -38,12 +38,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// OR per-route:
+
 app.options('/api/doctor/file-upload', cors());  // Handle preflight
 
 
 
-//common auth routes for doctor and patient
+// routes
 app.use('/api/auth',userRoutes);
 
 //patient routes

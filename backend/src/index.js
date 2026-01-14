@@ -1,16 +1,21 @@
 import dotenv from 'dotenv';
 dotenv.config();
-
+import {createServer} from 'http'
+import app from './app.js'
+import { initSocket } from './socket.js';
 import { connectDB } from './db/db.js';
-import app from './app.js';
+
 
 const port = process.env.PORT || 5000;
+const server = createServer(app);
 
 const startServer = async () => {
   try {
     await connectDB();
 
-    const server = app.listen(port, () => {
+    initSocket(server);
+
+    server.listen(port, () => {
       console.log(`Server started on http://localhost:${port}`);
     });
 
@@ -25,4 +30,8 @@ const startServer = async () => {
   }
 };
 
+
+
 startServer();
+
+

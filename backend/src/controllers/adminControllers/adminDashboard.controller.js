@@ -2,6 +2,8 @@ import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
 import { sendEmail } from "../../config/nodemailer.js";
+import { Notification } from "../../models/notification.model.js";
+import { getIO } from "../../socket.js";
 
 
 //------------- GET ADMIN DASHBORD---------------
@@ -71,6 +73,7 @@ export const getDoctorDocuments = async(req,res) => {
 //---------------- APPROVE DOCTORS ----------------------
 
 export const approveDoctorsRequest = async (req, res) => {
+  const io = getIO()
   const { id } = req.params;
 
   try {
@@ -111,6 +114,16 @@ export const approveDoctorsRequest = async (req, res) => {
       console.error("Approval email failed:", emailError);
     }
 
+     const notification = await Notification.create({
+      title: "Profile Approved",
+      message: `Your profile has been reviewed and approved by admin`,
+      recipient: doctor._id,
+      role: "doctor",
+      read: false,
+    });
+
+    io.to(doctor._id).emit("notification:new", notification);
+
     return res.status(200).json({
       success: true,
       message: `Approved Dr ${doctor.name}`,
@@ -132,6 +145,7 @@ export const approveDoctorsRequest = async (req, res) => {
 export const rejectDoctorsRequest = async (req,res) => {
   const {id} = req.params;
   const {reason} = req.body;
+  const io = getIO();
   try {
     const doctor = await Doctor.findByIdAndUpdate(id,{
       status:'rejected',
@@ -170,6 +184,15 @@ export const rejectDoctorsRequest = async (req,res) => {
       console.error("Error sending email:", emailError);
     }
 
+    const notification = await Notification.create({
+      title:'Profile Rejected',
+      message:'Your profile has been reviewed and rejected by admin',
+      recipient:doctor._id,
+      role:'doctor'
+    })
+
+    io.to(doctor._id).emit('notification:new',notification)
+
     return res.status(200).json({
       success: true,
       message: `Rejected request from ${doctor.name}`,
@@ -189,6 +212,7 @@ export const rejectDoctorsRequest = async (req,res) => {
 export const blockDoctorProfile = async (req,res) => {
   const {id} = req.params;
   const {reason} = req.body;
+  const io = getIO();
   try {
     const doctor = await Doctor.findByIdAndUpdate(id,{
       status:'blocked',
@@ -225,6 +249,16 @@ export const blockDoctorProfile = async (req,res) => {
     } catch (emailError) {
       console.error("Error sending email:", emailError);
     }
+
+
+    const notification = await Notification.create({
+      title:'Profile Blocked',
+      message:'Your profile has been blocked',
+      recipient:doctor._id,
+      role:'doctor'
+    })
+
+    io.to(doctor._id).emit('notification:new',notification)
 
     return res.status(200).json({
       success: true,
@@ -390,3 +424,38 @@ export const getAllDoctors = async(req,res) => {
     return res.status(500).json({success:false, message:'Internal server error'})
   }
 }
+
+//--------------------- GET NOTIFICATIONS -------------------
+export const getAdminNotifications = async (req,res) => {
+  const notifications = await Notification.find({role: 'admin'}).sort({createdAt: -1});
+
+  res.json({
+    success: true,
+    notifications
+  })
+}
+
+//------------------- MARK ALL READ ---------------------
+export const setMarkAllRead = async (req, res) => {
+  try {
+    const role = req.user.role; 
+    const result = await Notification.updateMany(
+      { role, read: false },   
+      { $set: { read: true } }
+    );
+
+    return res.json({
+      success: true,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to mark notifications as read"
+    });
+  }
+};
+
+  
+

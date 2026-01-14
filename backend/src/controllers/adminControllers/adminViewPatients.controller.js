@@ -1,6 +1,8 @@
 import Patient from "../../models/patient.model.js"
 import { sendEmail } from "../../config/nodemailer.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
+import { getIO } from "../../socket.js";
+import { Notification } from "../../models/notification.model.js";
 
 //------------------- VIEW ALL PATIENTS ---------------------
 export const getAllPatients = async (req,res) =>{
@@ -55,7 +57,7 @@ export const getPatientProfile = async (req, res) => {
 //----------------- BLOCK PATIENT ----------------
 export const blockPatientProfile = async (req, res) => {
   try {
-  
+    const io = getIO();
     const { id } = req.params;
     const {reason }= req.body;
 
@@ -70,6 +72,15 @@ export const blockPatientProfile = async (req, res) => {
     patient.status = "blocked";
     patient.blockedReason= reason;
     await patient.save();
+
+     const notification = await Notification.create({
+      title:'Profile Blocked',
+      message:'Your profile has been blocked',
+      recipient:patient._id,
+      role:'patient'
+    })
+
+    io.to(patient._id.toString()).emit('notification:new',notification)
 
     //-------------- SEND MAIL --------------
     try {
@@ -96,6 +107,8 @@ export const blockPatientProfile = async (req, res) => {
           console.error("Email failed:", emailError);
         }
     
+      
+   
 
     return res.status(200).json({
       success: true,
