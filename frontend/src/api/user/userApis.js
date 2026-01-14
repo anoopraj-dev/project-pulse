@@ -25,3 +25,14 @@ export const fetchSearchSuggestions = ({ role, query, type, limit = 6 }) => {
     },
   });
 };
+
+//---------------- fetch notifications ------------
+export const getNotifications = (role) => {
+  return api.get(`/api/${role}/notifications`)
+}
+
+// ----------------- Mark all read (notifications) ---------------
+export const markNotificationsRead = (role) => {
+  return api.patch(`/api/${role}/notifications/mark-all-read`);
+}
+

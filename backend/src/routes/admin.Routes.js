@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { authenticateUser} from "../middlewares/authenticateUser.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
-import { approveDoctorsRequest, getAdminDashboard, getAllDoctors, getDoctorDocuments, getPendingDoctorProfile, rejectDoctorsRequest,blockDoctorProfile, revokeDoctorStatus, unblockDoctorProfile } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { approveDoctorsRequest, getAdminDashboard, getAllDoctors, getDoctorDocuments, getPendingDoctorProfile, rejectDoctorsRequest,blockDoctorProfile, revokeDoctorStatus, unblockDoctorProfile, getAdminNotifications } from "../controllers/adminControllers/adminDashboard.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/adminControllers/search.controller.js";
+import { setMarkAllRead } from "../controllers/adminControllers/adminDashboard.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------
@@ -27,4 +28,7 @@ router.patch('/patient/unblock/:id',unblockPatientProfile)
 
 router.get('/search',searchController)
 router.get('/search/suggestions', searchSuggestionsController)
+router.get('/notifications',getAdminNotifications)
+router.patch('/notifications/mark-all-read', setMarkAllRead)
+
 export default router;

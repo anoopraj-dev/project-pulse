@@ -27,8 +27,6 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    console.log("Stored password:", admin.password);
-    console.log("Entered password:", password);
 
     // Compare plain password with stored hash
     const isMatch = await bcrypt.compare(password, admin.password);
@@ -48,6 +46,7 @@ export const adminLogin = async (req, res) => {
     const payload = {
       email: admin.email,
       role: "admin",
+      id:admin._id
     };
 
     // Generate token
@@ -67,6 +66,7 @@ export const adminLogin = async (req, res) => {
       admin: {
         email: admin.email,
         role: "admin",
+        id: admin._id
       }
     });
   } catch (error) {

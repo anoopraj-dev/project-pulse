@@ -3,11 +3,13 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useUser } from "../../../contexts/UserContext";
+
 import {
   adminSidebarMenu,
   doctorSidebarMenu,
   patientSidebarMenu,
 } from "../configs/sidebarConfig";
+
 
 const NAVBAR_HEIGHT = "h-16";
 const SIDEBAR_WIDTH = "w-64";
@@ -36,7 +38,7 @@ const Layout = () => {
 
       <main
         className={`ml-64 mt-16 h-[calc(100vh-4rem)] overflow-y-auto bg-gray-50`}
-      >
+      > 
         <Outlet />
       </main>
     </div>

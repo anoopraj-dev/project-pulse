@@ -1,5 +1,7 @@
 import { request } from "express";
 import Doctor from "../../models/doctor.model.js";
+import { getIO } from "../../socket.js";
+import { Notification } from "../../models/notification.model.js";
 
 // ------------- GET PROFILE ----------
 export const getDoctorProfile = async (req, res) => {
@@ -17,9 +19,7 @@ export const getDoctorProfile = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const doctor = await Doctor.findById( req.user.id ).select(
-      "-password"
-    );
+    const doctor = await Doctor.findById(req.user.id).select("-password");
 
     if (!doctor) {
       return res.status(404).json({
@@ -38,7 +38,6 @@ export const getDoctorProfile = async (req, res) => {
   }
 };
 
-
 // --------------- UPDATE PROFILE -----------------
 
 const safeParse = (value) => {
@@ -52,12 +51,19 @@ const safeParse = (value) => {
     }
   }
 
-  return value; 
+  return value;
 };
 
 export const updateDoctorProfile = async (req, res) => {
   try {
-    const { _id, professionalInfo, services, qualifications, specializations, ...rest } = req.body;
+    const {
+      _id,
+      professionalInfo,
+      services,
+      qualifications,
+      specializations,
+      ...rest
+    } = req.body;
 
     const updatePayload = { ...rest };
 
@@ -66,7 +72,8 @@ export const updateDoctorProfile = async (req, res) => {
       const parsedServices = safeParse(services);
       updatePayload.services = parsedServices
         .map((service, index) => {
-          if (!service || service.fees === undefined || service.fees === "") return null;
+          if (!service || service.fees === undefined || service.fees === "")
+            return null;
           return {
             serviceType: index === 0 ? "online" : "offline",
             fees: Number(service.fees),
@@ -76,7 +83,7 @@ export const updateDoctorProfile = async (req, res) => {
     }
 
     // Parse qualifications and specializations
-    console.log(qualifications, specializations)
+    console.log(qualifications, specializations);
     if (qualifications) {
       updatePayload.qualifications = safeParse(qualifications) || [];
     }
@@ -91,11 +98,12 @@ export const updateDoctorProfile = async (req, res) => {
     );
 
     if (!doctor) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
 
     return res.status(200).json({ success: true, user: doctor });
-
   } catch (error) {
     console.error("Update doctor profile error:", error);
     if (error.name === "ValidationError") {
@@ -106,9 +114,10 @@ export const updateDoctorProfile = async (req, res) => {
 };
 
 //----------------- PROFILE RESUBMISSION -------------------
-export const requestProfileResubmission = async(req,res) =>{
+export const requestProfileResubmission = async (req, res) => {
   try {
     const doctorId = req.user.id;
+    const io = getIO();
 
     const doctor = await Doctor.findById(doctorId);
 
@@ -129,29 +138,40 @@ export const requestProfileResubmission = async(req,res) =>{
     }
 
     doctor.resubmissionRequested = true;
-    doctor.status = 'requestedResubmission'
-
+    doctor.status = "requestedResubmission";
 
     await doctor.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Resubmission request sent to admin",
-      user:doctor
-    },{new : true});
+    const notification = await Notification.create({
+      title: "New Profile Resubmission request",
+      message: `Dr. ${doctor.name} has requested for a profile re-submission`,
+      recipient: "admin",
+      role: "admin",
+      read: false,
+    });
 
-    
+    io.to("role:admin").emit("notification:new", notification);
+
+    return res.status(200).json(
+      {
+        success: true,
+        message: "Resubmission request sent to admin",
+        user: doctor,
+      },
+      { new: true }
+    );
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       success: false,
-      message:'Resubmission request failed'
-    })
+      message: "Resubmission request failed",
+    });
   }
-}
+};
 
 // ---------------- RESUBMIT PROFILE -------------------
 export const resubmitProfile = async (req, res) => {
+  const io = getIO();
   try {
     const doctorId = req.user.id;
 
@@ -163,12 +183,21 @@ export const resubmitProfile = async (req, res) => {
       });
     }
 
-
     // Update resubmission state
     doctor.submissionCount = (doctor.submissionCount || 0) + 1;
-    doctor.resubmissionApproved=false;
-    doctor.status = "pending"; 
+    doctor.resubmissionApproved = false;
+    doctor.status = "pending";
     await doctor.save();
+
+    const notification = await Notification.create({
+      title: "New Profile Resubmission",
+      message: `Dr. ${doctor.name} has submitted updated profile`,
+      recipient: "admin",
+      role: "admin",
+      read: false,
+    });
+
+    io.to("role:admin").emit("notification:new", notification);
 
     return res.status(200).json({
       success: true,
@@ -183,4 +212,3 @@ export const resubmitProfile = async (req, res) => {
     });
   }
 };
-

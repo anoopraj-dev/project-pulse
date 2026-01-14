@@ -7,6 +7,7 @@ import { searchController, searchSuggestionsController } from "../controllers/pa
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { getPatientNotifications } from "../controllers/patientControllers/notifications.controller.js";
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.get('/doctors',getApprovedDoctors);
 router.get('/doctor/:id',viewDoctorProfile)
 router.get('/search',searchController)
 router.get('/search/suggestions',searchSuggestionsController)
+router.get('/notifications', getPatientNotifications)
 
 export default router;
