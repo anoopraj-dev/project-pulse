@@ -116,20 +116,11 @@ export const adminSidebarMenu = [
     icon: "healthicons:doctor",
     path: "/admin/doctors",
   },
-  {
-    label: "Messages",
-    icon: "mdi:message-bubble",
-    path: "/admin/messages",
-  },
+
   {
     label: "Appointments",
     icon: "mdi:calendar-clock",
     path: "/admin/appointments",
-  },
-  {
-    label: "Departments",
-    icon: "mdi:office-building",
-    path: "/admin/departments",
   },
   {
     label: "Revenue",

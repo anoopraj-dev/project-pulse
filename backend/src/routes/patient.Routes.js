@@ -8,6 +8,7 @@ import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { getPatientNotifications } from "../controllers/patientControllers/notifications.controller.js";
+import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 
 const router = Router();
 
@@ -27,5 +28,9 @@ router.get('/doctor/:id',viewDoctorProfile)
 router.get('/search',searchController)
 router.get('/search/suggestions',searchSuggestionsController)
 router.get('/notifications', getPatientNotifications)
+
+//--------- messages --------------
+router.get('/messages/:id',getAllMessages)
+router.get('/conversations', getAllConversations)
 
 export default router;

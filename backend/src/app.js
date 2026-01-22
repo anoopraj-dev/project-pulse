@@ -1,5 +1,5 @@
 import express from 'express';
-import userRoutes from './routes/user.Routes.js';
+import authRoutes from './routes/auth.Routes.js';
 import patientRoutes from './routes/patient.Routes.js'
 import doctorRoutes from './routes/doctor.Routes.js'
 import adminRoutes from './routes/admin.Routes.js'
@@ -44,7 +44,7 @@ app.options('/api/doctor/file-upload', cors());  // Handle preflight
 
 
 // routes
-app.use('/api/auth',userRoutes);
+app.use('/api/auth',authRoutes);
 
 //patient routes
 app.use('/api/patient',patientRoutes)

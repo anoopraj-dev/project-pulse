@@ -22,6 +22,7 @@ const App = () => {
     })
   }
 
+  //------------- Socket implementation -------------
 
   useEffect(() => {
     if (!id || !role) return;
@@ -43,6 +44,7 @@ const App = () => {
         payload:notification
       })
     });
+
 
     return () => {
       socket.off("notification:new");

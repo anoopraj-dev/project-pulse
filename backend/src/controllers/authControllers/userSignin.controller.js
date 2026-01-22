@@ -5,6 +5,8 @@ import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { getIO } from "../../socket.js";
+import { Notification } from "../../models/notification.model.js";
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -57,6 +59,7 @@ export const userSignin = async (req, res) => {
       maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
+  
 
     return res.status(200).json({
       success: true,

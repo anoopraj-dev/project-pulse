@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
@@ -35,6 +35,12 @@ const ProfileView = ({
       setActiveAction(null);
     }
   };
+
+  const navigate = useNavigate();
+
+  const handleMessages = () => {
+    navigate(`/patient/messages/${id}`)
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center">
@@ -193,7 +199,7 @@ const ProfileView = ({
                 icon="mdi:file-document"
                 text="Message"
                 onClick={() =>
-                  handleAction("documents", () => onVerify(user?._id))
+                  handleAction("documents", handleMessages)
                 }
                 className="bg-blue-500 hover:bg-blue-600"
               />
