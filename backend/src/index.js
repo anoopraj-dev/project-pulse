@@ -4,6 +4,7 @@ import {createServer} from 'http'
 import app from './app.js'
 import { initSocket } from './socket.js';
 import { connectDB } from './db/db.js';
+import './config/redis.js'
 
 
 const port = process.env.PORT || 5000;

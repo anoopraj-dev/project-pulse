@@ -31,8 +31,9 @@ export const getAllMessages = async (req, res) => {
 
     const ParticipantModel = modelMap[userModel2];
 
-    const participant = await ParticipantModel.findById(userId2)
-      .select("name profilePicture");
+    const participant = await ParticipantModel.findById(userId2).select(
+      "name profilePicture",
+    );
 
     if (!participant) {
       return res.status(404).json({
@@ -51,11 +52,15 @@ export const getAllMessages = async (req, res) => {
     });
 
     if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [
-          { userId: userId1, userModel: userModel1 },
-          { userId: userId2, userModel: userModel2 },
-        ],
+      return res.status(200).json({
+        success: true,
+        conversation: null,
+        participant: {
+          _id: participant._id,
+          name: participant.name,
+          profilePicture: participant.profilePicture,
+        },
+        messages: [],
       });
     }
 
@@ -63,16 +68,15 @@ export const getAllMessages = async (req, res) => {
       conversationId: conversation._id,
     }).sort({ createdAt: 1 });
 
-   
     return res.status(200).json({
       success: true,
       conversation: {
         _id: conversation._id,
-        participant: {
-          _id: participant._id,
-          name: participant.name,
-          profilePicture: participant.profilePicture,
-        },
+      },
+      participant: {
+        _id: participant._id,
+        name: participant.name,
+        profilePicture: participant.profilePicture,
       },
       messages,
     });
@@ -98,12 +102,13 @@ export const getAllConversations = async (req, res) => {
 
     for (const convo of conversations) {
       const other = convo.participants.find(
-        (p) => p.userId.toString() !== userId
+        (p) => p.userId.toString() !== userId,
       );
 
       const ParticipantModel = modelMap[other.userModel];
-      const participant = await ParticipantModel.findById(other.userId)
-        .select("name profilePicture");
+      const participant = await ParticipantModel.findById(other.userId).select(
+        "name profilePicture",
+      );
 
       result.push({
         _id: convo._id,
@@ -122,26 +127,49 @@ export const getAllConversations = async (req, res) => {
   }
 };
 
-
 //-------------------- SEND MESSAGE ----------------------
-export const sendMessage = async({conversationId,senderId, senderModel, receiverId, receiverModel, text}) => {
-  const message= await Message.create({
-    conversationId,
+
+export const sendMessage = async ({
+  conversationId,
+  senderId,
+  senderModel,
+  receiverId,
+  receiverModel,
+  text,
+}) => {
+  let conversation = conversationId
+    ? await Conversation.findById(conversationId)
+    : null;
+
+  if (!conversation) {
+    conversation = await Conversation.create({
+      participants: [
+        { userId: senderId, userModel: senderModel },
+        { userId: receiverId, userModel: receiverModel },
+      ],
+    });
+  }
+
+  const message = await Message.create({
+    conversationId: conversation._id,
     senderId,
     senderModel,
     receiverId,
     receiverModel,
     text,
-  })
-
-  await Conversation.findByIdAndUpdate(conversationId, {
-    lastMessage: {
-      text: message.text,
-      senderId: message.senderId,
-      createdAt: message.createdAt,
-    },
-    updatedAt: message.createdAt,
   });
 
-  return message
-}
+  conversation.lastMessage = {
+    text: message.text,
+    senderId: message.senderId,
+    createdAt: message.createdAt,
+  };
+  conversation.updatedAt = message.createdAt;
+  await conversation.save();
+
+  return {
+    message,
+    conversationId: conversation._id,
+  };
+};
+

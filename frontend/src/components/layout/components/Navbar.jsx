@@ -9,13 +9,14 @@ import logo from "../../../assets/logoPrimary.png";
 import { logoutUser } from "../../../api/auth/authService.js";
 import NotificationBell from "../../shared/components/NotificationBell.jsx";
 import NotificationPanel from "../../shared/components/NotificationPanel.jsx";
+import { socket } from "../../../socket.js";
 
 const Navbar = () => {
-  const { email, role, name, dispatch, isLoading, profilePicture } = useUser();
+  const { email, role, name, dispatch, isLoading, profilePicture,id } = useUser();
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
-  const [openNotification, setOpenNotification] = useState(false)
+  const [openNotification, setOpenNotification] = useState(false);
   const menuRef = useRef(null);
   const { user } = clerkUser();
   const { signOut } = useClerk();
@@ -38,11 +39,17 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       if (user) {
+        if (socket.connected) {
+          socket.emit("user:logout", { userId: id });
+          socket.disconnect();
+          socket.close();
+        }
         await signOut({ redirectUrl: "/signin" });
         await logoutUser();
         dispatch({ type: "CLEAR_USER" });
         sessionStorage.clear();
         setProfileMenuOpen(false);
+        
         navigate("/signin");
         return;
       }
@@ -75,7 +82,11 @@ const Navbar = () => {
             )}
 
             <Link to="/" className="block h-8 w-28 sm:h-10 sm:w-32">
-              <img src={logo} alt="Logo" className="h-full w-full object-contain" />
+              <img
+                src={logo}
+                alt="Logo"
+                className="h-full w-full object-contain"
+              />
             </Link>
           </div>
 
@@ -114,7 +125,9 @@ const Navbar = () => {
                   >
                     Home
                   </Link>
-                  <span className="px-3 py-2 text-sm text-slate-500">About</span>
+                  <span className="px-3 py-2 text-sm text-slate-500">
+                    About
+                  </span>
                   <span className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
                     Services
                   </span>
@@ -149,26 +162,24 @@ const Navbar = () => {
               ) : (
                 <div ref={menuRef} className="relative flex items-center gap-3">
                   <div className="relative">
-  <NotificationBell
-    onClick={() => {
-      setOpenNotification((prev) => !prev);
-      setProfileMenuOpen(false);
-    }}
-  />
+                    <NotificationBell
+                      onClick={() => {
+                        setOpenNotification((prev) => !prev);
+                        setProfileMenuOpen(false);
+                      }}
+                    />
 
-  {openNotification && (
-    <div className="absolute right-0 top-12 z-50">
-      <NotificationPanel />
-    </div>
-  )}
-</div>
-
+                    {openNotification && (
+                      <div className="absolute right-0 top-12 z-50">
+                        <NotificationPanel />
+                      </div>
+                    )}
+                  </div>
 
                   <div
                     className="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-slate-50 rounded-xl transition-colors"
                     onClick={() => setProfileMenuOpen((prev) => !prev)}
                   >
-                  
                     {profileImage ? (
                       <img
                         src={`${profileImage}?t=${Date.now()}`}
@@ -208,8 +219,6 @@ const Navbar = () => {
                       </button>
                     </div>
                   )}
-
-                  
                 </div>
               )}
             </div>

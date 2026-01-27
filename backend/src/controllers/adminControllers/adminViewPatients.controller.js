@@ -127,7 +127,7 @@ export const blockPatientProfile = async (req, res) => {
 
 //-------------- UNBLOCK PATIENT PROFILE -------------
 export const unblockPatientProfile = async (req, res) => {
-
+  const io = getIO();
   try {
     const { id } = req.params;
 
@@ -142,6 +142,16 @@ export const unblockPatientProfile = async (req, res) => {
     patient.status = "active";
     patient.blockedReason='';
     await patient.save();
+
+    const notification = await Notification.create({
+      title:'Profile Unblocked',
+      message:'Your profile has been unblocked',
+      recipient:patient._id,
+      role:'patient'
+    })
+
+    io.to(patient._id.toString()).emit('notification:new',notification)
+
 
     return res.status(200).json({
       success: true,
