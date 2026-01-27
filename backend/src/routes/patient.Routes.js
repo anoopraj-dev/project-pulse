@@ -9,6 +9,7 @@ import { uploadImage } from "../controllers/uploadController.js/imageUpload.cont
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { getPatientNotifications } from "../controllers/patientControllers/notifications.controller.js";
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
+import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 
 const router = Router();
 
@@ -27,7 +28,9 @@ router.get('/doctors',getApprovedDoctors);
 router.get('/doctor/:id',viewDoctorProfile)
 router.get('/search',searchController)
 router.get('/search/suggestions',searchSuggestionsController)
+
 router.get('/notifications', getPatientNotifications)
+router.patch('/notifications/mark-all-read',setMarkAllRead)
 
 //--------- messages --------------
 router.get('/messages/:id',getAllMessages)

@@ -17,15 +17,16 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", async (socket) => {
-    const { userId } = socket.handshake.auth;
+    const { userId,role } = socket.handshake.auth;
 
     console.log(`Socket connected: ${socket.id}`);
 
-    // Reject connection if userId is missing
     if (!userId) return;
 
-    // Join personal room (used for direct emits)
     socket.join(userId.toString());
+    if (role) {
+    socket.join(`role:${role}`);
+  }
 
     //------------------- TRACK SOCKET PER USER --------------------
     if (!onlineUsers.has(userId)) {

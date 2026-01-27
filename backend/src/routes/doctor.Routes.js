@@ -16,6 +16,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { deleteDocuments } from "../controllers/doctorControllers/documents.controller.js";
 import {getDoctorNotifications} from '../controllers/doctorControllers/notifications.controller.js'
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
+import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 
 const router = Router();
 
@@ -56,6 +57,7 @@ router.patch('/request-resubmission',requestProfileResubmission)
 router.patch('/resubmit', resubmitProfile);
 
 router.get('/notifications',getDoctorNotifications)
+router.patch('/notifications/mark-all-read',setMarkAllRead)
 
 router.get('/messages/:id',getAllMessages)
 router.get('/conversations', getAllConversations)
