@@ -64,9 +64,22 @@ export const getAllMessages = async (req, res) => {
       });
     }
 
+    //--------------- get conversations
     const messages = await Message.find({
       conversationId: conversation._id,
     }).sort({ createdAt: 1 });
+
+    //-------------- mark read --------------
+    await Message.updateMany(
+      {
+        conversationId: conversation._id,
+        receiverId:userId1,
+        isRead:false,
+      },
+      {
+        $set: {isRead:true}
+      }
+    )
 
     return res.status(200).json({
       success: true,
@@ -110,10 +123,18 @@ export const getAllConversations = async (req, res) => {
         "name profilePicture",
       );
 
+      //----------------- Unread count ----------------
+      const unreadCount = await Message.countDocuments({
+        conversationId: convo._id,
+        receiverId: userId,
+        isRead: false
+      })
+
       result.push({
         _id: convo._id,
         participant,
         lastMessage: convo.lastMessage || null,
+        unreadCount,
         updatedAt: convo.updatedAt,
       });
     }
