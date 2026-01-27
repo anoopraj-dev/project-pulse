@@ -17,8 +17,20 @@ const ChatContainer = () => {
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
-
   const tempConversationId = useRef(null);
+
+
+
+
+useEffect(() => {
+  const handleResize = () => {
+    setDeviceType(getDeviceTypes(window.innerWidth));
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
   // ---------------- Fetch Sidebar Conversations ----------------
   useEffect(() => {
@@ -31,20 +43,26 @@ const ChatContainer = () => {
 
   // ---------------- Fetch Messages ----------------
   useEffect(() => {
-    if (!receiverId) return;
+  if (!receiverId) return;
 
-    const loadMessages = async () => {
-      const res = await getAllMessages(role, receiverId);
-      setMessages(res?.data.messages || []);
+  const loadMessages = async () => {
+    const res = await getAllMessages(role, receiverId);
 
-      setActiveConversation({
-        id: res?.data?.conversation?._id || null,
-        participant: res.data.participant,
-      });
-    };
+    const updatedMessages = res.data.messages.map((m) =>
+      m.receiverId === id ? { ...m, isRead: true } : m
+    );
 
-    loadMessages();
-  }, [receiverId]);
+    setMessages(updatedMessages);
+
+    setActiveConversation({
+      id: res?.data?.conversation?._id || null,
+      participant: res.data.participant,
+    });
+  };
+
+  loadMessages();
+}, [receiverId]);
+
 
   // ---------------- Conversation Created ----------------
   useEffect(() => {
@@ -99,6 +117,7 @@ const ChatContainer = () => {
             text,
             senderId: id,
           },
+          unreadCount: 0,
         },
         ...prev,
       ]);
@@ -117,25 +136,57 @@ const ChatContainer = () => {
   };
 
   // ---------------- Receive Message ----------------
-  useEffect(() => {
-    const handleReceiveMessage = (message) => {
-      setMessages((prev) => {
-        const exists = prev.some((m) => m._id === message._id);
-        return exists ? prev : [...prev, message];
-      });
+ useEffect(() => {
+  const handleReceiveMessage = (message) => {
+    const isActiveChat =
+      activeConversation?.id === message.conversationId;
 
-      setConversations((prev) =>
-        prev.map((c) =>
-          c._id === message.conversationId ? { ...c, lastMessage: message } : c,
-        ),
-      );
-    };
+    // add message only if chat is open
+    setMessages((prev) =>
+      isActiveChat && !prev.some((m) => m._id === message._id)
+        ? [...prev, message]
+        : prev
+    );
 
-    socket.on("message:receive", handleReceiveMessage);
-    return () => {
-      socket.off("message:receive", handleReceiveMessage);
-    };
-  }, [socket]);
+    //------------ update sidebar ---------
+    setConversations((prev) =>
+      prev.map((c) =>
+        c._id === message.conversationId
+          ? {
+              ...c,
+              lastMessage: message,
+              unreadCount: isActiveChat
+                ? 0
+                : (c.unreadCount || 0) + 1,
+            }
+          : c
+      )
+    );
+  };
+
+  socket.on("message:receive", handleReceiveMessage);
+  return () => socket.off("message:receive", handleReceiveMessage);
+}, [socket, activeConversation?.id]);
+
+
+  //-------------------------- Mark message as read -----------------
+  useEffect(()=> {
+    if(!activeConversation?.id) return ;
+
+    setConversations(prev =>
+    prev.map(c =>
+      c._id === activeConversation.id
+        ? { ...c, unreadCount: 0 }
+        : c
+    )
+  );
+
+    socket.emit('message:read',{
+      conversationId:activeConversation.id,
+    })
+  },[activeConversation?.id])
+
+  
 
   const participantId = activeConversation?.participant?._id;
   const isOnline = participantId && onlineUsers.has(participantId);
@@ -146,8 +197,10 @@ const ChatContainer = () => {
         <ChatSidebar
           conversations={conversations}
           onSelect={(id) => navigate(`/${role}/messages/${id}`)}
+          activeConversationId = {activeConversation?.id}
         />
       }
+      isChatOpen={!!receiverId}
     >
       {receiverId ? (
         <>
@@ -156,7 +209,7 @@ const ChatContainer = () => {
             online={isOnline}
             profilePicture={activeConversation?.participant?.profilePicture}
           />
-          <MessageList messages={messages} userId={id} />
+          <MessageList messages={messages} userId={id} activeConversationId={activeConversation?.id}/>
           <MessageInput onSend={handleSendMessage} disabled={!isConnected} />
         </>
       ) : (

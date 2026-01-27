@@ -36,6 +36,8 @@ export const markNotificationsRead = (role) => {
   return api.patch(`/api/${role}/notifications/mark-all-read`);
 }
 
+//----------------- Messages -----------------------
+
 export const getAllMessages = (role,id) => {
   return api.get(`/api/${role}/messages/${id}`)
 }
@@ -43,4 +45,6 @@ export const getAllMessages = (role,id) => {
 export const getConversations = (role) => {
   return api.get(`/api/${role}/conversations`)
 }
+
+
 
