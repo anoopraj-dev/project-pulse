@@ -26,6 +26,12 @@ const OtpInputs = () => {
 
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
 
+  // ---------------- FOCUS FIRST INPUT ON LOAD ----------------
+  useEffect(() => {
+    document.getElementById("otp-0")?.focus();
+  }, []);
+
+
   // ---------------- OTP INPUT HANDLER ----------------
   const handleInputs = (e, index) => {
     const value = e.target.value;
@@ -62,7 +68,7 @@ const OtpInputs = () => {
         JSON.stringify({
           ...sessionData,
           expiryTime: newExpiryTime,
-        })
+        }),
       );
 
       setSecondsLeft(OTP_EXPIRY_SECONDS);
@@ -79,7 +85,7 @@ const OtpInputs = () => {
     if (secondsLeft <= 0) return;
 
     const timer = setInterval(() => {
-      setSecondsLeft(prev => (prev <= 1 ? 0 : prev - 1));
+      setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
 
     return () => clearInterval(timer);
@@ -124,6 +130,19 @@ const OtpInputs = () => {
     }
   };
 
+  // ---------------- PASTE HANDLER ----------------
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData("Text").trim();
+
+    if (!/^\d{6}$/.test(pasteData)) return; 
+
+    const otpArray = pasteData.split("");
+    setOtp(otpArray);
+
+    document.getElementById(`otp-5`)?.focus();
+  };
+
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const time = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
@@ -142,13 +161,13 @@ const OtpInputs = () => {
               maxLength={1}
               value={value}
               onChange={(e) => handleInputs(e, index)}
+              onPaste={index === 0 ? handlePaste : undefined}
               className="bg-white border border-opacity-20 border-[rgba(117,202,255,0.5)] rounded-md w-12 h-12 text-center text-xl focus:border-blue-500 focus:outline-none"
             />
           ))}
         </div>
 
         <PrimaryButton text="Submit OTP" className="w-full" type="submit" />
-
       </form>
 
       <div className="flex justify-center p-8 text-sm text-gray-600">
