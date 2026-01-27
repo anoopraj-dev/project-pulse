@@ -15,6 +15,7 @@ import upload from "../middlewares/multer.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { deleteDocuments } from "../controllers/doctorControllers/documents.controller.js";
 import {getDoctorNotifications} from '../controllers/doctorControllers/notifications.controller.js'
+import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 
 const router = Router();
 
@@ -55,5 +56,8 @@ router.patch('/request-resubmission',requestProfileResubmission)
 router.patch('/resubmit', resubmitProfile);
 
 router.get('/notifications',getDoctorNotifications)
+
+router.get('/messages/:id',getAllMessages)
+router.get('/conversations', getAllConversations)
 
 export default router;

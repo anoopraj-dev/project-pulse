@@ -6,6 +6,7 @@ import DoctorEditProfile from "../pages/doctor/DoctorEditProfile";
 import DoctorDocuments from "../pages/doctor/DoctorDocuments";
 import DoctorOnboarding from "../pages/doctor/DoctorOnboarding";
 import Navbar from "../components/layout/components/Navbar";
+import DoctorMessages from "../pages/doctor/DoctorMessages";
 
 const DoctorRoutes = [{
   element: (
@@ -17,7 +18,8 @@ const DoctorRoutes = [{
     { path: "/doctor/profile", element: <DoctorProfile /> },
     { path: "/doctor/edit-profile", element: <DoctorEditProfile /> },
     { path: "/doctor/documents", element: <DoctorDocuments /> },
-    { path: '/doctor/personal-info',element:<DoctorOnboarding/>}
+    { path: "/doctor/messages", element: <DoctorMessages /> },
+    { path: "/doctor/messages/:id", element: <DoctorMessages /> },
   ],
 },
 

@@ -6,6 +6,7 @@ import PatientDashboard from "../pages/patient/PatientDashboard";
 import PatientDoctorProfile from "../pages/patient/PatientDoctorProfile";
 import PatientDoctors from "../pages/patient/PatientDoctors";
 import PatientEditProfile from "../pages/patient/PatientEditProfile";
+import PatientMessages from "../pages/patient/PatientMessages";
 import PatientOnboarding from "../pages/patient/PatientOnboarding";
 import PatientsProfile from "../pages/patient/PatientsProfile";
 
@@ -21,6 +22,8 @@ const PatientRoutes = [{
     { path: "/patient/edit-profile", element: <PatientEditProfile /> },
     { path: "/patient/doctors", element: <PatientDoctors /> },
     { path: "/patient/doctor/:id", element: <PatientDoctorProfile /> },
+    { path: "/patient/messages", element: <PatientMessages/> },
+    { path: "/patient/messages/:id", element: <PatientMessages/>},
   ],
 },
 
