@@ -1,11 +1,11 @@
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 
-const SidebarItem = ({ item, isActive }) => {
+const SidebarItem = ({ item, isActive, isOpen }) => {
   return (
     <Link to={item.path}>
       <li
-        className={`group flex items-center gap-4 px-6 py-3 rounded-lg transition-all duration-200
+        className={`group flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200
           ${
             isActive
               ? "bg-white text-[#1F334E] shadow-md"
@@ -15,16 +15,20 @@ const SidebarItem = ({ item, isActive }) => {
       >
         <Icon
           icon={item.icon}
-          className={`w-6 h-6 transition-colors
+          className={`w-6 h-6
             ${isActive ? "text-[#1F334E]" : "text-white"}
           `}
         />
-        <span className="font-medium tracking-wide">
-          {item.label}
-        </span>
+
+        {isOpen && (
+          <span className="font-medium tracking-wide">
+            {item.label}
+          </span>
+        )}
       </li>
     </Link>
   );
 };
 
 export default SidebarItem;
+

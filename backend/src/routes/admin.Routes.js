@@ -4,7 +4,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { approveDoctorsRequest, getAdminDashboard, getAllDoctors, getDoctorDocuments, getPendingDoctorProfile, rejectDoctorsRequest,blockDoctorProfile, revokeDoctorStatus, unblockDoctorProfile, getAdminNotifications } from "../controllers/adminControllers/adminDashboard.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/adminControllers/search.controller.js";
-import { setMarkAllRead } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------

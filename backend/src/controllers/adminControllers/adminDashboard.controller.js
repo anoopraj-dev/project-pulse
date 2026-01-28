@@ -122,7 +122,7 @@ export const approveDoctorsRequest = async (req, res) => {
       read: false,
     });
 
-    io.to(doctor._id).emit("notification:new", notification);
+    io.to(doctor._id.toString()).emit("notification:new", notification);
 
     return res.status(200).json({
       success: true,
@@ -191,7 +191,7 @@ export const rejectDoctorsRequest = async (req,res) => {
       role:'doctor'
     })
 
-    io.to(doctor._id).emit('notification:new',notification)
+    io.to(doctor._id.toString()).emit('notification:new',notification)
 
     return res.status(200).json({
       success: true,
@@ -258,7 +258,7 @@ export const blockDoctorProfile = async (req,res) => {
       role:'doctor'
     })
 
-    io.to(doctor._id).emit('notification:new',notification)
+    io.to(doctor._id.toString()).emit('notification:new',notification)
 
     return res.status(200).json({
       success: true,
@@ -276,6 +276,7 @@ export const blockDoctorProfile = async (req,res) => {
 
 //--------------- UNBLOCK DOCTOR PROFILE ---------------
 export const unblockDoctorProfile = async (req,res) => {
+  const io = getIO()
   const {id} = req.params;
   try {
     const doctor = await Doctor.findByIdAndUpdate(id,{
@@ -314,6 +315,15 @@ export const unblockDoctorProfile = async (req,res) => {
       console.error("Error sending email:", emailError);
     }
 
+    const notification = await Notification.create({
+          title:'Profile Unlocked',
+          message:'Your profile has been unblocked',
+          recipient:doctor._id,
+          role:'doctor'
+        })
+    
+        io.to(doctor._id.toString()).emit('notification:new',notification)
+
     return res.status(200).json({
       success: true,
       message: `Blocked profile ${doctor.name}`,
@@ -334,6 +344,7 @@ export const revokeDoctorStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+    const io = getIO();
 
     // ---------- Validation ----------
     if (!status) {
@@ -394,6 +405,15 @@ export const revokeDoctorStatus = async (req, res) => {
       console.error("Email failed:", emailError);
     }
 
+    const notification = await Notification.create({
+          title:'Profile Status Revoked',
+          message:'Your profile resubmission request has been approved',
+          recipient:doctor._id,
+          role:'doctor'
+        })
+    
+        io.to(doctor._id.toString()).emit('notification:new',notification)
+
     // ---------- Response ----------
     return res.status(200).json({
       success: true,
@@ -435,27 +455,7 @@ export const getAdminNotifications = async (req,res) => {
   })
 }
 
-//------------------- MARK ALL READ ---------------------
-export const setMarkAllRead = async (req, res) => {
-  try {
-    const role = req.user.role; 
-    const result = await Notification.updateMany(
-      { role, read: false },   
-      { $set: { read: true } }
-    );
 
-    return res.json({
-      success: true,
-      modifiedCount: result.modifiedCount
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to mark notifications as read"
-    });
-  }
-};
 
   
 

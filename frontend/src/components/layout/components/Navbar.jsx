@@ -65,7 +65,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-white/95 shadow-sm border-b border-slate-100">
+    <nav className="fixed top-0 w-full z-60 backdrop-blur-md bg-white/95 shadow-sm border-b border-slate-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-3 sm:py-4">
           {/* Left: Logo + Mobile hamburger */}
@@ -125,15 +125,11 @@ const Navbar = () => {
                   >
                     Home
                   </Link>
-                  <span className="px-3 py-2 text-sm text-slate-500">
+                  <Link to='/about-us'
+                  className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
                     About
-                  </span>
-                  <span className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
-                    Services
-                  </span>
-                  <span className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
-                    Doctors
-                  </span>
+                  </Link>
+      
                 </div>
               )}
 
@@ -240,14 +236,6 @@ const Navbar = () => {
               <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
                 <Icon icon="mdi:information" className="h-5 w-5" />
                 About
-              </span>
-              <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
-                <Icon icon="mdi:medical-bag" className="h-5 w-5" />
-                Services
-              </span>
-              <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
-                <Icon icon="mdi:doctor" className="h-5 w-5" />
-                Doctors
               </span>
 
               {!isLoggedIn ? (
