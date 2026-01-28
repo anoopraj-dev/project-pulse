@@ -17,9 +17,6 @@ import {
   submitPatientLifestyleInfo,
 } from "../../api/patient/patientApis";
 
-// file fields used in patient onboarding
-const FILE_FIELDS = ["profilePicture"];
-
 const PatientOnboarding = () => {
   const stepKeys = Object.keys(patientOnboarding);
   const [currentStep, setCurrentStep] = useState(0);
@@ -27,7 +24,7 @@ const PatientOnboarding = () => {
   const navigate = useNavigate();
   const submitAction = useAsyncAction();
 
-  const { email, id, isLoading } = useUser();
+  const { email, id, isLoading, dispatch } = useUser();
   const { openModal } = useModal();
   const { files, clearField } = useFileUploadContext();
 
@@ -54,26 +51,33 @@ const PatientOnboarding = () => {
           }
         });
 
-        console.log("files.profilePicture:", files.profilePicture);
-console.log("instanceof File:", files.profilePicture instanceof File);
-
-
-        // FILE FIELD
         if (files?.profilePicture) {
           formData.append("profilePicture", files.profilePicture);
         }
 
-        // ---------- DEBUG ----------
-        console.log("---- PATIENT FORM DATA ----");
-        for (const [key, value] of formData.entries()) {
-          console.log(key, value instanceof File ? value.name : value);
-        }
 
         // ---------- API CALL ----------
         let response;
         switch (currentStep) {
           case 0:
             response = await submitPatientPersonalInfo(formData);
+
+            if (response?.data?.data) {
+              const updatedPatient = response.data.data;
+
+              dispatch({
+                type: "SET_USER",
+                payload: {
+                  id: updatedPatient._id,
+                  email: updatedPatient.email,
+                  name: updatedPatient.name,
+                  role: "patient",
+                  profilePicture: updatedPatient.profilePicture,
+                  firstLogin: updatedPatient.firstLogin,
+                },
+              });
+            }
+
             break;
           case 1:
             response = await submitPatientMedicalInfo(formData);

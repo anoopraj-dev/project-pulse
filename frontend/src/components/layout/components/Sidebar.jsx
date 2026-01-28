@@ -11,7 +11,7 @@ const Sidebar = ({ toggleSidebar, config, isOpen }) => {
   if (isLoading) return <SidebarShimmer />;
 
   return (
-    <aside className="h-full bg-[#0096C7] text-white flex flex-col">
+    <aside className="z-15 h-full bg-[#0096C7] text-white flex flex-col">
       
       {/* Toggle button */}
       <div className="flex justify-end p-4">
