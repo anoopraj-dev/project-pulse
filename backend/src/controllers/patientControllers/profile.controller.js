@@ -3,14 +3,6 @@ import Patient from "../../models/patient.model.js";
 //-------------- GET PATIENT PROFILE -----------
 
 export const getPatientProfile = async (req, res) => {
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
 
   try {
     if (!req.user || req.user.role !== "patient") {
