@@ -125,15 +125,11 @@ const Navbar = () => {
                   >
                     Home
                   </Link>
-                  <span className="px-3 py-2 text-sm text-slate-500">
+                  <Link to='/about-us'
+                  className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
                     About
-                  </span>
-                  <span className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
-                    Services
-                  </span>
-                  <span className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
-                    Doctors
-                  </span>
+                  </Link>
+      
                 </div>
               )}
 
@@ -240,14 +236,6 @@ const Navbar = () => {
               <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
                 <Icon icon="mdi:information" className="h-5 w-5" />
                 About
-              </span>
-              <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
-                <Icon icon="mdi:medical-bag" className="h-5 w-5" />
-                Services
-              </span>
-              <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
-                <Icon icon="mdi:doctor" className="h-5 w-5" />
-                Doctors
               </span>
 
               {!isLoggedIn ? (

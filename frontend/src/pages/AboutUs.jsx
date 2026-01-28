@@ -1,72 +1,88 @@
-// src/DoctorLanding.jsx
 import React from "react";
+import PrimaryButton from "../components/shared/components/PrimaryButton";
 
 const doctors = Array.from({ length: 8 });
 
 const DoctorLanding = () => {
   return (
-    <div className="min-h-screen bg-[#f7fcfd] py-10">
-      
-      {/* Container (80% width) */}
-      <div className="max-w-[80%] mx-auto space-y-16">
+    <div className="min-h-screen bg-[#f7fcfd]">
 
-        {/* --- HERO SECTION (Modern Minimal) --- */}
-        <section className="text-center space-y-3">
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
-            Healthcare at Your Fingertips
-          </h1>
-          <p className="text-slate-600 text-sm md:text-base max-w-xl mx-auto">
-            Consult online or book appointments with trusted doctors instantly.
-          </p>
+      {/* --- HERO SECTION --- */}
+      <section className="relative h-[70vh] md:h-[80vh] w-full mt-20">
+        <div className="relative h-full rounded-3xl overflow-hidden shadow-2xl mx-4 md:mx-10 lg:mx-20">
+          <img
+            src="/medical-banner.jpg"
+            alt="Healthcare hero"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+          <div className="relative z-10 h-full flex items-center">
+            <div className="max-w-2xl space-y-6 px-6 lg:px-12 text-white">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                Healthcare at Your Fingertips
+              </h1>
+              <p className="text-lg md:text-xl text-white/70 leading-relaxed">
+                Consult online or book appointments with trusted doctors instantly.
+              </p>
+              <PrimaryButton
+                  text="Find your doctor now"
+                  className="w-full sm:w-auto"
+                />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- MAIN CONTENT --- */}
+      <div className="max-w-[80%] mx-auto space-y-16 py-10">
+
+        {/* --- What We Offer --- */}
+        <section className="space-y-6">
+          <h2 className="text-xl font-bold text-slate-800">What We Offer</h2>
+
+          <div className="space-y-10">
+
+            <div className="flex items-start gap-5">
+              <div
+                className="w-20 h-20 rounded-2xl bg-cover bg-center shrink-0"
+                style={{ backgroundImage: "url('/images/doctor-call.jpg')" }}
+              />
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Instant Voice Consultation
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Talk to verified doctors instantly through secure, high-quality voice calls.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-5">
+              <div
+                className="w-20 h-20 rounded-2xl bg-cover bg-center shrink-0"
+                style={{ backgroundImage: "url('/images/doctor-hand.jpg')" }}
+              />
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Offline Visit Bookings
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Find specialists nearby and book in-person consultations with ease.
+                </p>
+              </div>
+            </div>
+
+          </div>
         </section>
-<section className="space-y-6">
-  <h2 className="text-xl font-bold text-slate-800">What We Offer</h2>
-
-  <div className="space-y-10">
-
-    {/* Feature 1 */}
-    <div className="flex items-start gap-5">
-      <div
-        className="w-20 h-20 rounded-2xl bg-cover bg-center shrink-0"
-        style={{ backgroundImage: "url('/images/doctor-call.jpg')" }}
-      />
-      <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-slate-900">
-          Instant Voice Consultation
-        </h3>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          Talk to verified doctors instantly through secure, high-quality voice calls.
-        </p>
-      </div>
-    </div>
-
-    {/* Feature 2 */}
-    <div className="flex items-start gap-5">
-      <div
-        className="w-20 h-20 rounded-2xl bg-cover bg-center shrink-0"
-        style={{ backgroundImage: "url('/images/doctor-hand.jpg')" }}
-      />
-      <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-slate-900">
-          Offline Visit Bookings
-        </h3>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          Find specialists nearby and book in-person consultations with ease.
-        </p>
-      </div>
-    </div>
-
-  </div>
-</section>
-
 
         {/* --- FIND A DOCTOR --- */}
         <section>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-slate-800">Find a Doctor</h2>
-            <button className="text-sm px-4 py-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition">
-              View All
-            </button>
+            <PrimaryButton
+                              text="View all"
+                              className="w-full sm:w-auto"
+                            />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -104,23 +120,7 @@ const DoctorLanding = () => {
   );
 };
 
-/* ------------------ OFFER CARD (New Lightweight Style) ------------------ */
-
-const OfferCard = ({ title, img, desc }) => (
-  <div className="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-    <div
-      className="w-24 h-24 rounded-xl bg-cover bg-center"
-      style={{ backgroundImage: `url(${img})` }}
-    />
-    <div>
-      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-      <p className="text-xs mt-1 text-slate-600 leading-normal">{desc}</p>
-    </div>
-  </div>
-);
-
 /* ------------------ DOCTOR CARD ------------------ */
-
 const DoctorCard = () => (
   <div className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition text-center">
     <div
@@ -134,7 +134,6 @@ const DoctorCard = () => (
 );
 
 /* ------------------ TESTIMONIAL ------------------ */
-
 const Testimonial = ({ name, rating, text }) => (
   <div className="bg-white rounded-xl p-4 shadow-sm flex gap-3">
     <div className="w-10 h-10 rounded-full bg-emerald-400 flex items-center justify-center text-white font-bold">
