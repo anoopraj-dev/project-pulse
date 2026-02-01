@@ -73,13 +73,13 @@ export const getAllMessages = async (req, res) => {
     await Message.updateMany(
       {
         conversationId: conversation._id,
-        receiverId:userId1,
-        isRead:false,
+        receiverId: userId1,
+        isRead: false,
       },
       {
-        $set: {isRead:true}
-      }
-    )
+        $set: { isRead: true },
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -127,8 +127,8 @@ export const getAllConversations = async (req, res) => {
       const unreadCount = await Message.countDocuments({
         conversationId: convo._id,
         receiverId: userId,
-        isRead: false
-      })
+        isRead: false,
+      });
 
       result.push({
         _id: convo._id,
@@ -158,17 +158,34 @@ export const sendMessage = async ({
   receiverModel,
   text,
 }) => {
-  let conversation = conversationId
-    ? await Conversation.findById(conversationId)
-    : null;
+  let conversation = null;
+  let isNewConversation = false;
+
+  if (conversationId) {
+    conversation = await Conversation.findById(conversationId);
+  }
 
   if (!conversation) {
-    conversation = await Conversation.create({
-      participants: [
-        { userId: senderId, userModel: senderModel },
-        { userId: receiverId, userModel: receiverModel },
-      ],
+    // try to find existing conversation between these users
+    conversation = await Conversation.findOne({
+      participants: {
+        $all: [
+          { $elemMatch: { userId: senderId } },
+          { $elemMatch: { userId: receiverId } },
+        ],
+      },
     });
+
+    // only create if still not found
+    if (!conversation) {
+      conversation = await Conversation.create({
+        participants: [
+          { userId: senderId, userModel: senderModel },
+          { userId: receiverId, userModel: receiverModel },
+        ],
+      });
+      isNewConversation = true;
+    }
   }
 
   const message = await Message.create({
@@ -185,12 +202,45 @@ export const sendMessage = async ({
     senderId: message.senderId,
     createdAt: message.createdAt,
   };
+
   conversation.updatedAt = message.createdAt;
   await conversation.save();
 
+  const populatedConversation = await Conversation.findById(
+    conversation._id,
+  ).populate("participants.userId", "name profilePicture");
+
+  const getOtherParticipant = (conversation, viewerId) => {
+    return conversation.participants.find(
+      (p) => p.userId._id.toString() !== viewerId.toString(),
+    ).userId;
+  };
+
+  const senderParticipant = getOtherParticipant(
+    populatedConversation,
+    senderId,
+  );
+
+  const receiverParticipant = getOtherParticipant(
+    populatedConversation,
+    receiverId,
+  );
+
   return {
+    conversationId: populatedConversation._id,
     message,
-    conversationId: conversation._id,
+    isNewConversation,
+    senderConversation: {
+      _id: populatedConversation._id,
+      participant: senderParticipant,
+      lastMessage: populatedConversation.lastMessage,
+      updatedAt: populatedConversation.updatedAt,
+    },
+    receiverConversation: {
+      _id: populatedConversation._id,
+      participant: receiverParticipant,
+      lastMessage: populatedConversation.lastMessage,
+      updatedAt: populatedConversation.updatedAt,
+    },
   };
 };
-

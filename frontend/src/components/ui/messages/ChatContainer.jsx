@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import { useSocket } from "../../../contexts/SocketContext";
@@ -14,19 +14,10 @@ const ChatContainer = () => {
   const { id: receiverId } = useParams();
   const { role, id } = useUser();
   const navigate = useNavigate();
+
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
-  const tempConversationId = useRef(null);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setDeviceType(getDeviceTypes(window.innerWidth));
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // ---------------- Fetch Sidebar Conversations ----------------
   useEffect(() => {
@@ -45,7 +36,7 @@ const ChatContainer = () => {
       const res = await getAllMessages(role, receiverId);
 
       const updatedMessages = res.data.messages.map((m) =>
-        m.receiverId === id ? { ...m, isRead: true } : m,
+        m.receiverId === id ? { ...m, isRead: true } : m
       );
 
       setMessages(updatedMessages);
@@ -57,30 +48,32 @@ const ChatContainer = () => {
     };
 
     loadMessages();
-  }, [receiverId]);
+  }, [receiverId, id, role]);
 
-  // ---------------- Conversation Created ----------------
+  // ---------------- Conversation Created (server-authoritative) ----------------
   useEffect(() => {
-    const handleConversationCreated = ({ conversationId }) => {
+    const handleConversationCreated = ({ conversationId, conversation }) => {
+      console.log('participant after convo creation', conversation?.participant)
       setActiveConversation((prev) => ({
         ...prev,
         id: conversationId,
+        participant:conversation?.participant
       }));
 
-      setConversations((prev) =>
-        prev.map((c) =>
-          c._id === tempConversationId.current
-            ? { ...c, _id: conversationId }
-            : c,
-        ),
-      );
+      setConversations((prev) => {
+        const exists = prev.some((c) => c._id === conversationId);
+        if (exists) return prev;
+        return [conversation, ...prev];
+      });
+      
     };
 
     socket.on("conversation:created", handleConversationCreated);
-    return () => socket.off("conversation:created", handleConversationCreated);
+    return () =>
+      socket.off("conversation:created", handleConversationCreated);
   }, [socket]);
 
-  // ---------------- Join Chat ----------------
+  // ---------------- Join / Leave Chat ----------------
   useEffect(() => {
     if (!activeConversation?.id || !isConnected) return;
 
@@ -97,37 +90,16 @@ const ChatContainer = () => {
 
   // ---------------- Send Message ----------------
   const handleSendMessage = (text) => {
-    console.log("send message called");
-    if (!activeConversation) return;
-
-    if (!activeConversation.id) {
-      const tempId = `temp-${Date.now()}`;
-      tempConversationId.current = tempId;
-
-      setConversations((prev) => [
-        {
-          _id: tempId,
-          participant: activeConversation.participant,
-          lastMessage: {
-            text,
-            senderId: id,
-          },
-          unreadCount: 0,
-        },
-        ...prev,
-      ]);
-    }
+    if (!receiverId) return;
 
     socket.emit("message:send", {
-      conversationId: activeConversation.id || null,
+      conversationId: activeConversation?.id || null,
       text,
       senderId: id,
       senderModel: role === "doctor" ? "Doctor" : "Patient",
       receiverId,
       receiverModel: role === "doctor" ? "Patient" : "Doctor",
     });
-
-    console.log("emited send message");
   };
 
   // ---------------- Receive Message ----------------
@@ -135,14 +107,14 @@ const ChatContainer = () => {
     const handleReceiveMessage = (message) => {
       const isActiveChat = activeConversation?.id === message.conversationId;
 
-      // add message only if chat is open
-      setMessages((prev) =>
-        isActiveChat && !prev.some((m) => m._id === message._id)
-          ? [...prev, message]
-          : prev,
-      );
+      if (isActiveChat) {
+        setMessages((prev) =>
+          prev.some((m) => m._id === message._id)
+            ? prev
+            : [...prev, message]
+        );
+      }
 
-      //------------ update sidebar ---------
       setConversations((prev) =>
         prev.map((c) =>
           c._id === message.conversationId
@@ -151,8 +123,8 @@ const ChatContainer = () => {
                 lastMessage: message,
                 unreadCount: isActiveChat ? 0 : (c.unreadCount || 0) + 1,
               }
-            : c,
-        ),
+            : c
+        )
       );
     };
 
@@ -160,23 +132,22 @@ const ChatContainer = () => {
     return () => socket.off("message:receive", handleReceiveMessage);
   }, [socket, activeConversation?.id]);
 
-  //-------------------------- Mark message as read -----------------
+  // ---------------- Mark Messages as Read ----------------
   useEffect(() => {
     if (!activeConversation?.id) return;
 
     setConversations((prev) =>
       prev.map((c) =>
-        c._id === activeConversation.id ? { ...c, unreadCount: 0 } : c,
-      ),
+        c._id === activeConversation.id ? { ...c, unreadCount: 0 } : c
+      )
     );
 
     socket.emit("message:read", {
       conversationId: activeConversation.id,
     });
-  }, [activeConversation?.id]);
+  }, [activeConversation?.id, socket]);
 
-
-//------------------- Reset Active conversation & messages on route change ------------------
+  // ---------------- Reset on Route Change ----------------
   useEffect(() => {
     setActiveConversation(null);
     setMessages([]);
