@@ -24,6 +24,15 @@ const conversationSchema = new mongoose.Schema(
       text: { type: String },
       senderId: { type: mongoose.Schema.Types.ObjectId },
       createdAt: { type: Date },
+      type: {type: String, enum:['text','media'],default:'text'},
+       files: [
+        {
+          url: String,
+          type: String,
+          name: String,
+          size: Number,
+        },
+      ],
     },
 
   },

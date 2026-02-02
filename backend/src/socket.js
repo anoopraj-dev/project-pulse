@@ -53,14 +53,15 @@ export const initSocket = (server) => {
       try {
         const {
           conversationId,
-          text,
+          text = "",
+          files = [],
           senderId,
           senderModel,
           receiverId,
           receiverModel,
         } = payload;
 
-        if (!text) return;
+        if (!text.trim() && files.length === 0) return;
 
         const {
           senderConversation,
@@ -74,7 +75,8 @@ export const initSocket = (server) => {
           senderModel,
           receiverId,
           receiverModel,
-          text, 
+          text,
+          files,
         });
 
         const roomId = newConversationId.toString();
@@ -93,25 +95,35 @@ export const initSocket = (server) => {
           }
         }
 
-
         // -------- EMIT CONVERSATION CREATED (ONCE) --------
         if (isNewConversation) {
           io.to(senderId.toString()).emit("conversation:created", {
             conversation: senderConversation,
             message,
-        
           });
 
           io.to(receiverId.toString()).emit("conversation:created", {
             conversation: receiverConversation,
             message,
             senderId,
-            receiverId
+            receiverId,
           });
         }
 
+        // ---------------- Format message for socket ----------------
+        const formattedMessage = {
+          ...message.toObject(), // plain JS object
+          files:
+            message.files?.map((f) => ({
+              url: f.url,
+              name: f.name,
+              size: f.size,
+              resourceType: f.resourceType || "image",
+            })) || [],
+        };
+
         // -------- EMIT MESSAGE (ROOM-BASED) --------
-        io.to(roomId).emit("message:receive", message);
+        io.to(roomId).emit("message:receive", formattedMessage);
 
         const socketsInRoom = await io.in(roomId).allSockets();
         console.log(`Sockets in room ${roomId}:`, socketsInRoom);

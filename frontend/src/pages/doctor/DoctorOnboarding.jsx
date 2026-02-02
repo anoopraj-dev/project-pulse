@@ -102,7 +102,7 @@ const DoctorOnboarding = () => {
           services.push({
             serviceType: "online",
             fees: Number(data.online_fee),
-            availableDates: [], // can be filled later
+            availableDates: [], 
           });
         }
 

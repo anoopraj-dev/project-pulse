@@ -67,7 +67,22 @@ export const getAllMessages = async (req, res) => {
     //--------------- get conversations
     const messages = await Message.find({
       conversationId: conversation._id,
-    }).sort({ createdAt: 1 });
+    })
+      .sort({ createdAt: 1 })
+      .lean();
+
+
+    //-------------- format messages --------------
+    const formattedMessages = messages.map((msg) => ({
+      ...msg,
+      files:
+        msg.files?.map((f) => ({
+          url: f.url,
+          name: f.name,
+          size: f.size,
+          resourceType: f.resourceType || "image",
+        })) || [],
+    }));
 
     //-------------- mark read --------------
     await Message.updateMany(
@@ -91,7 +106,7 @@ export const getAllMessages = async (req, res) => {
         name: participant.name,
         profilePicture: participant.profilePicture,
       },
-      messages,
+      messages: formattedMessages,
     });
   } catch (error) {
     console.error(error);
@@ -157,10 +172,15 @@ export const sendMessage = async ({
   receiverId,
   receiverModel,
   text,
+  files,
 }) => {
   let conversation = null;
   let isNewConversation = false;
+  
 
+  //------------------- Find or Create conversation --------------------
+
+  console.log("files recieved in send message", files);
   if (conversationId) {
     conversation = await Conversation.findById(conversationId);
   }
@@ -188,6 +208,7 @@ export const sendMessage = async ({
     }
   }
 
+  //---------------- Create Message -------------------------
   const message = await Message.create({
     conversationId: conversation._id,
     senderId,
@@ -195,16 +216,21 @@ export const sendMessage = async ({
     receiverId,
     receiverModel,
     text,
+    files,
   });
 
   conversation.lastMessage = {
     text: message.text,
     senderId: message.senderId,
+    files: message.files || [],
+    type: message.files?.length ? "media" : "text",
     createdAt: message.createdAt,
   };
 
   conversation.updatedAt = message.createdAt;
   await conversation.save();
+
+  // --------------------- Populate pariicaipants ---------------------
 
   const populatedConversation = await Conversation.findById(
     conversation._id,

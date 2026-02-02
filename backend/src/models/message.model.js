@@ -33,7 +33,6 @@ const messageSchema = new mongoose.Schema(
 
     text: {
       type: String,
-      required: true,
       trim: true,
       default: "",
     },
@@ -41,7 +40,15 @@ const messageSchema = new mongoose.Schema(
       type:Boolean,
       default:false,
       index: true
-    }
+    },
+     files: [
+      {
+        url: { type: String, required: true },    
+        type: { type: String },                   
+        name: { type: String },                   
+        size: { type: Number },                   
+      },
+    ],
   },
   { timestamps: true }
 );

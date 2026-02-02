@@ -9,17 +9,18 @@ import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import { getAllMessages, getConversations } from "../../../api/user/userApis";
+import { uploadFileToCloudinary } from "../../../utilis/cloudinary";
 
 const ChatContainer = () => {
   const { socket, isConnected, onlineUsers } = useSocket();
   const { id: receiverId } = useParams();
   const { role, id } = useUser();
   const navigate = useNavigate();
-  const { setTotalUnread} = useChatContext();
-  const [userOpenedChat, setUserOpenedChat] = useState(false);
+  const { setTotalUnread } = useChatContext();
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // ---------------- Fetch Sidebar Conversations ----------------
   useEffect(() => {
@@ -54,10 +55,7 @@ const ChatContainer = () => {
 
   // ---------------- Conversation Created ----------------
   useEffect(() => {
-    const handleConversationCreated = ({
-      conversationId,
-      conversation,
-    }) => {
+    const handleConversationCreated = ({ conversationId, conversation }) => {
       setActiveConversation((prev) => ({
         ...prev,
         id: conversationId,
@@ -111,17 +109,54 @@ const ChatContainer = () => {
   }, [activeConversation?.id, socket, isConnected]);
 
   // ---------------- Send Message ----------------
-  const handleSendMessage = (text) => {
+  const handleSendMessage = async ({ text, files }) => {
     if (!receiverId) return;
+    if (!text.trim() && (!files || files.length === 0)) return;
+    try {
+      setIsUploading(true);
 
-    socket.emit("message:send", {
-      conversationId: activeConversation?.id || null,
-      text,
-      senderId: id,
-      senderModel: role === "doctor" ? "Doctor" : "Patient",
-      receiverId,
-      receiverModel: role === "doctor" ? "Patient" : "Doctor",
-    });
+      let uploadedFiles = [];
+
+      if (files && files.length > 0) {
+        const filesToUpload = files.filter((f) => f instanceof File);
+        if (filesToUpload.length > 0) {
+          uploadedFiles = await Promise.all(
+            filesToUpload.map((file) => uploadFileToCloudinary(file)),
+          );
+        }
+
+        // Add already uploaded files (if any)
+        const alreadyUploadedFiles = files.filter((f) => !(f instanceof File));
+        uploadedFiles = [...alreadyUploadedFiles, ...uploadedFiles];
+      }
+
+      //------------ update ui locally --------------
+      const localMessage = {
+        _id: Date.now().toString(),
+        senderId: id,
+        conversationId: activeConversation?.id || null,
+        text,
+        files: uploadedFiles,
+        createdAt: new Date().toISOString(),
+        senderModel: role === "doctor" ? "Doctor" : "Patient",
+      };
+
+      setMessages((prev) => [...prev, localMessage]);
+
+      socket.emit("message:send", {
+        conversationId: activeConversation?.id || null,
+        text,
+        files: uploadedFiles,
+        senderId: id,
+        senderModel: role === "doctor" ? "Doctor" : "Patient",
+        receiverId,
+        receiverModel: role === "doctor" ? "Patient" : "Doctor",
+      });
+    } catch (error) {
+      console.error("Message sending failed", error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   // ---------------- Receive Message ----------------
@@ -170,14 +205,13 @@ const ChatContainer = () => {
   //-------------- Total Unread for Global use ---------------
 
   useEffect(() => {
-  const total = conversations.reduce(
-    (sum, c) => sum + (c.unreadCount || 0),
-    0
-  );
+    const total = conversations.reduce(
+      (sum, c) => sum + (c.unreadCount || 0),
+      0,
+    );
 
-  setTotalUnread(total);
-}, [conversations, setTotalUnread]);
-
+    setTotalUnread(total);
+  }, [conversations, setTotalUnread]);
 
   // ---------------- Reset on Route Change ----------------
   useEffect(() => {
@@ -186,9 +220,6 @@ const ChatContainer = () => {
       setMessages([]);
     }
   }, [receiverId]);
-
-
-  
 
   const participantId = activeConversation?.participant?._id;
   const isOnline = participantId && onlineUsers.has(participantId);
@@ -216,7 +247,10 @@ const ChatContainer = () => {
             userId={id}
             activeConversationId={activeConversation?.id}
           />
-          <MessageInput onSend={handleSendMessage} disabled={!isConnected} />
+          <MessageInput
+            onSend={handleSendMessage}
+            disabled={!isConnected || isUploading}
+          />
         </>
       ) : (
         <div className="flex items-center justify-center h-full text-slate-500">
