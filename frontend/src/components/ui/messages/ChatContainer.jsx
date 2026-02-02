@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import { useSocket } from "../../../contexts/SocketContext";
+import { useChatContext } from "../../../contexts/ChatContext";
 import ChatLayout from "../../layout/components/ChatLayout";
 import ChatSidebar from "./ChatSidebar";
 import ChatHeader from "./ChatHeader";
@@ -14,7 +15,8 @@ const ChatContainer = () => {
   const { id: receiverId } = useParams();
   const { role, id } = useUser();
   const navigate = useNavigate();
-
+  const { setTotalUnread} = useChatContext();
+  const [userOpenedChat, setUserOpenedChat] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
@@ -164,6 +166,18 @@ const ChatContainer = () => {
       conversationId: activeConversation.id,
     });
   }, [activeConversation?.id, socket]);
+
+  //-------------- Total Unread for Global use ---------------
+
+  useEffect(() => {
+  const total = conversations.reduce(
+    (sum, c) => sum + (c.unreadCount || 0),
+    0
+  );
+
+  setTotalUnread(total);
+}, [conversations, setTotalUnread]);
+
 
   // ---------------- Reset on Route Change ----------------
   useEffect(() => {
