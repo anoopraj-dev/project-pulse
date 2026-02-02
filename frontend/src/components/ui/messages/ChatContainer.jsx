@@ -36,7 +36,7 @@ const ChatContainer = () => {
       const res = await getAllMessages(role, receiverId);
 
       const updatedMessages = res.data.messages.map((m) =>
-        m.receiverId === id ? { ...m, isRead: true } : m
+        m.receiverId === id ? { ...m, isRead: true } : m,
       );
 
       setMessages(updatedMessages);
@@ -50,14 +50,16 @@ const ChatContainer = () => {
     loadMessages();
   }, [receiverId, id, role]);
 
-  // ---------------- Conversation Created (server-authoritative) ----------------
+  // ---------------- Conversation Created ----------------
   useEffect(() => {
-    const handleConversationCreated = ({ conversationId, conversation }) => {
-      console.log('participant after convo creation', conversation?.participant)
+    const handleConversationCreated = ({
+      conversationId,
+      conversation,
+    }) => {
       setActiveConversation((prev) => ({
         ...prev,
         id: conversationId,
-        participant:conversation?.participant
+        participant: conversation?.participant,
       }));
 
       setConversations((prev) => {
@@ -65,13 +67,31 @@ const ChatContainer = () => {
         if (exists) return prev;
         return [conversation, ...prev];
       });
-      
+      forceRefreshChat();
     };
 
     socket.on("conversation:created", handleConversationCreated);
-    return () =>
-      socket.off("conversation:created", handleConversationCreated);
+    return () => socket.off("conversation:created", handleConversationCreated);
   }, [socket]);
+
+  //---------------- Force refresh the chat after first message ---------------
+  const forceRefreshChat = async () => {
+    if (!receiverId) return;
+
+    const [convRes, msgRes] = await Promise.all([
+      getConversations(role),
+      getAllMessages(role, receiverId),
+    ]);
+
+    setConversations(convRes.data.conversations);
+
+    setMessages(msgRes.data.messages);
+
+    setActiveConversation({
+      id: msgRes?.data?.conversation?._id || null,
+      participant: msgRes.data.participant,
+    });
+  };
 
   // ---------------- Join / Leave Chat ----------------
   useEffect(() => {
@@ -109,9 +129,7 @@ const ChatContainer = () => {
 
       if (isActiveChat) {
         setMessages((prev) =>
-          prev.some((m) => m._id === message._id)
-            ? prev
-            : [...prev, message]
+          prev.some((m) => m._id === message._id) ? prev : [...prev, message],
         );
       }
 
@@ -123,8 +141,8 @@ const ChatContainer = () => {
                 lastMessage: message,
                 unreadCount: isActiveChat ? 0 : (c.unreadCount || 0) + 1,
               }
-            : c
-        )
+            : c,
+        ),
       );
     };
 
@@ -138,8 +156,8 @@ const ChatContainer = () => {
 
     setConversations((prev) =>
       prev.map((c) =>
-        c._id === activeConversation.id ? { ...c, unreadCount: 0 } : c
-      )
+        c._id === activeConversation.id ? { ...c, unreadCount: 0 } : c,
+      ),
     );
 
     socket.emit("message:read", {
@@ -149,9 +167,14 @@ const ChatContainer = () => {
 
   // ---------------- Reset on Route Change ----------------
   useEffect(() => {
-    setActiveConversation(null);
-    setMessages([]);
+    if (!receiverId) {
+      setActiveConversation(null);
+      setMessages([]);
+    }
   }, [receiverId]);
+
+
+  
 
   const participantId = activeConversation?.participant?._id;
   const isOnline = participantId && onlineUsers.has(participantId);

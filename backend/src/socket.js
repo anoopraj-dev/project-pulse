@@ -74,7 +74,7 @@ export const initSocket = (server) => {
           senderModel,
           receiverId,
           receiverModel,
-          text,
+          text, 
         });
 
         const roomId = newConversationId.toString();
@@ -93,17 +93,20 @@ export const initSocket = (server) => {
           }
         }
 
-        console.log(`Both users joined room ${roomId}`);
 
         // -------- EMIT CONVERSATION CREATED (ONCE) --------
         if (isNewConversation) {
           io.to(senderId.toString()).emit("conversation:created", {
             conversation: senderConversation,
-            senderId
+            message,
+        
           });
 
           io.to(receiverId.toString()).emit("conversation:created", {
             conversation: receiverConversation,
+            message,
+            senderId,
+            receiverId
           });
         }
 
