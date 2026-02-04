@@ -6,8 +6,10 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
 
   // Filter messages for active conversation
   const filteredMessages = messages.filter(
-    (msg) => msg?.conversationId === activeConversationId
+    (msg) => msg?.conversationId === activeConversationId,
   );
+
+  console.log(filteredMessages);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -54,17 +56,16 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
 
                   {/* Files */}
                   {msg.files?.map((file, idx) => {
-                    const timestamp = new Date(msg.createdAt).toLocaleTimeString(
-                      [],
-                      { hour: "2-digit", minute: "2-digit" }
-                    );
+                    const timestamp = new Date(
+                      msg.createdAt,
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
 
                     if (file.resourceType === "image") {
                       return (
-                        <div
-                          key={idx}
-                          className="relative mt-2 inline-block"
-                        >
+                        <div key={idx} className="relative mt-2 inline-block">
                           <img
                             src={file.url}
                             alt={file.name || "uploaded image"}
@@ -77,10 +78,7 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                       );
                     } else if (file.resourceType === "video") {
                       return (
-                        <div
-                          key={idx}
-                          className="relative mt-2 inline-block"
-                        >
+                        <div key={idx} className="relative mt-2 inline-block">
                           <video
                             src={file.url}
                             controls
@@ -90,6 +88,24 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                             {timestamp}
                           </span>
                         </div>
+                      );
+                    } else if (file.resourceType === "raw") {
+                      return (
+                        <a
+                          key={idx}
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50"
+                        >
+                          <Icon
+                            icon="mdi:file-document-outline"
+                            className="w-5 h-5 text-gray-600"
+                          />
+                          <span className="text-sm text-gray-800 truncate max-w-[200px]">
+                            {file.name || "Document"}
+                          </span>
+                        </a>
                       );
                     } else {
                       return null;

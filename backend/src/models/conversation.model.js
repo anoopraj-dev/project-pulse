@@ -2,41 +2,41 @@ import mongoose from "mongoose";
 
 const conversationSchema = new mongoose.Schema(
   {
-
     participants: [
       {
         userId: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
-          refPath: 'participants.userModel'
+          refPath: "participants.userModel",
         },
 
         userModel: {
           type: String,
           required: true,
-          enum: ['Patient','Doctor'],
-        }
-      }
+          enum: ["Patient", "Doctor"],
+        },
+      },
     ],
-
 
     lastMessage: {
       text: { type: String },
       senderId: { type: mongoose.Schema.Types.ObjectId },
       createdAt: { type: Date },
-      type: {type: String, enum:['text','media'],default:'text'},
-       files: [
+      type: { type: String, enum: ["text", "media"], default: "text" },
+      files: [
         {
           url: String,
-          type: String,
+          resourceType: {
+            type: String,
+            enum: ["image", "video", "raw"],
+          },
           name: String,
           size: Number,
         },
       ],
     },
-
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Conversation = mongoose.model("Conversation", conversationSchema);

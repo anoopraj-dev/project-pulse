@@ -131,17 +131,17 @@ const ChatContainer = () => {
       }
 
       //------------ update ui locally --------------
-      const localMessage = {
-        _id: Date.now().toString(),
-        senderId: id,
-        conversationId: activeConversation?.id || null,
-        text,
-        files: uploadedFiles,
-        createdAt: new Date().toISOString(),
-        senderModel: role === "doctor" ? "Doctor" : "Patient",
-      };
+      // const localMessage = {
+      //   _id: Date.now().toString(),
+      //   senderId: id,
+      //   conversationId: activeConversation?.id || null,
+      //   text,
+      //   files: uploadedFiles,
+      //   createdAt: new Date().toISOString(),
+      //   senderModel: role === "doctor" ? "Doctor" : "Patient",
+      // };
 
-      setMessages((prev) => [...prev, localMessage]);
+      // setMessages((prev) => [...prev, localMessage]);
 
       socket.emit("message:send", {
         conversationId: activeConversation?.id || null,

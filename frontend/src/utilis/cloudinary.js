@@ -1,38 +1,32 @@
 export const uploadFileToCloudinary = async (file) => {
   const formData = new FormData();
-
   formData.append("file", file);
-  formData.append(
-    "upload_preset",
-    import.meta.env.VITE_CLOUDINARY_PRESET
-  );
 
   let resourceType = "raw";
+  let uploadPreset = import.meta.env.VITE_CLOUDINARY_RAW_PRESET;
 
   if (file.type.startsWith("image/")) {
     resourceType = "image";
+    uploadPreset = import.meta.env.VITE_CLOUDINARY_IMAGE_PRESET;
   } else if (file.type.startsWith("video/")) {
     resourceType = "video";
+    uploadPreset = import.meta.env.VITE_CLOUDINARY_VIDEO_PRESET;
   }
 
+  formData.append("upload_preset", uploadPreset);
+
   const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${
-      import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-    }/${resourceType}/upload`,
+    `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/${resourceType}/upload`,
     {
       method: "POST",
       body: formData,
     }
   );
 
-    console.log(import.meta.env.VITE_CLOUDINARY_PRESET);
-    console.log(import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-
-
   if (!res.ok) {
     const errorText = await res.text();
-  console.error("Cloudinary RAW error:", errorText);
-  throw new Error("Cloudinary upload failed: " + errorText);
+    console.error("Cloudinary upload error:", errorText);
+    throw new Error("Cloudinary upload failed");
   }
 
   const data = await res.json();
@@ -40,7 +34,7 @@ export const uploadFileToCloudinary = async (file) => {
   return {
     url: data.secure_url,
     publicId: data.public_id,
-    resourceType,
+    resourceType: data.resource_type, // trust Cloudinary
     mimeType: file.type,
     name: file.name,
     size: file.size,

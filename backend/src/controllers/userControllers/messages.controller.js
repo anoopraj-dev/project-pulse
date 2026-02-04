@@ -71,7 +71,6 @@ export const getAllMessages = async (req, res) => {
       .sort({ createdAt: 1 })
       .lean();
 
-
     //-------------- format messages --------------
     const formattedMessages = messages.map((msg) => ({
       ...msg,
@@ -80,7 +79,7 @@ export const getAllMessages = async (req, res) => {
           url: f.url,
           name: f.name,
           size: f.size,
-          resourceType: f.resourceType || "image",
+          resourceType: f.resourceType,
         })) || [],
     }));
 
@@ -176,7 +175,6 @@ export const sendMessage = async ({
 }) => {
   let conversation = null;
   let isNewConversation = false;
-  
 
   //------------------- Find or Create conversation --------------------
 
@@ -208,7 +206,16 @@ export const sendMessage = async ({
     }
   }
 
+  //------------ normalize files ------------
+  const normalizedFiles = files.map((f) => ({
+    url: f.url,
+    name: f.name,
+    size: f.size,
+    resourceType: f.resourceType || "image",
+  }));
+
   //---------------- Create Message -------------------------
+
   const message = await Message.create({
     conversationId: conversation._id,
     senderId,
@@ -216,7 +223,7 @@ export const sendMessage = async ({
     receiverId,
     receiverModel,
     text,
-    files,
+    files: normalizedFiles,
   });
 
   conversation.lastMessage = {

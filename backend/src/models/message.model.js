@@ -42,13 +42,17 @@ const messageSchema = new mongoose.Schema(
       index: true
     },
      files: [
-      {
-        url: { type: String, required: true },    
-        type: { type: String },                   
-        name: { type: String },                   
-        size: { type: Number },                   
-      },
-    ],
+        {
+          url: String,
+          resourceType: {
+            type: String,
+            enum: ["image", "video", "raw"],
+          },
+          name: String,
+          size: Number,
+        },
+      ],
+    
   },
   { timestamps: true }
 );
