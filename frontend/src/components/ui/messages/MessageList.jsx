@@ -9,8 +9,6 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
     (msg) => msg?.conversationId === activeConversationId,
   );
 
-  console.log(filteredMessages);
-
   // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,7 +26,7 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                 key={msg._id}
                 className={`flex ${isMe ? "justify-end" : "justify-start"}`}
               >
-                <div className={`max-w-xs lg:max-w-md`}>
+                <div className="max-w-xs lg:max-w-md relative">
                   {/* Text */}
                   {msg.text && (
                     <div
@@ -40,22 +38,22 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                     >
                       <p className="text-sm leading-relaxed">{msg.text}</p>
 
-                      {/* Timestamp for text */}
-                      <p
-                        className={`text-xs mt-1 text-right ${
-                          isMe ? "text-sky-100" : "text-slate-500"
-                        }`}
-                      >
-                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
+                      {/* Timestamp with tick only if sent */}
+                      {isMe && !msg.files?.some((f) => f.localPreview) && (
+                        <p className="text-xs mt-1 text-right text-sky-100 flex items-center justify-end gap-1">
+                          {new Date(msg.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          <Icon icon="mdi:check" className="w-3 h-3" />
+                        </p>
+                      )}
                     </div>
                   )}
 
                   {/* Files */}
                   {msg.files?.map((file, idx) => {
+                    const isTemp = !!file.localPreview;
                     const timestamp = new Date(
                       msg.createdAt,
                     ).toLocaleTimeString([], {
@@ -63,41 +61,74 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                       minute: "2-digit",
                     });
 
-                    if (file.resourceType === "image") {
+                    // Spinner overlay for temp files
+                    const spinner = (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
+                        <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+                      </div>
+                    );
+
+                    // Image
+                    if (file.resourceType === "image" || isTemp) {
                       return (
                         <div key={idx} className="relative mt-2 inline-block">
                           <img
-                            src={file.url}
+                            src={file.url || file.localPreview}
                             alt={file.name || "uploaded image"}
-                            className="rounded-lg max-h-60 w-auto border border-gray-300"
+                            className={`rounded-lg max-h-60 w-auto border border-gray-300 ${
+                              isTemp ? "blur-sm opacity-80" : ""
+                            }`}
                           />
-                          <span className="absolute bottom-2 right-2 text-xs  bg-white/50 px-1 rounded">
-                            {timestamp}
-                          </span>
+                          {isTemp && spinner}
+                          {!isTemp && (
+                            <span className="absolute bottom-2 right-2 text-xs bg-white/50 px-1 rounded flex items-center gap-1">
+                              {timestamp}
+                              {isMe && (
+                                <Icon icon="mdi:check" className="w-3 h-3" />
+                              )}
+                            </span>
+                          )}
                         </div>
                       );
-                    } else if (file.resourceType === "video") {
+                    }
+
+                    // Video
+                    else if (file.resourceType === "video" || isTemp) {
                       return (
-                        <div key={idx} className="relative mt-2 inline-block">
+                        <div key={idx} className="relative mt-2 inline-block ">
                           <video
-                            src={file.url}
+                            src={file.url || file.localPreview}
                             controls
-                            className="rounded-lg max-h-60 w-auto border border-gray-300"
+                            className={`rounded-lg max-h-60 w-auto border border-gray-300 ${
+                              isTemp ? "blur-sm opacity-80 " : ""
+                            }`}
                           />
-                          <span className="absolute bottom-1 right-1 text-xs text-white bg-black/50 px-1 rounded">
-                            {timestamp}
-                          </span>
+                          {isTemp && spinner}
+                          {!isTemp && (
+                            <span className="absolute bottom-2 right-2 text-xs bg-white/50 px-1 rounded flex items-center gap-1">
+                              {timestamp}
+                              {isMe && (
+                                <Icon icon="mdi:check" className="w-3 h-3" />
+                              )}
+                            </span>
+                          )}
                         </div>
                       );
-                    } else if (file.resourceType === "raw") {
+                    }
+
+                    // Document / Raw file
+                    else if (file.resourceType === "raw" || isTemp) {
                       return (
                         <a
                           key={idx}
-                          href={file.url}
+                          href={file.url || file.localPreview}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="mt-2 flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50"
+                          className={`mt-2 flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 relative ${
+                            isTemp ? "blur-sm opacity-80" : ""
+                          }`}
                         >
+                          {isTemp && spinner}
                           <Icon
                             icon="mdi:file-document-outline"
                             className="w-5 h-5 text-gray-600"
@@ -105,6 +136,12 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                           <span className="text-sm text-gray-800 truncate max-w-[200px]">
                             {file.name || "Document"}
                           </span>
+                          {!isTemp && isMe && (
+                            <Icon
+                              icon="mdi:check"
+                              className="absolute right-2 top-2 w-3 h-3 text-sky-500"
+                            />
+                          )}
                         </a>
                       );
                     } else {

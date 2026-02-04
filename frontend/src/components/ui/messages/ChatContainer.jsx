@@ -115,6 +115,27 @@ const ChatContainer = () => {
     try {
       setIsUploading(true);
 
+      //----------------- create temperorry message for preview --------------------
+      const tempId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+      const tempMessage = {
+        _id: tempId,
+        clientMessageId: tempId,
+        conversationId: activeConversation?.id,
+        senderId: id,
+        text,
+        files: files?.map((file) =>
+          file instanceof File
+            ? { localPreview: URL.createObjectURL(file), type: "image" }
+            : file,
+        ),
+        status: isUploading,
+        createdAt: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, tempMessage]);
+
+      //-------------------  upload to cloudinary ----------------------
       let uploadedFiles = [];
 
       if (files && files.length > 0) {
@@ -130,21 +151,16 @@ const ChatContainer = () => {
         uploadedFiles = [...alreadyUploadedFiles, ...uploadedFiles];
       }
 
-      //------------ update ui locally --------------
-      // const localMessage = {
-      //   _id: Date.now().toString(),
-      //   senderId: id,
-      //   conversationId: activeConversation?.id || null,
-      //   text,
-      //   files: uploadedFiles,
-      //   createdAt: new Date().toISOString(),
-      //   senderModel: role === "doctor" ? "Doctor" : "Patient",
-      // };
-
-      // setMessages((prev) => [...prev, localMessage]);
+      //-------------------- replace temp preview ------------------
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === tempId ? { ...m, files: uploadedFiles, status: "sent" } : m,
+        ),
+      );
 
       socket.emit("message:send", {
         conversationId: activeConversation?.id || null,
+        clientMessageId: tempId,
         text,
         files: uploadedFiles,
         senderId: id,
@@ -164,12 +180,13 @@ const ChatContainer = () => {
     const handleReceiveMessage = (message) => {
       const isActiveChat = activeConversation?.id === message.conversationId;
 
-      if (isActiveChat) {
+      if (isActiveChat && message.senderId !== id) {
         setMessages((prev) =>
           prev.some((m) => m._id === message._id) ? prev : [...prev, message],
         );
       }
 
+      //------------ update sidebar --------------
       setConversations((prev) =>
         prev.map((c) =>
           c._id === message.conversationId
