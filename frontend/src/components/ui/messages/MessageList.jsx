@@ -54,6 +54,7 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                   {/* Files */}
                   {msg.files?.map((file, idx) => {
                     const isTemp = !!file.localPreview;
+                    const isProtected = file.isProtected && !isMe
                     const timestamp = new Date(
                       msg.createdAt,
                     ).toLocaleTimeString([], {
@@ -69,7 +70,7 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                     );
 
                     // Image
-                    if (file.resourceType === "image" || isTemp) {
+                    if (file.resourceType === "image" || isTemp && (!isProtected || isMe)) {
                       return (
                         <div key={idx} className="relative mt-2 inline-block">
                           <img

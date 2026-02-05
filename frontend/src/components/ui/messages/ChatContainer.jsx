@@ -10,6 +10,7 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import { getAllMessages, getConversations } from "../../../api/user/userApis";
 import { uploadFileToCloudinary } from "../../../utilis/cloudinary";
+import { generateVideoThumbnail } from "../../../utilis/videoThumbnail";
 
 const ChatContainer = () => {
   const { socket, isConnected, onlineUsers } = useSocket();
@@ -115,6 +116,44 @@ const ChatContainer = () => {
     try {
       setIsUploading(true);
 
+      //---------------- temperory message with thumbnail for video ---------------
+      const tempFiles = await Promise.all(
+        files?.map( async (file)=> {
+
+          //---------- video files --------------
+          if( file.type ==='video'){
+            const thumbnail = await generateVideoThumbnail(file);
+            return {
+              localPreview: thumbnail,
+              type:'video',
+              resourceType:'video',
+              name:file.name,
+              isProtected: role !== 'doctor'
+            }
+          }
+
+          //------------- images -----------------
+          if(file.type==='image'){
+            return{
+              localPreview: URL.createObjectURL(file),
+              type:'image',
+              resourceType:'image',
+              name:file.name,
+              isProtected: role !=='doctor'
+            }
+          }
+
+          //------------- documents ---------------
+          return {
+            localPreview: URL.createObjectURL(file),
+            type: 'raw',
+            resourceType:'raw',
+            name:file.name,
+            isProtected: role !=='doctor'
+          }
+        })
+      )
+
       //----------------- create temperorry message for preview --------------------
       const tempId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -124,11 +163,7 @@ const ChatContainer = () => {
         conversationId: activeConversation?.id,
         senderId: id,
         text,
-        files: files?.map((file) =>
-          file instanceof File
-            ? { localPreview: URL.createObjectURL(file), type: "image" }
-            : file,
-        ),
+        files: tempFiles,
         status: isUploading,
         createdAt: new Date().toISOString(),
       };
@@ -151,6 +186,11 @@ const ChatContainer = () => {
         uploadedFiles = [...alreadyUploadedFiles, ...uploadedFiles];
       }
 
+      const uploadWithProtection = uploadedFiles.map((file)=> ({
+        ...file,
+        isProtected: role!=='doctor'
+      }))
+
       //-------------------- replace temp preview ------------------
       setMessages((prev) =>
         prev.map((m) =>
@@ -162,7 +202,7 @@ const ChatContainer = () => {
         conversationId: activeConversation?.id || null,
         clientMessageId: tempId,
         text,
-        files: uploadedFiles,
+        files: uploadWithProtection,
         senderId: id,
         senderModel: role === "doctor" ? "Doctor" : "Patient",
         receiverId,

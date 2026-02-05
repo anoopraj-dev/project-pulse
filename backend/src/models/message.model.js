@@ -50,6 +50,8 @@ const messageSchema = new mongoose.Schema(
           },
           name: String,
           size: Number,
+          isProtected: {type: Boolean, default:false},
+          thumbnailUrl: String,
         },
       ],
   
