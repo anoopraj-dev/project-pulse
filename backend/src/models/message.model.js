@@ -41,6 +41,7 @@ const messageSchema = new mongoose.Schema(
       default:false,
       index: true
     },
+
      files: [
         {
           url: String,
@@ -52,6 +53,7 @@ const messageSchema = new mongoose.Schema(
           size: Number,
           isProtected: {type: Boolean, default:false},
           thumbnailUrl: String,
+          format:String
         },
       ],
   

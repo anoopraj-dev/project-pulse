@@ -10,7 +10,7 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import { getAllMessages, getConversations } from "../../../api/user/userApis";
 import { uploadFileToCloudinary } from "../../../utilis/cloudinary";
-import { generateVideoThumbnail } from "../../../utilis/videoThumbnail";
+import { generateVideoThumbnail, getFileCategory } from "../../../utilis/videoThumbnail";
 
 const ChatContainer = () => {
   const { socket, isConnected, onlineUsers } = useSocket();
@@ -119,9 +119,9 @@ const ChatContainer = () => {
       //---------------- temperory message with thumbnail for video ---------------
       const tempFiles = await Promise.all(
         files?.map( async (file)=> {
-
+          const category = getFileCategory(file);
           //---------- video files --------------
-          if( file.type ==='video'){
+          if(category ==='video'){
             const thumbnail = await generateVideoThumbnail(file);
             return {
               localPreview: thumbnail,
@@ -133,13 +133,24 @@ const ChatContainer = () => {
           }
 
           //------------- images -----------------
-          if(file.type==='image'){
+          if(category==='image'){
             return{
               localPreview: URL.createObjectURL(file),
               type:'image',
               resourceType:'image',
               name:file.name,
               isProtected: role !=='doctor'
+            }
+          }
+
+          //--------------- pdf files ------------------
+          if(category === 'pdf'){
+            return {
+              localPreview: URL.createObjectURL(file),
+              type:'pdf',
+              resourceType: 'raw',
+              name:file.name,
+              isProtected: role!=='doctor'
             }
           }
 
@@ -167,6 +178,8 @@ const ChatContainer = () => {
         status: isUploading,
         createdAt: new Date().toISOString(),
       };
+
+      console.log('tempFiles', tempMessage?.files)
 
       setMessages((prev) => [...prev, tempMessage]);
 
@@ -226,6 +239,12 @@ const ChatContainer = () => {
         );
       }
 
+      //------------ emit message delivered --------------
+      socket.emit('message:delivered',{
+        messageId: message._id,
+        conversationId: message.conversationId
+      })
+
       //------------ update sidebar --------------
       setConversations((prev) =>
         prev.map((c) =>
@@ -269,6 +288,8 @@ const ChatContainer = () => {
 
     setTotalUnread(total);
   }, [conversations, setTotalUnread]);
+
+  
 
   // ---------------- Reset on Route Change ----------------
   useEffect(() => {

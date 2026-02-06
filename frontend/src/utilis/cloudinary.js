@@ -34,7 +34,7 @@ export const uploadFileToCloudinary = async (file) => {
   return {
     url: data.secure_url,
     publicId: data.public_id,
-    resourceType: data.resource_type, // trust Cloudinary
+    resourceType: data.resource_type, 
     mimeType: file.type,
     name: file.name,
     size: file.size,

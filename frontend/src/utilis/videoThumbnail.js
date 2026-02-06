@@ -22,12 +22,27 @@ export const generateVideoThumbnail = (file) => {
 
             const thumbnail = canvas.toDataURL('image/png');
             resolve(thumbnail);
+
+            URL.revokeObjectURL(video.src)
         })
 
         video.addEventListener('error',(err)=> {
-            
+            reject(err)
         })
 
-        video.onerror = (err) => reject(err)
+        video.onerror = (err) => {
+            URL.revokeObjectURL(url)
+            reject(err)
+        }
     })
 }
+
+export const getFileCategory = (file) => {
+  const name = file.name || "";
+  const ext = name.split(".").pop()?.toLowerCase();
+
+  if (["mp4", "webm", "mov", "mkv"].includes(ext)) return "video";
+  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "image";
+  if(ext === 'pdf') return 'pdf';
+  return "raw";
+};

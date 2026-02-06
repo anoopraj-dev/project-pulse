@@ -34,6 +34,7 @@ const conversationSchema = new mongoose.Schema(
           size: Number,
           isProtected: {type: Boolean, default :false},
           thumbnailUrl: String,
+          format:String
         },
       ],
     },

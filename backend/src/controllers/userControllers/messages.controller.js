@@ -64,7 +64,7 @@ export const getAllMessages = async (req, res) => {
       });
     }
 
-    //--------------- get conversations
+    //--------------- get conversations---------------------
     const messages = await Message.find({
       conversationId: conversation._id,
     })
@@ -80,6 +80,7 @@ export const getAllMessages = async (req, res) => {
           name: f.name,
           size: f.size,
           resourceType: f.resourceType,
+          format:f.format
         })) || [],
     }));
 
@@ -212,6 +213,7 @@ export const sendMessage = async ({
     name: f.name,
     size: f.size,
     resourceType: f.resourceType || "image",
+    format: f.format
   }));
 
   //---------------- Create Message -------------------------

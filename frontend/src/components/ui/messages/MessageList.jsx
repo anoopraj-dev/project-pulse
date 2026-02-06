@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
+import PDFViewer from "../pdrViewer/PDFViewer";
 
 const MessageList = ({ messages, userId, activeConversationId }) => {
   const bottomRef = useRef(null);
@@ -21,6 +22,11 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
           {filteredMessages.map((msg) => {
             const isMe = msg.senderId === userId;
 
+            const timestamp = new Date(msg.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
             return (
               <div
                 key={msg._id}
@@ -38,29 +44,22 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                     >
                       <p className="text-sm leading-relaxed">{msg.text}</p>
 
-                      {/* Timestamp with tick only if sent */}
-                      {isMe && !msg.files?.some((f) => f.localPreview) && (
-                        <p className="text-xs mt-1 text-right text-sky-100 flex items-center justify-end gap-1">
-                          {new Date(msg.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                          <Icon icon="mdi:check" className="w-3 h-3" />
-                        </p>
-                      )}
+                      {/* Timestamp + tick for sender, timestamp for receiver */}
+                      <p
+                        className={`text-xs mt-1 flex items-center justify-end gap-1 ${
+                          isMe ? "text-blue-100" : "text-slate-500"
+                        }`}
+                      >
+                        {timestamp}
+                        {isMe && <Icon icon="mdi:check" className="w-3 h-3" />}
+                      </p>
                     </div>
                   )}
 
                   {/* Files */}
                   {msg.files?.map((file, idx) => {
                     const isTemp = !!file.localPreview;
-                    const isProtected = file.isProtected && !isMe
-                    const timestamp = new Date(
-                      msg.createdAt,
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    });
+                    const isProtected = file.isProtected && !isMe;
 
                     // Spinner overlay for temp files
                     const spinner = (
@@ -70,7 +69,7 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                     );
 
                     // Image
-                    if (file.resourceType === "image" || isTemp && (!isProtected || isMe)) {
+                    if (file.resourceType === "image" || (isTemp && (!isProtected || isMe))) {
                       return (
                         <div key={idx} className="relative mt-2 inline-block">
                           <img
@@ -82,11 +81,11 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                           />
                           {isTemp && spinner}
                           {!isTemp && (
-                            <span className="absolute bottom-2 right-2 text-xs bg-white/50 px-1 rounded flex items-center gap-1">
+                            <span className={`absolute bottom-2 right-2 text-xs px-1 rounded flex items-center gap-1 ${
+                              isMe ? "bg-white/50 text-gray-500" : "bg-white/50 text-slate-500"
+                            }`}>
                               {timestamp}
-                              {isMe && (
-                                <Icon icon="mdi:check" className="w-3 h-3" />
-                              )}
+                              {isMe && <Icon icon="mdi:check" className="w-3 h-3" />}
                             </span>
                           )}
                         </div>
@@ -96,55 +95,30 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                     // Video
                     else if (file.resourceType === "video" || isTemp) {
                       return (
-                        <div key={idx} className="relative mt-2 inline-block ">
+                        <div key={idx} className="relative mt-2 inline-block">
                           <video
                             src={file.url || file.localPreview}
                             controls
                             className={`rounded-lg max-h-60 w-auto border border-gray-300 ${
-                              isTemp ? "blur-sm opacity-80 " : ""
+                              isTemp ? "blur-sm opacity-80" : ""
                             }`}
                           />
                           {isTemp && spinner}
                           {!isTemp && (
-                            <span className="absolute bottom-2 right-2 text-xs bg-white/50 px-1 rounded flex items-center gap-1">
+                            <span className={`absolute bottom-2 right-2 text-xs px-1 rounded flex items-center gap-1 ${
+                              isMe ? "bg-white/50 text-white" : "bg-white/50 text-white"
+                            }`}>
                               {timestamp}
-                              {isMe && (
-                                <Icon icon="mdi:check" className="w-3 h-3" />
-                              )}
+                              {isMe && <Icon icon="mdi:check" className="w-3 h-3" />}
                             </span>
                           )}
                         </div>
                       );
                     }
 
-                    // Document / Raw file
+                    // Document / PDF
                     else if (file.resourceType === "raw" || isTemp) {
-                      return (
-                        <a
-                          key={idx}
-                          href={file.url || file.localPreview}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`mt-2 flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 bg-white hover:bg-gray-50 relative ${
-                            isTemp ? "blur-sm opacity-80" : ""
-                          }`}
-                        >
-                          {isTemp && spinner}
-                          <Icon
-                            icon="mdi:file-document-outline"
-                            className="w-5 h-5 text-gray-600"
-                          />
-                          <span className="text-sm text-gray-800 truncate max-w-[200px]">
-                            {file.name || "Document"}
-                          </span>
-                          {!isTemp && isMe && (
-                            <Icon
-                              icon="mdi:check"
-                              className="absolute right-2 top-2 w-3 h-3 text-sky-500"
-                            />
-                          )}
-                        </a>
-                      );
+                      return <PDFViewer key={idx} file={file} timestamp={timestamp} />;
                     } else {
                       return null;
                     }
