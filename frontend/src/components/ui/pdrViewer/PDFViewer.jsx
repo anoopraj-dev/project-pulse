@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
 
-const PDFViewer = ({ file, timestamp }) => {
+const PDFViewer = ({ file, timestamp, isRead }) => {
   const [loading, setLoading] = useState(false);
 
   const openPdf = async () => {
@@ -44,15 +44,13 @@ const PDFViewer = ({ file, timestamp }) => {
       <div className="mt-1 flex justify-end items-center gap-1 text-[11px] text-gray-400">
         <span>{timestamp}</span>
         <Icon
-          icon="mdi:check"
-          className="w-4 h-4 text-blue-500"
+          icon={`${isRead ? "mdi:check-all" : "mdi:check"}`}
+          className="w-3 h-3"
         />
       </div>
 
       {loading && (
-        <p className="mt-1 text-xs text-gray-400 text-right">
-          Opening…
-        </p>
+        <p className="mt-1 text-xs text-gray-400 text-right">Opening…</p>
       )}
     </div>
   );

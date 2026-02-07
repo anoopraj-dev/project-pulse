@@ -10,7 +10,10 @@ import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 import { getAllMessages, getConversations } from "../../../api/user/userApis";
 import { uploadFileToCloudinary } from "../../../utilis/cloudinary";
-import { generateVideoThumbnail, getFileCategory } from "../../../utilis/videoThumbnail";
+import {
+  generateVideoThumbnail,
+  getFileCategory,
+} from "../../../utilis/videoThumbnail";
 
 const ChatContainer = () => {
   const { socket, isConnected, onlineUsers } = useSocket();
@@ -118,52 +121,52 @@ const ChatContainer = () => {
 
       //---------------- temperory message with thumbnail for video ---------------
       const tempFiles = await Promise.all(
-        files?.map( async (file)=> {
+        files?.map(async (file) => {
           const category = getFileCategory(file);
           //---------- video files --------------
-          if(category ==='video'){
+          if (category === "video") {
             const thumbnail = await generateVideoThumbnail(file);
             return {
               localPreview: thumbnail,
-              type:'video',
-              resourceType:'video',
-              name:file.name,
-              isProtected: role !== 'doctor'
-            }
+              type: "video",
+              resourceType: "video",
+              name: file.name,
+              isProtected: role !== "doctor",
+            };
           }
 
           //------------- images -----------------
-          if(category==='image'){
-            return{
+          if (category === "image") {
+            return {
               localPreview: URL.createObjectURL(file),
-              type:'image',
-              resourceType:'image',
-              name:file.name,
-              isProtected: role !=='doctor'
-            }
+              type: "image",
+              resourceType: "image",
+              name: file.name,
+              isProtected: role !== "doctor",
+            };
           }
 
           //--------------- pdf files ------------------
-          if(category === 'pdf'){
+          if (category === "pdf") {
             return {
               localPreview: URL.createObjectURL(file),
-              type:'pdf',
-              resourceType: 'raw',
-              name:file.name,
-              isProtected: role!=='doctor'
-            }
+              type: "pdf",
+              resourceType: "raw",
+              name: file.name,
+              isProtected: role !== "doctor",
+            };
           }
 
           //------------- documents ---------------
           return {
             localPreview: URL.createObjectURL(file),
-            type: 'raw',
-            resourceType:'raw',
-            name:file.name,
-            isProtected: role !=='doctor'
-          }
-        })
-      )
+            type: "raw",
+            resourceType: "raw",
+            name: file.name,
+            isProtected: role !== "doctor",
+          };
+        }),
+      );
 
       //----------------- create temperorry message for preview --------------------
       const tempId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -179,7 +182,7 @@ const ChatContainer = () => {
         createdAt: new Date().toISOString(),
       };
 
-      console.log('tempFiles', tempMessage?.files)
+      console.log("tempFiles", tempMessage?.files);
 
       setMessages((prev) => [...prev, tempMessage]);
 
@@ -199,10 +202,10 @@ const ChatContainer = () => {
         uploadedFiles = [...alreadyUploadedFiles, ...uploadedFiles];
       }
 
-      const uploadWithProtection = uploadedFiles.map((file)=> ({
+      const uploadWithProtection = uploadedFiles.map((file) => ({
         ...file,
-        isProtected: role!=='doctor'
-      }))
+        isProtected: role !== "doctor",
+      }));
 
       //-------------------- replace temp preview ------------------
       setMessages((prev) =>
@@ -232,18 +235,19 @@ const ChatContainer = () => {
   useEffect(() => {
     const handleReceiveMessage = (message) => {
       const isActiveChat = activeConversation?.id === message.conversationId;
+      const isFromOtherUser = message.senderId !== id;
 
-      if (isActiveChat && message.senderId !== id) {
+      if (isActiveChat && isFromOtherUser) {
         setMessages((prev) =>
           prev.some((m) => m._id === message._id) ? prev : [...prev, message],
         );
       }
 
-      //------------ emit message delivered --------------
-      socket.emit('message:delivered',{
-        messageId: message._id,
-        conversationId: message.conversationId
-      })
+      if (isActiveChat) {
+        socket.emit("message:read", {
+          conversationId: message.conversationId,
+        });
+      }
 
       //------------ update sidebar --------------
       setConversations((prev) =>
@@ -278,6 +282,23 @@ const ChatContainer = () => {
     });
   }, [activeConversation?.id, socket]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMessageRead = ({ conversationId }) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.conversationId === conversationId && m.senderId === id
+            ? { ...m, isRead: true }
+            : m,
+        ),
+      );
+    };
+
+    socket.on("message:read", handleMessageRead);
+    return () => socket.off("message:read", handleMessageRead);
+  }, [socket, id]);
+
   //-------------- Total Unread for Global use ---------------
 
   useEffect(() => {
@@ -288,8 +309,6 @@ const ChatContainer = () => {
 
     setTotalUnread(total);
   }, [conversations, setTotalUnread]);
-
-  
 
   // ---------------- Reset on Route Change ----------------
   useEffect(() => {

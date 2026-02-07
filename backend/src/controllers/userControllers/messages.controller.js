@@ -279,3 +279,23 @@ export const sendMessage = async ({
     },
   };
 };
+
+
+//--------------------- MarkConversation as read -----------------------
+export const markConversationAsRead = async ({
+  conversationId,
+}) => {
+  if (!conversationId ) return;
+
+  const result = await Message.updateMany(
+    {
+      conversationId,
+      isRead: false,
+    },
+    {
+      $set: { isRead: true },
+    }
+  );
+
+  return result.modifiedCount;
+};

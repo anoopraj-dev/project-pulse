@@ -1,5 +1,8 @@
 import { Server } from "socket.io";
-import { sendMessage } from "./controllers/userControllers/messages.controller.js";
+import {
+  markConversationAsRead,
+  sendMessage,
+} from "./controllers/userControllers/messages.controller.js";
 import redis from "./config/redis.js";
 
 let io;
@@ -130,6 +133,15 @@ export const initSocket = (server) => {
       } catch (error) {
         console.error("message:send error", error);
       }
+    });
+
+    socket.on("message:read", async ({ conversationId }) => {
+      if (!conversationId) return;
+
+      await markConversationAsRead({conversationId});
+      socket.to(conversationId.toString()).emit("message:read", {
+        conversationId,
+      });
     });
 
     // ---------------- DISCONNECT ----------------
