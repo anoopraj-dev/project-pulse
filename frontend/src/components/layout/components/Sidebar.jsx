@@ -11,10 +11,10 @@ const Sidebar = ({ toggleSidebar, config, isOpen }) => {
   if (isLoading) return <SidebarShimmer />;
 
   return (
-    <aside className="z-15 h-full bg-[#0096C7] text-white flex flex-col">
+    <aside className="rounded-lg h-full bg-[#0096C7] text-white flex flex-col ">
       
       {/* Toggle button */}
-      <div className="flex justify-end p-4">
+      <div className="flex justify-center p-4">
         <Icon
           icon={
             isOpen
@@ -27,7 +27,7 @@ const Sidebar = ({ toggleSidebar, config, isOpen }) => {
       </div>
 
       {/* Profile */}
-      <div className="flex justify-center mb-6">
+      {/* <div className="flex justify-center mb-6">
         <img
           src={`${profilePicture || "/profile.png"}?t=${Date.now()}`}
           alt="Profile"
@@ -35,7 +35,7 @@ const Sidebar = ({ toggleSidebar, config, isOpen }) => {
             ${isOpen ? "w-32 h-32" : "w-12 h-12"}
           `}
         />
-      </div>
+      </div> */}
 
       {/* Navigation */}
       <ul className="flex-1 space-y-2 px-2">

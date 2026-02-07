@@ -195,7 +195,7 @@ export const sendMessage = async ({
       },
     });
 
-    // only create if still not found
+    // ---- only create if still not found ------------------
     if (!conversation) {
       conversation = await Conversation.create({
         participants: [

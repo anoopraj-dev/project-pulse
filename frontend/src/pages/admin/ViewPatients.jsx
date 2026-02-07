@@ -79,7 +79,7 @@ const ViewPatients = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header band */}
-      <div className="bg-gradient-to-br from-sky-50 via-white to-cyan-50">
+      <div className=" bg-gradient-to-br from-sky-50 via-white to-cyan-50 ">
         <div className="mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             {/* Title + subtitle */}
