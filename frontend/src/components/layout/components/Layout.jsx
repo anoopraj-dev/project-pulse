@@ -34,7 +34,8 @@ const Layout = () => {
       <aside
         className={`
     fixed z-40
-    md:top-[7rem] sm:top-[5rem]
+    top-[4.9rem] left-0 bottom-0
+     md:top-[7rem] sm:top-[5rem]
     md:left-6 sm:left-2
     bottom-2 sm:bottom-4
 

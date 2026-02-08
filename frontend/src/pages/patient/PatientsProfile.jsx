@@ -59,29 +59,15 @@ const PatientsProfile = () => {
         <BlockedProfile reason={user?.blockedReason} />
       )}
       {user?.status === "active" && (
-        <>
-          <div className=" my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100">
-            <div className="px-2 sm:px-4 md:px-6 lg:px-20 xl:px-48 pb-6 pt-20 ">
-              <div className="flex flex-col gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-                  Patient · Profile
-                </p>
-                <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-                  Patient Profile
-                </h1>
-                <p className="mt-1 max-w-xl text-sm text-slate-600">
-                  View and edit your details, vitals and health informations.
-                </p>
-              </div>
-            </div>
-          </div>
+        
+         
 
           <ProfileView
             user={user}
             onEdit={handleProfileEdit}
             onUpdateProfilePicture={handleUpdateProfilePicture}
           />
-        </>
+        
       )}
     </>
   );

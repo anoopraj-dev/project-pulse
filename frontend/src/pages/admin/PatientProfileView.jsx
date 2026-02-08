@@ -73,7 +73,7 @@ const PatientProfileView = () => {
     fetchPatient();
   }, [id]);
   return (
-    <div className="mt-18 min-h-screen">
+    <div className="mt-8 min-h-screen">
       <PatientStatusBanner
         status={user?.status}
         variant="admin"
