@@ -21,6 +21,7 @@ const ProfileView = ({
   onProfilePictureUpload,
   onCerticateUpload,
   onUnblock,
+  onManageAvailability
 }) => {
   const [viewMore, setViewmore] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
@@ -153,6 +154,22 @@ const ProfileView = ({
                         text="Upload Certificates"
                         onClick={() =>
                           handleAction("certificate", onCerticateUpload)
+                        }
+                        disabled={
+                          !(
+                            user?.status === "approved" ||
+                            user?.status === "resubmit"
+                          )
+                        }
+                        className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                      />
+                       <ActionButton
+                        action="availability"
+                        activeAction={activeAction}
+                        icon="mdi:calendar"
+                        text="Manage Availability"
+                        onClick={() =>
+                          handleAction("availability", onManageAvailability)
                         }
                         disabled={
                           !(

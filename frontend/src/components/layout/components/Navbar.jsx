@@ -81,7 +81,7 @@ const Navbar = () => {
               />
             )}
 
-            <Link to="/" className="block h-8 w-28 sm:h-10 sm:w-32">
+            <Link to="/" className="block h-8 w-28 sm:h-10 sm:w-48">
               <img
                 src={logo}
                 alt="Logo"
