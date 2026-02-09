@@ -98,4 +98,5 @@ const DoctorAvailbility = () => {
   );
 };
 
+
 export default DoctorAvailbility;
