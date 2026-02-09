@@ -64,22 +64,37 @@ export const getAllMessages = async (req, res) => {
       });
     }
 
-    //--------------- get conversations
+    //--------------- get conversations---------------------
     const messages = await Message.find({
       conversationId: conversation._id,
-    }).sort({ createdAt: 1 });
+    })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    //-------------- format messages --------------
+    const formattedMessages = messages.map((msg) => ({
+      ...msg,
+      files:
+        msg.files?.map((f) => ({
+          url: f.url,
+          name: f.name,
+          size: f.size,
+          resourceType: f.resourceType,
+          format:f.format
+        })) || [],
+    }));
 
     //-------------- mark read --------------
     await Message.updateMany(
       {
         conversationId: conversation._id,
-        receiverId:userId1,
-        isRead:false,
+        receiverId: userId1,
+        isRead: false,
       },
       {
-        $set: {isRead:true}
-      }
-    )
+        $set: { isRead: true },
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -91,7 +106,7 @@ export const getAllMessages = async (req, res) => {
         name: participant.name,
         profilePicture: participant.profilePicture,
       },
-      messages,
+      messages: formattedMessages,
     });
   } catch (error) {
     console.error(error);
@@ -127,8 +142,8 @@ export const getAllConversations = async (req, res) => {
       const unreadCount = await Message.countDocuments({
         conversationId: convo._id,
         receiverId: userId,
-        isRead: false
-      })
+        isRead: false,
+      });
 
       result.push({
         _id: convo._id,
@@ -157,19 +172,51 @@ export const sendMessage = async ({
   receiverId,
   receiverModel,
   text,
+  files,
 }) => {
-  let conversation = conversationId
-    ? await Conversation.findById(conversationId)
-    : null;
+  let conversation = null;
+  let isNewConversation = false;
+
+  //------------------- Find or Create conversation --------------------
+
+  console.log("files recieved in send message", files);
+  if (conversationId) {
+    conversation = await Conversation.findById(conversationId);
+  }
 
   if (!conversation) {
-    conversation = await Conversation.create({
-      participants: [
-        { userId: senderId, userModel: senderModel },
-        { userId: receiverId, userModel: receiverModel },
-      ],
+    // try to find existing conversation between these users
+    conversation = await Conversation.findOne({
+      participants: {
+        $all: [
+          { $elemMatch: { userId: senderId } },
+          { $elemMatch: { userId: receiverId } },
+        ],
+      },
     });
+
+    // ---- only create if still not found ------------------
+    if (!conversation) {
+      conversation = await Conversation.create({
+        participants: [
+          { userId: senderId, userModel: senderModel },
+          { userId: receiverId, userModel: receiverModel },
+        ],
+      });
+      isNewConversation = true;
+    }
   }
+
+  //------------ normalize files ------------
+  const normalizedFiles = files.map((f) => ({
+    url: f.url,
+    name: f.name,
+    size: f.size,
+    resourceType: f.resourceType || "image",
+    format: f.format
+  }));
+
+  //---------------- Create Message -------------------------
 
   const message = await Message.create({
     conversationId: conversation._id,
@@ -178,19 +225,77 @@ export const sendMessage = async ({
     receiverId,
     receiverModel,
     text,
+    files: normalizedFiles,
   });
 
   conversation.lastMessage = {
     text: message.text,
     senderId: message.senderId,
+    files: message.files || [],
+    type: message.files?.length ? "media" : "text",
     createdAt: message.createdAt,
   };
+
   conversation.updatedAt = message.createdAt;
   await conversation.save();
 
+  // --------------------- Populate pariicaipants ---------------------
+
+  const populatedConversation = await Conversation.findById(
+    conversation._id,
+  ).populate("participants.userId", "name profilePicture");
+
+  const getOtherParticipant = (conversation, viewerId) => {
+    return conversation.participants.find(
+      (p) => p.userId._id.toString() !== viewerId.toString(),
+    ).userId;
+  };
+
+  const senderParticipant = getOtherParticipant(
+    populatedConversation,
+    senderId,
+  );
+
+  const receiverParticipant = getOtherParticipant(
+    populatedConversation,
+    receiverId,
+  );
+
   return {
+    conversationId: populatedConversation._id,
     message,
-    conversationId: conversation._id,
+    isNewConversation,
+    senderConversation: {
+      _id: populatedConversation._id,
+      participant: senderParticipant,
+      lastMessage: populatedConversation.lastMessage,
+      updatedAt: populatedConversation.updatedAt,
+    },
+    receiverConversation: {
+      _id: populatedConversation._id,
+      participant: receiverParticipant,
+      lastMessage: populatedConversation.lastMessage,
+      updatedAt: populatedConversation.updatedAt,
+    },
   };
 };
 
+
+//--------------------- MarkConversation as read -----------------------
+export const markConversationAsRead = async ({
+  conversationId,
+}) => {
+  if (!conversationId ) return;
+
+  const result = await Message.updateMany(
+    {
+      conversationId,
+      isRead: false,
+    },
+    {
+      $set: { isRead: true },
+    }
+  );
+
+  return result.modifiedCount;
+};

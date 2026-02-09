@@ -33,7 +33,6 @@ const messageSchema = new mongoose.Schema(
 
     text: {
       type: String,
-      required: true,
       trim: true,
       default: "",
     },
@@ -41,7 +40,24 @@ const messageSchema = new mongoose.Schema(
       type:Boolean,
       default:false,
       index: true
-    }
+    },
+
+     files: [
+        {
+          url: String,
+          resourceType: {
+            type: String,
+            enum: ["image", "video", "raw"],
+          },
+          name: String,
+          size: Number,
+          isProtected: {type: Boolean, default:false},
+          thumbnailUrl: String,
+          format:String
+        },
+      ],
+  
+    
   },
   { timestamps: true }
 );

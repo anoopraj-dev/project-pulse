@@ -5,8 +5,6 @@ import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { getIO } from "../../socket.js";
-import { Notification } from "../../models/notification.model.js";
 
 const jwtSecret = process.env.JWT_SECRET;
 

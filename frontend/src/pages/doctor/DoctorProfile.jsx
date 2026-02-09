@@ -112,6 +112,11 @@ const DoctorProfile = () => {
     }
   };
 
+  //------------- MANAGE AVAILABILITY ----------------
+  const handleManageAvailability = async() => {
+    navigate('/doctor/profile/manage-availability')
+  }
+
   useEffect(() => {
     fetchDoctor();
   }, [id]);
@@ -138,6 +143,7 @@ const DoctorProfile = () => {
           onCerticateUpload={handleUploadCertificates}
           onResubmissionRequest={handleResubmissionRequest}
           onResubmission={handleResubmission}
+          onManageAvailability={handleManageAvailability}
         />
       )}
     </div>

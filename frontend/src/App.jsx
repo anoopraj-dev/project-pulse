@@ -4,10 +4,12 @@ import ModalProvider from "./contexts/ModalContext";
 import { Toaster } from "react-hot-toast";
 import { FileUploadProvider } from "./contexts/FileUploadContext";
 import { ImageModalProvider } from "./contexts/ImageModalContext";
+import { ChatProvider } from "./contexts/ChatContext";
 
 const App = () => {
   return (
     <Router>
+      <ChatProvider>
       <FileUploadProvider>
         <ImageModalProvider>
           <ModalProvider>
@@ -15,6 +17,7 @@ const App = () => {
           </ModalProvider>
         </ImageModalProvider>
       </FileUploadProvider>
+      </ChatProvider>
 
       <Toaster
         position="top-right"

@@ -4,6 +4,22 @@ import { useUser } from "../../../contexts/UserContext";
 const ChatSidebar = ({ conversations, onSelect, activeConversationId }) => {
   const { id } = useUser();
 
+  const getLastMessagePreview = (lastMessage) => {
+    if (!lastMessage) {
+      return { type: "empty", text: "No messages yet" };
+    }
+
+    if (lastMessage.files?.length) {
+      return { type: "attachment", text: "Attachment" };
+    }
+
+    if (lastMessage.text) {
+      return { type: "text", text: lastMessage.text };
+    }
+
+    return { type: "empty", text: "No messages yet" };
+  };
+
   return (
     <div className="flex flex-col h-full rounded-lg">
       {/* Header */}
@@ -21,6 +37,7 @@ const ChatSidebar = ({ conversations, onSelect, activeConversationId }) => {
         {conversations?.map((conv) => {
           const unreadCount = conv.unreadCount || 0;
           const isActive = conv._id === activeConversationId;
+          const preview = getLastMessagePreview(conv.lastMessage)
 
           return (
             <div
@@ -30,7 +47,6 @@ const ChatSidebar = ({ conversations, onSelect, activeConversationId }) => {
               onClick={() => onSelect(conv?.participant?._id)}
             >
               <div className="flex items-center gap-3">
-
                 {/* --------------Avatar ---------------*/}
                 <div className="relative">
                   <img
@@ -52,14 +68,9 @@ const ChatSidebar = ({ conversations, onSelect, activeConversationId }) => {
                     <h3 className="font-semibold text-sm text-slate-900 truncate">
                       {conv.participant?.name}
                     </h3>
-
-                    <span className="text-xs text-slate-500">
-                      {/* optional later */}
-                    </span>
                   </div>
 
                   <span className="flex items-center gap-1 text-sm text-slate-600 truncate">
-
                     {/*------ Tick icon (only if sent by loggedin user)----------------- */}
                     {conv.lastMessage?.senderId === id && (
                       <Icon
@@ -69,20 +80,34 @@ const ChatSidebar = ({ conversations, onSelect, activeConversationId }) => {
                     )}
 
                     {/*----------- Message text ---------------------*/}
-                    <span className="truncate">
-                      {conv.lastMessage?.text || "No messages yet"}
+                    <span className="flex items-center gap-1 truncate">
+                      {preview.type === "attachment" && (
+                        <Icon
+                          icon="mdi:paperclip"
+                          className="w-4 h-4 text-slate-500 flex-shrink-0"
+                        />
+                      )}
+
+                      <span
+                        className={
+                          preview.type === "empty"
+                            ? "italic text-slate-400"
+                            : "truncate"
+                        }
+                      >
+                        {preview.text}
+                      </span>
                     </span>
 
                     {/* ------------ Time --------------------------*/}
                     {conv.lastMessage?.createdAt && (
                       <span className="text-xs text-slate-400 ml-auto whitespace-nowrap">
-                        {new Date(conv.lastMessage.createdAt).toLocaleTimeString(
-                          [],
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                        )}
+                        {new Date(
+                          conv.lastMessage.createdAt,
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
                     )}
                   </span>

@@ -28,7 +28,7 @@ const SearchInput = ({
   }, [value]);
 
   return (
-    <div className=" relative  rounded-2xl bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm ring-1 ring-slate-200">
+    <div className=" relative rounded-2xl bg-white/80 backdrop-blur-sm p-4 sm:p-6 shadow-sm ring-1 ring-slate-200">
       <div className="flex flex-col gap-4">
         {/* Search bar */}
         <div className="relative">
@@ -51,7 +51,7 @@ const SearchInput = ({
 
           {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-50 mt-1 w-full max-h-72 rounded-2xl bg-gray-100  shadow-lg ring-1 ring-slate-200 overflow-hidden">
+            <div className="absolute z-10 mt-1 w-full max-h-72 rounded-2xl bg-gray-100  shadow-lg ring-1 ring-slate-200 overflow-hidden">
               {suggestions.map((item) => (
                 <div
                   key={item._id}

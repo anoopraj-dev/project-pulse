@@ -20,8 +20,8 @@ const Layout = () => {
     role === "patient"
       ? patientSidebarMenu
       : role === "doctor"
-      ? doctorSidebarMenu
-      : adminSidebarMenu;
+        ? doctorSidebarMenu
+        : adminSidebarMenu;
 
   return (
     <div className="h-screen overflow-hidden relative">
@@ -33,10 +33,22 @@ const Layout = () => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-18 left-0 bottom-0 z-20 flex flex-col bg-[#0096C7] text-white
-          transition-all duration-300 shadow-lg
-          ${isSidebarOpen ? "w-64" : "w-20"}
-        `}
+    fixed z-40
+    top-[4.9rem] left-0 bottom-0
+     md:top-[7rem] sm:top-[5rem]
+    md:left-6 sm:left-2
+    bottom-2 sm:bottom-4
+
+    flex flex-col
+    bg-[#0096C7] text-white
+    transition-all duration-300
+    shadow-2xl
+    rounded-2xl
+    overflow-hidden
+    backdrop-blur-sm
+
+    ${isSidebarOpen ? "w-60 sm:w-64" : "w-16 sm:w-20"}
+  `}
       >
         <Sidebar
           config={config}
@@ -48,9 +60,10 @@ const Layout = () => {
       {/* Main content */}
       <main
         className={`
-          mt-16 h-[calc(100vh-4rem)] overflow-y-auto bg-gray-50 
+          mt-16 h-[calc(100vh-4rem)] overflow-y-auto
           transition-all duration-300
-          ${!isSidebarOpen ? "ml-20" : "ml-0"}
+          px-2 sm:px-4 md:px-6 lg:px-20 xl:px-48
+          ${isSidebarOpen ? "ml-22" : "ml-22"}
         `}
       >
         <Outlet />

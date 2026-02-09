@@ -70,13 +70,13 @@ const ViewDoctors = () => {
   const isLoading = fetchAllDoctorsAction.loading;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       {/* ---------- Header band ---------- */}
-      <div className="bg-gradient-to-br from-sky-50 via-white to-cyan-50">
-        <div className="mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-sky-50 via-white to-cyan-100 pt-20 pb-16">
+      <div className="my-2">
+        <div className="my-2 rounded-xl mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-sky-50 via-white to-cyan-100 pt-20 pb-3">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between ">
             {/* Title */}
-            <div>
+            <div className="">
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
                 <Icon icon="mdi:shield-account" className="h-4 w-4" />
                 Admin · Doctors

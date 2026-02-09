@@ -6,7 +6,6 @@ const initialState = {
   email: "",
   id: "",
   role: "",
-  token: "",
   firstLogin: true,
   name: "",
   profilePicture: "",

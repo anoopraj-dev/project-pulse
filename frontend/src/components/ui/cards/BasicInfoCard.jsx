@@ -8,8 +8,8 @@ const BasicInfoCard = ({ field, val }) => {
     gender: "mdi:gender-male-female",
     location: "mingcute:location-2-fill",
     education: "material-symbols:school-rounded",
-    specialization:'healthicons:stethoscope-24px',
-    work:'mdi:briefcase-variant'
+    specialization: "healthicons:stethoscope-24px",
+    work: "mdi:briefcase-variant",
   };
 
   const formattedValue = (() => {
@@ -25,56 +25,78 @@ const BasicInfoCard = ({ field, val }) => {
   })();
 
   return (
-    <div className=" group relative w-20 hover:w-80 h-24 min-h-[96px] transition-all duration-300 flex items-center  border border-blue-100 rounded-md bg-white p-3 cursor-pointer overflow-hidden shadow-sm hover:shadow-lg">
-      <div className=" absolute left-5 w-10 h-10  flex justify-center items-center  bg-white rounded">
-        <Icon icon={icons[field] || "mingcute:info"} className="text-xl text-[#0096C7] " />
+    <div className="group relative overflow-hidden">
+      {/* Icon Container */}
+      <div className="flex items-center gap-3 py-3">
+        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-[#0096C7]/10 flex items-center justify-center 
+                        group-hover:bg-[#0096C7] transition-colors duration-300">
+          <Icon
+            icon={icons[field] || "mingcute:info"}
+            className="text-2xl text-[#0096C7] group-hover:text-white transition-colors duration-300"
+          />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {Array.isArray(val) && val.length > 0 ? (
+            <div className="space-y-0.5">
+              {val.map((item, index) => (
+                <p
+                  key={index}
+                  className="text-sm text-gray-700 font-medium leading-snug truncate"
+                >
+                  {String(item)}
+                </p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-800 font-medium leading-snug truncate">
+              {formattedValue}
+            </p>
+          )}
+        </div>
       </div>
-      <div className="ml-14 w-full h-full flex flex-col justify-center pt-2">
-        {Array.isArray(val) && val.length > 0 ? (
-          <div className="opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300 space-y-1">
-            {val.map((item, index) => (
-              <p key={index} className="text-sm text-gray-800 font-medium leading-tight">
-                {String(item)}
-              </p>
-            ))}
-          </div>
-        ) : (
-          <p className="opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-300 text-sm text-gray-800 font-semibold leading-tight">
-            {formattedValue}
-          </p>
-        )}
-      </div>
+
+      {/* Bottom Border Accent */}
+      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#0096C7] 
+                      group-hover:w-full transition-all duration-300 ease-out" />
     </div>
   );
 };
 
 export default BasicInfoCard;
 
-
-// --------- DetailsDisplayCard --------
 export const DetailsDisplayCard = ({ label, value }) => {
+  const formatValue = (val) => {
+    if (val == null || val === "") return "—";
+    
+    // Check if it's a date
+    const date = new Date(val);
+    if (!isNaN(date) && typeof val === "string" && val.includes("-")) {
+      return date.toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    }
+    
+    return String(val);
+  };
+
   return (
-    <div className="group relative p-4 border border-gray-200/50 rounded-md bg-white/60 backdrop-blur-sm 
-                    hover:border-[#0096C7]/30 hover:bg-[#0096C7]/2 hover:shadow-sm 
-                    transition-all duration-200 w-full">
-      
-      <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1.5">
+    <div className="group py-3">
+      {/* Label */}
+      <p className="text-xs font-medium text-gray-500 mb-1.5">
         {label}
       </p>
       
-      <p className="text-lg font-semibold text-gray-900 leading-tight truncate">
-        {value ?? <span className="text-gray-500 font-normal">—</span>}
+      {/* Value */}
+      <p className="text-sm font-semibold text-gray-900">
+        {formatValue(value)}
       </p>
       
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0096C7]/0 via-[#0096C7]/3 to-[#0096C7]/0 
-                      opacity-0 group-hover:opacity-100 rounded-md transition-all duration-400 pointer-events-none" />
-      
-      <div className="absolute -bottom-1 left-0 h-0.5 bg-[#0096C7]/40 w-0 group-hover:w-full 
-                      transition-all duration-500 origin-left scale-x-0 group-hover:scale-x-100" />
+      {/* Bottom Border */}
+      <div className="mt-3 h-px bg-gray-100 group-hover:bg-[#0096C7]/30 transition-colors duration-200" />
     </div>
   );
 };
-
-
-
-

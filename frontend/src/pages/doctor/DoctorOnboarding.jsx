@@ -13,6 +13,7 @@ import {
 } from "../../api/doctor/doctorApis";
 
 import { useFileUploadContext } from "../../contexts/FileUploadContext";
+import { useUser } from "../../contexts/UserContext";
 
 const FILE_FIELDS = [
   "profilePicture",
@@ -26,6 +27,7 @@ const DoctorOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const submitAction = useAsyncAction();
+  const { dispatch } = useUser();
 
   const { files, clearField } = useFileUploadContext();
 
@@ -48,9 +50,9 @@ const DoctorOnboarding = () => {
               JSON.stringify(
                 value.map(
                   ({ experienceCertificate, educationCertificate, ...rest }) =>
-                    rest
-                )
-              )
+                    rest,
+                ),
+              ),
             );
           } else if (typeof value === "object") {
             formData.append(key, JSON.stringify(value));
@@ -68,7 +70,7 @@ const DoctorOnboarding = () => {
         // Proof Documents
         if (files?.proofDocument?.length > 0) {
           files.proofDocument.forEach((file) =>
-            formData.append("proofDocument", file)
+            formData.append("proofDocument", file),
           );
         }
 
@@ -100,7 +102,7 @@ const DoctorOnboarding = () => {
           services.push({
             serviceType: "online",
             fees: Number(data.online_fee),
-            availableDates: [], // can be filled later
+            availableDates: [], 
           });
         }
 
@@ -114,12 +116,28 @@ const DoctorOnboarding = () => {
 
         formData.append("services", JSON.stringify(services));
 
-
         // ---------------- API CALL ----------------
         let response;
         switch (currentStep) {
           case 0:
             response = await submitDoctorPersonalInfo(formData);
+
+            if (response?.data?.data) {
+              const updatedDoctor = response.data.data;
+
+              dispatch({
+                type: "SET_USER",
+                payload: {
+                  id: updatedDoctor._id,
+                  name: updatedDoctor.name,
+                  email: updatedDoctor.email,
+                  role: "doctor",
+                  profilePicture: updatedDoctor.profilePicture,
+                  firstLogin: updatedDoctor.firstLogin,
+                },
+              });
+            }
+
             break;
           case 1:
             response = await submitDoctorProfessionalInfo(formData);
@@ -161,8 +179,8 @@ const DoctorOnboarding = () => {
             currentStep === 0
               ? "Tell us about yourself"
               : currentStep === 1
-              ? "Professional Information"
-              : "Services & Availability"
+                ? "Professional Information"
+                : "Services & Availability"
           }
         />
 

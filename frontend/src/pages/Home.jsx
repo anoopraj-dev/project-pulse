@@ -43,7 +43,7 @@ const Home = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Hero Section */}
-        <section className="relative h-[80vh] md:h-[90vh] w-full px-4 md:px-8">
+        <section className="relative h-[70vh] md:h-[80vh] w-full px-4 md:px-8">
           <div className="relative h-full rounded-3xl overflow-hidden shadow-2xl">
             <img
               src="/healthcare1.jpg"

@@ -42,21 +42,7 @@ const PatientDoctorProfile = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-gradient-to-br from-sky-50 via-white to-cyan-100">
-        <div className="mx-auto max-w-4xl px-4 pb-6 pt-20 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-              Doctor · Profile
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Doctor Profile
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              View complete doctor details, specializations, and consultation options.
-            </p>
-          </div>
-        </div>
-      </div>
+    
 
       {/* Content */}
       {/* <div className="mx-auto max-w-4xl px-4 pb-12 pt-4 sm:px-6 lg:px-8"> */}

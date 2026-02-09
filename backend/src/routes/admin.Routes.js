@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { authenticateUser} from "../middlewares/authenticateUser.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
-import { approveDoctorsRequest, getAdminDashboard, getAllDoctors, getDoctorDocuments, getPendingDoctorProfile, rejectDoctorsRequest,blockDoctorProfile, revokeDoctorStatus, unblockDoctorProfile, getAdminNotifications } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { getAdminDashboard, getDoctorDocuments, getPendingDoctorProfile,getAdminNotifications } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { approveDoctorsRequest,rejectDoctorsRequest,blockDoctorProfile,unblockDoctorProfile,revokeDoctorStatus,getAllDoctors } from "../controllers/adminControllers/adminViewDoctors.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/adminControllers/search.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
@@ -14,6 +15,8 @@ router.use(authenticateUser,authorizeRoles('admin'))
 router.get('/dashboard',getAdminDashboard)
 router.get('/doctor/:id',getPendingDoctorProfile)
 router.get('/doctor/:id/documents', getDoctorDocuments)
+
+
 router.patch('/doctor/approve/:id',approveDoctorsRequest)
 router.patch('/doctor/reject/:id',rejectDoctorsRequest)
 router.patch('/doctor/block/:id', blockDoctorProfile)
