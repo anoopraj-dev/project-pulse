@@ -17,6 +17,7 @@ import { deleteDocuments } from "../controllers/doctorControllers/documents.cont
 import {getDoctorNotifications} from '../controllers/doctorControllers/notifications.controller.js'
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
+import { getAvailability, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
 
 const router = Router();
 
@@ -61,5 +62,8 @@ router.patch('/notifications/mark-all-read',setMarkAllRead)
 
 router.get('/messages/:id',getAllMessages)
 router.get('/conversations', getAllConversations)
+
+router.get('/availability',getAvailability)
+router.post('/availability',saveAvailability)
 
 export default router;

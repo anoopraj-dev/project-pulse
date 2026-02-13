@@ -114,7 +114,7 @@ const DoctorProfile = () => {
 
   //------------- MANAGE AVAILABILITY ----------------
   const handleManageAvailability = async() => {
-    navigate('/doctor/profile/manage-availability')
+    navigate('/doctor/availability')
   }
 
   useEffect(() => {
