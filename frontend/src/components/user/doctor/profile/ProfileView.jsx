@@ -1,15 +1,18 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
 import ActionButton from "../../../shared/components/ActionButton";
+import AvailabilityPreview from "../availability/AvailabilityPreview";
+import { getAvailability } from "@/api/doctor/doctorApis";
 
 //----------------------- DOCTOR PROFILE COMPONENT ---------------------
 const ProfileView = ({
   viewer,
   user,
+  availability,
   onApprove,
   onVerify,
   onReject,
@@ -27,7 +30,8 @@ const ProfileView = ({
   const [activeAction, setActiveAction] = useState(null);
 
   const { id } = useParams();
-  const isProfileReview = !!id;
+
+  console.log(availability)
 
   const handleAction = async (action, fn) => {
     try {
@@ -43,6 +47,7 @@ const ProfileView = ({
   const handleMessages = () => {
     navigate(`/patient/messages/${id}`);
   };
+
 
   if (!user)
     return (
@@ -405,6 +410,14 @@ const ProfileView = ({
                 </div>
               </div>
             )}
+
+            {/* -------------- Availability -------------- */}
+
+            { (viewer ==='doctor' || viewer ==='patient') && (
+              
+              <AvailabilityPreview availability={availability}/>
+            )
+            }
 
             {/* License & Registration */}
             {user?.professionalInfo?.medicalLicense && (

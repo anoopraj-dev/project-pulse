@@ -44,8 +44,16 @@ export const viewDoctorProfile = (id) => {
   return api.get(`/api/patient/doctor/${id}`)
 }
 
+export const viewDoctorAvailability = (id) =>{
+  return api.get(`/api/patient/doctor/:{id}`)
+}
+
+
 //-------------- Get Chats ------------------
 export const getConversations = () => {
   return api.get('/api/patient/messages')
 }
+
+
+//-------------- View Doctors availability ----------------
 

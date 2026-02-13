@@ -1,5 +1,6 @@
-import { request } from "express";
+
 import Doctor from "../../models/doctor.model.js";
+import DoctorAvailability from '../../models/availability.model.js'
 import { getIO } from "../../socket.js";
 import { Notification } from "../../models/notification.model.js";
 
@@ -20,9 +21,22 @@ export const getDoctorProfile = async (req, res) => {
       });
     }
 
+     //----------------- fetch doctor availability ------------
+        const availability = await DoctorAvailability
+          .find({ doctorId: req.user.id})
+          .sort({ date: 1 });
+    
+        const formattedAvailability = availability.map((day) => ({
+          date: day.date.toISOString().split("T")[0],
+          slots: day.slots.map(
+            (slot) => `${slot.startTime}-${slot.endTime}`
+          ),
+        }));
+
     res.json({
       success: true,
       user: doctor,
+      availability:formattedAvailability || []
     });
   } catch (error) {
     console.error(error);

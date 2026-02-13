@@ -117,11 +117,14 @@ const DoctorAvailbility = () => {
       }
 
       toast.success("Availability saved successfully");
+      setSelectedDate(null)
     } catch (error) {
       console.log(error);
       toast.error("Server error");
     }
   };
+
+  
 
   /* ------------------ UI ------------------ */
   if (loading) {

@@ -5,7 +5,6 @@ import DoctorAvailability from '../../models/availability.model.js'
 export const getAvailability = async (req, res) => {
     try {
         const { id } = req.user;
-
         const availability = await DoctorAvailability
             .find({ doctorId: id })
             .sort({ date: 1 });

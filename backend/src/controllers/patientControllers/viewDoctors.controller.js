@@ -1,4 +1,5 @@
 import Doctor from "../../models/doctor.model.js";
+import DoctorAvailability from '../../models/availability.model.js'
 
 
 //--------------- GET ALL DOCTORS ---------------
@@ -38,10 +39,23 @@ export const viewDoctorProfile = async (req, res) => {
       });
     }
 
+    //----------------- fetch doctor availability ------------
+    const availability = await DoctorAvailability
+      .find({ doctorId: id })
+      .sort({ date: 1 });
+
+    const formattedAvailability = availability.map((day) => ({
+      date: day.date.toISOString().split("T")[0],
+      slots: day.slots.map(
+        (slot) => `${slot.startTime}-${slot.endTime}`
+      ),
+    }));
+
     return res.status(200).json({
       success: true,
       message: "Data loaded successfully",
       user: doctor,
+      availability:formattedAvailability || []
     });
   } catch (error) {
     return res.status(500).json({
