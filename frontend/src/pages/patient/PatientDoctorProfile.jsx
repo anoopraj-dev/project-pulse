@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState} from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { viewDoctorProfile } from "../../api/patient/patientApis";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
@@ -9,8 +10,10 @@ import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
 
 const PatientDoctorProfile = () => {
   const [doctor, setDoctor] = useState(null);
+  const [availability,setAvailability] = useState([])
   const viewProfileAction = useAsyncAction();
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const getDoctorProfile = () => {
     viewProfileAction.executeAsyncFn(async () => {
@@ -24,6 +27,7 @@ const PatientDoctorProfile = () => {
         }
 
         setDoctor(res?.data?.user);
+        setAvailability(res?.data?.availability)
       } catch (error) {
         console.error(error);
         toast.error(
@@ -33,6 +37,10 @@ const PatientDoctorProfile = () => {
     });
   };
 
+  const handleBookAppointment= ()=>{
+    navigate('/patient/appointments')
+  }
+
   useEffect(() => {
     if (id) getDoctorProfile();
   }, [id]);
@@ -41,9 +49,7 @@ const PatientDoctorProfile = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-    
-
+   
       {/* Content */}
       {/* <div className="mx-auto max-w-4xl px-4 pb-12 pt-4 sm:px-6 lg:px-8"> */}
         <div className="flex flex-col gap-4">
@@ -57,7 +63,7 @@ const PatientDoctorProfile = () => {
           {/* Profile */}
           {!isLoading && doctor && (
             <div className="rounded-2xl bg-white px-4 py-6 sm:px-6">
-              <ProfileView user={doctor} viewer='patient'/>
+              <ProfileView user={doctor} viewer='patient' availability={availability} onBookAppointment={handleBookAppointment}/>
             </div>
           )}
 
@@ -81,7 +87,7 @@ const PatientDoctorProfile = () => {
           )}
         </div>
       </div>
-    // </div>
+   
   );
 };
 

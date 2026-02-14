@@ -27,13 +27,15 @@ const DoctorProfile = () => {
   const resubmissionAction = useAsyncAction();
   const navigate = useNavigate();
   const { openModal, closeModal } = useModal();
+  const [availability,setAvailability] = useState([]);
 
   //-------------- FETCH DOCTOR --------------
   const fetchDoctor = async () => {
     try {
       await fetchDoctorAction.executeAsyncFn(async () => {
         const response = await fetchDoctorProfile(id);
-        setUser(response.data.user);
+        setUser(response?.data?.user);
+        setAvailability(response?.data?.availability)
       });
     } catch (error) {
       console.log(error);
@@ -114,7 +116,7 @@ const DoctorProfile = () => {
 
   //------------- MANAGE AVAILABILITY ----------------
   const handleManageAvailability = async() => {
-    navigate('/doctor/profile/manage-availability')
+    navigate('/doctor/availability')
   }
 
   useEffect(() => {
@@ -138,6 +140,7 @@ const DoctorProfile = () => {
         <ProfileView
           viewer= 'doctor'
           user={user}
+          availability={availability}
           onEdit={handleProfileEdit}
           onProfilePictureUpload={handleUpdateProfilePicture}
           onCerticateUpload={handleUploadCertificates}

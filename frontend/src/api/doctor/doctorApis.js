@@ -70,3 +70,14 @@ export const deleteDocuments = (id) => {
   return api.delete(`/api/doctor/delete-documents/${id}`)
 }
 
+//------------------ AVAILABILITY ----------------
+export const getAvailability = () =>{
+  return api.get('/api/doctor/availability')
+}
+
+export const saveAvailability = (payload) => {
+  return api.post('/api/doctor/availability',payload)
+  
+}
+
+

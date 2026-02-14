@@ -1,15 +1,19 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
 import ActionButton from "../../../shared/components/ActionButton";
+import AvailabilityPreview from "../availability/AvailabilityPreview";
+import { getAvailability } from "@/api/doctor/doctorApis";
 
 //----------------------- DOCTOR PROFILE COMPONENT ---------------------
 const ProfileView = ({
   viewer,
   user,
+  availability,
+  onBookAppointment,
   onApprove,
   onVerify,
   onReject,
@@ -27,7 +31,8 @@ const ProfileView = ({
   const [activeAction, setActiveAction] = useState(null);
 
   const { id } = useParams();
-  const isProfileReview = !!id;
+
+  console.log(availability)
 
   const handleAction = async (action, fn) => {
     try {
@@ -43,6 +48,7 @@ const ProfileView = ({
   const handleMessages = () => {
     navigate(`/patient/messages/${id}`);
   };
+
 
   if (!user)
     return (
@@ -214,7 +220,7 @@ const ProfileView = ({
                         icon="mdi:calendar-check"
                         text="Book Appointment"
                         onClick={() =>
-                          handleAction("book", () => onVerify(user?._id))
+                          handleAction("book", () => onBookAppointment(user?._id))
                         }
                         className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                       />
@@ -405,6 +411,14 @@ const ProfileView = ({
                 </div>
               </div>
             )}
+
+            {/* -------------- Availability -------------- */}
+
+            { (viewer ==='doctor' || viewer ==='patient') && (
+              
+              <AvailabilityPreview availability={availability}/>
+            )
+            }
 
             {/* License & Registration */}
             {user?.professionalInfo?.medicalLicense && (

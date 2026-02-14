@@ -1,4 +1,5 @@
 
+import PatientAppointments from "@/pages/patient/PatientAppointments";
 import ProtectedRoute from "../components/auth/routes/ProtectedRoute";
 import Layout from "../components/layout/components/Layout";
 import Navbar from "../components/layout/components/Navbar";
@@ -24,6 +25,7 @@ const PatientRoutes = [{
     { path: "/patient/doctor/:id", element: <PatientDoctorProfile /> },
     { path: "/patient/messages", element: <PatientMessages/> },
     { path: "/patient/messages/:id", element: <PatientMessages/>},
+    { path: "/patient/appointments", element: <PatientAppointments/>},
   ],
 },
 
