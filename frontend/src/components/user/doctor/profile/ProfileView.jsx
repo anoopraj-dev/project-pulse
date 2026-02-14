@@ -13,6 +13,7 @@ const ProfileView = ({
   viewer,
   user,
   availability,
+  onBookAppointment,
   onApprove,
   onVerify,
   onReject,
@@ -219,7 +220,7 @@ const ProfileView = ({
                         icon="mdi:calendar-check"
                         text="Book Appointment"
                         onClick={() =>
-                          handleAction("book", () => onVerify(user?._id))
+                          handleAction("book", () => onBookAppointment(user?._id))
                         }
                         className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                       />

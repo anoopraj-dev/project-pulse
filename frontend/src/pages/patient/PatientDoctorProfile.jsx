@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState} from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { viewDoctorProfile } from "../../api/patient/patientApis";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
@@ -12,6 +13,7 @@ const PatientDoctorProfile = () => {
   const [availability,setAvailability] = useState([])
   const viewProfileAction = useAsyncAction();
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const getDoctorProfile = () => {
     viewProfileAction.executeAsyncFn(async () => {
@@ -35,6 +37,10 @@ const PatientDoctorProfile = () => {
     });
   };
 
+  const handleBookAppointment= ()=>{
+    navigate('/patient/appointments')
+  }
+
   useEffect(() => {
     if (id) getDoctorProfile();
   }, [id]);
@@ -57,7 +63,7 @@ const PatientDoctorProfile = () => {
           {/* Profile */}
           {!isLoading && doctor && (
             <div className="rounded-2xl bg-white px-4 py-6 sm:px-6">
-              <ProfileView user={doctor} viewer='patient' availability={availability}/>
+              <ProfileView user={doctor} viewer='patient' availability={availability} onBookAppointment={handleBookAppointment}/>
             </div>
           )}
 
