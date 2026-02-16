@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
 import DataTable from "../../components/shared/components/DataTable";
@@ -10,25 +10,40 @@ import SearchInput from "../../components/shared/components/SearchInput";
 import { useSearch } from "../../hooks/useSearch";
 import { fetchSearchSuggestions } from "../../api/user/userApis";
 import BookAppointmentForm from "@/components/user/patient/appointments/BookAppointmentForm";
-
+import { fetchAppointments, getBookingInfo } from "@/api/patient/patientApis";
 
 const PatientAppointments = () => {
-  const [activeTab, setActiveTab] = useState("upcoming");
   const [appointments, setAppointments] = useState(null);
+  const [bookingInfo, setBookingInfo] = useState(null);
   const navigate = useNavigate();
   const fetchAppointmentsAction = useAsyncAction();
-  const { query, setQuery, results, loading: searchLoading } = useSearch({
+  const {
+    query,
+    setQuery,
+    results,
+    loading: searchLoading,
+  } = useSearch({
     type: "appointments",
     role: "patient",
   });
+
+  const location = useLocation();
+  const navigationState = location.state;
+  const [activeTab, setActiveTab] = useState(
+    navigationState?.defaultTab || "upcoming",
+  );
 
   //------------- Get all appointments -----------------
   const fetchAllAppointments = () => {
     fetchAppointmentsAction.executeAsyncFn(async () => {
       try {
-      
-        
+        const response = await fetchAppointments();
 
+        if (!response.data.success) {
+          return toast.error("Failed to fetch appointments information");
+        }
+
+        setAppointments(response?.data?.appointments);
       } catch (error) {
         console.error(error);
         toast.error("Something went wrong");
@@ -58,16 +73,15 @@ const PatientAppointments = () => {
     navigate(`/patient/appointment/${id}`);
   };
 
-  //--------------- Book New Appointment --------------
-  const handleBookNow = () => {
-    navigate("/patient/book-appointment");
-  };
-
   const filteredAppointments = appointments?.filter((appointment) => {
     if (activeTab === "upcoming") {
       return appointment?.status === "upcoming";
     } else if (activeTab === "history") {
       return appointment?.status === "completed";
+    } else if (activeTab === "pending") {
+      return appointment?.status === "pending";
+    } else if (activeTab === "cancelled") {
+      return appointment?.status === "cancelled";
     }
     return true;
   });
@@ -80,6 +94,30 @@ const PatientAppointments = () => {
     }
     return true;
   });
+
+  //------------------- Fetch selected doc info (prefill form) -----------
+  useEffect(() => {
+    const fetchBookingInfo = async () => {
+      if (!navigationState?.selectedDoctorId) return;
+
+      try {
+        const response = await getBookingInfo(navigationState.selectedDoctorId);
+
+        if (response?.data?.success) {
+          setBookingInfo(response.data.bookingInfo);
+        } else {
+          toast.error("Failed to load booking info");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load booking info");
+      }
+    };
+
+    fetchBookingInfo();
+  }, []);
+
+  useEffect(() => {}, [activeTab]);
 
   const displayedAppointments = query.trim()
     ? filteredSearchResult
@@ -146,31 +184,29 @@ const PatientAppointments = () => {
       </div>
 
       {/* Search Section */}
-      {
-        activeTab!=='book' && (
-          <div className="mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex-1">
-            <SearchInput
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search appointments"
-              fetchSuggestions={fetchSuggestions}
-              onSelectSuggestion={handleSelectSuggestion}
-              role="patient"
-              entity="appointments"
-            />
-            {searchLoading && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                <Icon icon="mdi:loading" className="animate-spin" />
-                Searching…
-              </div>
-            )}
+      {activeTab !== "book" && (
+        <div className="mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex-1">
+              <SearchInput
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search appointments"
+                fetchSuggestions={fetchSuggestions}
+                onSelectSuggestion={handleSelectSuggestion}
+                role="patient"
+                entity="appointments"
+              />
+              {searchLoading && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                  <Icon icon="mdi:loading" className="animate-spin" />
+                  Searching…
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-        )
-      }
+      )}
 
       {/* Content section */}
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
@@ -182,8 +218,8 @@ const PatientAppointments = () => {
                 {activeTab === "upcoming"
                   ? "Upcoming Appointments"
                   : activeTab === "history"
-                  ? "Past Appointments"
-                  : "Book New Appointment"}
+                    ? "Past Appointments"
+                    : "Book New Appointment"}
               </h2>
 
               <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
@@ -198,7 +234,11 @@ const PatientAppointments = () => {
 
           <div className="px-2 py-3 sm:px-4">
             {activeTab === "book" ? (
-              <BookAppointmentForm onSuccess={fetchAllAppointments} />
+              <BookAppointmentForm
+                onSuccess={fetchAllAppointments}
+                bookingInfo={bookingInfo}
+                setActiveTab={setActiveTab}
+              />
             ) : filteredAppointments && filteredAppointments.length > 0 ? (
               <DataTable
                 data={displayedAppointments}
@@ -221,7 +261,7 @@ const PatientAppointments = () => {
                     ? "You have no upcoming appointments. Book one to get started!"
                     : "You have no past appointments yet."}
                 </p>
-                {activeTab === "upcoming" && (
+                {/* {activeTab === "upcoming" && (
                   <button
                     onClick={handleBookNow}
                     className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors"
@@ -230,7 +270,7 @@ const PatientAppointments = () => {
                     Book Appointment
               
                   </button>
-                )}
+                )} */}
               </div>
             )}
           </div>

@@ -10,6 +10,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { getPatientNotifications } from "../controllers/patientControllers/notifications.controller.js";
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
+import { bookAppointment, getAllAppointments, getBookingInfo } from "../controllers/patientControllers/appointments.controller.js";
 
 const router = Router();
 
@@ -35,5 +36,10 @@ router.patch('/notifications/mark-all-read',setMarkAllRead)
 //--------- messages --------------
 router.get('/messages/:id',getAllMessages)
 router.get('/conversations', getAllConversations)
+
+//-------------- appointments -------------
+router.get(`/doctor/:id/booking-info`,getBookingInfo)
+router.post('/appointments/book-appointment',bookAppointment);
+router.get('/appointments',getAllAppointments)
 
 export default router;
