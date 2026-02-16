@@ -119,7 +119,7 @@ export const patientColumns = [
 
 //-------------- Patient appointment colums --------------------
 
-export const appointmentColumns = [
+export const patientAppointmentColumns = [
   {
     header: "Booked On",
     render: (appointment) =>
@@ -148,6 +148,83 @@ export const appointmentColumns = [
       </div>
     ),
   },
+
+
+  {
+    header: "Appointment Date",
+    render: (appointment) =>
+      new Date(appointment.appointmentDate).toLocaleDateString("en-IN"),
+  },
+
+  {
+    header: "Time",
+    render: (appointment) => (
+      <span className="font-semibold text-gray-900">
+        {appointment.timeSlot || "-"}
+      </span>
+    ),
+  },
+
+  {
+    header: "Status",
+    render: (appointment) => {
+      const statusStyles = {
+        pending: "bg-amber-100 text-amber-700",
+        confirmed: "bg-emerald-100 text-emerald-700",
+        cancelled: "bg-red-100 text-red-700",
+        completed: "bg-blue-100 text-blue-700",
+      };
+
+      return (
+        <span
+          className={`px-3 py-1 text-xs font-semibold rounded-full ${
+            statusStyles[appointment.status] ||
+            "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {appointment.status || "-"}
+        </span>
+      );
+    },
+  },
+];
+
+//----------------- Doctor Appointments Columns -------------
+
+export const doctorAppointmentColumns = [
+  {
+    header: "Booked On",
+    render: (appointment) =>
+      new Date(appointment.createdAt).toLocaleDateString("en-IN"),
+  },
+
+  {
+    header: "Patient",
+    render: (appointment) => (
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
+          <img
+            src={appointment.patient?.profilePicture}
+            alt={appointment.patient?.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-900">
+            {appointment.patient?.name || "-"}
+          </span>
+          <span className="text-xs text-gray-500">
+            {appointment.patient?.gender || "-"}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+  {
+  header: "Consultation",
+  render: (appointment) => appointment.serviceType || "-"
+},
+
 
 
   {

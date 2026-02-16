@@ -1,6 +1,5 @@
-const PatientAppointmentTabs = ({ activeTab, setActiveTab }) => {
+const DoctorAppointmentTabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { key: "book", label: "Book New" },
     { key: "upcoming", label: "Upcoming Appointments" },
     { key: "pending", label: "Waiting Confirmation" },
     { key: "cancelled", label: "Cancelled Appointments" },
@@ -26,4 +25,4 @@ const PatientAppointmentTabs = ({ activeTab, setActiveTab }) => {
   );
 };
 
-export default PatientAppointmentTabs;
+export default DoctorAppointmentTabs;

@@ -223,3 +223,21 @@ export const revokeStatusConfig = {
     },
   ],
 };
+
+//----------- Set Appointment Status Config ----------------
+
+export const setAppointmentStatusConfig = {
+  fields: [
+    {
+      name:'appointmentStatus',
+      label:'Select Action',
+      type:'select',
+      options:[
+        'confirm',
+        'cancel',
+        're-schedule'
+      ],
+      required:true
+    }
+  ]
+}

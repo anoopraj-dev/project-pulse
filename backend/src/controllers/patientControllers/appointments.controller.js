@@ -79,7 +79,7 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
-    const { doctorId, date, time, reason, notes } = req.body;
+    const { doctorId, date, time, reason, notes,serviceType } = req.body;
     const patientId = req.user.id;
 
     // ---------------- Validation ----------------
@@ -128,6 +128,7 @@ export const bookAppointment = async (req, res) => {
       doctor: doctorId,
       appointmentDate,
       timeSlot: time,
+      serviceType,
       reason,
       notes,
     });
