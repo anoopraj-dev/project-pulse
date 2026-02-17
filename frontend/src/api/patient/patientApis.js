@@ -39,6 +39,8 @@ export const getAllDoctors = ()=>{
   return api.get('/api/patient/doctors')
   
 }
+
+
 //---------------- View Doctor ------------------
 export const viewDoctorProfile = (id) => {
   return api.get(`/api/patient/doctor/${id}`)
@@ -49,11 +51,28 @@ export const viewDoctorAvailability = (id) =>{
 }
 
 
+
+
 //-------------- Get Chats ------------------
 export const getConversations = () => {
   return api.get('/api/patient/messages')
 }
 
 
-//-------------- View Doctors availability ----------------
+//--------------- Fetch Doctor for appointment --------------
+export const  getBookingInfo = (id) =>{
+  return api.get(`/api/patient/doctor/${id}/booking-info`)
+}
+
+//-------------------- Book appointment -------------------
+export const bookAppointment = (payload) => {
+  return api.post('/api/patient/appointments/book-appointment',payload)
+}
+
+//--------------------- Fetch All appointments --------------
+export const fetchAppointments = () => {
+  return api.get('/api/patient/appointments')
+}
+
+
 

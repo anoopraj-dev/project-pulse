@@ -80,4 +80,12 @@ export const saveAvailability = (payload) => {
   
 }
 
+//--------------------- APPOINTMENTS ----------------
+export const fetchAppointments = () =>{
+  return api.get('/api/doctor/appointments')
+}
+
+
+
+
 

@@ -2,13 +2,18 @@ import { USER_STATUS_OPTIONS } from "../../../constants/homePageData";
 
 // -------------Email Input Config-------------
 export const emailInputConfig = {
-    fields: [
-        {name:'email',label:'Email',type:'email', required: true},
-        {name:'role',label:'Role', type:'select',options:['patient','doctor'],required:true}
-    ],
-    buttonText:'Submit'
+  fields: [
+    { name: "email", label: "Email", type: "email", required: true },
+    {
+      name: "role",
+      label: "Role",
+      type: "select",
+      options: ["patient", "doctor"],
+      required: true,
+    },
+  ],
+  buttonText: "Submit",
 };
-
 
 //------------- Set Password Config ------------
 export const setPasswordFormConfig = {
@@ -31,27 +36,21 @@ export const setPasswordFormConfig = {
 
 //------------------ Send Message/Comment config ------------------
 export const sendCommentConfig = {
-  fields:[
-    {name:'reason',
-      label: 'Reason',
-      type: 'textarea',
-      required: true
-    }
-  ]
-}
+  fields: [
+    { name: "reason", label: "Reason", type: "textarea", required: true },
+  ],
+};
 
 //------------- Update Profile Picture config-------
 export const updateProfilePictureConfig = {
   fields: [
     {
-      name:'profilePicture',
-      label:'Choose a picture',
-      type: 'file',
-    }
-  ]
-}
-
-
+      name: "profilePicture",
+      label: "Choose a picture",
+      type: "file",
+    },
+  ],
+};
 
 // ---------- Certificate upload config ----------
 
@@ -207,18 +206,26 @@ export const certificateUploadConfig = (closeModal) => ({
 // ----------- Revoke Status config -------------
 
 export const revokeStatusConfig = {
-
   fields: [
     {
       name: "status",
       label: "Select New Status *",
       type: "select",
-      options: [
-        "approved",
-        "rejected",
-        "pending",
-        'resubmit'
-      ],
+      options: ["approved", "rejected", "pending", "resubmit"],
+      required: true,
+    },
+  ],
+};
+
+//----------- Set Appointment Status Config ----------------
+
+export const setAppointmentStatusConfig = {
+  fields: [
+    {
+      name: "appointmentStatus",
+      label: "Select Action",
+      type: "select",
+      options: ["confirm", "cancel", "re-schedule"],
       required: true,
     },
   ],

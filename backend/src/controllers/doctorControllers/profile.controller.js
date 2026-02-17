@@ -1,12 +1,10 @@
-
 import Doctor from "../../models/doctor.model.js";
-import DoctorAvailability from '../../models/availability.model.js'
+import DoctorAvailability from "../../models/availability.model.js";
 import { getIO } from "../../socket.js";
 import { Notification } from "../../models/notification.model.js";
 
 // ------------- GET PROFILE ----------
 export const getDoctorProfile = async (req, res) => {
-
   try {
     if (!req.user || req.user.role !== "doctor") {
       return res.status(403).json({ message: "Not authorized" });
@@ -21,22 +19,24 @@ export const getDoctorProfile = async (req, res) => {
       });
     }
 
-     //----------------- fetch doctor availability ------------
-        const availability = await DoctorAvailability
-          .find({ doctorId: req.user.id})
-          .sort({ date: 1 });
-    
-        const formattedAvailability = availability.map((day) => ({
-          date: day.date.toISOString().split("T")[0],
-          slots: day.slots.map(
-            (slot) => `${slot.startTime}-${slot.endTime}`
-          ),
-        }));
+    //----------------- fetch doctor availability ------------
+    const availability = await DoctorAvailability.find({
+      doctorId: req.user.id,
+    }).sort({ date: 1 });
+
+    const formattedAvailability = availability.map((day) => ({
+      date: day.date.toISOString().split("T")[0],
+      slots: day.slots.map((slot) => ({
+        startTime: slot.startTime.trim(),
+        endTime: slot.endTime.trim(),
+        isBooked: slot.isBooked ?? false,
+      })),
+    }));
 
     res.json({
       success: true,
       user: doctor,
-      availability:formattedAvailability || []
+      availability: formattedAvailability || [],
     });
   } catch (error) {
     console.error(error);
@@ -100,7 +100,7 @@ export const updateDoctorProfile = async (req, res) => {
     const doctor = await Doctor.findByIdAndUpdate(
       _id,
       { $set: updatePayload },
-      { new: true, runValidators: true, context: "query" }
+      { new: true, runValidators: true, context: "query" },
     );
 
     if (!doctor) {
@@ -164,7 +164,7 @@ export const requestProfileResubmission = async (req, res) => {
         message: "Resubmission request sent to admin",
         user: doctor,
       },
-      { new: true }
+      { new: true },
     );
   } catch (error) {
     console.log(error);

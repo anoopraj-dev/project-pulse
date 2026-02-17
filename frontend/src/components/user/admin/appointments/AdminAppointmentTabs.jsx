@@ -1,10 +1,10 @@
-const PatientAppointmentTabs = ({ activeTab, setActiveTab }) => {
+const AdminAppointmentTabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { key: "book", label: "Book Appointment" },
-    { key: "upcoming", label: "Upcoming Appointments" },
+    { key: "all", label: "All Appointments" },
+    { key: "upcoming", label: "Confirmed Appointments" },
     { key: "pending", label: "Waiting Confirmation" },
     { key: "cancelled", label: "Cancelled Appointments" },
-    { key: "history", label: "Past Appointments" },
+    { key: "history", label: "Completed Appointments" },
     { key: "expired", label: "Expired Appointments" },
   ];
 
@@ -27,4 +27,4 @@ const PatientAppointmentTabs = ({ activeTab, setActiveTab }) => {
   );
 };
 
-export default PatientAppointmentTabs;
+export default AdminAppointmentTabs;

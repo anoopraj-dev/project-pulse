@@ -45,11 +45,14 @@ export const viewDoctorProfile = async (req, res) => {
       .sort({ date: 1 });
 
     const formattedAvailability = availability.map((day) => ({
-      date: day.date.toISOString().split("T")[0],
-      slots: day.slots.map(
-        (slot) => `${slot.startTime}-${slot.endTime}`
-      ),
-    }));
+  date: day.date.toISOString().split("T")[0],
+  slots: day.slots.map((slot) => ({
+    startTime: slot.startTime.trim(),
+    endTime: slot.endTime.trim(),
+    isBooked: slot.isBooked ?? false, 
+  })),
+}));
+
 
     return res.status(200).json({
       success: true,

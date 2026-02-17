@@ -1,17 +1,27 @@
-import { useState} from "react";
-import {toast} from 'react-hot-toast'
+import { useState, useMemo } from "react";
+import { toast } from "react-hot-toast";
 import DynamicForm from "../../forms/engines/DynamicForm";
-import { emailInputConfig, revokeStatusConfig, sendCommentConfig, setPasswordFormConfig, updateProfilePictureConfig } from "../../forms/config/modalFormConfig";
+import { setAppointmentStatus } from "../../../api/user/userApis";
+import {
+  emailInputConfig,
+  revokeStatusConfig,
+  sendCommentConfig,
+  setAppointmentStatusConfig,
+  setPasswordFormConfig,
+  updateProfilePictureConfig,
+} from "../../forms/config/modalFormConfig";
 import { api } from "../../../api/axiosInstance";
 import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
-import { rejectDoctorProfile, submitDoctorPersonalInfo,submitDoctorProfessionalInfo} from "../../../api/doctor/doctorApis";
+import {
+  submitDoctorPersonalInfo,
+  submitDoctorProfessionalInfo,
+} from "../../../api/doctor/doctorApis";
 import { submitPatientPersonalInfo } from "../../../api/patient/patientApis";
 import { useUser } from "../../../contexts/UserContext";
 import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 import { Icon } from "@iconify/react";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { revokeProfileStatus } from "../../../api/admin/adminApis";
-
 
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
@@ -20,35 +30,38 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
     try {
       setLoading(true);
       const expiryTime = Date.now() + 60 * 1000;
-      const payload = {...formData,type,expiryTime};
+      const payload = { ...formData, type, expiryTime };
 
       const { data } = await api.post(endPoint, payload);
-      sessionStorage.setItem('otpSession', JSON.stringify(payload));
-      
+      sessionStorage.setItem("otpSession", JSON.stringify(payload));
 
       if (data.success) {
         toast.success(data.message || "Submitted successfully!");
-        if (onSubmit) onSubmit(data); 
+        if (onSubmit) onSubmit(data);
         closeModal();
       } else {
         toast.error(data.message || "Something went wrong");
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to submit form. Try again."
+        error.response?.data?.message || "Failed to submit form. Try again.",
       );
-    }finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col">
-      <DynamicForm config={emailInputConfig} onSubmit={handleSubmit}  mode='modal' loading={loading}/>
+      <DynamicForm
+        config={emailInputConfig}
+        onSubmit={handleSubmit}
+        mode="modal"
+        loading={loading}
+      />
     </div>
   );
 };
-
 
 //----------------- set Password modal ---------------------
 
@@ -60,7 +73,10 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
       setLoading(true);
       const payload = { ...formData, type };
       const { data } = await api.post(endPoint, payload);
-      sessionStorage.setItem('forgotPasswordVerification', JSON.stringify(payload));
+      sessionStorage.setItem(
+        "forgotPasswordVerification",
+        JSON.stringify(payload),
+      );
 
       if (data.success) {
         toast.success(data.message || "Password set successfully!");
@@ -71,7 +87,7 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
       }
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Failed to submit form. Try again."
+        error.response?.data?.message || "Failed to submit form. Try again.",
       );
     } finally {
       setLoading(false);
@@ -79,11 +95,14 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   };
 
   return (
-    <DynamicForm mode="modal" config={setPasswordFormConfig} onSubmit={handleSubmit}  loading={loading}
+    <DynamicForm
+      mode="modal"
+      config={setPasswordFormConfig}
+      onSubmit={handleSubmit}
+      loading={loading}
     />
   );
 };
-
 
 //------------- Profile Picture upload ---------------
 export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
@@ -138,7 +157,6 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
   );
 };
 
-
 // -------- Certificat upload modal --------------
 
 export const CertificateUploadModal = ({ closeModal }) => {
@@ -162,14 +180,11 @@ export const CertificateUploadModal = ({ closeModal }) => {
               college: rest.college,
               completionYear: rest.completionYear,
             },
-          ])
+          ]),
         );
 
         if (files?.educationCertificate) {
-          formData.append(
-            "educationCertificate",
-            files.educationCertificate
-          );
+          formData.append("educationCertificate", files.educationCertificate);
         }
       }
 
@@ -183,14 +198,11 @@ export const CertificateUploadModal = ({ closeModal }) => {
               hospital: rest.hospitalName,
               location: rest.hospitalLocation,
             },
-          ])
+          ]),
         );
 
         if (files?.experienceCertificate) {
-          formData.append(
-            "experienceCertificate",
-            files.experienceCertificate
-          );
+          formData.append("experienceCertificate", files.experienceCertificate);
         }
       }
 
@@ -202,32 +214,25 @@ export const CertificateUploadModal = ({ closeModal }) => {
 
         if (files?.proofDocument?.length > 0) {
           files.proofDocument.forEach((file) =>
-            formData.append("proofDocument", file)
+            formData.append("proofDocument", file),
           );
         }
       }
 
-      // -------- DEBUG --------
-      console.log("---- CERTIFICATE FORM DATA ----");
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value instanceof File ? value.name : value);
-      }
-
       // -------- API CALL --------
-      uploadCertificateAction.executeAsyncFn(async()=>{
+      uploadCertificateAction.executeAsyncFn(async () => {
         const response = await submitDoctorProfessionalInfo(formData);
 
         if (!response?.data?.success) {
-        toast.error(response?.data?.message || "Certificate upload failed");
-        return;
-      }
-      toast.success("Certificate added successfully");
+          toast.error(response?.data?.message || "Certificate upload failed");
+          return;
+        }
+        toast.success("Certificate added successfully");
 
-      // -------- CLEANUP --------
-      Object.keys(files).forEach(clearField);
-      closeModal();
-      })
-      
+        // -------- CLEANUP --------
+        Object.keys(files).forEach(clearField);
+        closeModal();
+      });
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while uploading certificate");
@@ -246,11 +251,9 @@ export const CertificateUploadModal = ({ closeModal }) => {
 
 //------------- Image Viewer -------------
 
-
- export const ImageModal = ({ url, label, onClose }) => {
+export const ImageModal = ({ url, label, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 bg-black/90 flex flex-col">
-
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 text-white">
         <span className="text-lg font-medium">{label}</span>
@@ -274,40 +277,42 @@ export const CertificateUploadModal = ({ closeModal }) => {
 };
 
 //----------------- Comment modal --------------
-export const SendCommentModal = ({id,onSubmit,closeModal,apiCall})=>{
-  const apiAction = useAsyncAction()
-  const handleSubmit = async(data) =>{
+export const SendCommentModal = ({ id, onSubmit, closeModal, apiCall }) => {
+  const apiAction = useAsyncAction();
+  const handleSubmit = async (data) => {
     try {
-      const formData =  new FormData();
+      const formData = new FormData();
 
-      formData.append(
-        'reason' , data.reason
-      )
+      formData.append("reason", data.reason);
 
       //------------- API CALL ------------
 
-      await apiAction.executeAsyncFn(async ()=>{
-        const res = await apiCall(id,formData);
-        if(res.data.success){
+      await apiAction.executeAsyncFn(async () => {
+        const res = await apiCall(id, formData);
+        if (res.data.success) {
           toast.success(res.data.message);
-          if(onSubmit) onSubmit(res.data.user)
+          if (onSubmit) onSubmit(res.data.user);
           closeModal();
         }
-      })
-
+      });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   return (
-    <DynamicForm config={sendCommentConfig} mode='modal' onSubmit={handleSubmit} loading={apiAction.loading}/>
-  )
-}
+    <DynamicForm
+      config={sendCommentConfig}
+      mode="modal"
+      onSubmit={handleSubmit}
+      loading={apiAction.loading}
+    />
+  );
+};
 
 // -------------------- Revoke Status -----------------
 
-  export const RevokeStatusModal = ({ id, onSubmit, closeModal }) => {
+export const RevokeStatusModal = ({ id, onSubmit, closeModal }) => {
   const apiAction = useAsyncAction();
 
   const handleSubmit = async (data) => {
@@ -339,4 +344,170 @@ export const SendCommentModal = ({id,onSubmit,closeModal,apiCall})=>{
       loading={apiAction.loading}
     />
   );
-}
+};
+
+//---------------- Appointments action ------------------
+export const AppointmentsActionModal = ({
+  appointment,
+  id,
+  role,
+  onSubmit,
+  closeModal,
+}) => {
+  const apiAction = useAsyncAction();
+
+  //---------------- Allowed action time ---------------
+  const isActionAllowed = useMemo(() => {
+    if (!appointment?.appointmentDate || !appointment?.timeSlot) return false;
+
+    const datePart = new Date(appointment.appointmentDate)
+      .toISOString()
+      .split("T")[0];
+
+    const appointmentDateTime = new Date(`${datePart}T${appointment.timeSlot}:00`);
+    const now = new Date();
+
+    const diffInHours =
+      (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    // Admin can override 24h restriction if needed
+    return role === "admin" ? true : diffInHours >= 24;
+  }, [appointment, role]);
+
+  const formConfig = {
+  ...setAppointmentStatusConfig,
+  fields: setAppointmentStatusConfig.fields.map((field) => {
+    if (field.name === "appointmentStatus") {
+      // Determine available actions by role
+      let options = [];
+
+      if (role === "doctor") {
+        options = ["confirm", "cancel", "re-schedule"];
+        // Only restrict actions if within 24h
+        if (!isActionAllowed) options = [];
+      } else if (role === "patient") {
+        options = ["cancel"];
+        if (!isActionAllowed) options = [];
+      } else if (role === "admin") {
+        // Admin has all actions, no 24h restriction
+        options = ["confirm", "cancel", "re-schedule", "complete"];
+      }
+
+      return { ...field, options };
+    }
+    return field;
+  }),
+};
+
+
+  const handleSubmit = async (data) => {
+    try {
+      const formData = new FormData();
+      formData.append("status", data.appointmentStatus);
+
+      await apiAction.executeAsyncFn(async () => {
+        const res = await setAppointmentStatus(id, role, formData);
+        if (res?.data?.success) {
+          toast.success("Appointment status updated");
+          onSubmit && onSubmit();
+          closeModal && closeModal();
+        } else {
+          toast.error("Failed to update appointment status");
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update appointment status");
+    }
+  };
+
+  if (!appointment)
+    return <p className="text-sm text-red-500">Appointment details not available</p>;
+
+  return (
+    <div>
+      {/* Appointment Details */}
+      <div className="mb-4 rounded-md border border-slate-200 p-4 text-sm text-slate-700">
+        {/* Show both patient and doctor info for admin */}
+        {role === "admin" && (
+          <>
+            <p>
+              <strong>Patient:</strong> {appointment.patient?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Doctor:</strong> {appointment.doctor?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Specialization:</strong>{" "}
+              {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+            </p>
+          </>
+        )}
+
+        {role === "doctor" && (
+          <>
+            <p>
+              <strong>Patient:</strong> {appointment.patient?.name}
+            </p>
+            <p>
+              <strong>Gender:</strong> {appointment.patient?.gender || "N/A"}
+            </p>
+          </>
+        )}
+
+        {role === "patient" && (
+          <>
+            <p>
+              <strong>Doctor:</strong> {appointment.doctor?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Specialization:</strong>{" "}
+              {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+            </p>
+          </>
+        )}
+
+        <p>
+          <strong>Consultation:</strong> {appointment?.serviceType || "N/A"}
+        </p>
+        <p>
+          <strong>Date:</strong>{" "}
+          {new Date(appointment.appointmentDate).toLocaleDateString()}
+        </p>
+        <p>
+          <strong>Time:</strong> {appointment.timeSlot || "N/A"}
+        </p>
+        <p>
+          <strong>Status:</strong>{" "}
+          <span className="capitalize">{appointment.status}</span>
+        </p>
+
+        {appointment.reason && (
+          <p>
+            <strong>Reason:</strong> {appointment.reason}
+          </p>
+        )}
+
+        {appointment.notes && (
+          <p>
+            <strong>Notes:</strong> {appointment.notes}
+          </p>
+        )}
+      </div>
+
+      {/* Status Form */}
+      {!isActionAllowed && role !== "admin" ? (
+        <p className="text-red-500 font-medium text-sm">
+          Changes are not allowed within 24 hours.
+        </p>
+      ) : (
+        <DynamicForm
+          config={formConfig}
+          mode="modal"
+          onSubmit={handleSubmit}
+          loading={apiAction.loading}
+        />
+      )}
+    </div>
+  );
+};

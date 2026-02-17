@@ -7,6 +7,7 @@ import DoctorProfileView from "../pages/admin/DoctorProfileView";
 import ViewDoctors from "../pages/admin/ViewDoctors";
 import ViewPatients from "../pages/admin/ViewPatients";
 import PatientProfileView from "../pages/admin/PatientProfileView";
+import ViewAppointments from "@/pages/admin/ViewAppointments";
 
 const AdminRoutes = {
   element: (
@@ -23,6 +24,7 @@ const AdminRoutes = {
     { path: "/admin/doctor/:id/documents", element: <ViewDocuments /> },
     { path: "/admin/patients", element: <ViewPatients /> },
     { path: "/admin/patient/:id", element: <PatientProfileView /> },
+    { path: "/admin/appointments", element: <ViewAppointments /> },
   ],
 };
 

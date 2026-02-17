@@ -1,52 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
+import toast from "react-hot-toast";
+import { bookAppointment } from "@/api/patient/patientApis";
 
-const BookAppointmentForm = ({ onSuccess }) => {
+const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
   const [formData, setFormData] = useState({
     doctorId: "",
     specialty: "",
+    serviceType: "",
     date: "",
     time: "",
     reason: "",
     notes: "",
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Dummy doctors data - replace with API call
-  const doctors = [
-    { _id: "1", name: "Dr. John Smith", specialty: "Cardiology" },
-    { _id: "2", name: "Dr. Emily Johnson", specialty: "Neurology" },
-    { _id: "3", name: "Dr. Michael Brown", specialty: "Dermatology" },
-    { _id: "4", name: "Dr. Sarah Davis", specialty: "Pediatrics" },
-  ];
+  const hasBookingInfo = !!bookingInfo?.doctorId;
 
-  const specialties = [
-    "Cardiology",
-    "Neurology",
-    "Dermatology",
-    "Pediatrics",
-    "Orthopedics",
-    "General Medicine",
-  ];
+  //---------- Prefill when bookingInfo exists ----------
+  useEffect(() => {
+    if (!bookingInfo?.doctorId) return;
 
-  const timeSlots = [
-    "09:00 AM",
-    "09:30 AM",
-    "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "02:00 PM",
-    "02:30 PM",
-    "03:00 PM",
-    "03:30 PM",
-    "04:00 PM",
-    "04:30 PM",
-  ];
+    setFormData((prev) => ({
+      ...prev,
+      doctorId: bookingInfo.doctorId,
+      specialty: bookingInfo.specialty || "",
+    }));
+  }, [bookingInfo]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "date" ? { time: "" } : {}),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -54,38 +44,62 @@ const BookAppointmentForm = ({ onSuccess }) => {
     setIsSubmitting(true);
 
     try {
-      // Replace with actual API call
-      // const res = await bookAppointment(formData);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+      const response = await bookAppointment(formData);
+
+      if (!response.data.success)
+        return toast.error("Failed to book appointment");
+
       toast.success("Appointment booked successfully!");
+      setActiveTab("upcoming");
+
       setFormData({
         doctorId: "",
         specialty: "",
+        serviceType: "",
         date: "",
         time: "",
         reason: "",
         notes: "",
       });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
+
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error(error);
       toast.error("Failed to book appointment");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const filteredDoctors = formData.specialty
-    ? doctors.filter((doc) => doc.specialty === formData.specialty)
-    : doctors;
+  //-------------------- Get available dates ------------
+  const getAvailableDates = () => {
+    if (!hasBookingInfo) return [];
 
-  // Get minimum date (today)
+    const now = new Date();
+    return bookingInfo.availability
+      .map((day) => new Date(day.date))
+      .filter((date) => {
+        return date >= new Date(now.setHours(0, 0, 0, 0));
+      })
+      .map((date) => date.toISOString().split("T")[0]);
+  };
+
+  const availableSlots = () => {
+    if (!hasBookingInfo || !formData.date) return [];
+
+    const day = bookingInfo.availability?.find(
+      (d) => d.date.split("T")[0] === formData.date,
+    );
+
+    if (!day?.slots) return [];
+
+    const now = new Date();
+    return day.slots.filter((slot) => {
+      const slotDateTime = new Date(`${formData.date}T${slot.startTime}`);
+      // Allow only if slot is at least 1 hour ahead
+      return slotDateTime.getTime() - now.getTime() >= 60 * 60 * 1000;
+    });
+  };
+
   const today = new Date().toISOString().split("T")[0];
 
   return (
@@ -93,7 +107,10 @@ const BookAppointmentForm = ({ onSuccess }) => {
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 ring-1 ring-indigo-200">
-            <Icon icon="mdi:calendar-plus" className="text-2xl text-indigo-600" />
+            <Icon
+              icon="mdi:calendar-plus"
+              className="text-2xl text-indigo-600"
+            />
           </div>
           <h3 className="mt-4 text-lg font-semibold text-slate-900">
             Book New Appointment
@@ -104,7 +121,7 @@ const BookAppointmentForm = ({ onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Specialty Selection */}
+          {/* Specialty */}
           <div>
             <label
               htmlFor="specialty"
@@ -112,27 +129,27 @@ const BookAppointmentForm = ({ onSuccess }) => {
             >
               Specialty <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              
-              <select
-                id="specialty"
+
+            {hasBookingInfo ? (
+              <input
+                type="text"
+                value={formData.specialty}
+                disabled
+                className="w-full rounded-sm border border-slate-200 bg-slate-50 pl-4 pr-4 py-2.5 text-sm text-slate-900"
+              />
+            ) : (
+              <input
+                type="text"
                 name="specialty"
                 value={formData.specialty}
                 onChange={handleChange}
                 required
-                className="w-full rounded-sm border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              >
-                <option value="">Select a specialty</option>
-                {specialties.map((spec) => (
-                  <option key={spec} value={spec}>
-                    {spec}
-                  </option>
-                ))}
-              </select>
-            </div>
+                className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+            )}
           </div>
 
-          {/* Doctor Selection */}
+          {/* Doctor */}
           <div>
             <label
               htmlFor="doctorId"
@@ -140,34 +157,68 @@ const BookAppointmentForm = ({ onSuccess }) => {
             >
               Doctor <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-             
-              <select
-                id="doctorId"
+
+            {hasBookingInfo ? (
+              <input
+                type="text"
+                value={bookingInfo.doctorName}
+                disabled
+                className="w-full rounded-sm border border-slate-200 bg-slate-50 pl-4 pr-4 py-2.5 text-sm text-slate-900"
+              />
+            ) : (
+              <input
+                type="text"
                 name="doctorId"
                 value={formData.doctorId}
                 onChange={handleChange}
                 required
-                disabled={!formData.specialty}
-                className="w-full rounded-sm border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+            )}
+          </div>
+
+          {/* Service Type */}
+          <div>
+            <label
+              htmlFor="serviceType"
+              className="block text-sm font-medium text-slate-700 mb-1.5"
+            >
+              Service Type <span className="text-red-500">*</span>
+            </label>
+
+            {hasBookingInfo ? (
+              <select
+                id="serviceType"
+                name="serviceType"
+                value={formData.serviceType}
+                onChange={handleChange}
+                required
+                className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               >
-                <option value="">
-                  {formData.specialty
-                    ? "Select a doctor"
-                    : "Select specialty first"}
-                </option>
-                {filteredDoctors.map((doc) => (
-                  <option key={doc._id} value={doc._id}>
-                    {doc.name} - {doc.specialty}
+                <option value="">Select service</option>
+                {bookingInfo.services?.map((service) => (
+                  <option key={service.serviceType} value={service.serviceType}>
+                    {service.serviceType} - ₹{service.fees}
                   </option>
                 ))}
               </select>
-            </div>
+            ) : (
+              <select
+                name="serviceType"
+                value={formData.serviceType}
+                onChange={handleChange}
+                required
+                className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+                <option value="">Select service</option>
+                <option value="Online">Online</option>
+                <option value="Offline">Offline</option>
+              </select>
+            )}
           </div>
 
-          {/* Date and Time Row */}
+          {/* Date & Time */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {/* Date */}
             <div>
               <label
                 htmlFor="date"
@@ -175,22 +226,35 @@ const BookAppointmentForm = ({ onSuccess }) => {
               >
                 Date <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-               
+
+              {hasBookingInfo ? (
+                <select
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                >
+                  <option value="">Select date</option>
+                  {getAvailableDates().map((date) => (
+                    <option key={date} value={date}>
+                      {date}
+                    </option>
+                  ))}
+                </select>
+              ) : (
                 <input
                   type="date"
-                  id="date"
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
                   min={today}
                   required
-                  className="w-full rounded-sm border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 />
-              </div>
+              )}
             </div>
 
-            {/* Time */}
             <div>
               <label
                 htmlFor="time"
@@ -198,28 +262,37 @@ const BookAppointmentForm = ({ onSuccess }) => {
               >
                 Time <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                
+
+              {hasBookingInfo ? (
                 <select
-                  id="time"
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-sm border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  disabled={!formData.date}
+                  className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 >
-                  <option value="">Select a time</option>
-                  {timeSlots.map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
+                  <option value="">Select time</option>
+                  {availableSlots().map((slot) => (
+                    <option key={slot.startTime} value={slot.startTime}>
+                      {slot.startTime} - {slot.endTime}
                     </option>
                   ))}
                 </select>
-              </div>
+              ) : (
+                <input
+                  type="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                />
+              )}
             </div>
           </div>
 
-          {/* Reason for Visit */}
+          {/* Reason */}
           <div>
             <label
               htmlFor="reason"
@@ -227,47 +300,39 @@ const BookAppointmentForm = ({ onSuccess }) => {
             >
               Reason for Visit <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-            
-              <input
-                type="text"
-                id="reason"
-                name="reason"
-                value={formData.reason}
-                onChange={handleChange}
-                required
-                placeholder="e.g., Regular checkup, Follow-up consultation"
-                className="w-full rounded-sm border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              />
-            </div>
+
+            <input
+              type="text"
+              name="reason"
+              value={formData.reason}
+              onChange={handleChange}
+              required
+              placeholder="e.g., Regular checkup, Follow-up consultation"
+              className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
           </div>
 
-          {/* Additional Notes */}
+          {/* Notes */}
           <div>
             <label
               htmlFor="notes"
               className="block text-sm font-medium text-slate-700 mb-1.5"
             >
-              Additional Notes <span className="text-slate-400">(Optional)</span>
+              Additional Notes{" "}
+              <span className="text-slate-400">(Optional)</span>
             </label>
-            <div className="relative">
-              <Icon
-              
-                className="absolute left-3 top-3 text-slate-400"
-              />
-              <textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Any specific concerns or symptoms you'd like to discuss..."
-                className="w-full rounded-sm border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
-              />
-            </div>
+
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Any specific concerns or symptoms you'd like to discuss..."
+              className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
+            />
           </div>
 
-          {/* Submit Button */}
+          {/* Buttons */}
           <div className="flex items-center justify-end gap-3 pt-4">
             <button
               type="button"
@@ -275,6 +340,7 @@ const BookAppointmentForm = ({ onSuccess }) => {
                 setFormData({
                   doctorId: "",
                   specialty: "",
+                  serviceType: "",
                   date: "",
                   time: "",
                   reason: "",
@@ -285,6 +351,7 @@ const BookAppointmentForm = ({ onSuccess }) => {
             >
               Reset
             </button>
+
             <button
               type="submit"
               disabled={isSubmitting}
@@ -308,6 +375,5 @@ const BookAppointmentForm = ({ onSuccess }) => {
     </div>
   );
 };
-
 
 export default BookAppointmentForm;

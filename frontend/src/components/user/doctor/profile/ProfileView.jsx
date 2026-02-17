@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
@@ -25,14 +24,12 @@ const ProfileView = ({
   onProfilePictureUpload,
   onCerticateUpload,
   onUnblock,
-  onManageAvailability
+  onManageAvailability,
 }) => {
   const [viewMore, setViewmore] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
 
   const { id } = useParams();
-
-  console.log(availability)
 
   const handleAction = async (action, fn) => {
     try {
@@ -49,7 +46,6 @@ const ProfileView = ({
     navigate(`/patient/messages/${id}`);
   };
 
-
   if (!user)
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
@@ -63,7 +59,7 @@ const ProfileView = ({
   return (
     <div className="min-h-screen">
       {/* Welcome Banner */}
-        <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
+      <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
         <div className="mx-auto max-w-4xl px-4 pb-6 pt-20 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
@@ -73,12 +69,13 @@ const ProfileView = ({
               Doctor Profile
             </h1>
             <p className="mt-1 max-w-xl text-sm text-slate-600">
-              View complete doctor details, specializations, and consultation options.
+              View complete doctor details, specializations, and consultation
+              options.
             </p>
           </div>
         </div>
       </div>
-      
+
       <div className="w-full px-4 pb-6">
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -169,7 +166,7 @@ const ProfileView = ({
                         }
                         className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                       />
-                       <ActionButton
+                      <ActionButton
                         action="availability"
                         activeAction={activeAction}
                         icon="mdi:calendar"
@@ -193,7 +190,10 @@ const ProfileView = ({
                           icon="mdi:document"
                           text="Request Re-Submission"
                           onClick={() =>
-                            handleAction("request-resubmit", onResubmissionRequest)
+                            handleAction(
+                              "request-resubmit",
+                              onResubmissionRequest,
+                            )
                           }
                           className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                         />
@@ -205,7 +205,9 @@ const ProfileView = ({
                           activeAction={activeAction}
                           icon="mdi:document"
                           text="ReSubmit Profile"
-                          onClick={() => handleAction("resubmit", onResubmission)}
+                          onClick={() =>
+                            handleAction("resubmit", onResubmission)
+                          }
                           className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                         />
                       )}
@@ -220,7 +222,9 @@ const ProfileView = ({
                         icon="mdi:calendar-check"
                         text="Book Appointment"
                         onClick={() =>
-                          handleAction("book", () => onBookAppointment(user?._id))
+                          handleAction("book", () =>
+                            onBookAppointment(user?._id),
+                          )
                         }
                         className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                       />
@@ -259,7 +263,9 @@ const ProfileView = ({
                               text="Approve"
                               loadingText="Approving..."
                               onClick={() =>
-                                handleAction("approve", () => onApprove(user?._id))
+                                handleAction("approve", () =>
+                                  onApprove(user?._id),
+                                )
                               }
                               className="w-full bg-green-500 hover:bg-green-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                             />
@@ -296,7 +302,9 @@ const ProfileView = ({
                             icon="mdi:block-helper"
                             text="Revoke Status"
                             loadingText="Revoking..."
-                            onClick={() => handleAction("revoke", onRevokeStatus)}
+                            onClick={() =>
+                              handleAction("revoke", onRevokeStatus)
+                            }
                             className="w-full bg-red-500 hover:bg-red-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                           />
                         )}
@@ -414,11 +422,9 @@ const ProfileView = ({
 
             {/* -------------- Availability -------------- */}
 
-            { (viewer ==='doctor' || viewer ==='patient') && (
-              
-              <AvailabilityPreview availability={availability}/>
-            )
-            }
+            {(viewer === "doctor" || viewer === "patient") && (
+              <AvailabilityPreview availability={availability} />
+            )}
 
             {/* License & Registration */}
             {user?.professionalInfo?.medicalLicense && (

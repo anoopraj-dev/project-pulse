@@ -36,6 +36,7 @@ const TIME_SLOTS = generateTimeSlots();
 /* ------------------ COMPONENT ------------------ */
 const DoctorAvailbility = () => {
   const today = startOfDay(new Date());
+  const tomorrow = addDays(today, 1);
 
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 5);
@@ -61,10 +62,10 @@ const DoctorAvailbility = () => {
         const map = {};
 
         response.data.data.forEach((day) => {
-          map[day.date] = day.slots.map((slot) => {
-            const [start, end] = slot.split("-");
-            return `${start.trim()} - ${end.trim()}`;
-          });
+          map[day.date] = day.slots.map((slot) => ({
+            time: `${slot.startTime} - ${slot.endTime}`,
+            isBooked: slot.isBooked,
+          }));
         });
 
         setAvailabilityMap(map);
@@ -81,22 +82,55 @@ const DoctorAvailbility = () => {
 
   /* ------------------ HIGHLIGHT DATES ------------------ */
   const highlightedDates = useMemo(
-    () => Object.keys(availabilityMap).map((d) => new Date(d + "T00:00:00")),
+    () =>
+      Object.keys(availabilityMap)
+        .filter((date) => availabilityMap[date]?.length > 0)
+        .map((d) => new Date(d + "T00:00:00")),
     [availabilityMap],
   );
 
+  /* ------------------ HANDLE DATE SELECT ------------------ */
+  const handleDateSelect = (date) => {
+    if (!date) return;
+
+    const selected = startOfDay(date);
+
+    if (
+      selected.getTime() === today.getTime() ||
+      selected.getTime() === tomorrow.getTime()
+    ) {
+      toast.error("Availability can only be set 48 hours in advance.");
+      return;
+    }
+
+    if (isBefore(selected, today) || selected > weekEnd) {
+      return;
+    }
+
+    setSelectedDate(date);
+  };
+
   /* ------------------ TOGGLE SLOT ------------------ */
-  const toggleSlot = (slot) => {
+  const toggleSlot = (time) => {
     if (!dateKey) return;
 
     setAvailabilityMap((prev) => {
       const currentSlots = prev[dateKey] || [];
 
+      const exists = currentSlots.find((s) => s.time === time);
+      if (exists) {
+        if (!exists.isBooked) {
+          return {
+            ...prev,
+            [dateKey]: currentSlots.filter((s) => s.time !== time),
+          };
+        }
+        return prev;
+      }
+
       return {
         ...prev,
-        [dateKey]: currentSlots.includes(slot)
-          ? currentSlots.filter((s) => s !== slot)
-          : [...currentSlots, slot],
+        [dateKey]: [...currentSlots, { time, isBooked: false }],
       };
     });
   };
@@ -117,14 +151,12 @@ const DoctorAvailbility = () => {
       }
 
       toast.success("Availability saved successfully");
-      setSelectedDate(null)
+      setSelectedDate(null);
     } catch (error) {
       console.log(error);
       toast.error("Server error");
     }
   };
-
-  
 
   /* ------------------ UI ------------------ */
   if (loading) {
@@ -164,8 +196,7 @@ const DoctorAvailbility = () => {
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
-              disabled={(date) => isBefore(date, today) || date > weekEnd}
+              onSelect={handleDateSelect}
               modifiers={{
                 hasAvailability: highlightedDates,
               }}
@@ -187,20 +218,25 @@ const DoctorAvailbility = () => {
               <p className="text-slate-400">Select a date to manage slots</p>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                {TIME_SLOTS.map((slot) => (
-                  <Button
-                    key={slot}
-                    variant="outline"
-                    onClick={() => toggleSlot(slot)}
-                    className={`rounded-xl transition-all ${
-                      selectedSlots.includes(slot)
-                        ? "bg-yellow-200 text-yellow-900 border-yellow-200 hover:bg-yellow-200 hover:text-yellow-900 pointer-events-auto"
-                        : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                    }`}
-                  >
-                    {slot}
-                  </Button>
-                ))}
+                {TIME_SLOTS.map((slot) => {
+                  const slotObj = selectedSlots.find((s) => s.time === slot);
+
+                  return (
+                    <Button
+                      key={slot}
+                      variant="outline"
+                      onClick={() => toggleSlot(slot)}
+                      disabled={slotObj?.isBooked}
+                      className={`rounded-xl transition-all ${
+                        slotObj
+                          ? "bg-yellow-200 text-yellow-900 border-yellow-200"
+                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                      }`}
+                    >
+                      {slot}
+                    </Button>
+                  );
+                })}
               </div>
             )}
           </CardContent>
