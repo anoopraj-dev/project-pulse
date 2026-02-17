@@ -18,7 +18,7 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
 
   const hasBookingInfo = !!bookingInfo?.doctorId;
 
-  // Prefill when bookingInfo exists
+  //---------- Prefill when bookingInfo exists ----------
   useEffect(() => {
     if (!bookingInfo?.doctorId) return;
 
@@ -70,6 +70,19 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
     }
   };
 
+  //-------------------- Get available dates ------------
+  const getAvailableDates = () => {
+    if (!hasBookingInfo) return [];
+
+    const now = new Date();
+    return bookingInfo.availability
+      .map((day) => new Date(day.date))
+      .filter((date) => {
+        return date >= new Date(now.setHours(0, 0, 0, 0));
+      })
+      .map((date) => date.toISOString().split("T")[0]);
+  };
+
   const availableSlots = () => {
     if (!hasBookingInfo || !formData.date) return [];
 
@@ -77,7 +90,14 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
       (d) => d.date.split("T")[0] === formData.date,
     );
 
-    return day?.slots || [];
+    if (!day?.slots) return [];
+
+    const now = new Date();
+    return day.slots.filter((slot) => {
+      const slotDateTime = new Date(`${formData.date}T${slot.startTime}`);
+      // Allow only if slot is at least 1 hour ahead
+      return slotDateTime.getTime() - now.getTime() >= 60 * 60 * 1000;
+    });
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -216,9 +236,9 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
                   className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 >
                   <option value="">Select date</option>
-                  {bookingInfo.availability?.map((day) => (
-                    <option key={day.date} value={day.date.split("T")[0]}>
-                      {day.date.split("T")[0]}
+                  {getAvailableDates().map((date) => (
+                    <option key={date} value={date}>
+                      {date}
                     </option>
                   ))}
                 </select>

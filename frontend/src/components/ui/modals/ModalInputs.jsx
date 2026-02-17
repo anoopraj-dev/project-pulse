@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import DynamicForm from "../../forms/engines/DynamicForm";
+import { setAppointmentStatus } from "../../../api/user/userApis";
 import {
   emailInputConfig,
   revokeStatusConfig,
@@ -12,7 +13,6 @@ import {
 import { api } from "../../../api/axiosInstance";
 import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
 import {
-  rejectDoctorProfile,
   submitDoctorPersonalInfo,
   submitDoctorProfessionalInfo,
 } from "../../../api/doctor/doctorApis";
@@ -346,25 +346,71 @@ export const RevokeStatusModal = ({ id, onSubmit, closeModal }) => {
   );
 };
 
+//---------------- Appointments action ------------------
 export const AppointmentsActionModal = ({
   appointment,
   id,
+  role,
   onSubmit,
   closeModal,
 }) => {
   const apiAction = useAsyncAction();
-  console.log(appointment);
+
+  //---------------- Allowed action time ---------------
+  const isActionAllowed = useMemo(() => {
+    if (!appointment?.appointmentDate || !appointment?.timeSlot) return false;
+
+    const datePart = new Date(appointment.appointmentDate)
+      .toISOString()
+      .split("T")[0];
+
+    // Combine date + time
+    const appointmentDateTime = new Date(
+      `${datePart}T${appointment.timeSlot}:00`,
+    );
+
+    const now = new Date();
+
+    const diffInHours =
+      (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+    return diffInHours >= 24;
+  }, [appointment]);
+
+  const formConfig = {
+    ...setAppointmentStatusConfig,
+    fields: setAppointmentStatusConfig.fields.map((field) => {
+      if (field.name === "appointmentStatus") {
+        if (!isActionAllowed) {
+          return {
+            ...field,
+            options: [], // no actions allowed
+          };
+        }
+
+        const options =
+          role === "doctor" ? ["confirm", "cancel", "re-schedule"] : ["cancel"];
+
+        return {
+          ...field,
+          options,
+        };
+      }
+
+      return field;
+    }),
+  };
 
   const handleSubmit = async (data) => {
     try {
       const formData = new FormData();
-      formData.append("status", data.status);
+      formData.append("status", data.appointmentStatus);
 
       await apiAction.executeAsyncFn(async () => {
-        const res = await setAppointmentStatus(id, formData);
+        const res = await setAppointmentStatus(id, role, formData);
         if (res?.data?.success) {
           toast.success("Appointment status updated");
-          onSubmit && onSubmit(); // Refresh parent
+          onSubmit && onSubmit();
           closeModal && closeModal();
         } else {
           toast.error("Failed to update appointment status");
@@ -384,32 +430,49 @@ export const AppointmentsActionModal = ({
   return (
     <div>
       {/* Appointment Details */}
-      <div className="mb-4 rounded-md border border-slate-200  p-4 text-sm text-slate-700">
+      <div className="mb-4 rounded-md border border-slate-200 p-4 text-sm text-slate-700">
         <p>
-          <strong>Patient:</strong> {appointment.patient?.name || "N/A"}
+          <strong>{role === "doctor" ? "Doctor" : "Patient"}:</strong>{" "}
+          {role === "doctor"
+            ? appointment.patient?.name
+            : appointment.doctor?.name || "N/A"}
         </p>
-        <p>
-          <strong>Gender:</strong> {appointment.patient?.gender || "N/A"}
-        </p>
+
+        {role === "doctor" ? (
+          <p>
+            <strong>Gender:</strong> {appointment.patient?.gender || "N/A"}
+          </p>
+        ) : (
+          <p>
+            <strong>Specialization:</strong>{" "}
+            {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+          </p>
+        )}
+
         <p>
           <strong>Consultation:</strong> {appointment?.serviceType || "N/A"}
         </p>
+
         <p>
           <strong>Date:</strong>{" "}
           {new Date(appointment.appointmentDate).toLocaleDateString()}
         </p>
+
         <p>
           <strong>Time:</strong> {appointment.timeSlot || "N/A"}
         </p>
+
         <p>
           <strong>Status:</strong>{" "}
           <span className="capitalize">{appointment.status}</span>
         </p>
+
         {appointment.reason && (
           <p>
             <strong>Reason:</strong> {appointment.reason}
           </p>
         )}
+
         {appointment.notes && (
           <p>
             <strong>Notes:</strong> {appointment.notes}
@@ -418,12 +481,18 @@ export const AppointmentsActionModal = ({
       </div>
 
       {/* Status Form */}
-      <DynamicForm
-        config={setAppointmentStatusConfig}
-        mode="modal"
-        onSubmit={handleSubmit}
-        loading={apiAction.loading}
-      />
+      {!isActionAllowed ? (
+        <p className="text-red-500 font-medium text-sm">
+          Changes are not allowed within 24 hours.
+        </p>
+      ) : (
+        <DynamicForm
+          config={formConfig}
+          mode="modal"
+          onSubmit={handleSubmit}
+          loading={apiAction.loading}
+        />
+      )}
     </div>
   );
 };

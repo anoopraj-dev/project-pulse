@@ -1,10 +1,8 @@
-
 //-------------- Doctors Table config ----------------
 export const doctorColumns = [
   {
     header: "Joined",
-    render: (doc) =>
-      new Date(doc.createdAt).toLocaleDateString("en-IN"),
+    render: (doc) => new Date(doc.createdAt).toLocaleDateString("en-IN"),
   },
   {
     header: "Name",
@@ -23,8 +21,7 @@ export const doctorColumns = [
   },
   {
     header: "Specialization",
-    render: (doc) =>
-      doc.professionalInfo?.specializations?.[0] || "—",
+    render: (doc) => doc.professionalInfo?.specializations?.[0] || "—",
   },
   {
     header: "Experience",
@@ -32,7 +29,7 @@ export const doctorColumns = [
       const years =
         doc.professionalInfo?.experience?.reduce(
           (total, curr) => total + curr.years,
-          0
+          0,
         ) || 0;
 
       return (
@@ -45,8 +42,7 @@ export const doctorColumns = [
   },
   {
     header: "Qualification",
-    render: (doc) =>
-      doc.professionalInfo?.qualifications?.[0] || "—",
+    render: (doc) => doc.professionalInfo?.qualifications?.[0] || "—",
   },
 ];
 
@@ -68,7 +64,6 @@ const calculateAge = (dob) => {
   return age;
 };
 
-
 export const patientColumns = [
   {
     header: "Joined",
@@ -86,36 +81,43 @@ export const patientColumns = [
             className="w-full h-full object-cover"
           />
         </div>
-        <span className="font-semibold text-gray-900">{patient.name || '-'}</span>
+        <span className="font-semibold text-gray-900">
+          {patient.name || "-"}
+        </span>
       </div>
-    )
+    ),
   },
   {
     header: "Age",
     render: (patient) => (
       <div className="flex items-center gap-4">
-        <span className="font-semibold text-gray-900">{calculateAge(patient.dob) || '-'}</span>
+        <span className="font-semibold text-gray-900">
+          {calculateAge(patient.dob) || "-"}
+        </span>
       </div>
-    )
+    ),
   },
   {
     header: "Gender",
     render: (patient) => (
       <div className="flex items-center gap-4">
-        <span className="font-semibold text-gray-900">{patient.gender || '-'}</span>
+        <span className="font-semibold text-gray-900">
+          {patient.gender || "-"}
+        </span>
       </div>
-    )
+    ),
   },
   {
     header: "Work",
     render: (patient) => (
       <div className="flex items-center gap-4">
-        <span className="font-semibold text-gray-900">{patient.work ||'-'}</span>
+        <span className="font-semibold text-gray-900">
+          {patient.work || "-"}
+        </span>
       </div>
-    )
+    ),
   },
 ];
-
 
 //-------------- Patient appointment colums --------------------
 
@@ -142,13 +144,12 @@ export const patientAppointmentColumns = [
             {appointment.doctor?.name || "-"}
           </span>
           <span className="text-xs text-gray-500">
-            {appointment.doctor?.specialization || "-"}
+            {appointment.doctor?.professionalInfo?.specializations[0] || "-"}
           </span>
         </div>
       </div>
     ),
   },
-
 
   {
     header: "Appointment Date",
@@ -178,8 +179,7 @@ export const patientAppointmentColumns = [
       return (
         <span
           className={`px-3 py-1 text-xs font-semibold rounded-full ${
-            statusStyles[appointment.status] ||
-            "bg-gray-100 text-gray-600"
+            statusStyles[appointment.status] || "bg-gray-100 text-gray-600"
           }`}
         >
           {appointment.status || "-"}
@@ -221,11 +221,9 @@ export const doctorAppointmentColumns = [
     ),
   },
   {
-  header: "Consultation",
-  render: (appointment) => appointment.serviceType || "-"
-},
-
-
+    header: "Consultation",
+    render: (appointment) => appointment.serviceType || "-",
+  },
 
   {
     header: "Appointment Date",
@@ -255,8 +253,7 @@ export const doctorAppointmentColumns = [
       return (
         <span
           className={`px-3 py-1 text-xs font-semibold rounded-full ${
-            statusStyles[appointment.status] ||
-            "bg-gray-100 text-gray-600"
+            statusStyles[appointment.status] || "bg-gray-100 text-gray-600"
           }`}
         >
           {appointment.status || "-"}

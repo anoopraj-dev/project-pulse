@@ -67,18 +67,21 @@ const DoctorAppointments = () => {
     openModal("Choose Appointment Status", AppointmentsActionModal, {
       appointment,
       id: appointment._id,
+      role: "doctor",
     });
   };
 
   const filteredAppointments = appointments?.filter((appointment) => {
     if (activeTab === "upcoming") {
-      return appointment?.status === "upcoming";
+      return appointment?.status === "confirmed";
     } else if (activeTab === "history") {
       return appointment?.status === "completed";
     } else if (activeTab === "pending") {
       return appointment?.status === "pending";
     } else if (activeTab === "cancelled") {
       return appointment?.status === "cancelled";
+    } else if (activeTab === "expired") {
+      return appointment?.status === "expired";
     }
     return true;
   });

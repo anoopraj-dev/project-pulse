@@ -46,5 +46,8 @@ export const getConversations = (role) => {
   return api.get(`/api/${role}/conversations`)
 }
 
-
+//----------------- Appointments Action ----------------
+export const setAppointmentStatus = (id,role,payload) =>{
+  return api.patch(`/api/${role}/appointments/${id}`,payload)
+}
 

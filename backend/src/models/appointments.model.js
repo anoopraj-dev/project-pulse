@@ -16,7 +16,7 @@ const rescheduleHistorySchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const appointmentSchema = new mongoose.Schema(
@@ -53,7 +53,7 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-     serviceType: {         
+    serviceType: {
       type: String,
       required: true,
       trim: true,
@@ -61,14 +61,7 @@ const appointmentSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "pending",
-        "confirmed",
-        "cancelled",
-        "completed",
-        "rejected",
-        "rescheduled",
-      ],
+      enum: ["pending", "confirmed", "cancelled", "completed", "expired"],
       default: "pending",
     },
 
@@ -78,10 +71,6 @@ const appointmentSchema = new mongoose.Schema(
       default: null,
     },
 
-    cancellationReason: {
-      type: String,
-    },
-
     rescheduleHistory: [rescheduleHistorySchema],
 
     isActive: {
@@ -89,7 +78,7 @@ const appointmentSchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /* ------Indexes ---------- */

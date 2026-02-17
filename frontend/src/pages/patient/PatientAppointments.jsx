@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
 import DataTable from "../../components/shared/components/DataTable";
@@ -11,12 +11,15 @@ import { useSearch } from "../../hooks/useSearch";
 import { fetchSearchSuggestions } from "../../api/user/userApis";
 import BookAppointmentForm from "@/components/user/patient/appointments/BookAppointmentForm";
 import { fetchAppointments, getBookingInfo } from "@/api/patient/patientApis";
+import { useModal } from "@/contexts/ModalContext";
+import { AppointmentsActionModal } from "@/components/ui/modals/ModalInputs";
 
 const PatientAppointments = () => {
   const [appointments, setAppointments] = useState(null);
   const [bookingInfo, setBookingInfo] = useState(null);
-  const navigate = useNavigate();
   const fetchAppointmentsAction = useAsyncAction();
+  const { openModal } = useModal();
+
   const {
     query,
     setQuery,
@@ -70,7 +73,12 @@ const PatientAppointments = () => {
 
   //--------------- View Appointment --------------
   const handleView = (id) => {
-    navigate(`/patient/appointment/${id}`);
+    const appointment = displayedAppointments.find((a) => a._id === id);
+    openModal("Choose Appointment Status", AppointmentsActionModal, {
+      appointment,
+      id: appointment._id,
+      role: "patient",
+    });
   };
 
   const filteredAppointments = appointments?.filter((appointment) => {
@@ -82,6 +90,8 @@ const PatientAppointments = () => {
       return appointment?.status === "pending";
     } else if (activeTab === "cancelled") {
       return appointment?.status === "cancelled";
+    } else if (activeTab === "expired") {
+      return appointment?.status === "expired";
     }
     return true;
   });
@@ -243,7 +253,7 @@ const PatientAppointments = () => {
               <DataTable
                 data={displayedAppointments}
                 columns={patientAppointmentColumns}
-                onView={handleView}
+                onView={(id) => handleView(id)}
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
@@ -261,7 +271,6 @@ const PatientAppointments = () => {
                     ? "You have no upcoming appointments. Book one to get started!"
                     : "You have no past appointments yet."}
                 </p>
-             
               </div>
             )}
           </div>

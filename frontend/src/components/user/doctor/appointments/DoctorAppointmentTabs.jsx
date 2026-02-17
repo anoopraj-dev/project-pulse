@@ -4,6 +4,7 @@ const DoctorAppointmentTabs = ({ activeTab, setActiveTab }) => {
     { key: "pending", label: "Waiting Confirmation" },
     { key: "cancelled", label: "Cancelled Appointments" },
     { key: "history", label: "Past Appointments" },
+    { key: "expired", label: "Expired Appointments" },
   ];
 
   return (

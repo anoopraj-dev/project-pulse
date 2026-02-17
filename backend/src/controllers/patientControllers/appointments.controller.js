@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Doctor from "../../models/doctor.model.js";
 import Availability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
+import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -61,12 +62,10 @@ export const getBookingInfo = async (req, res) => {
       availability,
     };
 
-
     return res.status(200).json({
       success: true,
       bookingInfo,
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -79,7 +78,7 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
-    const { doctorId, date, time, reason, notes,serviceType } = req.body;
+    const { doctorId, date, time, reason, notes, serviceType } = req.body;
     const patientId = req.user.id;
 
     // ---------------- Validation ----------------
@@ -100,20 +99,22 @@ export const bookAppointment = async (req, res) => {
     const appointmentDate = new Date(date);
 
     // ---------------- Update availability ----------------
-    const availabilityUpdate = await mongoose.model("DoctorAvailability").findOneAndUpdate(
-      {
-        doctorId,
-        date: appointmentDate,
-        "slots.startTime": time,
-        "slots.isBooked": false, // ensures not already booked
-      },
-      {
-        $set: {
-          "slots.$.isBooked": true,
+    const availabilityUpdate = await mongoose
+      .model("DoctorAvailability")
+      .findOneAndUpdate(
+        {
+          doctorId,
+          date: appointmentDate,
+          "slots.startTime": time,
+          "slots.isBooked": false, // ensures not already booked
         },
-      },
-      { new: true }
-    );
+        {
+          $set: {
+            "slots.$.isBooked": true,
+          },
+        },
+        { new: true },
+      );
 
     if (!availabilityUpdate) {
       return res.status(409).json({
@@ -138,7 +139,6 @@ export const bookAppointment = async (req, res) => {
       message: "Appointment booked successfully",
       appointment,
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -148,26 +148,88 @@ export const bookAppointment = async (req, res) => {
   }
 };
 
-
 //------------------ Get all appointments ------------------
 
-export const getAllAppointments = async(req,res) => {
-    try {
-        
-        const {id} = req.user;
-        const appointments = await Appointment.find({patient:id}).populate('doctor','name profilePicture');
-        
-        res.status(200).json({
-            success:true,
-            message:'Appointments loaded successfully',
-            appointments
-        })
+export const getAllAppointments = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const appointments = await Appointment.find({ patient: id }).populate(
+      "doctor",
+      "name profilePicture professionalInfo.specializations",
+    );
+    res.status(200).json({
+      success: true,
+      message: "Appointments loaded successfully",
+      appointments,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            message:'Server error'
-        })
+//------------------------- Set Appointments Status --------------------
+export const setAppointmentStatus = async (req, res) => {
+  try {
+    const mapAppointmentActionToStatus = (action) => {
+      const actionMap = {
+        confirm: "confirmed",
+        cancel: "cancelled",
+        "re-schedule": "pending",
+        complete: "completed",
+      };
+
+      return actionMap[action] || null;
+    };
+
+    const { id: appointmentId } = req.params;
+    const { status } = req.body;
+
+    if (!appointmentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment ID missing",
+      });
     }
-}
+
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    //------------- Restrict actions within 24 hours to appointment---------
+    if (!isAppointmentActionAllowed(appointment)) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment changes are not allowed within 24 hours.",
+      });
+    }
+
+    const mappedStatus = mapAppointmentActionToStatus(status);
+
+    //------------- Update appointment status -------------------------------
+    appointment.status = mappedStatus;
+    appointment.cancelledBy = "patient";
+
+    await appointment.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Action updated successfully",
+      appointment,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update action",
+    });
+  }
+};

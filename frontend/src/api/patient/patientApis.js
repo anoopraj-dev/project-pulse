@@ -74,3 +74,5 @@ export const fetchAppointments = () => {
   return api.get('/api/patient/appointments')
 }
 
+
+

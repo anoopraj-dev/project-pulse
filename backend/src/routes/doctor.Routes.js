@@ -18,7 +18,7 @@ import {getDoctorNotifications} from '../controllers/doctorControllers/notificat
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 import { getAvailability, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
-import { getAllAppointments } from "../controllers/doctorControllers/appointments.controller.js";
+import { getAllAppointments, setAppointmentStatus } from "../controllers/doctorControllers/appointments.controller.js";
 
 const router = Router();
 
@@ -69,5 +69,6 @@ router.post('/availability',saveAvailability)
 
 //------------ appointments-------------
 router.get('/appointments',getAllAppointments)
+router.patch('/appointments/:id',setAppointmentStatus)
 
 export default router;
