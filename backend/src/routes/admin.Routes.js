@@ -6,6 +6,7 @@ import { approveDoctorsRequest,rejectDoctorsRequest,blockDoctorProfile,unblockDo
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/adminControllers/search.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
+import { getAllAppointments, setAdminAppointmentStatus } from "../controllers/adminControllers/adminAppoiintments.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------
@@ -33,5 +34,8 @@ router.get('/search',searchController)
 router.get('/search/suggestions', searchSuggestionsController)
 router.get('/notifications',getAdminNotifications)
 router.patch('/notifications/mark-all-read', setMarkAllRead)
+
+router.get('/appointments',getAllAppointments)
+router.patch('/appointments/:id',setAdminAppointmentStatus)
 
 export default router;

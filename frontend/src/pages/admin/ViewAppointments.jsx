@@ -1,23 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { adminAppointmentColumns } from "@/components/shared/configs/TableConfigs";
+import DataTable from "@/components/shared/components/DataTable";
+import AdminAppointmentTabs from "@/components/user/admin/appointments/AdminAppointmentTabs";
+import SearchInput from "@/components/shared/components/SearchInput";
+import { fetchSearchSuggestions } from "@/api/user/userApis";
+import { useSearch } from "@/hooks/useSearch";
 import { Icon } from "@iconify/react";
-import { useLocation, useParams } from "react-router-dom";
-import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { useAsyncAction } from "@/hooks/useAsyncAction";
+import { fetchAppointments } from "@/api/admin/adminApis";
 import toast from "react-hot-toast";
-import DataTable from "../../components/shared/components/DataTable";
-import { patientAppointmentColumns } from "../../components/shared/configs/TableConfigs";
-import PatientAppointmentTabs from "../../components/user/patient/appointments/AppointmentTabs";
-import SearchInput from "../../components/shared/components/SearchInput";
-import { useSearch } from "../../hooks/useSearch";
-import { fetchSearchSuggestions } from "../../api/user/userApis";
-import BookAppointmentForm from "@/components/user/patient/appointments/BookAppointmentForm";
-import { fetchAppointments, getBookingInfo } from "@/api/patient/patientApis";
 import { useModal } from "@/contexts/ModalContext";
 import { AppointmentsActionModal } from "@/components/ui/modals/ModalInputs";
 
-const PatientAppointments = () => {
+const ViewAppointments = () => {
   const [appointments, setAppointments] = useState(null);
-  const [bookingInfo, setBookingInfo] = useState(null);
   const fetchAppointmentsAction = useAsyncAction();
+  const [activeTab, setActiveTab] = useState("upcoming");
   const { openModal } = useModal();
 
   const {
@@ -30,25 +28,16 @@ const PatientAppointments = () => {
     role: "patient",
   });
 
-  const location = useLocation();
-  const navigationState = location.state;
-  const [activeTab, setActiveTab] = useState(
-    navigationState?.defaultTab || "upcoming",
-  );
-
-  //------------- Get all appointments -----------------
   const fetchAllAppointments = () => {
     fetchAppointmentsAction.executeAsyncFn(async () => {
       try {
         const response = await fetchAppointments();
-
         if (!response.data.success) {
           return toast.error("Failed to load appointments");
         }
-
         setAppointments(response?.data?.appointments);
       } catch (error) {
-        console.error(error);
+        console.log(error);
         toast.error("Something went wrong");
       }
     });
@@ -58,7 +47,7 @@ const PatientAppointments = () => {
     fetchAllAppointments();
   }, []);
 
-  //---------------- Search Suggestions ---------
+  // ------------ Search Suggestions ------------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "patient",
@@ -71,13 +60,13 @@ const PatientAppointments = () => {
     setQuery(item.name);
   };
 
-  //--------------- View Appointment --------------
+  // ------------- View Appointments -----------------
   const handleView = (id) => {
     const appointment = displayedAppointments.find((a) => a._id === id);
-    openModal("Choose Appointment Status", AppointmentsActionModal, {
+    openModal("Appointment Details", AppointmentsActionModal, {
       appointment,
       id: appointment._id,
-      role: "patient",
+      role: "admin",
     });
   };
 
@@ -105,30 +94,6 @@ const PatientAppointments = () => {
     return true;
   });
 
-  //------------------- Fetch selected doc info (prefill form) -----------
-  useEffect(() => {
-    const fetchBookingInfo = async () => {
-      if (!navigationState?.selectedDoctorId) return;
-
-      try {
-        const response = await getBookingInfo(navigationState.selectedDoctorId);
-
-        if (response?.data?.success) {
-          setBookingInfo(response.data.bookingInfo);
-        } else {
-          toast.error("Failed to load booking info");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to load booking info");
-      }
-    };
-
-    fetchBookingInfo();
-  }, []);
-
-  useEffect(() => {}, [activeTab]);
-
   const displayedAppointments = query.trim()
     ? filteredSearchResult
     : filteredAppointments;
@@ -145,14 +110,13 @@ const PatientAppointments = () => {
             <div>
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
                 <Icon icon="mdi:calendar-heart" />
-                Patient · Appointments
+                Admin · Appointments
               </p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
                 Manage Appointments
               </h1>
               <p className="mt-2 max-w-xl text-sm text-slate-600">
-                Book new appointments or review your upcoming and past
-                consultations.
+                View and manage  appointments.
               </p>
             </div>
 
@@ -185,7 +149,7 @@ const PatientAppointments = () => {
 
           {/* Tabs */}
           <div className="mt-5">
-            <PatientAppointmentTabs
+            <AdminAppointmentTabs
               activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
@@ -227,9 +191,13 @@ const PatientAppointments = () => {
                 <Icon icon="mdi:clipboard-text-outline" />
                 {activeTab === "upcoming"
                   ? "Upcoming Appointments"
-                  : activeTab === "history"
-                    ? "Past Appointments"
-                    : "Book New Appointment"}
+                  : activeTab === "pending"
+                    ? "Pending Confirmation"
+                    : activeTab === "history"
+                      ? "Past Appointments"
+                      : activeTab === "cancelled"
+                        ? "Cancelled Appointments"
+                        : "Appointments"}
               </h2>
 
               <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
@@ -252,7 +220,7 @@ const PatientAppointments = () => {
             ) : filteredAppointments && filteredAppointments.length > 0 ? (
               <DataTable
                 data={displayedAppointments}
-                columns={patientAppointmentColumns}
+                columns={adminAppointmentColumns}
                 onView={(id) => handleView(id)}
               />
             ) : (
@@ -280,4 +248,4 @@ const PatientAppointments = () => {
   );
 };
 
-export default PatientAppointments;
+export default ViewAppointments;

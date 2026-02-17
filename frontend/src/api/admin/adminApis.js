@@ -57,4 +57,10 @@ export const unblockPatientProfile = (id) => {
   return api.patch(`/api/admin/patient/unblock/${id}`)
 }
 
+//--------------- Appointments ----------------------
+export const fetchAppointments = () =>{
+  return api.get('/api/admin/appointments')
+}
+
+
 

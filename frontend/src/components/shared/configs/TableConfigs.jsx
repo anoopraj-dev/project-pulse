@@ -262,3 +262,112 @@ export const doctorAppointmentColumns = [
     },
   },
 ];
+
+
+//-------------------------- Admin appointment columns ----------------
+export const adminAppointmentColumns = [
+  {
+    header: "Booked On",
+    render: (appointment) =>
+      new Date(appointment.createdAt).toLocaleDateString("en-IN"),
+  },
+
+  {
+    header: "Patient",
+    render: (appointment) => (
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
+          <img
+            src={appointment.patient?.profilePicture || "/default-avatar.png"}
+            alt={appointment.patient?.name || "Patient"}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-900">
+            {appointment.patient?.name || "-"}
+          </span>
+          <span className="text-xs text-gray-500">
+            {appointment.patient?.gender || "-"}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+
+ {
+  header: "Doctor",
+  render: (appointment) => (
+    <div className="flex items-center gap-4">
+      <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
+        <img
+          src={appointment.doctor?.profilePicture || "/default-avatar.png"}
+          alt={appointment.doctor?.name || "Doctor"}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="flex flex-col">
+        <span className="font-semibold text-gray-900">
+          {appointment.doctor?.name || "-"}
+        </span>
+        <span className="text-xs text-gray-500">
+          {appointment.doctor?.professionalInfo?.specializations?.[0] || "-"}
+        </span>
+      </div>
+    </div>
+  ),
+},
+
+
+  {
+    header: "Consultation",
+    render: (appointment) => appointment.serviceType || "-",
+  },
+
+  {
+    header: "Appointment Date",
+    render: (appointment) =>
+      new Date(appointment.appointmentDate).toLocaleDateString("en-IN"),
+  },
+
+  {
+    header: "Time",
+    render: (appointment) => (
+      <span className="font-semibold text-gray-900">
+        {appointment.timeSlot || "-"}
+      </span>
+    ),
+  },
+
+  {
+    header: "Status",
+    render: (appointment) => {
+      const statusStyles = {
+        pending: "bg-amber-100 text-amber-700",
+        confirmed: "bg-emerald-100 text-emerald-700",
+        cancelled: "bg-red-100 text-red-700",
+        completed: "bg-blue-100 text-blue-700",
+        expired: "bg-gray-100 text-gray-600",
+      };
+
+      // Show proper label mapping if needed
+      const statusLabelMap = {
+        pending: "Pending",
+        confirmed: "Confirmed",
+        cancelled: "Cancelled",
+        completed: "Completed",
+        expired: "Expired",
+      };
+
+      return (
+        <span
+          className={`px-3 py-1 text-xs font-semibold rounded-full ${
+            statusStyles[appointment.status] || "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {statusLabelMap[appointment.status] || "-"}
+        </span>
+      );
+    },
+  },
+];

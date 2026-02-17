@@ -364,42 +364,41 @@ export const AppointmentsActionModal = ({
       .toISOString()
       .split("T")[0];
 
-    // Combine date + time
-    const appointmentDateTime = new Date(
-      `${datePart}T${appointment.timeSlot}:00`,
-    );
-
+    const appointmentDateTime = new Date(`${datePart}T${appointment.timeSlot}:00`);
     const now = new Date();
 
     const diffInHours =
       (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-    return diffInHours >= 24;
-  }, [appointment]);
+    // Admin can override 24h restriction if needed
+    return role === "admin" ? true : diffInHours >= 24;
+  }, [appointment, role]);
 
   const formConfig = {
-    ...setAppointmentStatusConfig,
-    fields: setAppointmentStatusConfig.fields.map((field) => {
-      if (field.name === "appointmentStatus") {
-        if (!isActionAllowed) {
-          return {
-            ...field,
-            options: [], // no actions allowed
-          };
-        }
+  ...setAppointmentStatusConfig,
+  fields: setAppointmentStatusConfig.fields.map((field) => {
+    if (field.name === "appointmentStatus") {
+      // Determine available actions by role
+      let options = [];
 
-        const options =
-          role === "doctor" ? ["confirm", "cancel", "re-schedule"] : ["cancel"];
-
-        return {
-          ...field,
-          options,
-        };
+      if (role === "doctor") {
+        options = ["confirm", "cancel", "re-schedule"];
+        // Only restrict actions if within 24h
+        if (!isActionAllowed) options = [];
+      } else if (role === "patient") {
+        options = ["cancel"];
+        if (!isActionAllowed) options = [];
+      } else if (role === "admin") {
+        // Admin has all actions, no 24h restriction
+        options = ["confirm", "cancel", "re-schedule", "complete"];
       }
 
-      return field;
-    }),
-  };
+      return { ...field, options };
+    }
+    return field;
+  }),
+};
+
 
   const handleSubmit = async (data) => {
     try {
@@ -423,45 +422,61 @@ export const AppointmentsActionModal = ({
   };
 
   if (!appointment)
-    return (
-      <p className="text-sm text-red-500">Appointment details not available</p>
-    );
+    return <p className="text-sm text-red-500">Appointment details not available</p>;
 
   return (
     <div>
       {/* Appointment Details */}
       <div className="mb-4 rounded-md border border-slate-200 p-4 text-sm text-slate-700">
-        <p>
-          <strong>{role === "doctor" ? "Doctor" : "Patient"}:</strong>{" "}
-          {role === "doctor"
-            ? appointment.patient?.name
-            : appointment.doctor?.name || "N/A"}
-        </p>
+        {/* Show both patient and doctor info for admin */}
+        {role === "admin" && (
+          <>
+            <p>
+              <strong>Patient:</strong> {appointment.patient?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Doctor:</strong> {appointment.doctor?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Specialization:</strong>{" "}
+              {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+            </p>
+          </>
+        )}
 
-        {role === "doctor" ? (
-          <p>
-            <strong>Gender:</strong> {appointment.patient?.gender || "N/A"}
-          </p>
-        ) : (
-          <p>
-            <strong>Specialization:</strong>{" "}
-            {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
-          </p>
+        {role === "doctor" && (
+          <>
+            <p>
+              <strong>Patient:</strong> {appointment.patient?.name}
+            </p>
+            <p>
+              <strong>Gender:</strong> {appointment.patient?.gender || "N/A"}
+            </p>
+          </>
+        )}
+
+        {role === "patient" && (
+          <>
+            <p>
+              <strong>Doctor:</strong> {appointment.doctor?.name || "N/A"}
+            </p>
+            <p>
+              <strong>Specialization:</strong>{" "}
+              {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+            </p>
+          </>
         )}
 
         <p>
           <strong>Consultation:</strong> {appointment?.serviceType || "N/A"}
         </p>
-
         <p>
           <strong>Date:</strong>{" "}
           {new Date(appointment.appointmentDate).toLocaleDateString()}
         </p>
-
         <p>
           <strong>Time:</strong> {appointment.timeSlot || "N/A"}
         </p>
-
         <p>
           <strong>Status:</strong>{" "}
           <span className="capitalize">{appointment.status}</span>
@@ -481,7 +496,7 @@ export const AppointmentsActionModal = ({
       </div>
 
       {/* Status Form */}
-      {!isActionAllowed ? (
+      {!isActionAllowed && role !== "admin" ? (
         <p className="text-red-500 font-medium text-sm">
           Changes are not allowed within 24 hours.
         </p>
