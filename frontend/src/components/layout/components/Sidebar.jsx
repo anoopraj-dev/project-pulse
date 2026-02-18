@@ -3,10 +3,12 @@ import { useLocation } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext";
 import SidebarItem from "./SidebarItem";
 import SidebarShimmer from "../../ui/loaders/SidebarShimmer";
+import { getDeviceTypes } from "@/utilis/deviceTypes";
 
 const Sidebar = ({ toggleSidebar, config, isOpen }) => {
   const { isLoading } = useUser();
   const location = useLocation();
+  
 
   if (isLoading) return <SidebarShimmer />;
 

@@ -51,3 +51,11 @@ export const setAppointmentStatus = (id,role,payload) =>{
   return api.patch(`/api/${role}/appointments/${id}`,payload)
 }
 
+//----------------- Razorpay Payments -----------------
+export const createRazorpayOrder = (amount, role,doctorId) => {
+  return api.post(`/api/${role}/create-order`,{amount,doctorId})
+}
+
+export const verifyRazorpayPayment = (data, role) => {
+  return api.post(`/api/${role}/verify-payment`,data)
+}
