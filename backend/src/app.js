@@ -8,13 +8,21 @@ import userRoutes from './routes/user.Routes.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
+import path from 'path'
+import { fileURLToPath } from 'url';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 //middlewares
 app.use(cookieParser())
 app.use(express.json())
+
+app.use(express.static("public"));
+
 
 app.use(
     session({
@@ -38,7 +46,7 @@ app.use(cors({
 
 app.options('/api/doctor/file-upload', cors());  // Handle preflight
 
-
+// app.use(express.static(path.join(__dirname, "public")));
 
 //----------- auth routes-----------------
 app.use('/api/auth',authRoutes);

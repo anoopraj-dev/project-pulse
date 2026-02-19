@@ -13,6 +13,7 @@ import { setMarkAllRead } from "../controllers/userControllers/notifications.con
 import { bookAppointment, getAllAppointments, getBookingInfo, setAppointmentStatus } from "../controllers/patientControllers/appointments.controller.js";
 import { createOrder, updatePaymentStatus, verifyPayment } from "../controllers/paymentControllers/payment.controller.js";
 import { getPatientPaymentHistory } from "../controllers/patientControllers/paymentHistory.controller.js";
+import { viewReceipt } from "../controllers/userControllers/receipt.controller.js";
 
 const router = Router();
 
@@ -51,5 +52,6 @@ router.post('/verify-payment',verifyPayment)
 router.get('/payments',getPatientPaymentHistory)
 
 router.patch('/payment-status',updatePaymentStatus)
+router.get(`/payments/:id`, viewReceipt)
 
 export default router;

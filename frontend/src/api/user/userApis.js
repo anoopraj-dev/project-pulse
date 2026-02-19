@@ -64,3 +64,10 @@ export const verifyRazorpayPayment = (data, role) => {
 export const updatePaymentStatus = () =>{
   return api.post('/api/payments/update-status')
 }
+
+//--------------- View payment invoice --------------
+export const getReceipt = async (id,role) =>{
+  return api.get(`/api/${role}/payments/${id}`,{
+    responseType:'blob'
+  })
+}

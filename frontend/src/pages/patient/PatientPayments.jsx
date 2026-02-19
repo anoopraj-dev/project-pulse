@@ -5,15 +5,17 @@ import DataTable from "../../components/shared/components/DataTable";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import { fetchPatientPayments } from "@/api/patient/patientApis"; 
 import SearchInput from "../../components/shared/components/SearchInput";
-import { fetchSearchSuggestions } from "@/api/user/userApis";
+import { fetchSearchSuggestions, getReceipt } from "@/api/user/userApis";
 import { useSearch } from "../../hooks/useSearch";
 import { patientPaymentColumns } from "@/components/shared/configs/TableConfigs";
 import PatientPaymentTabs from "@/components/user/patient/payments/PaymentTabs";
+import { useUser } from "@/contexts/UserContext";
 
 const PatientPayments = () => {
   const [payments,setPayments] = useState(null);
   const fetchPaymentsAction = useAsyncAction();
   const [activeTab,setActiveTab] = useState('upcoming')
+  const {role} = useUser();
 
 
   const {
@@ -62,9 +64,13 @@ const PatientPayments = () => {
     setQuery(item.name);
   };
 
-  //--------------- View Appointment --------------
-  const handleView = (id) => {
-    console.log('viewing')
+  //--------------- View Payments --------------
+  const handleView = async(id) => {
+    console.log(id)
+    const res = await getReceipt(id,role)
+
+    const url = window.URL.createObjectURL(res.data);
+    window.open(url)
   };
 
   const filteredPayments = payments?.filter((payment) => {

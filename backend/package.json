@@ -26,6 +26,7 @@
     "mongoose": "^8.19.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
+    "puppeteer": "^24.37.4",
     "razorpay": "^2.9.6",
     "socket.io": "^4.8.3",
     "streamifier": "^0.1.1",
