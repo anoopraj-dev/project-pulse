@@ -1,4 +1,5 @@
 import { createRazorpayOrder, verifyRazorpayPayment } from '@/api/user/userApis'
+import { updatePaymentStatus } from '@/api/patient/patientApis';
 import React from 'react'
 import toast from 'react-hot-toast';
 
@@ -33,6 +34,19 @@ const PaymentButton = ({amount,user,role,doctorId,onSuccess}) => {
                         },
                         role
                     );
+
+                    //---------------- Update payment Status, Wallet & Transactions -----------------
+                    const updateRes = await updatePaymentStatus({
+                        orderId:response.razorpay_order_id,
+                        status:'verified',
+                        notes:'Patient completed payment'
+                    })
+
+                    console.log(updateRes)
+
+                    if(!updateRes.data?.success) return toast.error( 'Failed to update Wallet and status');
+
+                    toast.success('Wallet updated')
 
                     if(verifyRes.data?.success){
                         toast.success(`Payment Successful!`);

@@ -59,3 +59,8 @@ export const createRazorpayOrder = (amount, role,doctorId) => {
 export const verifyRazorpayPayment = (data, role) => {
   return api.post(`/api/${role}/verify-payment`,data)
 }
+
+//------------ Update payment status and Wallet ---------
+export const updatePaymentStatus = () =>{
+  return api.post('/api/payments/update-status')
+}

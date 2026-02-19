@@ -74,5 +74,13 @@ export const fetchAppointments = () => {
   return api.get('/api/patient/appointments')
 }
 
+//--------------- Fetch Payments ---------------------
+export const fetchPatientPayments = () =>{
+  return api.get('/api/patient/payments')
+}
+
+export const updatePaymentStatus = (data) =>{
+  return api.patch(`/api/patient/payment-status`,data)
+}
 
 

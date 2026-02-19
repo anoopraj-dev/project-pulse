@@ -3,6 +3,8 @@ import authRoutes from './routes/auth.Routes.js';
 import patientRoutes from './routes/patient.Routes.js'
 import doctorRoutes from './routes/doctor.Routes.js'
 import adminRoutes from './routes/admin.Routes.js'
+import webhookRoutes from './routes/webhook.Routes.js'
+import userRoutes from './routes/user.Routes.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import session from 'express-session'
@@ -11,9 +13,6 @@ const app = express();
 
 
 //middlewares
-
-
-
 app.use(cookieParser())
 app.use(express.json())
 
@@ -29,8 +28,6 @@ app.use(
     })
 )
 
-
-
 app.use(cors({
   origin: 'http://localhost:5173',  // Vite default port
   credentials: true,
@@ -43,18 +40,29 @@ app.options('/api/doctor/file-upload', cors());  // Handle preflight
 
 
 
-// routes
+//----------- auth routes-----------------
 app.use('/api/auth',authRoutes);
 
-//patient routes
+//--------------patient routes---------------
 app.use('/api/patient',patientRoutes)
 
-//doctor routes
+//--------------doctor routes--------------
 app.use('/api/doctor',doctorRoutes)
 
-//admin routes
+//----------admin routes-------------
 app.use('/api/admin',adminRoutes)
 
+//----------- common routes -------------
+app.use('/api',userRoutes)
+
+//------ webhook routes ------------
+app.use('/webhooks',webhookRoutes)
+
+// router.post(
+//   'api/webhook/razorpay',
+//   express.raw({ type: 'application/json' }), // ---------- for signature verification
+//   handleRazorpayWebhook
+// );
 
 
 
