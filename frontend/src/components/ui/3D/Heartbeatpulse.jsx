@@ -1,8 +1,34 @@
 import { useEffect, useRef } from "react";
 
-const TOTAL_LENGTH = 1800; // approximate path length
+const BPM = 72;
+const BEAT_DURATION = Math.round(60000 / BPM); // 833ms
 
-const css = `
+const WAVEFORM_LENGTH = 420; // approximate length of just the QRS+T segment
+
+const BASELINE_Y = 60;
+
+
+const PATH = [
+  `M 0,${BASELINE_Y}`,
+  `L 160,${BASELINE_Y}`,                         // flat lead-in
+  `C 172,${BASELINE_Y} 176,48 184,46`,            // P wave up
+  `C 192,44 196,56 206,${BASELINE_Y}`,            // P wave down
+  `L 232,${BASELINE_Y}`,                          // short flat (PR segment)
+  `L 238,${BASELINE_Y + 7}`,                      // Q dip
+  `L 248,6`,                                      // R peak (QRS spike up)
+  `L 258,${BASELINE_Y + 12}`,                     // S dip
+  `L 266,${BASELINE_Y}`,                          // return to baseline
+  `L 296,${BASELINE_Y}`,                          // ST segment
+  `C 310,${BASELINE_Y} 318,40 334,38`,            // T wave up
+  `C 350,36 358,52 372,${BASELINE_Y}`,            // T wave down
+  `L 800,${BASELINE_Y}`,                          // flat tail
+].join(" ");
+
+const TOTAL_LENGTH = 1800;
+
+const ACTIVE_WAVEFORM_LENGTH = 380; // P→T wave segment length
+
+const buildCss = () => `
   @keyframes ecg-draw {
     0%   { stroke-dashoffset: ${TOTAL_LENGTH}; }
     100% { stroke-dashoffset: 0; }
@@ -24,13 +50,6 @@ const css = `
     }
   }
 
-  @keyframes dot-move {
-    0%   { opacity: 0; }
-    5%   { opacity: 1; }
-    95%  { opacity: 1; }
-    100% { opacity: 0; }
-  }
-
   .ecg-wrap {
     width: 100%;
     height: 120px;
@@ -44,6 +63,15 @@ const css = `
     overflow: visible;
   }
 
+  /* 
+   * Real heartbeat timing breakdown:
+   * - animation-duration = BEAT_DURATION (833ms for 72 BPM)
+   * - The path is drawn left-to-right; flat sections draw near-instantly
+   *   (they're geometrically short), the waveform spike draws fast,
+   *   matching the sudden nature of a real heartbeat
+   * - timing-function: linear keeps the draw speed proportional to path length,
+   *   so the flat baseline draws quickly and the waveform gets its natural speed
+   */
   .ecg-line {
     fill: none;
     stroke: url(#ecgFade);
@@ -53,7 +81,7 @@ const css = `
     stroke-dasharray: ${TOTAL_LENGTH};
     stroke-dashoffset: ${TOTAL_LENGTH};
     animation:
-      ecg-draw 3s linear infinite,
+      ecg-draw ${BEAT_DURATION}ms linear infinite,
       ecg-glow-breathe 1.6s ease-in-out infinite;
   }
 
@@ -65,7 +93,7 @@ const css = `
     stroke-linejoin: round;
     stroke-dasharray: ${TOTAL_LENGTH};
     stroke-dashoffset: ${TOTAL_LENGTH};
-    animation: ecg-draw 3s linear infinite;
+    animation: ecg-draw ${BEAT_DURATION}ms linear infinite;
   }
 
   .ecg-mid-glow {
@@ -77,25 +105,9 @@ const css = `
     stroke-opacity: 0.25;
     stroke-dasharray: ${TOTAL_LENGTH};
     stroke-dashoffset: ${TOTAL_LENGTH};
-    animation: ecg-draw 3s linear infinite;
+    animation: ecg-draw ${BEAT_DURATION}ms linear infinite;
   }
 `;
-
-const PATH = [
-  "M 0,60",
-  "L 220,60",
-  "C 232,60 236,48 244,46",
-  "C 252,44 256,56 266,60",
-  "L 292,60",
-  "L 298,67",
-  "L 308,6",
-  "L 318,72",
-  "L 326,60",
-  "L 356,60",
-  "C 370,60 378,40 394,38",
-  "C 410,36 418,52 432,60",
-  "L 800,60",
-].join(" ");
 
 export default function HeartbeatPulse() {
   const styleRef = useRef(null);
@@ -103,16 +115,13 @@ export default function HeartbeatPulse() {
   const rafRef = useRef(null);
   const mainLineRef = useRef(null);
   const startRef = useRef(null);
-  const DURATION = 3000; // ms, must match CSS animation
 
   useEffect(() => {
     const style = document.createElement("style");
-    style.textContent = css;
+    style.textContent = buildCss();
     document.head.appendChild(style);
     styleRef.current = style;
 
-    // Animate a leading dot along the path in sync with the draw animation
-    const svg = dotRef.current?.ownerSVGElement;
     const pathEl = mainLineRef.current;
     if (!pathEl || !dotRef.current) return;
 
@@ -120,8 +129,8 @@ export default function HeartbeatPulse() {
 
     const animate = (timestamp) => {
       if (!startRef.current) startRef.current = timestamp;
-      const elapsed = (timestamp - startRef.current) % DURATION;
-      const progress = elapsed / DURATION;
+      const elapsed = (timestamp - startRef.current) % BEAT_DURATION;
+      const progress = elapsed / BEAT_DURATION;
       const point = pathEl.getPointAtLength(progress * totalLen);
       dotRef.current.setAttribute("cx", point.x);
       dotRef.current.setAttribute("cy", point.y);
@@ -163,16 +172,16 @@ export default function HeartbeatPulse() {
           </linearGradient>
         </defs>
 
-        {/* Wide diffuse glow — draws in sync */}
+        {/* Wide diffuse glow */}
         <path className="ecg-glow-line" d={PATH} />
 
-        {/* Mid glow — draws in sync */}
+        {/* Mid glow */}
         <path className="ecg-mid-glow" d={PATH} />
 
-        {/* Main line drawing left to right */}
+        {/* Main drawing line */}
         <path className="ecg-line" d={PATH} ref={mainLineRef} />
 
-        {/* Leading dot that follows the tip of the line */}
+        {/* Leading dot tracking the tip */}
         <circle
           ref={dotRef}
           r="4"
