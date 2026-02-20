@@ -454,3 +454,83 @@ export const patientPaymentColumns = [
     render: (payment) => payment.orderId || "-",
   },
 ];
+
+//------------------------ Doctor Payment Columns -------------
+export const doctorPaymentColumns = [
+  {
+    header: "Paid On",
+    render: (payment) =>
+      new Date(payment.createdAt).toLocaleDateString("en-IN"),
+  },
+
+  {
+    header: "Patient",
+    render: (payment) => (
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
+          <img
+            src={payment.patient?.profilePicture || "/default-avatar.png"}
+            alt={payment.patient?.name || "Doctor"}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-900">
+            {payment.patient?.name || "-"}
+          </span>
+        </div>
+      </div>
+    ),
+  },
+
+  {
+  header: "Amount",
+  render: (payment) => (
+    <span className="font-semibold text-gray-900">
+      ₹{((payment.amount || 0) / 100).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}
+    </span>
+  ),
+},
+
+
+  {
+    header: "Status",
+    render: (payment) => {
+      const statusStyles = {
+        created: "bg-amber-100 text-amber-700",
+        verified: "bg-emerald-100 text-emerald-700",
+        failed: "bg-red-100 text-red-700",
+      };
+
+      const statusLabelMap = {
+        created: "Pending",
+        verified: "Successful",
+        failed: "Failed",
+      };
+
+      return (
+        <span
+          className={`px-3 py-1 text-xs font-semibold rounded-full ${
+            statusStyles[payment.status] || "bg-gray-100 text-gray-600"
+          }`}
+        >
+          {statusLabelMap[payment.status] || "-"}
+        </span>
+      );
+    },
+  },
+
+  {
+    header: "Payment Method",
+    render: (payment) => payment.method || "-",
+  },
+
+  {
+    header: "Order ID",
+    render: (payment) => payment.orderId || "-",
+  },
+];
+

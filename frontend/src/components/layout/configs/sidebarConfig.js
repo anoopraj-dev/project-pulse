@@ -71,11 +71,6 @@ export const doctorSidebarMenu = [
     path: "/doctor/appointments",
   },
   {
-    label: "Consultations",
-    icon: "healthicons:health-worker-form",
-    path: "/doctor/consultations",
-  },
-  {
     label: "Documents",
     icon: "mingcute:folder-fill",
     path: "/doctor/documents",

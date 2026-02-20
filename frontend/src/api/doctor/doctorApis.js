@@ -86,6 +86,12 @@ export const fetchAppointments = () =>{
 }
 
 
+//------------------- PAYMENTS --------------------
+export const fetchDoctorPayments = () =>{
+  return api.get('/api/doctor/payments')
+}
+
+
 
 
 

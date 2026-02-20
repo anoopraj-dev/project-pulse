@@ -7,7 +7,7 @@ export const getDoctorPaymentHistory = async (req, res) => {
     const doctorId = req.user.id;
 
     const payments = await Payment.find({ doctor: doctorId, status: 'verified' })
-      .populate('patient', 'name email')
+      .populate('patient', 'name email profilePicture')
       .populate('appointment', 'appointmentDate timeSlot serviceType status')
       .sort({ createdAt: -1 });
 

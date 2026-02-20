@@ -1,165 +1,378 @@
-import { useState, useEffect } from 'react';
-import { Icon } from '@iconify/react';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Icon } from "@iconify/react";
 import Footer from "../components/layout/components/Footer";
-import Headings from "../components/shared/components/Headings";
-import PrimaryButton from "../components/shared/components/PrimaryButton";
-import SubHeadings from "../components/shared/components/SubHeadings";
-import Subtext from "../components/shared/components/Subtext";
-import { aboutUs, whyChooseUs, welcomeText } from '../constants/homePageData';
+import { aboutUs, whyChooseUs, welcomeText } from "../constants/homePageData";
+import GlobalStyles from "@/components/shared/components/GlobalStyles";
+import DoctorFanCards from "@/components/ui/cards/DoctorFanCards";
+import {
+  scaleIn,
+  staggerContainer,
+  staggerChild,
+  floatY,
+  floatYReverse,
+  pulseRing,
+  hoverLift,
+  hoverLiftSubtle,
+  viewportOnce,
+} from "../utilis/animations";
 
+//----------------- Primary Button -------------------
+const ArrowRight = ({ size = 15 }) => (
+  <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PrimaryBtn = ({ children, onClick }) => (
+  <motion.button
+    onClick={onClick}
+    className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-white"
+    style={{ background: "#0096C7", boxShadow: "0 6px 24px rgba(0,150,199,.35)" }}
+    whileHover={{ backgroundColor: "#007aa3", y: -2, boxShadow: "0 10px 28px rgba(0,150,199,.4)" }}
+    whileTap={{ scale: 0.97 }}
+    transition={{ duration: 0.2 }}
+  >
+    {children}
+  </motion.button>
+);
+
+//---------------- Stats Data ---------------------------
 const statsData = [
-  { label: 'Happy Patients', value: '50K+', icon: 'mdi:account-heart-outline' },
-  { label: 'Expert Doctors', value: '2.5K+', icon: 'mdi:stethoscope' },
-  { label: 'Appointments', value: '1.2M+', icon: 'mdi:calendar-check' },
-  { label: 'Clinics', value: '150+', icon: 'mdi:hospital-building' }
+  { label: "Happy Patients",  value: "50000",   display: "50K+",  icon: "mdi:account-heart-outline" },
+  { label: "Expert Doctors",  value: "2500",    display: "2.5K+", icon: "mdi:stethoscope" },
+  { label: "Appointments",    value: "1200000", display: "1.2M+", icon: "mdi:calendar-check" },
+  { label: "Clinics",         value: "150",     display: "150+",  icon: "mdi:hospital-building" },
 ];
 
+//----------------- Home Page -------------------------
 const Home = () => {
-  const [stats, setStats] = useState(statsData.map(() => 0));
+  const [stats, setStats]         = useState(statsData.map(() => 0));
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 500);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setIsVisible(true), 500);
+    return () => clearTimeout(t);
   }, []);
 
+  //-------------- Stats Animation -------------------
   useEffect(() => {
     if (!isVisible) return;
     let startTime;
-    const animateStats = (time) => {
+    const animate = (time) => {
       if (!startTime) startTime = time;
       const progress = Math.min((time - startTime) / 2000, 1);
-      setStats(statsData.map((stat, i) => {
-        const target = parseInt(stat.value);
-        return Math.floor(target * progress);
-      }));
-      if (progress < 1) requestAnimationFrame(animateStats);
+      setStats(statsData.map((s) => Math.floor(parseInt(s.value) * progress)));
+      if (progress < 1) requestAnimationFrame(animate);
     };
-    requestAnimationFrame(animateStats);
+    requestAnimationFrame(animate);
   }, [isVisible]);
 
+  const formatStat = (val, idx) => {
+    const raw = parseInt(statsData[idx].value);
+    if (val >= raw)       return statsData[idx].display;
+    if (raw >= 1_000_000) return `${(val / 1_000_000).toFixed(1)}M+`;
+    if (raw >= 1_000)     return `${(val / 1_000).toFixed(0)}K+`;
+    return `${val}+`;
+  };
+
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen mt-20">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="h-root min-h-screen bg-slate-50">
+      <GlobalStyles />
 
-        {/* Hero Section */}
-        <section className="relative h-[70vh] md:h-[80vh] w-full px-4 md:px-8">
-          <div className="relative h-full rounded-3xl overflow-hidden shadow-2xl">
-            <img
-              src="/healthcare1.jpg"
-              alt="Healthcare hero"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-            <div className="relative z-10 h-full flex items-center">
-              <div className="max-w-2xl space-y-6 text-white px-6 lg:px-12">
-                <Headings
-                  text={'Care That Fits Your Lifestyle'}
-                  className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white"
-                />
-                <Subtext
-                  text={welcomeText}
-                  className="text-lg md:text-xl text-white/60 "
-                />
-                <PrimaryButton
-                  text="Find your doctor now"
-                  className="w-full sm:w-auto"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* ------------ Hero Section ------------ */}
+      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
 
-        {/* “A Healthier Tomorrow Starts Here” Section */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-12 py-20">
-          <div className="flex flex-col justify-center space-y-6 px-4 md:px-0">
-            <Headings text={'"A Healthier Tomorrow Starts Here"'} className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900" />
-            <Subtext text={welcomeText} className="text-gray-600 text-lg md:text-xl leading-relaxed" />
-            <PrimaryButton text="Find your doctor now" className="w-full md:w-auto" />
-          </div>
-          <div className="flex justify-center items-center">
-            <img
-              src="/banner.webp"
-              alt="Banner"
-              className="w-full max-w-md md:max-w-lg lg:max-w-xl rounded-3xl shadow-2xl object-cover"
-            />
-          </div>
-        </section>
+        <div className="absolute inset-0"
+          style={{ background: "linear-gradient(140deg,#00131e 0%,#002e45 60%,#003f5c 100%)" }} />
 
-        {/* Stats Section */}
-        <section className="py-20">
-          <div className="text-center mb-12">
-            <Headings text="Trusted By Millions" className="text-4xl lg:text-5xl font-black text-gray-900 mb-4" />
-            <Subtext text="Real results from real users" className="text-lg text-gray-600" />
-          </div>
+        <div className="absolute inset-0 opacity-[.035]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
+            backgroundSize: "52px 52px",
+          }} />
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {statsData.map((stat, index) => (
-              <div key={stat.label} className="p-6 bg-white rounded-3xl shadow-xl flex flex-col items-center transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg">
-                  <Icon icon={stat.icon} className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-3xl lg:text-4xl font-black mb-2">
-                  {stats[index] >= parseInt(stat.value) ? stat.value : `${stats[index]}+`}
-                </div>
-                <p className="text-gray-600 font-semibold">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Blobs */}
+        <motion.div
+          className="absolute -top-48 -right-32 w-[700px] h-[700px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)", filter: "blur(72px)" }}
+          {...floatY(14, 7)}
+        />
+        <motion.div
+          className="absolute -bottom-28 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)", filter: "blur(64px)" }}
+          {...floatYReverse(14, 9)}
+        />
 
-        {/* Why Choose Section */}
-        <section className="py-20">
-          <div className="text-center mb-16">
-            <Headings text="Why Pulse360?" className="text-4xl lg:text-6xl font-black text-gray-900 mb-4" />
-            <div className="w-24 h-1 bg-gradient-to-r from-emerald-500 to-teal-600 mx-auto rounded-full" />
-          </div>
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-20 flex items-center justify-between gap-12">
 
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-24">
-            {[
-              { icon: 'mdi:rocket-launch-outline', title: 'Seamless Booking', text: whyChooseUs[0], color: 'from-emerald-500 to-teal-600' },
-              { icon: 'mdi:doctor', title: 'Trusted Doctors', text: whyChooseUs[1], color: 'from-blue-500 to-indigo-600' },
-              { icon: 'mdi:shield-check-outline', title: '24/7 Support', text: whyChooseUs[2], color: 'from-orange-500 to-amber-600' },
-              { icon: 'mdi:lock-outline', title: 'Secure & Private', text: whyChooseUs[3], color: 'from-purple-500 to-pink-600' }
-            ].map((item, i) => (
-              <div key={i} className="flex items-start gap-6 p-6 bg-white rounded-3xl shadow-xl hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 border border-gray-100">
-                <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center shadow-lg`}>
-                  <Icon icon={item.icon} className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <SubHeadings text={item.title} className="text-2xl font-bold mb-2" />
-                  <Subtext text={item.text} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* About Section */}
-        <section className="py-20">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-            <div>
-              <img 
-                src="./connection.webp" 
-                alt="Healthcare connection"
-                className="w-full h-[450px] lg:h-[550px] object-cover rounded-3xl shadow-2xl ring-8 ring-white/50 hover:scale-105 transition-all duration-700"
+          <motion.div
+            className="flex-1 min-w-0 space-y-7"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div
+              variants={staggerChild}
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[11px] font-bold tracking-[.12em] uppercase"
+              style={{ background: "rgba(0,150,199,.12)", borderColor: "rgba(0,150,199,.3)", color: "#48cae4" }}
+            >
+              <motion.span
+                className="w-1.5 h-1.5 rounded-full inline-block"
+                style={{ background: "#0096C7" }}
+                {...pulseRing}
               />
-            </div>
-            <div className="space-y-6">
-              <Headings text="About Our Mission" className="text-4xl lg:text-5xl font-black text-gray-900 leading-tight" />
-              <div className="space-y-4">
-                <div className="p-6 bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50">
-                  <Subtext text={aboutUs[0]} className="text-lg leading-relaxed" />
-                </div>
-                <div className="p-6 bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50">
-                  <Subtext text={aboutUs[1]} className="text-lg leading-relaxed" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+              Modern Healthcare Platform
+            </motion.div>
 
-      </main>
+            <motion.h1 variants={staggerChild}
+              className="h-serif text-5xl md:text-6xl lg:text-[4.25rem] font-bold text-white leading-[1.07]">
+              Care That Fits<br />
+              Your&nbsp;<em className="not-italic" style={{ color: "#48cae4" }}>Lifestyle</em>
+            </motion.h1>
+
+            <motion.p variants={staggerChild}
+              className="text-[1.05rem] leading-relaxed max-w-[480px]"
+              style={{ color: "rgba(255,255,255,.55)" }}>
+              {welcomeText}
+            </motion.p>
+
+            <motion.div variants={staggerChild} className="flex flex-wrap gap-3">
+              <PrimaryBtn>Find your doctor <ArrowRight /></PrimaryBtn>
+              <motion.button
+                className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold"
+                style={{ border: "1.5px solid rgba(255,255,255,.18)", color: "rgba(255,255,255,.65)" }}
+                whileHover={{ backgroundColor: "rgba(255,255,255,0.07)", color: "#fff" }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2 }}
+              >
+                How it works
+              </motion.button>
+            </motion.div>
+
+            <motion.div variants={staggerChild}
+              className="flex gap-10 pt-6 border-t"
+              style={{ borderColor: "rgba(255,255,255,.1)" }}>
+              {[["50K+","Happy Patients"],["2.5K+","Expert Doctors"],["150+","Partner Clinics"]].map(([v,l]) => (
+                <div key={l}>
+                  <div className="h-serif text-2xl font-bold text-white">{v}</div>
+                  <div className="text-[10px] uppercase tracking-widest mt-0.5"
+                    style={{ color: "rgba(255,255,255,.38)" }}>{l}</div>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/*---------- Right card ----------------- */}
+          <motion.div
+  className="hidden lg:flex shrink-0 items-center justify-center"
+  variants={scaleIn}
+  initial="hidden"
+  animate="visible"
+  custom={0.5}
+>
+  <DoctorFanCards />
+</motion.div>
+        </div>
+
+        <div className="h-wave absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={{ width: "100%", height: 60 }}>
+            <path d="M0,60 C480,0 960,0 1440,60 L1440,60 L0,60 Z" fill="#f8fafc" />
+          </svg>
+        </div>
+      </section>
+
+
+      {/* -------------- Healthier tommorow --------------- */}
+      <section className="max-w-6xl mx-auto px-6 lg:px-10 py-20">
+        <div className="grid md:grid-cols-2 gap-14 items-center">
+
+          <motion.div className="space-y-6"
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+            <motion.p variants={staggerChild}
+              className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>
+              Our promise
+            </motion.p>
+            <motion.h2 variants={staggerChild}
+              className="h-serif text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+              A Healthier Tomorrow<br />
+              <em className="not-italic" style={{ color: "#0096C7" }}>Starts Here</em>
+            </motion.h2>
+            <motion.p variants={staggerChild} className="text-slate-500 text-base leading-relaxed">
+              {welcomeText}
+            </motion.p>
+            <motion.div variants={staggerChild}>
+              <PrimaryBtn>Find your doctor <ArrowRight /></PrimaryBtn>
+            </motion.div>
+          </motion.div>
+
+          <motion.div className="relative"
+            variants={scaleIn} initial="hidden" whileInView="visible" viewport={viewportOnce} custom={0.15}>
+            <div className="absolute -top-4 -right-4 w-full h-full rounded-3xl border-2 border-dashed opacity-30 pointer-events-none"
+              style={{ borderColor: "#0096C7" }} />
+            <img src="/banner.webp" alt="Banner"
+              className="relative w-full rounded-3xl object-cover shadow-2xl"
+              style={{ boxShadow: "0 24px 60px rgba(0,150,199,.2)" }} />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ------------- Stats display -------------------- */}
+      <section className="py-20" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+
+          <motion.div className="text-center mb-14 space-y-2"
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+            <motion.p variants={staggerChild}
+              className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>
+              By the numbers
+            </motion.p>
+            <motion.h2 variants={staggerChild}
+              className="h-serif text-3xl md:text-4xl font-bold text-slate-900">
+              Trusted By <em className="not-italic" style={{ color: "#0096C7" }}>Millions</em>
+            </motion.h2>
+            <motion.p variants={staggerChild} className="text-slate-500 text-sm">Real results from real users</motion.p>
+          </motion.div>
+
+          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-5"
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+            {statsData.map((stat, i) => (
+              <motion.div key={stat.label} variants={staggerChild} {...hoverLift}
+                className="bg-white rounded-2xl p-6 text-center border border-slate-100 cursor-default"
+                style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}>
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center transition-all duration-300"
+                  style={{ background: "#ddf1f8" }}>
+                  <Icon icon={stat.icon} style={{ color: "#0096C7", fontSize: "1.5rem" }} />
+                </div>
+                <div className="h-serif text-2xl font-bold text-slate-900">{formatStat(stats[i], i)}</div>
+                <p className="text-xs text-slate-500 mt-1 font-medium">{stat.label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+
+      {/* ----------------- Why Pulse360 */}
+      <section className="max-w-6xl mx-auto px-6 lg:px-10 py-20">
+
+        <motion.div className="text-center mb-12 space-y-2"
+          variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+          <motion.p variants={staggerChild}
+            className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>
+            Our advantages
+          </motion.p>
+          <motion.h2 variants={staggerChild}
+            className="h-serif text-3xl md:text-4xl font-bold text-slate-900">
+            Why <em className="not-italic" style={{ color: "#0096C7" }}>Pulse360?</em>
+          </motion.h2>
+        </motion.div>
+
+        <motion.div className="grid md:grid-cols-2 gap-5"
+          variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+          {[
+            { icon: "mdi:rocket-launch-outline", title: "Seamless Booking",  text: whyChooseUs[0] },
+            { icon: "mdi:doctor",                title: "Trusted Doctors",   text: whyChooseUs[1] },
+            { icon: "mdi:shield-check-outline",  title: "24/7 Support",      text: whyChooseUs[2] },
+            { icon: "mdi:lock-outline",          title: "Secure & Private",  text: whyChooseUs[3] },
+          ].map((item, i) => (
+            <motion.div key={i} variants={staggerChild} {...hoverLift}
+              className="h-why-card flex items-start gap-5 bg-white p-6 rounded-2xl border border-slate-100 cursor-default"
+              style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}>
+              <div className="h-why-icon w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300"
+                style={{ background: "#ddf1f8" }}>
+                <Icon icon={item.icon} style={{ color: "#0096C7", fontSize: "1.5rem" }} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">{item.title}</h3>
+                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">{item.text}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* --------------- About ---------------------- */}
+      <section className="py-20" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+          <div className="grid md:grid-cols-2 gap-14 items-center">
+
+            <motion.div className="relative"
+              variants={scaleIn} initial="hidden" whileInView="visible" viewport={viewportOnce} custom={0}>
+              <div className="absolute -bottom-4 -left-4 w-full h-full rounded-3xl border-2 border-dashed opacity-30 pointer-events-none"
+                style={{ borderColor: "#0096C7" }} />
+              <img src="/connection.webp" alt="Healthcare connection"
+                className="relative w-full rounded-3xl object-cover shadow-2xl"
+                style={{ boxShadow: "0 24px 60px rgba(0,150,199,.18)" }} />
+            </motion.div>
+
+            <motion.div className="space-y-6"
+              variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+              <motion.p variants={staggerChild}
+                className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>
+                Who we are
+              </motion.p>
+              <motion.h2 variants={staggerChild}
+                className="h-serif text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+                About Our <em className="not-italic" style={{ color: "#0096C7" }}>Mission</em>
+              </motion.h2>
+              <motion.div variants={staggerChild} className="space-y-4">
+                {[aboutUs[0], aboutUs[1]].map((text, i) => (
+                  <motion.div key={i} {...hoverLiftSubtle}
+                    className="bg-white p-5 rounded-2xl border border-slate-100"
+                    style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                        style={{ background: "#ddf1f8" }}>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 5l2.5 2.5L8 3" stroke="#0096C7" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <p className="text-sm text-slate-600 leading-relaxed">{text}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+              <motion.div variants={staggerChild}>
+                <PrimaryBtn>Learn more <ArrowRight /></PrimaryBtn>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* -------------------- Footer CTA-------------------- */}
+      <section className="px-6 lg:px-10 py-14">
+        <motion.div
+          className="max-w-6xl mx-auto rounded-3xl px-10 py-12 flex flex-wrap items-center justify-between gap-8"
+          style={{
+            background: "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
+            boxShadow: "0 20px 60px rgba(0,150,199,.28)",
+          }}
+          variants={scaleIn} initial="hidden" whileInView="visible" viewport={viewportOnce} custom={0}
+        >
+          <div>
+            <h2 className="h-serif text-3xl md:text-4xl font-bold text-white leading-tight">
+              Ready to take charge<br />
+              of your <em className="not-italic" style={{ color: "#90e0ef" }}>health?</em>
+            </h2>
+            <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,.5)" }}>
+              Join millions who trust Pulse360 every day.
+            </p>
+          </div>
+          <motion.button
+            className="flex items-center gap-2.5 px-8 py-4 rounded-full font-bold text-sm"
+            style={{ background: "#fff", color: "#0096C7", boxShadow: "0 4px 20px rgba(0,0,0,.12)" }}
+            whileHover={{ y: -2, boxShadow: "0 8px 28px rgba(0,0,0,.18)" }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2 }}
+          >
+            Get Started Now <ArrowRight />
+          </motion.button>
+        </motion.div>
+      </section>
+
       <Footer />
     </div>
   );

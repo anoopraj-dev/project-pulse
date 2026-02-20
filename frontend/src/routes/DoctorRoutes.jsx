@@ -9,6 +9,7 @@ import Navbar from "../components/layout/components/Navbar";
 import DoctorMessages from "../pages/doctor/DoctorMessages";
 import DoctorAvailbility from "@/pages/doctor/DoctorAvailbility";
 import DoctorAppointments from "@/pages/doctor/DoctorAppointments";
+import DoctorPayments from "@/pages/doctor/DoctorPayments";
 
 const DoctorRoutes = [{
   element: (
@@ -24,6 +25,7 @@ const DoctorRoutes = [{
     { path: "/doctor/messages/:id", element: <DoctorMessages /> },
     { path: "/doctor/availability", element: <DoctorAvailbility/> },
     { path: "/doctor/appointments", element: <DoctorAppointments/> },
+    { path: "/doctor/payments", element: <DoctorPayments/> },
   ],
 },
 
