@@ -16,6 +16,7 @@ import {
   hoverLiftSubtle,
   viewportOnce,
 } from "../utilis/animations";
+import Heart from "@/components/ui/3D/Heart";
 
 //----------------- Primary Button -------------------
 const ArrowRight = ({ size = 15 }) => (
@@ -165,13 +166,14 @@ const Home = () => {
 
           {/*---------- Right card ----------------- */}
           <motion.div
-  className="hidden lg:flex shrink-0 items-center justify-center"
+  className="hidden lg:flex shrink-0 items-center justify-center w-[520px] aspect-square"
   variants={scaleIn}
   initial="hidden"
   animate="visible"
   custom={0.5}
 >
-  <DoctorFanCards />
+  
+  <Heart/>
 </motion.div>
         </div>
 
