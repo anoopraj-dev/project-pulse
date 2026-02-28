@@ -29,50 +29,44 @@ const PaymentButton = ({ amount, user, role, doctorId, onSuccess }) => {
           enabled: true,
           max_count: 3,
         },
-        modal: {
-          ondismiss: async function () {
-            await updatePaymentStatus({
-              orderId: order.id,
-              status: "cancelled",
-              notes: "User closed payment popup",
-            });
-            toast("Payment cancelled");
-          },
-        },
+
         handler: async function (response) {
-          //--------------- Verify payment on server ---------------
-          const verifyRes = await verifyRazorpayPayment(
-            {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            },
-            role,
-          );
+          try {
+            //--------------- Verify payment on server ---------------
+            const verifyRes = await verifyRazorpayPayment(
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              },
+              role,
+            );
 
-          if (!verifyRes.data?.success) {
-            toast.error("Paymet verification failed");
-            return;
-          }
+            if (!verifyRes.data?.success) {
+              toast.error("Paymet verification failed");
+              return;
+            }
 
-          //---------------- Update payment Status, Wallet & Transactions -----------------
-          const updateRes = await updatePaymentStatus({
-            orderId: response.razorpay_order_id,
-            status: "verified",
-            notes: "Patient completed payment",
-          });
+            //---------------- Update payment Status, Wallet & Transactions -----------------
+            const updateRes = await updatePaymentStatus({
+              orderId: response.razorpay_order_id,
+              status: "verified",
+              notes: "Patient completed payment",
+            });
 
-          console.log(updateRes);
+            console.log(updateRes);
 
-          if (!updateRes.data?.success)
-            return toast.error("Failed to update Wallet and status");
+            if (!updateRes.data?.success)
+              return toast.error("Failed to update Wallet and status");
 
-          toast.success("Wallet updated");
+            toast.success(`Payment Successful!`);
 
-          toast.success(`Payment Successful!`);
-
-          if (onSuccess) {
-            onSuccess(order.id); //  Controll passed to the parent
+            if (onSuccess) {
+              onSuccess(order.id); //  Controll passed to the parent
+            }
+          } catch (error) {
+            console.log(error);
+            toast.error('Something went wrong during payment')
           }
         },
         prefill: {
@@ -89,6 +83,8 @@ const PaymentButton = ({ amount, user, role, doctorId, onSuccess }) => {
         try {
           await updatePaymentStatus({
             orderId: response.error.metadata.order_id,
+            paymentId:response.error.metadata.payment_id || null,
+            method:response.error.metadata.method || null,
             status: "failed",
             notes: response.error.description,
           });

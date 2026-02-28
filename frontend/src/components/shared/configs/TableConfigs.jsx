@@ -424,12 +424,14 @@ export const patientPaymentColumns = [
         created: "bg-amber-100 text-amber-700",
         verified: "bg-emerald-100 text-emerald-700",
         failed: "bg-red-100 text-red-700",
+        cancelled:'bg-yellow-100 text-yellow-700'
       };
 
       const statusLabelMap = {
         created: "Pending",
         verified: "Successful",
         failed: "Failed",
+        cancelled:'Cancelled'
       };
 
       return (

@@ -119,7 +119,6 @@ export const updatePaymentStatus = async (req, res) => {
       "verified",
       "failed",
       "refunded",
-      "cancelled",
     ];
 
     if (!validStatuses.includes(status)) {
