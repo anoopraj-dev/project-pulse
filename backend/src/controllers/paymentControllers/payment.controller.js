@@ -73,9 +73,12 @@ export const verifyPayment = async (req, res) => {
       {
         paymentId: razorpay_payment_id,
         signature: razorpay_signature,
-        status: paymentDetails.status === 'captured' ? 'verified' :paymentDetails.status,
+        status:
+          paymentDetails.status === "captured"
+            ? "verified"
+            : paymentDetails.status,
         method: paymentDetails.method,
-        notes:`Paid via ${paymentDetails.method}`
+        notes: `Paid via ${paymentDetails.method}`,
       },
       { new: true },
     );
@@ -139,7 +142,23 @@ export const updatePaymentStatus = async (req, res) => {
 
     //--------------- update admin wallet & transactions after successful payment -----------------
 
-    const admin = await Admin.findOne()
+    //---------- Prevent double credit -----------
+    if (payment.status === "verified") {
+      return res.status(200).json({
+        success: true,
+        message: "Payment already processed",
+      });
+    }
+
+    //-------- Only allow crated-- verified --------
+    if (status === "verified" && payment.status !== "created") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid state transition",
+      });
+    }
+
+    const admin = await Admin.findOne();
 
     let adminWallet = await Wallet.findOne({ role: "admin" });
 

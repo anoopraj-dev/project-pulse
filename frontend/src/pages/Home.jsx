@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react";
 import Footer from "../components/layout/components/Footer";
 import { aboutUs, whyChooseUs, welcomeText } from "../constants/homePageData";
 import GlobalStyles from "@/components/shared/components/GlobalStyles";
-import DoctorFanCards from "@/components/ui/cards/DoctorFanCards";
+
 import {
   scaleIn,
   staggerContainer,
@@ -260,7 +260,7 @@ const Home = () => {
             <Heart />
 
             {/* Pulse overlay */}
-            <div className="hidden lg:block absolute left-1/2 right-translate-x-1/2">
+            <div className="hidden lg:block absolute left-1 translate-x-1/2">
               <HeartbeatPulse />
             </div>
           </motion.div>
