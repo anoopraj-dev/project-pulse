@@ -3,6 +3,7 @@ import Doctor from "../../models/doctor.model.js";
 import Availability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
 import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
+import Payment from "../../models/payments.model.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -78,7 +79,7 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
-    const { doctorId, date, time, reason, notes, serviceType } = req.body;
+    const { doctorId, date, time, reason, notes, serviceType,orderId} = req.body;
     const patientId = req.user.id;
 
     // ---------------- Validation ----------------
@@ -94,6 +95,20 @@ export const bookAppointment = async (req, res) => {
         success: false,
         message: "Invalid doctor ID",
       });
+    }
+
+    //--------------- Check payment Verification --------------
+    const payment = await Payment.findOne({
+      orderId,
+      patient:patientId,
+      status:'verified'
+    })
+
+    if(!payment){
+      return res.status(403).json({
+        success:false,
+        message:'Payment not verified'
+      })
     }
 
     const appointmentDate = new Date(date);
@@ -133,6 +148,10 @@ export const bookAppointment = async (req, res) => {
       reason,
       notes,
     });
+
+    //---------------- Link appointment to payment --------------
+    payment.appointment = appointment._id;
+    await payment.save();
 
     return res.status(201).json({
       success: true,

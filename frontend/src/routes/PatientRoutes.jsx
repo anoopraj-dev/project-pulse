@@ -10,6 +10,7 @@ import PatientEditProfile from "../pages/patient/PatientEditProfile";
 import PatientMessages from "../pages/patient/PatientMessages";
 import PatientOnboarding from "../pages/patient/PatientOnboarding";
 import PatientsProfile from "../pages/patient/PatientsProfile";
+import PatientPayments from "@/pages/patient/PatientPayments";
 
 const PatientRoutes = [{
   element: (
@@ -26,6 +27,7 @@ const PatientRoutes = [{
     { path: "/patient/messages", element: <PatientMessages/> },
     { path: "/patient/messages/:id", element: <PatientMessages/>},
     { path: "/patient/appointments", element: <PatientAppointments/>},
+    { path: "/patient/payments", element: <PatientPayments/>},
   ],
 },
 

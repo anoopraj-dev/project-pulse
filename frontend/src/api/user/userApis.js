@@ -1,6 +1,11 @@
 import { api } from "../axiosInstance";
 
 
+//---------------- Get All approved Doctors ----------------
+export const getApprovedDoctors = () => {
+  return api.get('/api/doctors/approved')
+}
+
 // -------------- Generic Search Api ---------------------
 export const searchApi = ({ role,query, type, page = 1, limit = 10 ,filters ={}}) => {
   return api.get(`/api/${role}/search`, {
@@ -51,3 +56,23 @@ export const setAppointmentStatus = (id,role,payload) =>{
   return api.patch(`/api/${role}/appointments/${id}`,payload)
 }
 
+//----------------- Razorpay Payments -----------------
+export const createRazorpayOrder = (amount, role,doctorId) => {
+  return api.post(`/api/${role}/create-order`,{amount,doctorId})
+}
+
+export const verifyRazorpayPayment = (data, role) => {
+  return api.post(`/api/${role}/verify-payment`,data)
+}
+
+//------------ Update payment status and Wallet ---------
+export const updatePaymentStatus = () =>{
+  return api.post('/api/payments/update-status')
+}
+
+//--------------- View payment invoice --------------
+export const getReceipt = async (id,role) =>{
+  return api.get(`/api/${role}/payments/${id}`,{
+    responseType:'blob'
+  })
+}

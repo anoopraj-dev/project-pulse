@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
+import PaymentButton from "@/components/shared/components/PaymentButton";
+import { useUser } from "@/contexts/UserContext";
 import { bookAppointment } from "@/api/patient/patientApis";
 
-const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
+const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   const [formData, setFormData] = useState({
     doctorId: "",
     specialty: "",
@@ -14,9 +16,11 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
     notes: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const user = useUser();
 
+ 
   const hasBookingInfo = !!bookingInfo?.doctorId;
+
 
   //---------- Prefill when bookingInfo exists ----------
   useEffect(() => {
@@ -37,37 +41,6 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
       [name]: value,
       ...(name === "date" ? { time: "" } : {}),
     }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await bookAppointment(formData);
-
-      if (!response.data.success)
-        return toast.error("Failed to book appointment");
-
-      toast.success("Appointment booked successfully!");
-      setActiveTab("upcoming");
-
-      setFormData({
-        doctorId: "",
-        specialty: "",
-        serviceType: "",
-        date: "",
-        time: "",
-        reason: "",
-        notes: "",
-      });
-
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      toast.error("Failed to book appointment");
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   //-------------------- Get available dates ------------
@@ -102,6 +75,31 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
 
   const today = new Date().toISOString().split("T")[0];
 
+  //------------- amount to pay --------------
+  const selectedService = bookingInfo?.services?.find(
+    (s) => s.serviceType === formData.serviceType
+  );
+  const amountToPay = selectedService?.fees;
+
+  //--------------------- Handle Book appointment -------------
+  const handleBooking = async (orderId) => {
+    try {
+        const res = await bookAppointment({...formData,orderId});
+
+        if(res.data?.success){
+            setActiveTab('pending')
+            toast.success("Appointment booked successfully");
+        } else {
+            toast.error("Failed to book appointment");
+        }
+
+    } catch (error) {
+        console.log(error);
+        toast.error("Something went wrong");
+    }
+};
+
+
   return (
     <div className="p-6 sm:p-8">
       <div className="mx-auto max-w-2xl">
@@ -120,7 +118,7 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6">
           {/* Specialty */}
           <div>
             <label
@@ -347,28 +345,20 @@ const BookAppointmentForm = ({ onSuccess, bookingInfo, setActiveTab }) => {
                   notes: "",
                 })
               }
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              className="rounded border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
             >
               Reset
             </button>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                <>
-                  <Icon icon="mdi:loading" className="animate-spin" />
-                  Booking...
-                </>
-              ) : (
-                <>
-                  <Icon icon="mdi:calendar-check" />
-                  Book Appointment
-                </>
-              )}
-            </button>
+            {/* ------------- Payment Button ------------- */}
+            <PaymentButton
+              amount={amountToPay}
+              role='patient'
+              user={user}
+              doctorId={formData.doctorId}
+              onSuccess={(orderId)=>handleBooking(orderId)}
+              
+            />
           </div>
         </form>
       </div>

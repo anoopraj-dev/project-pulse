@@ -5,6 +5,7 @@ import app from './app.js'
 import { initSocket } from './socket.js';
 import { connectDB } from './db/db.js';
 import './config/redis.js'
+import { initBrowser } from './config/puppeteer.js';
 
 
 const port = process.env.PORT || 5000;
@@ -15,6 +16,7 @@ const startServer = async () => {
     await connectDB();
 
     initSocket(server);
+    await initBrowser();
 
     server.listen(port, () => {
       console.log(`Server started on http://localhost:${port}`);
