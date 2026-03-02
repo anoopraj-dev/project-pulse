@@ -455,6 +455,7 @@ export const patientPaymentColumns = [
     header: "Order ID",
     render: (payment) => payment.orderId || "-",
   },
+  
 ];
 
 //------------------------ Doctor Payment Columns -------------
