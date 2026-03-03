@@ -114,8 +114,15 @@ const DoctorAvailability = () => {
     const formattedEndTime = formatMinutesToTime(endMinutes);
     const slotString = `${startTime} - ${formattedEndTime}`;
 
+    //-------------- Check for slot overlap --------------
     const isOverlapping = selectedSlots.some((slot) => {
-      const [existingStart, existingEnd] = slot.time.split(" - ");
+      if (!slot?.time) return false;
+
+      const parts = slot.time.split(" - ");
+      if (parts.length !== 2) return false;
+
+      const [existingStart, existingEnd] = parts;
+
       const existingStartMin = convertToMinutes(existingStart);
       const existingEndMin = convertToMinutes(existingEnd);
 
