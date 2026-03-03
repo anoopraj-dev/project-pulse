@@ -14,7 +14,7 @@ const AnimatedHeart = () => {
 
     // Custom material
     const customMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0a1290f,
+      color: 0x0a9292f,
       emissive: 0x0a192f,
       emissiveIntensity: 0.6,
       roughness: 0.5,

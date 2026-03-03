@@ -194,3 +194,75 @@ export const updatePaymentStatus = async (req, res) => {
       .json({ success: false, message: "Could not update payment" });
   }
 };
+
+
+//--------------------- Retry Payment --------------------
+export const retryPayment = async (req, res) => {
+  try {
+    const { id:paymentId } = req.params;
+
+    const payment = await Payment.findById(paymentId);
+
+    console.log(payment)
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "Payment not found",
+      });
+    }
+
+    //----------- Only failed payments can be retried ----------
+    if (payment.status !== "failed") {
+      return res.status(400).json({
+        success: false,
+        message: "Only failed payments can be retried",
+      });
+    }
+
+    //----------- Maximum 3 retry attempts ----------
+    if (payment.attempts >= 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Maximum retry attempts exceeded",
+      });
+    }
+
+    const now = new Date();
+    const createdAt = new Date(payment.createdAt);
+    const diffInHours = (now - createdAt) / (1000 * 60 * 60);
+
+    //----------- Retry allowed only within 24 hours ----------
+    if (diffInHours > 24) {
+      return res.status(400).json({
+        success: false,
+        message: "Retry window expired (24 hours)",
+      });
+    }
+
+    //------------- Create new Razorpay order ----------------
+    const newOrder = await razorpay.orders.create({
+      amount: payment.amount, // already stored in paise
+      currency: "INR",
+      receipt: `retry_${Date.now()}`,
+    });
+
+    //------------- Update payment record ----------------
+    payment.orderId = newOrder.id;
+    payment.status = "created";
+    payment.attempts += 1;
+    await payment.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Retry order created successfully",
+      order: newOrder,
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Retry failed",
+    });
+  }
+};

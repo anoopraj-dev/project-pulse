@@ -23,7 +23,6 @@ const paymentSchema = new mongoose.Schema(
     orderId: {
       type: String,
       required: true,
-      unique: true,
     },
 
     paymentId: {
@@ -61,6 +60,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    attempts:{
+      type:Number,
+      default:1,
+    }
   },
   { timestamps: true }
 );

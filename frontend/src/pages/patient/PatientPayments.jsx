@@ -3,20 +3,23 @@ import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import DataTable from "../../components/shared/components/DataTable";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
-import { fetchPatientPayments } from "@/api/patient/patientApis"; 
+import { fetchPatientPayments } from "@/api/patient/patientApis";
 import SearchInput from "../../components/shared/components/SearchInput";
 import { fetchSearchSuggestions, getReceipt } from "@/api/user/userApis";
 import { useSearch } from "../../hooks/useSearch";
 import { patientPaymentColumns } from "@/components/shared/configs/TableConfigs";
 import PatientPaymentTabs from "@/components/user/patient/payments/PaymentTabs";
 import { useUser } from "@/contexts/UserContext";
+import { handleRazorpayPayment } from "@/utilis/handleRazorpayPayment";
+import { retryPayment } from "@/api/patient/patientApis";
+import { useNavigate } from "react-router-dom";
 
 const PatientPayments = () => {
-  const [payments,setPayments] = useState(null);
+  const [payments, setPayments] = useState(null);
   const fetchPaymentsAction = useAsyncAction();
-  const [activeTab,setActiveTab] = useState('upcoming')
-  const {role} = useUser();
-
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const { role,user} = useUser();
+  const navigate = useNavigate();
 
   const {
     query,
@@ -27,7 +30,6 @@ const PatientPayments = () => {
     type: "payments",
     role: "patient",
   });
-
 
   //------------- Get all payments -----------------
   const fetchAllPayments = () => {
@@ -64,13 +66,41 @@ const PatientPayments = () => {
     setQuery(item.name);
   };
 
-  //--------------- View Payments --------------
-  const handleView = async(id) => {
-    console.log(id)
-    const res = await getReceipt(id,role)
+  //--------------- View / Retry Payments --------------
+  const handleAction = async (id, type) => {
+    //-------------------- Retry Payment --------------------
+    if (type === "retry") {
+  try {
+    const response = await retryPayment(id);
 
-    const url = window.URL.createObjectURL(res.data);
-    window.open(url)
+    if (!response.data?.success) {
+      return toast.error(response.data?.message || "Retry failed");
+    }
+
+    const order = response.data.order;
+
+    await handleRazorpayPayment({
+      order,
+      role,
+      user, 
+      onSuccess: () => {
+        fetchAllPayments(); // refresh table
+      },
+      onFailure: () => {
+        navigate('/patient/payments'); // navigate to payments
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    toast.error(error.response?.data?.message || "Retry failed");
+  }
+} else {
+      //-------------------- View Receipt --------------------
+      const res = await getReceipt(id, role);
+
+      const url = window.URL.createObjectURL(res.data);
+      window.open(url);
+    }
   };
 
   const filteredPayments = payments?.filter((payment) => {
@@ -82,7 +112,7 @@ const PatientPayments = () => {
       return payment?.status === "failed";
     } else if (activeTab === "refunds") {
       return payment?.status === "refunded";
-    } 
+    }
     return true;
   });
 
@@ -94,8 +124,6 @@ const PatientPayments = () => {
     }
     return true;
   });
-
-
 
   useEffect(() => {}, [activeTab]);
 
@@ -212,11 +240,11 @@ const PatientPayments = () => {
           </div>
 
           <div className="px-2 py-3 sm:px-4">
-            { filteredPayments && filteredPayments.length > 0 ? (
+            {filteredPayments && filteredPayments.length > 0 ? (
               <DataTable
                 data={displayedPayments}
                 columns={patientPaymentColumns}
-                onView={(id) => handleView(id)}
+                onView={handleAction}
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">

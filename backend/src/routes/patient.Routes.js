@@ -11,7 +11,7 @@ import { getPatientNotifications } from "../controllers/patientControllers/notif
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 import { bookAppointment, getAllAppointments, getBookingInfo, setAppointmentStatus } from "../controllers/patientControllers/appointments.controller.js";
-import { createOrder, updatePaymentStatus, verifyPayment } from "../controllers/paymentControllers/payment.controller.js";
+import { createOrder, retryPayment, updatePaymentStatus, verifyPayment } from "../controllers/paymentControllers/payment.controller.js";
 import { getPatientPaymentHistory } from "../controllers/patientControllers/paymentHistory.controller.js";
 import { viewReceipt } from "../controllers/userControllers/receipt.controller.js";
 
@@ -53,5 +53,6 @@ router.get('/payments',getPatientPaymentHistory)
 
 router.patch('/payment-status',updatePaymentStatus)
 router.get(`/payments/:id`, viewReceipt)
+router.post('/payments/retry/:id',retryPayment)
 
 export default router;
