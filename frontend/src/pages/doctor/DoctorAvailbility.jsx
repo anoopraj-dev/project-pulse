@@ -2,53 +2,27 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { startOfDay, isBefore, startOfWeek, addDays, format } from "date-fns";
+import { startOfDay, isBefore, addDays, format } from "date-fns";
 import { saveAvailability, getAvailability } from "../../api/doctor/doctorApis";
 import toast from "react-hot-toast";
 
-/* ------------------ SLOT GENERATOR ------------------ */
-const generateTimeSlots = () => {
-  const slots = [];
-  const startMinutes = 9 * 60;
-  const endMinutes = 17 * 60;
-
-  let current = startMinutes;
-
-  while (current + 30 <= endMinutes) {
-    const startH = String(Math.floor(current / 60)).padStart(2, "0");
-    const startM = String(current % 60).padStart(2, "0");
-
-    const endSlot = current + 30;
-    const endH = String(Math.floor(endSlot / 60)).padStart(2, "0");
-    const endM = String(endSlot % 60).padStart(2, "0");
-
-    slots.push(`${startH}:${startM} - ${endH}:${endM}`);
-
-    current += 45;
-  }
-
-  return slots;
-};
-
-const TIME_SLOTS = generateTimeSlots();
-
-/* ------------------ COMPONENT ------------------ */
-const DoctorAvailbility = () => {
+const DoctorAvailability = () => {
   const today = startOfDay(new Date());
-  const tomorrow = addDays(today, 1);
-
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
-  const weekEnd = addDays(weekStart, 5);
+  const lastAllowedDate = addDays(today, 7);
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [availabilityMap, setAvailabilityMap] = useState({});
   const [loading, setLoading] = useState(true);
 
+  const [startTime, setStartTime] = useState("");
+  const [duration, setDuration] = useState(30);
+
   const dateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : null;
   const selectedSlots = availabilityMap[dateKey] || [];
 
-  /* ------------------ FETCH ON LOAD ------------------ */
+  // ------------------ FETCH ------------------
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
@@ -80,7 +54,7 @@ const DoctorAvailbility = () => {
     fetchAvailability();
   }, []);
 
-  /* ------------------ HIGHLIGHT DATES ------------------ */
+  // ------------------ HIGHLIGHT ------------------
   const highlightedDates = useMemo(
     () =>
       Object.keys(availabilityMap)
@@ -89,53 +63,111 @@ const DoctorAvailbility = () => {
     [availabilityMap],
   );
 
-  /* ------------------ HANDLE DATE SELECT ------------------ */
+  // ------------------ DATE SELECT ------------------
   const handleDateSelect = (date) => {
     if (!date) return;
 
     const selected = startOfDay(date);
 
-    if (
-      selected.getTime() === today.getTime() ||
-      selected.getTime() === tomorrow.getTime()
-    ) {
-      toast.error("Availability can only be set 48 hours in advance.");
+    if (selected.getTime() === today.getTime()) {
+      toast.error("Availability must be set 24 hours in advance.");
       return;
     }
 
-    if (isBefore(selected, today) || selected > weekEnd) {
+    if (isBefore(selected, today)) return;
+
+    if (selected > lastAllowedDate) {
+      toast.error("You can only set availability for the next 7 days");
       return;
     }
 
     setSelectedDate(date);
   };
 
-  /* ------------------ TOGGLE SLOT ------------------ */
-  const toggleSlot = (time) => {
-    if (!dateKey) return;
-
-    setAvailabilityMap((prev) => {
-      const currentSlots = prev[dateKey] || [];
-
-      const exists = currentSlots.find((s) => s.time === time);
-      if (exists) {
-        if (!exists.isBooked) {
-          return {
-            ...prev,
-            [dateKey]: currentSlots.filter((s) => s.time !== time),
-          };
-        }
-        return prev;
-      }
-
-      return {
-        ...prev,
-        [dateKey]: [...currentSlots, { time, isBooked: false }],
-      };
-    });
+  // ------------------ HELPERS ------------------
+  const convertToMinutes = (time) => {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
   };
 
-  /* ------------------ SAVE ------------------ */
+  const formatMinutesToTime = (mins) => {
+    const h = String(Math.floor(mins / 60)).padStart(2, "0");
+    const m = String(mins % 60).padStart(2, "0");
+    return `${h}:${m}`;
+  };
+
+  // ------------------ ADD SLOT ------------------
+  const addSlot = () => {
+    if (!dateKey || !startTime) {
+      toast.error("Select start time");
+      return;
+    }
+
+    const startMinutes = convertToMinutes(startTime);
+    const endMinutes = startMinutes + duration;
+
+    if (endMinutes > 24 * 60) {
+      toast.error("Invalid duration");
+      return;
+    }
+
+    const formattedEndTime = formatMinutesToTime(endMinutes);
+    const slotString = `${startTime} - ${formattedEndTime}`;
+
+    //-------------- Check for slot overlap --------------
+    const isOverlapping = selectedSlots.some((slot) => {
+      if (!slot?.time) return false;
+
+      const parts = slot.time.split(" - ");
+      if (parts.length !== 2) return false;
+
+      const [existingStart, existingEnd] = parts;
+
+      const existingStartMin = convertToMinutes(existingStart);
+      const existingEndMin = convertToMinutes(existingEnd);
+
+      return startMinutes < existingEndMin && endMinutes > existingStartMin;
+    });
+
+    if (isOverlapping) {
+      toast.error("Slot overlaps with existing slot");
+      return;
+    }
+
+    const newSlot = {
+      time: slotString,
+      isBooked: false,
+    };
+
+    const updatedSlots = [...selectedSlots, newSlot].sort((a, b) => {
+      const [aStart] = a.time.split(" - ");
+      const [bStart] = b.time.split(" - ");
+      return convertToMinutes(aStart) - convertToMinutes(bStart);
+    });
+
+    setAvailabilityMap((prev) => ({
+      ...prev,
+      [dateKey]: updatedSlots,
+    }));
+
+    setStartTime("");
+    setDuration(30);
+  };
+
+  // ------------------ REMOVE SLOT ------------------
+  const removeSlot = (index) => {
+    if (selectedSlots[index].isBooked) return;
+
+    const updated = [...selectedSlots];
+    updated.splice(index, 1);
+
+    setAvailabilityMap((prev) => ({
+      ...prev,
+      [dateKey]: updated,
+    }));
+  };
+
+  // ------------------ SAVE ------------------
   const handleSave = async () => {
     const payload = Object.entries(availabilityMap).map(([date, slots]) => ({
       date,
@@ -158,7 +190,7 @@ const DoctorAvailbility = () => {
     }
   };
 
-  /* ------------------ UI ------------------ */
+  // ------------------ UI ------------------
   if (loading) {
     return (
       <div className="p-6">
@@ -169,7 +201,6 @@ const DoctorAvailbility = () => {
 
   return (
     <div className="min-h-screen p-6">
-      {/* ------------------ HEADER ------------------ */}
       <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
         <div className="mx-auto max-w-4xl px-4 pb-6 pt-20">
           <div className="flex flex-col gap-2">
@@ -187,68 +218,85 @@ const DoctorAvailbility = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ------------------ CALENDAR ------------------ */}
-        <Card className="bg-white border border-slate-200 rounded-2xl shadow-sm">
+        <Card>
           <CardContent className="p-4">
-            <p className="text-slate-700 mb-3 font-medium">
-              Select Date (Till Saturday)
-            </p>
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
-              modifiers={{
-                hasAvailability: highlightedDates,
-              }}
+              modifiers={{ hasAvailability: highlightedDates }}
               modifiersClassNames={{
                 hasAvailability:
                   "bg-yellow-200 text-yellow-900 font-semibold rounded-md",
               }}
-              className="rounded-xl"
             />
           </CardContent>
         </Card>
 
-        {/* ------------------ TIME SLOTS ------------------ */}
-        <Card className="bg-white border border-slate-200 rounded-2xl shadow-sm">
-          <CardContent className="p-4">
-            <p className="text-slate-700 mb-3 font-medium">Select Time Slots</p>
-
+        <Card>
+          <CardContent className="p-4 space-y-4">
             {!selectedDate ? (
-              <p className="text-slate-400">Select a date to manage slots</p>
+              <p className="text-slate-400">Select a date</p>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {TIME_SLOTS.map((slot) => {
-                  const slotObj = selectedSlots.find((s) => s.time === slot);
+              <>
+                <div>
+                  <label className="text-sm font-medium">Start Time</label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    min="09:00"
+                    max="17:00"
+                    step={300}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full border rounded px-3 py-2 mt-1"
+                  />
+                </div>
 
-                  return (
-                    <Button
-                      key={slot}
-                      variant="outline"
-                      onClick={() => toggleSlot(slot)}
-                      disabled={slotObj?.isBooked}
-                      className={`rounded-xl transition-all ${
-                        slotObj
-                          ? "bg-yellow-200 text-yellow-900 border-yellow-200"
-                          : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
-                      }`}
+                <div>
+                  <label className="text-sm font-medium">
+                    Duration: {duration} mins
+                  </label>
+                  <Slider
+                    min={10}
+                    max={120}
+                    step={5}
+                    value={[duration]}
+                    onValueChange={(val) => setDuration(val[0])}
+                  />
+                </div>
+
+                <Button onClick={addSlot} className="w-full">
+                  Add Slot
+                </Button>
+
+                <div className="space-y-2">
+                  {selectedSlots.map((slot, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between items-center bg-slate-100 rounded px-3 py-2"
                     >
-                      {slot}
-                    </Button>
-                  );
-                })}
-              </div>
+                      <span>{slot.time}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={slot.isBooked}
+                        onClick={() => removeSlot(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* ------------------ SAVE BUTTON ------------------ */}
       <div className="mt-6">
         <Button
           disabled={Object.keys(availabilityMap).length === 0}
           onClick={handleSave}
-          className="rounded-xl px-6 bg-[#0096C7] text-white hover:bg-[#0077A3] disabled:opacity-50"
         >
           Save Weekly Availability
         </Button>
@@ -257,4 +305,4 @@ const DoctorAvailbility = () => {
   );
 };
 
-export default DoctorAvailbility;
+export default DoctorAvailability;
