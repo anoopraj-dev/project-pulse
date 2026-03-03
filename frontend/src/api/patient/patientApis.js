@@ -83,4 +83,8 @@ export const updatePaymentStatus = (data) =>{
   return api.patch(`/api/patient/payment-status`,data)
 }
 
+export const retryPayment = (id) => {
+  return api.post(`/api/patient/payments/retry/${id}`)
+}
+
 

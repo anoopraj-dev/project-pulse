@@ -4,6 +4,8 @@ const DataTable = ({
   onView,
   emptyMessage = "No data available",
 }) => {
+  const failedPayments = data.filter((d) => d.status === "failed");
+  console.log(failedPayments);
   return (
     <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl">
       <div className="overflow-auto max-h-[70vh]">
@@ -22,8 +24,8 @@ const DataTable = ({
                     col.align === "center"
                       ? "text-center"
                       : col.align === "right"
-                      ? "text-right"
-                      : "text-left"
+                        ? "text-right"
+                        : "text-left"
                   }`}
                 >
                   {col.header}
@@ -59,8 +61,8 @@ const DataTable = ({
                         col.align === "center"
                           ? "text-center"
                           : col.align === "right"
-                          ? "text-right"
-                          : "text-left"
+                            ? "text-right"
+                            : "text-left"
                       }`}
                     >
                       {col.render(row, index)}
@@ -69,12 +71,21 @@ const DataTable = ({
 
                   {onView && (
                     <td className="px-6 py-5 text-right">
-                      <button
-                        onClick={() => onView(row._id)}
-                        className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none"
-                      >
-                        View
-                      </button>
+                      {row.status === "failed" ? (
+                        <button
+                          onClick={() => onView(row._id, "retry")}
+                          className="text-red-600 hover:text-red-700 font-semibold hover:underline"
+                        >
+                          Retry
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => onView(row._id, "view")}
+                          className="text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                        >
+                          View
+                        </button>
+                      )}
                     </td>
                   )}
                 </tr>
