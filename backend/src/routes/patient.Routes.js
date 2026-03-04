@@ -10,7 +10,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { getPatientNotifications } from "../controllers/patientControllers/notifications.controller.js";
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
-import { bookAppointment, getAllAppointments, getBookingInfo, setAppointmentStatus } from "../controllers/patientControllers/appointments.controller.js";
+import { bookAppointment, cancelAppointment, getAllAppointments, getAppointmentById, getBookingInfo } from "../controllers/patientControllers/appointments.controller.js";
 import { createOrder, retryPayment, updatePaymentStatus, verifyPayment } from "../controllers/paymentControllers/payment.controller.js";
 import { getPatientPaymentHistory } from "../controllers/patientControllers/paymentHistory.controller.js";
 import { viewReceipt } from "../controllers/userControllers/receipt.controller.js";
@@ -44,7 +44,8 @@ router.get('/conversations', getAllConversations)
 router.get(`/doctor/:id/booking-info`,getBookingInfo)
 router.post('/appointments/book-appointment',bookAppointment);
 router.get('/appointments',getAllAppointments)
-router.patch('/appointments/:id', setAppointmentStatus)
+router.get('/appointments/:id',getAppointmentById)
+router.patch('/appointments/:id', cancelAppointment)
 
 //---------------- payments --------------
 router.post('/create-order',createOrder);
