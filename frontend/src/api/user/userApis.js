@@ -57,8 +57,8 @@ export const setAppointmentStatus = (id,role,payload) =>{
 }
 
 //----------------- Razorpay Payments -----------------
-export const createRazorpayOrder = (amount, role,doctorId) => {
-  return api.post(`/api/${role}/create-order`,{amount,doctorId})
+export const createRazorpayOrder = (payload) => {
+  return api.post(`/api/${payload.role}/create-order`,payload)
 }
 
 export const verifyRazorpayPayment = (data, role) => {

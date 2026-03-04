@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import DataTable from "../../components/shared/components/DataTable";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
-import { fetchPatientPayments } from "@/api/patient/patientApis";
+import { bookAppointment, fetchPatientPayments } from "@/api/patient/patientApis";
 import SearchInput from "../../components/shared/components/SearchInput";
 import { fetchSearchSuggestions, getReceipt } from "@/api/user/userApis";
 import { useSearch } from "../../hooks/useSearch";
@@ -18,7 +18,7 @@ const PatientPayments = () => {
   const [payments, setPayments] = useState(null);
   const fetchPaymentsAction = useAsyncAction();
   const [activeTab, setActiveTab] = useState("upcoming");
-  const { role,user} = useUser();
+  const { role, user } = useUser();
   const navigate = useNavigate();
 
   const {
@@ -70,31 +70,46 @@ const PatientPayments = () => {
   const handleAction = async (id, type) => {
     //-------------------- Retry Payment --------------------
     if (type === "retry") {
-  try {
-    const response = await retryPayment(id);
+      try {
+        const response = await retryPayment(id);
 
-    if (!response.data?.success) {
-      return toast.error(response.data?.message || "Retry failed");
-    }
+        if (!response.data?.success) {
+          return toast.error(response.data?.message || "Retry failed");
+        }
 
-    const order = response.data.order;
+        const order = response.data.order;
+        const bookingData = response.data.bookingData
 
-    await handleRazorpayPayment({
-      order,
-      role,
-      user, 
-      onSuccess: () => {
-        fetchAllPayments(); // refresh table
-      },
-      onFailure: () => {
-        navigate('/patient/payments'); // navigate to payments
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    toast.error(error.response?.data?.message || "Retry failed");
-  }
-} else {
+        console.log(bookingData)
+
+        await handleRazorpayPayment({
+          order,
+          role,
+          user,
+          onSuccess: async() => {
+            try {
+                await bookAppointment({
+                  ...bookingData,
+                  orderId: order.id,
+                });
+                toast.success('Appointment booked successfully')
+                fetchAllPayments(); // refresh table
+            } catch (error) {
+              console.log(error);
+              toast.error('Appointment booking failed')
+              
+            }
+           
+          },
+          onFailure: () => {
+            navigate("/patient/payments"); // navigate to payments
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        toast.error(error.response?.data?.message || "Retry failed");
+      }
+    } else {
       //-------------------- View Receipt --------------------
       const res = await getReceipt(id, role);
 

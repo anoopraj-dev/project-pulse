@@ -87,7 +87,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
         const res = await bookAppointment({...formData,orderId});
 
         if(res.data?.success){
-            setActiveTab('pending')
+            setActiveTab('confirmed')
             toast.success("Appointment booked successfully");
         } else {
             toast.error("Failed to book appointment");
@@ -356,6 +356,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
               role='patient'
               user={user}
               doctorId={formData.doctorId}
+              bookingData={formData}
               onSuccess={(orderId)=>handleBooking(orderId)}
               
             />

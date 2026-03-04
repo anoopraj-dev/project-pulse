@@ -12,11 +12,12 @@ const razorpay = new Razorpay({
 
 //--------------- Create Razorpay Order --------------
 export const createOrder = async (req, res) => {
-  const { amount, doctorId } = req.body;
-
+  console.log(req.body)
+  const { amount, doctorId,date,time,serviceType,reason,notes} = req.body;
+  
   try {
     const options = {
-      amount: amount * 100, // ------- convert to paise
+      amount: amount * 100, // ------- convert to paise 
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
@@ -31,6 +32,15 @@ export const createOrder = async (req, res) => {
       currency: order.currency,
       receipt: order.receipt,
       status: "created",
+      attempts:0,
+      bookingData: {
+        doctorId,
+        date,
+        time,
+        serviceType,
+        reason,
+        notes,
+      }
     });
 
     res.status(200).json({
@@ -203,7 +213,6 @@ export const retryPayment = async (req, res) => {
 
     const payment = await Payment.findById(paymentId);
 
-    console.log(payment)
     if (!payment) {
       return res.status(404).json({
         success: false,
@@ -248,7 +257,6 @@ export const retryPayment = async (req, res) => {
 
     //------------- Update payment record ----------------
     payment.orderId = newOrder.id;
-    payment.status = "created";
     payment.attempts += 1;
     await payment.save();
 
@@ -256,6 +264,7 @@ export const retryPayment = async (req, res) => {
       success: true,
       message: "Retry order created successfully",
       order: newOrder,
+      bookingData:payment.bookingData
     });
 
   } catch (error) {

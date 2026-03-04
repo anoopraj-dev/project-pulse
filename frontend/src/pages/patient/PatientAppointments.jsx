@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
 import DataTable from "../../components/shared/components/DataTable";
@@ -11,14 +11,13 @@ import { useSearch } from "../../hooks/useSearch";
 import { fetchSearchSuggestions } from "../../api/user/userApis";
 import BookAppointmentForm from "@/components/user/patient/appointments/BookAppointmentForm";
 import { fetchAppointments, getBookingInfo } from "@/api/patient/patientApis";
-import { useModal } from "@/contexts/ModalContext";
-import { AppointmentsActionModal } from "@/components/ui/modals/ModalInputs";
+
 
 const PatientAppointments = () => {
   const [appointments, setAppointments] = useState(null);
   const [bookingInfo, setBookingInfo] = useState(null);
   const fetchAppointmentsAction = useAsyncAction();
-  const { openModal } = useModal();
+  const navigate= useNavigate();
 
   const {
     query,
@@ -71,28 +70,19 @@ const PatientAppointments = () => {
     setQuery(item.name);
   };
 
-  //--------------- View Appointment --------------
-  const handleView = (id) => {
-    const appointment = displayedAppointments.find((a) => a._id === id);
-    openModal("Choose Appointment Status", AppointmentsActionModal, {
-      appointment,
-      id: appointment._id,
-      role: "patient",
-    });
-  };
+  //-------------- View Appointment ----------------
+  const handleView = (id) =>{
+    navigate(`/patient/appointments/${id}`)
+  }
 
   const filteredAppointments = appointments?.filter((appointment) => {
     if (activeTab === "upcoming") {
       return appointment?.status === "confirmed";
     } else if (activeTab === "history") {
       return appointment?.status === "completed";
-    } else if (activeTab === "pending") {
-      return appointment?.status === "pending";
     } else if (activeTab === "cancelled") {
       return appointment?.status === "cancelled";
-    } else if (activeTab === "expired") {
-      return appointment?.status === "expired";
-    }
+    } 
     return true;
   });
 

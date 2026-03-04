@@ -74,6 +74,14 @@ export const fetchAppointments = () => {
   return api.get('/api/patient/appointments')
 }
 
+export const viewAppointmentDetails = (id) => {
+  return api.get(`/api/patient/appointments/${id}`)
+}
+
+export const cancelAppointment = (id) => {
+  return api.patch(`/api/patient/appointments/${id}`)
+}
+
 //--------------- Fetch Payments ---------------------
 export const fetchPatientPayments = () =>{
   return api.get('/api/patient/payments')

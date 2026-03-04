@@ -5,11 +5,13 @@ import { createRazorpayOrder } from "@/api/user/userApis";
 import { handleRazorpayPayment } from "@/utilis/handleRazorpayPayment";
 import { useNavigate } from "react-router-dom";
 
-const PaymentButton = ({ amount, user, role, doctorId, onSuccess }) => {
+const PaymentButton = ({ amount, user, role,doctorId, bookingData, onSuccess }) => {
   const navigate = useNavigate();
+
   const handlePayment = async () => {
     try {
-      const response = await createRazorpayOrder(amount, role, doctorId);
+      console.log('bookingData',bookingData)
+      const response = await createRazorpayOrder({amount, role,doctorId,...bookingData});
 
       if (!response.data?.success) {
         return toast.error("Failed to create order");
