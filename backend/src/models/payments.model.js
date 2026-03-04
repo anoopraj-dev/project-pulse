@@ -20,6 +20,15 @@ const paymentSchema = new mongoose.Schema(
       default: null,
     },
 
+    bookingData: {
+      doctorId: mongoose.Schema.Types.ObjectId,
+      date: Date,
+      time: String,
+      serviceType: String,
+      reason: String,
+      notes: String,
+    },
+
     orderId: {
       type: String,
       required: true,
@@ -47,25 +56,25 @@ const paymentSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["created", "verified", "failed","refunded"],
+      enum: ["created", "verified", "failed", "refunded"],
       default: "created",
     },
 
     method: {
       type: String,
-      default: null, 
+      default: null,
     },
 
     receipt: {
       type: String,
       default: null,
     },
-    attempts:{
-      type:Number,
-      default:1,
-    }
+    attempts: {
+      type: Number,
+      default: 1,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Payment", paymentSchema);

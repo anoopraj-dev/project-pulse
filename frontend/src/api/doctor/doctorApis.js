@@ -26,10 +26,7 @@ export const submitDoctorServicesInfo = (formData) => {
 
 // -------- Fetch doctor profile --------
 export const fetchDoctorProfile = () => {
-  // if (id) {
 
-  //   return api.get(`/api/admin/doctor/${id}`);  // Admin reviewing doctor profile
-  // }
     return api.get("/api/doctor/profile");  // Doctor viewing own profile
 };
 
@@ -85,6 +82,23 @@ export const fetchAppointments = () =>{
   return api.get('/api/doctor/appointments')
 }
 
+export const viewAppointmentDetails = (id) =>{
+  return api.get(`/api/doctor/appointments/${id}`)
+}
+
+
+export const cancelAppointment = (id,reason) => {
+  return api.patch(`/api/doctor/appointments/${id}`,reason)
+}
+
+//-------------------- VIEW PATIENT PROFILE ------------------
+export const viewPatientProfile = (id) => {
+  return api.get(`/api/doctor/appointments/patient-profile/${id}`)
+}
+
+export const getPatientMedicalRecords = () =>{
+  return api.get(`/api/doctor/appointments/patient-records`)
+}
 
 //------------------- PAYMENTS --------------------
 export const fetchDoctorPayments = () =>{

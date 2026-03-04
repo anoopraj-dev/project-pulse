@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Doctor from "../../models/doctor.model.js";
-import Availability from "../../models/availability.model.js";
+import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
 import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
 import Payment from "../../models/payments.model.js";
@@ -40,7 +40,7 @@ export const getBookingInfo = async (req, res) => {
     }));
 
     // -------- Get ALL availability documents --------
-    const availabilityDocs = await Availability.find({
+    const availabilityDocs = await DoctorAvailability.find({
       doctorId: doctor._id,
     }).lean();
 
@@ -84,6 +84,7 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
+    console.log(req.body)
     const { doctorId, date, time, reason, notes, serviceType, orderId } =
       req.body;
     const patientId = req.user.id;
@@ -109,6 +110,7 @@ export const bookAppointment = async (req, res) => {
       patient: patientId,
       status: "verified",
     });
+    
 
     if (!payment) {
       return res.status(403).json({
@@ -116,6 +118,13 @@ export const bookAppointment = async (req, res) => {
         message: "Payment not verified",
       });
     }
+
+    if (payment.appointment) {
+  return res.status(400).json({
+    success: false,
+    message: "Appointment already created for this payment",
+  });
+}
 
     const appointmentDate = new Date(date);
 
@@ -281,7 +290,7 @@ export const cancelAppointment = async (req, res) => {
     const appointmentDate = new Date(appointment.appointmentDate);
     appointmentDate.setUTCHours(0, 0, 0, 0);
 
-    await Availability.updateOne(
+    await DoctorAvailability.updateOne(
       {
         doctorId: appointment.doctor,
         date: appointmentDate,

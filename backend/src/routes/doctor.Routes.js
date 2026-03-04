@@ -18,8 +18,9 @@ import {getDoctorNotifications} from '../controllers/doctorControllers/notificat
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 import { getAvailability, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
-import { getAllAppointments, setAppointmentStatus } from "../controllers/doctorControllers/appointments.controller.js";
+import { cancelAppointment, getAllAppointments, getDoctorAppointmentById } from "../controllers/doctorControllers/appointments.controller.js";
 import { getDoctorPaymentHistory } from "../controllers/doctorControllers/paymentHistory.controller.js";
+import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient.controller.js";
 
 const router = Router();
 
@@ -70,7 +71,9 @@ router.post('/availability',saveAvailability)
 
 //------------ appointments-------------
 router.get('/appointments',getAllAppointments)
-router.patch('/appointments/:id',setAppointmentStatus)
+router.get('/appointments/:id',getDoctorAppointmentById)
+router.patch('/appointments/:id',cancelAppointment)
+router.get('/appointments/patient-profile/:id',viewPatientProfile)
 
 //----------------- payments ----------------
 router.get('/payments',getDoctorPaymentHistory)

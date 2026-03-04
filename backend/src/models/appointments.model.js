@@ -1,23 +1,5 @@
 import mongoose from "mongoose";
 
-const rescheduleHistorySchema = new mongoose.Schema(
-  {
-    oldDate: Date,
-    oldTimeSlot: String,
-    newDate: Date,
-    newTimeSlot: String,
-    changedBy: {
-      type: String,
-      enum: ["doctor", "patient", "admin"],
-    },
-    reason: String,
-    changedAt: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  { _id: false },
-);
 
 const appointmentSchema = new mongoose.Schema(
   {
@@ -70,8 +52,10 @@ const appointmentSchema = new mongoose.Schema(
       enum: ["patient", "doctor", "admin", null],
       default: null,
     },
-
-    rescheduleHistory: [rescheduleHistorySchema],
+    cancellationReason:{
+      type: String,
+      default:''
+    },
 
     isActive: {
       type: Boolean,

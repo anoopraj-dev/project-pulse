@@ -26,7 +26,7 @@ export const handleRazorpayPayment = async ({
 
     modal: {
       ondismiss: function () {
-        toast.error("Payment failed");
+        toast.error("Payment cancelled!");
       },
     },
 

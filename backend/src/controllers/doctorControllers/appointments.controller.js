@@ -1,5 +1,6 @@
 import Appointment from "../../models/appointments.model.js";
-import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
+import DoctorAvailability from '../../models/availability.model.js'
+import mongoose from "mongoose";
 
 //---------------- Get all appointments --------------
 export const getAllAppointments = async (req, res) => {
@@ -54,31 +55,26 @@ export const getAllAppointments = async (req, res) => {
   }
 };
 
-//------------------------- Set Appointments Status --------------------
-export const setAppointmentStatus = async (req, res) => {
+
+export const getDoctorAppointmentById = async (req, res) => {
   try {
-    const { id: appointmentId } = req.params;
-    const { status } = req.body;
+    const { id } = req.params;
+    const doctorId = req.user.id; // logged-in doctor
 
-    const mapAppointmentActionToStatus = (action) => {
-      const actionMap = {
-        confirm: "confirmed",
-        cancel: "cancelled",
-        "re-schedule": "pending",
-        complete: "completed",
-      };
-
-      return actionMap[action] || null;
-    };
-
-    if (!appointmentId) {
+    // -------- Validate ID --------
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
-        message: "Appointment ID missing",
+        message: "Invalid appointment ID",
       });
     }
 
-    const appointment = await Appointment.findById(appointmentId);
+    // -------- Find appointment belonging to doctor --------
+    const appointment = await Appointment.findOne({
+      _id: id,
+      doctor: doctorId, 
+    })
+      .populate("patient", "name email profilePicture")
 
     if (!appointment) {
       return res.status(404).json({
@@ -87,33 +83,104 @@ export const setAppointmentStatus = async (req, res) => {
       });
     }
 
-    //------------- Restrict actions within 24 hours to appointment---------
-    if (!isAppointmentActionAllowed(appointment)) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment changes are not allowed within 24 hours.",
-      });
-    }
-
-    const mappedStatus = mapAppointmentActionToStatus(status);
-
-    //------------- Update appointment status -------------------------------
-    appointment.status = mappedStatus;
-    if (mappedStatus === "cancelled") {
-      appointment.cancelledBy = "doctor";
-    }
-    await appointment.save();
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Action updated successfully",
       appointment,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to update action",
+      message: "Server error",
+    });
+  }
+};
+
+
+
+export const cancelAppointment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const doctorId = req.user?.id; 
+    
+    console.log(req.body)
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment ID is required",
+      });
+    }
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Cancellation reason is required",
+      });
+    }
+
+    const appointment = await Appointment.findById(id);
+
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+   
+    if (appointment.doctor.toString() !== doctorId) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized action",
+      });
+    }
+
+    //  Prevent invalid state changes
+    if (appointment.status === "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Completed appointment cannot be cancelled",
+      });
+    }
+
+    if (appointment.status === "cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment already cancelled",
+      });
+    }
+
+    // -------------------  Update Appointment -------------------
+    appointment.status = "cancelled";
+    appointment.cancelledBy = "doctor";
+    appointment.cancellationReason = reason.trim();
+
+    await appointment.save();
+
+    // -------------------  Free the Slot -------------------
+    await DoctorAvailability.updateOne(
+      {
+        doctor: appointment.doctor,
+        date: appointment.appointmentDate,
+        "slots.time": appointment.timeSlot,
+      },
+      {
+        $set: { "slots.$.isBooked": false },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Appointment cancelled successfully",
+      appointment,
+    });
+
+  } catch (error) {
+    console.error("Cancel Appointment Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to cancel appointment",
     });
   }
 };

@@ -11,11 +11,13 @@ import { fetchAppointments } from "@/api/doctor/doctorApis";
 import toast from "react-hot-toast";
 import { useModal } from "@/contexts/ModalContext";
 import { AppointmentsActionModal } from "@/components/ui/modals/ModalInputs";
+import { useNavigate } from "react-router-dom";
 
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState(null);
   const fetchAppointmentsAction = useAsyncAction();
   const [activeTab, setActiveTab] = useState("upcoming");
+  const navigate = useNavigate();
   const { openModal } = useModal();
   const {
     query,
@@ -62,14 +64,18 @@ const DoctorAppointments = () => {
   };
 
   //------------- View Appointments -----------------
-  const handleView = (id) => {
-    const appointment = displayedAppointments.find((a) => a._id === id);
-    openModal("Choose Appointment Status", AppointmentsActionModal, {
-      appointment,
-      id: appointment._id,
-      role: "doctor",
-    });
-  };
+  // const handleView = (id) => {
+  //   const appointment = displayedAppointments.find((a) => a._id === id);
+  //   openModal("Choose Appointment Status", AppointmentsActionModal, {
+  //     appointment,
+  //     id: appointment._id,
+  //     role: "doctor",
+  //   });
+  // };
+
+  const handleView = (id)=>{
+    navigate(`/doctor/appointments/${id}`)
+  }
 
   const filteredAppointments = appointments?.filter((appointment) => {
     if (activeTab === "upcoming") {
