@@ -1,5 +1,8 @@
 import Appointment from "../../models/appointments.model.js";
-import DoctorAvailability from '../../models/availability.model.js'
+import DoctorAvailability from "../../models/availability.model.js";
+import Wallet from "../../models/wallet.model.js";
+import Payment from "../../models/payments.model.js";
+import Transaction from "../../models/transaction.model.js";
 import mongoose from "mongoose";
 
 //---------------- Get all appointments --------------
@@ -55,7 +58,6 @@ export const getAllAppointments = async (req, res) => {
   }
 };
 
-
 export const getDoctorAppointmentById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -72,9 +74,8 @@ export const getDoctorAppointmentById = async (req, res) => {
     // -------- Find appointment belonging to doctor --------
     const appointment = await Appointment.findOne({
       _id: id,
-      doctor: doctorId, 
-    })
-      .populate("patient", "name email profilePicture")
+      doctor: doctorId,
+    }).populate("patient", "name email profilePicture");
 
     if (!appointment) {
       return res.status(404).json({
@@ -96,59 +97,40 @@ export const getDoctorAppointmentById = async (req, res) => {
   }
 };
 
-
-
 export const cancelAppointment = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { id } = req.params;
     const { reason } = req.body;
-    const doctorId = req.user?.id; 
-    
-    console.log(req.body)
+    const doctorId = req.user?.id;
+
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment ID is required",
-      });
+      throw new Error("Appointment ID is required");
     }
 
     if (!reason || !reason.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Cancellation reason is required",
-      });
+      throw new Error("Cancellation reason is required");
     }
 
     const appointment = await Appointment.findById(id);
 
     if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: "Appointment not found",
-      });
+      throw new Error("Appointment not found");
     }
 
-   
     if (appointment.doctor.toString() !== doctorId) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized action",
-      });
+      throw new Error("Unauthorized action");
     }
 
     //  Prevent invalid state changes
     if (appointment.status === "completed") {
-      return res.status(400).json({
-        success: false,
-        message: "Completed appointment cannot be cancelled",
-      });
+      throw new Error("Completed appointment cannot be cancelled");
     }
 
     if (appointment.status === "cancelled") {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment already cancelled",
-      });
+      throw new Error("Appointment already cancelled");
     }
 
     // -------------------  Update Appointment -------------------
@@ -156,7 +138,7 @@ export const cancelAppointment = async (req, res) => {
     appointment.cancelledBy = "doctor";
     appointment.cancellationReason = reason.trim();
 
-    await appointment.save();
+    await appointment.save({ session });
 
     // -------------------  Free the Slot -------------------
     await DoctorAvailability.updateOne(
@@ -167,15 +149,57 @@ export const cancelAppointment = async (req, res) => {
       },
       {
         $set: { "slots.$.isBooked": false },
-      }
+      },
+      { session },
     );
+
+    //-------------- Initiate refund --------------------
+    const payment = await Payment.findOne({ appointment: appointment._id });
+
+    if (payment && payment.status !== "refunded") {
+      let wallet = await Wallet.findOne({userId: appointment.patient,role:'patient'});
+
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: appointment.patient,
+          role: "patient",
+          balance: 0,
+        });
+      }
+
+      //---------- add refund amount -----------
+      wallet.balance += payment.amount;
+      await wallet.save({ session });
+
+      //------------- create transaction record --------
+      await Transaction.create(
+        [
+          {
+            wallet: wallet._id,
+            type: "credit",
+            amount: payment.amount,
+            referenceType: "refund",
+            referenceId: payment._id,
+            notes: `Refund for cancelled appointment #${appointment.id.toString()}`,
+          },
+        ],
+        { session },
+      );
+      
+
+      //--------- update payment status -----------
+      payment.status = "refunded";
+      await payment.save({ session });
+    }
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       success: true,
       message: "Appointment cancelled successfully",
       appointment,
     });
-
   } catch (error) {
     console.error("Cancel Appointment Error:", error);
     return res.status(500).json({

@@ -7,6 +7,8 @@ import {
   cancelAppointment,
 } from "@/api/doctor/doctorApis";
 
+import { refundToWallet } from "@/api/patient/patientApis";
+
 const statusConfig = {
   confirmed: {
     color: "text-emerald-700",
@@ -68,8 +70,8 @@ const DoctorViewAppointment = () => {
 
   //-------------- View Patient Profile -------------
   const viewPatientProfile = (patientId) => {
-    navigate(`/doctor/appointments/patient-profile/${patientId}`)
-  }
+    navigate(`/doctor/appointments/patient-profile/${patientId}`);
+  };
 
   //------------- Send Messages -------------------
   const handleMessages = (patientId) => {
@@ -86,17 +88,19 @@ const DoctorViewAppointment = () => {
     try {
       setCancelling(true);
 
-      const res = await cancelAppointment(id, {
-        reason: cancelReason,
-      });
+      const res = await cancelAppointment(id, { reason: cancelReason });
 
       if (!res.data?.success) {
-        toast.error("Failed to cancel appointment");
+        toast.error(res.data?.message || "Failed to cancel appointment");
         return;
       }
 
-      toast.success("Appointment cancelled successfully");
+      //------ Backend handles refund -------------
+      toast.success(
+        "Appointment cancelled and refund processed to patient's wallet",
+      );
 
+      // Update frontend state
       setAppointment((prev) => ({
         ...prev,
         status: "cancelled",
@@ -106,6 +110,7 @@ const DoctorViewAppointment = () => {
       setShowConfirm(false);
       setCancelReason("");
     } catch (error) {
+      console.error(error);
       toast.error("Error cancelling appointment");
     } finally {
       setCancelling(false);
@@ -304,7 +309,7 @@ const DoctorViewAppointment = () => {
             </div>
           </div>
 
-           {/* Message Patient */}
+          {/* Message Patient */}
           <div className="border-t border-slate-100 px-6 py-6">
             <div className="flex items-center justify-between rounded-xl bg-slate-50 px-5 py-4 ring-1 ring-slate-100">
               <div>
@@ -381,6 +386,7 @@ const DoctorViewAppointment = () => {
                 </div>
               </div>
             )}
+         
           </div>
         </div>
       </div>

@@ -55,7 +55,7 @@ const PatientAppointments = () => {
 
   useEffect(() => {
     fetchAllAppointments();
-  }, []);
+  }, [activeTab]);
 
   //---------------- Search Suggestions ---------
   const fetchSuggestions = (query) => {

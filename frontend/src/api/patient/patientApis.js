@@ -95,4 +95,17 @@ export const retryPayment = (id) => {
   return api.post(`/api/patient/payments/retry/${id}`)
 }
 
+//------------------- Wallet -------------
+export const getPatientWallet = () =>{
+  return api.get('/api/patient/wallet')
+}
+
+export const refundToWallet = (appointmentId,amount) =>{
+  return api.post(`/api/patient/refund/${appointmentId}`,amount)
+}
+
+export const createWalletOrder = (payload) =>{
+  return api.post('/api/patient/create-wallet-order',payload)
+}
+
 
