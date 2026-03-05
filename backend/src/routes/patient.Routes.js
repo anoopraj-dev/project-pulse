@@ -60,7 +60,5 @@ router.post('/payments/retry/:id',retryPayment)
 //---------------- wallet --------------
 router.get('/wallet',getPatientWallet)
 
-//------------- refund -------------
-router.post('/refund/:id',refundToWallet)
 
 export default router;

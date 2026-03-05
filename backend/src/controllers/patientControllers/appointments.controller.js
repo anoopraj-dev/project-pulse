@@ -251,97 +251,135 @@ export const getAppointmentById = async (req, res) => {
   }
 };
 
-//------------------------- CANCEL APPOINTMENTS --------------------
-export const cancelAppointment = async (req, res) => {
-  try {
-    const { id: appointmentId } = req.params;
 
-    if (!appointmentId) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment ID missing",
-      });
+export const cancelAppointment = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { id } = req.params;
+    const patientId = req.user?.id;
+
+    if (!id) {
+      throw new Error("Appointment ID is required");
     }
 
-    const appointment = await Appointment.findById(appointmentId);
+    const appointment = await Appointment.findById(id);
 
     if (!appointment) {
-      return res.status(404).json({
-        success: false,
-        message: "Appointment not found",
-      });
+      throw new Error("Appointment not found");
+    }
+
+    if (appointment.patient.toString() !== patientId) {
+      throw new Error("Unauthorized action");
+    }
+
+    if (appointment.status === "completed") {
+      throw new Error("Completed appointment cannot be cancelled");
     }
 
     if (appointment.status === "cancelled") {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment already cancelled",
-      });
+      throw new Error("Appointment already cancelled");
     }
 
-    // ------------- 24 hour restriction ---------------
-    if (!isAppointmentActionAllowed(appointment)) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Appointment cannot be cancelled within 24 hours of consultation.",
-      });
+    // -------------------  24 Hour Restriction -------------------
+    const appointmentDateTime = new Date(appointment.appointmentDate);
+    const [hours, minutes] = appointment.timeSlot.split(":");
+    appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+    const now = new Date();
+    const timeDifference = appointmentDateTime - now;
+
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    if (timeDifference <= twentyFourHours) {
+      throw new Error(
+        "Appointment cannot be cancelled within 24 hours of consultation"
+      );
     }
 
-    // ---------------- Release Slot ----------------
-
-    const appointmentDate = new Date(appointment.appointmentDate);
-    appointmentDate.setUTCHours(0, 0, 0, 0);
-
-    await DoctorAvailability.updateOne(
-      {
-        doctorId: appointment.doctor,
-        date: appointmentDate,
-        "slots.startTime": appointment.timeSlot,
-      },
-      {
-        $set: {
-          "slots.$.isBooked": false,
-        },
-      },
-    );
-
-    // ---------------- Update Appointment ----------------
-
+    // -------------------  Update Appointment -------------------
     appointment.status = "cancelled";
     appointment.cancelledBy = "patient";
+    appointment.cancellationReason = 'Patient cancelled'
 
-    await appointment.save();
+    await appointment.save({ session });
 
-    //--------------- Refund to Wallet -------------------
-    const amountToRefund = appointment.amount || 0;
+    // -------------------  Free the Slot -------------------
+    await DoctorAvailability.updateOne(
+      {
+        doctor: appointment.doctor,
+        date: appointment.appointmentDate,
+        "slots.time": appointment.timeSlot,
+      },
+      {
+        $set: { "slots.$.isBooked": false },
+      },
+      { session }
+    );
 
-    try {
-      if(amountToRefund >0){
-      await refundToWallet({
-        userId:appointment.patientId,
-        role:'patient',
-        amount:appointment.amount,
-        type:'credit',
-        referenceType:'refund',
-        referenceId:appointment._id,
-        notes:'Appointment cancellation refund'
-      })
+    //-------------- Initiate refund --------------------
+    const payment = await Payment.findOne({ appointment: appointment._id });
+
+    if (payment && payment.status !== "refunded") {
+
+      //--------------- 10% platform fee deduction ----------------
+      const platformFee = payment.amount * 0.1;
+      const refundAmount = payment.amount - platformFee;
+
+      let wallet = await Wallet.findOne({
+        userId: appointment.patient,
+        role: "patient",
+      });
+
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: appointment.patient,
+          role: "patient",
+          balance: 0,
+        });
+      }
+
+      wallet.balance += refundAmount;
+      await wallet.save({ session });
+
+      await Transaction.create(
+        [
+          {
+            wallet: wallet._id,
+            type: "credit",
+            amount: refundAmount,
+            referenceType: "refund",
+            referenceId: payment._id,
+            notes: `Refund (90%) after 10% platform fee deduction for appointment #${appointment.id.toString()}`,
+          },
+        ],
+        { session }
+      );
+
+      payment.status = "refunded";
+      await payment.save({ session });
     }
-    } catch (error) {
-      console.log(error)
-    }
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       success: true,
-      message: "Appointment cancelled successfully",
+      message:
+        "Appointment cancelled successfully (10% platform fee deducted)",
       appointment,
     });
+
   } catch (error) {
-    console.log(error);
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error("Cancel Appointment (Patient) Error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to cancel appointment",
+      message: error.message || "Failed to cancel appointment",
     });
   }
 };
