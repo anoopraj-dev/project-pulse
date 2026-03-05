@@ -1,15 +1,60 @@
 
-import { useRoutes } from "react-router-dom";
-import PublicLayout from "../components/layout/components/PublicLayout"
-import ProtectedLayout from "../components/layout/components/ProtectedLayout";
-import CommonRoutes from '../routes/CommonRoutes'
-import AdminRoutes from '../routes/AdminRoutes'
-import DoctorRoutes from '../routes/DoctorRoutes'
-import PatientRoutes from '../routes/PatientRoutes'
-import NotFound from "../pages/NotFound";
+// import { useRoutes } from "react-router-dom";
+// import PublicLayout from "../components/layout/components/PublicLayout"
+// import ProtectedLayout from "../components/layout/components/ProtectedLayout";
+// import CommonRoutes from '../routes/CommonRoutes'
+// import NotFound from "../pages/NotFound";
+// import { Suspense ,lazy} from "react";
+// import PageLoader from "@/components/ui/loaders/PageLoader";
 
-const AppRoutes = () =>
-  useRoutes([
+// //------------ lazy load route groups ----------
+// const AdminRoutes = lazy(() => import("../routes/AdminRoutes"));
+// const DoctorRoutes = lazy(() => import("../routes/DoctorRoutes"));
+// const PatientRoutes = lazy(() => import("../routes/PatientRoutes"));
+
+
+// const AppRoutes = () =>
+//   useRoutes([
+//     {
+//       element: <PublicLayout />,
+//       children: CommonRoutes,
+//     },
+//     {
+//       element: <ProtectedLayout />,
+//       children: [
+//         AdminRoutes,
+//         ...DoctorRoutes,
+//         ...PatientRoutes,
+//       ],
+//     },
+//     { path: "*", element: <NotFound /> },
+//   ]);
+
+//   return (
+//     <Suspense  fallback={<PageLoader/>}>
+//       {routes}
+//     </Suspense>
+//   )
+
+// export default AppRoutes;
+
+
+
+import { useRoutes } from "react-router-dom";
+import PublicLayout from "../components/layout/components/PublicLayout";
+import ProtectedLayout from "../components/layout/components/ProtectedLayout";
+import CommonRoutes from "../routes/CommonRoutes";
+import NotFound from "../pages/NotFound";
+import { Suspense, lazy } from "react";
+import PageLoader from "@/components/ui/loaders/PageLoader";
+
+// Lazy load route groups
+const AdminRoutes = lazy(() => import("../routes/AdminRoutes"));
+const DoctorRoutes = lazy(() => import("../routes/DoctorRoutes"));
+const PatientRoutes = lazy(() => import("../routes/PatientRoutes"));
+
+const AppRoutes = () => {
+  const routes = useRoutes([
     {
       element: <PublicLayout />,
       children: CommonRoutes,
@@ -17,13 +62,18 @@ const AppRoutes = () =>
     {
       element: <ProtectedLayout />,
       children: [
-        AdminRoutes,
-        ...DoctorRoutes,
-        ...PatientRoutes,
+        { path: "admin/*", element: <AdminRoutes /> },
+        { path: "doctor/*", element: <DoctorRoutes /> },
+        { path: "patient/*", element: <PatientRoutes /> },
       ],
     },
-    { path: "*", element: <NotFound /> },
   ]);
 
-export default AppRoutes;
+  return (
+    <Suspense fallback={<PageLoader />}>
+      {routes}
+    </Suspense>
+  );
+};
 
+export default AppRoutes;

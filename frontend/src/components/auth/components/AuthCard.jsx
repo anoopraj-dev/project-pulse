@@ -81,12 +81,10 @@ const AuthCard = ({ role: initialRole }) => {
           };
 
           const response = await signup(signupData);
-
-
-
+          
           if (response.success) {
             toast.success(response.message);
-            
+
             const expiryTime = Date.now() + 60 * 1000;
             const payload = {
               email: data.email,
