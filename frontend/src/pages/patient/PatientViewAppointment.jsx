@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { viewAppointmentDetails } from "@/api/patient/patientApis";
+import {
+  fetchAppointments,
+  viewAppointmentDetails,
+} from "@/api/patient/patientApis";
 import { cancelAppointment } from "@/api/patient/patientApis";
 import { Icon } from "@iconify/react";
 
@@ -71,6 +74,10 @@ const PatientViewAppointment = () => {
     try {
       const res = await cancelAppointment(id);
       toast.success("Appointment cancelled successfully");
+      setAppointment((prev) => ({
+        ...prev,
+        status: "cancelled",
+      }));
     } catch {
       toast.error("Error cancelling appointment");
     } finally {
@@ -343,7 +350,6 @@ const PatientViewAppointment = () => {
                 </p>
               </div>
             )}
-            
           </div>
         </div>
       </div>

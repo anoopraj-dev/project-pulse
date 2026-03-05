@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 import toast from "react-hot-toast";
 import PaymentButton from "@/components/shared/components/PaymentButton";
 import { useUser } from "@/contexts/UserContext";
-import { bookAppointment } from "@/api/patient/patientApis";
+import { bookAppointment, fetchAppointments } from "@/api/patient/patientApis";
 
 const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   const [formData, setFormData] = useState({
@@ -87,6 +87,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
         const res = await bookAppointment({...formData,orderId});
 
         if(res.data?.success){
+            await fetchAppointments();
             setActiveTab('confirmed')
             toast.success("Appointment booked successfully");
         } else {

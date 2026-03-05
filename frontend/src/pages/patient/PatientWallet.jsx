@@ -59,10 +59,11 @@ const PatientWallet = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pb-10 space-y-4">
+      <div className=" w-full px-2 pt-3 pb-10 flex flex-col gap-4 lg:flex-row">
 
         {/* Balance Card */}
-        <div
+        <div className="w-full lg:w-1/3">
+          <div
           style={{
             background: "linear-gradient(135deg, #0096C7 0%, #0077B6 60%, #023E8A 100%)",
             borderRadius: "20px",
@@ -141,8 +142,10 @@ const PatientWallet = () => {
             </div>
           </div>
         </div>
+        </div>
 
-        {/* Transactions */}
+       <div className="w-full lg:w-2/3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+         {/* Transactions */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div style={{ padding: "18px 20px 12px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", margin: 0 }}>
@@ -189,10 +192,10 @@ const PatientWallet = () => {
                       <p style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {txn.type}
                       </p>
-                       <p style={{ fontSize: 11, color: "#94a3b8", margin: "2px 0 0" }}>
+                       <p style={{ fontSize: 13, color: "#336bdbff", margin: "2px 0 0" }}>
                         {txn.notes}
                       </p>
-                      <p style={{ fontSize: 11, color: "#94a3b8", margin: "2px 0 0" }}>
+                      <p style={{ fontSize: 13, color: "#608ce4ff", margin: "2px 0 0" }}>
                         {new Date(txn.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                       </p>
                     </div>
@@ -210,6 +213,7 @@ const PatientWallet = () => {
             </div>
           )}
         </div>
+       </div>
       </div>
     </div>
   );

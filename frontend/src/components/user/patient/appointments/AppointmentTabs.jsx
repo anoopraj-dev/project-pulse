@@ -1,7 +1,7 @@
 const PatientAppointmentTabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
     { key: "book", label: "Book Appointment" },
-    { key: "upcoming", label: "Upcoming Appointments" },
+    { key: "confirmed", label: "Upcoming Appointments" },
     { key: "cancelled", label: "Cancelled Appointments" },
     { key: "history", label: "Past Appointments" },
   ];
