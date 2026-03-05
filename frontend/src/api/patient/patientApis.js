@@ -104,4 +104,8 @@ export const refundToWallet = (appointmentId,amount) =>{
   return api.post(`/api/patient/refund/${appointmentId}`,amount)
 }
 
+export const createWalletOrder = (payload) =>{
+  return api.post('/api/patient/create-wallet-order',payload)
+}
+
 

@@ -2,6 +2,7 @@ import Wallet from '../../models/wallet.model.js'
 import Transaction from '../../models/transaction.model.js'
 import mongoose from 'mongoose'
 import Appointment from '../../models/appointments.model.js'
+import Razorpay from 'razorpay'
 
 //----------- Get patients Wallet and transactions ------------
 export const getPatientWallet = async(req , res) =>{
@@ -91,3 +92,70 @@ export const refundToWallet = async(req,res) =>{
         })
     }
 }
+
+
+//-------------- create Wallet order ---------------
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+export const createWalletOrder = async (req, res) => {
+  try {
+    const { amount, notes } = req.body;
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
+    }
+
+    // Create Razorpay order
+   const order = await razorpay.orders.create({
+  amount, // in paise
+  currency: "INR",
+  receipt: `wallet_topup_${Date.now()}`,
+  notes: {
+    purpose: "Wallet top-up",
+    description: notes || "",
+  },
+});
+
+//----------------- Save in DB ------------
+
+
+    return res.status(200).json({ success: true, order });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to create wallet order" });
+  }
+};
+
+//------------- Verify Wallet payment -------------
+export const verifyWalletPayment = async (req, res) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } = req.body;
+
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature || !amount) {
+      return res.status(400).json({ success: false, message: "Missing payment data" });
+    }
+
+    // TODO: Verify signature using Razorpay SDK or HMAC
+
+    // Add funds to wallet
+    const wallet = await Wallet.findOne({ userId: req.user._id });
+    wallet.balance += amount;
+    await wallet.save();
+
+    // Create transaction record
+    await Transaction.create({
+      userId: req.user._id,
+      amount,
+      type: "topup",
+      notes: "Wallet top-up via Razorpay",
+      date: new Date(),
+    });
+
+    res.json({ success: true, message: "Payment verified and wallet updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

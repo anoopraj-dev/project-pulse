@@ -14,7 +14,7 @@ import { bookAppointment, cancelAppointment, getAllAppointments, getAppointmentB
 import { createOrder, retryPayment, updatePaymentStatus, verifyPayment } from "../controllers/paymentControllers/payment.controller.js";
 import { getPatientPaymentHistory } from "../controllers/patientControllers/paymentHistory.controller.js";
 import { viewReceipt } from "../controllers/userControllers/receipt.controller.js";
-import { getPatientWallet, refundToWallet } from "../controllers/patientControllers/wallet.controller.js";
+import { createWalletOrder, getPatientWallet, refundToWallet, verifyWalletPayment } from "../controllers/patientControllers/wallet.controller.js";
 
 const router = Router();
 
@@ -59,6 +59,7 @@ router.post('/payments/retry/:id',retryPayment)
 
 //---------------- wallet --------------
 router.get('/wallet',getPatientWallet)
-
+router.post('/create-wallet-order',createWalletOrder)
+router.post('/verify-payment',verifyWalletPayment)
 
 export default router;
