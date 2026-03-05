@@ -4,6 +4,9 @@ import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
 import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
 import Payment from "../../models/payments.model.js";
+import Wallet from '../../models/wallet.model.js'
+import Transaction from '../../models/transaction.model.js'
+import { refundToWallet } from "./wallet.controller.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -309,6 +312,25 @@ export const cancelAppointment = async (req, res) => {
     appointment.cancelledBy = "patient";
 
     await appointment.save();
+
+    //--------------- Refund to Wallet -------------------
+    const amountToRefund = appointment.amount || 0;
+
+    try {
+      if(amountToRefund >0){
+      await refundToWallet({
+        userId:appointment.patientId,
+        role:'patient',
+        amount:appointment.amount,
+        type:'credit',
+        referenceType:'refund',
+        referenceId:appointment._id,
+        notes:'Appointment cancellation refund'
+      })
+    }
+    } catch (error) {
+      console.log(error)
+    }
 
     return res.status(200).json({
       success: true,

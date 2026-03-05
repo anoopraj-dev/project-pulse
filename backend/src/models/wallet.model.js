@@ -15,12 +15,6 @@ const walletSchema = new mongoose.Schema({
     type: Number,
     default: 0, 
   },
-  transactions: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Transaction',
-    },
-  ],
 }, { timestamps: true });
 
 export default mongoose.model('Wallet', walletSchema);
