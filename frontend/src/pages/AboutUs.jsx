@@ -1,73 +1,23 @@
+
 import React, { useEffect, useState } from "react";
-import PrimaryButton from "../components/shared/components/PrimaryButton";
+import { motion } from "framer-motion";
 import { getApprovedDoctors } from "@/api/user/userApis";
+import {
+  fadeUp,
+  scaleIn,
+  floatY,
+  floatYReverse,
+  pulseRing,
+  hoverLift,
+  tapScale,
+  staggerContainer,
+  staggerChild,
+  viewportOnce,
+} from "@/utilis/animations";
+import GlobalStyles from "@/components/shared/components/GlobalStyles";
+import { Icon } from "@iconify/react";
 
-/* ── Inject Google Font + custom keyframes ── */
-const GlobalStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
-    .dl-root { font-family: 'DM Sans', sans-serif; }
-    .dl-serif { font-family: 'Lora', Georgia, serif; }
-
-    @keyframes dl-fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0);    }
-    }
-    @keyframes dl-scaleIn {
-      from { opacity: 0; transform: scale(0.93); }
-      to   { opacity: 1; transform: scale(1);    }
-    }
-    @keyframes dl-float {
-      0%, 100% { transform: translateY(0px);   }
-      50%       { transform: translateY(-12px); }
-    }
-    @keyframes dl-pulse-ring {
-      0%   { box-shadow: 0 0 0 0    rgba(0,150,199,.5); }
-      70%  { box-shadow: 0 0 0 14px rgba(0,150,199,0);  }
-      100% { box-shadow: 0 0 0 0    rgba(0,150,199,0);  }
-    }
-    @keyframes dl-shimmer {
-      from { background-position: -200% center; }
-      to   { background-position:  200% center; }
-    }
-
-    .dl-anim-1 { animation: dl-fadeUp .7s cubic-bezier(.22,1,.36,1) .10s both; }
-    .dl-anim-2 { animation: dl-fadeUp .7s cubic-bezier(.22,1,.36,1) .25s both; }
-    .dl-anim-3 { animation: dl-fadeUp .7s cubic-bezier(.22,1,.36,1) .40s both; }
-    .dl-anim-4 { animation: dl-fadeUp .7s cubic-bezier(.22,1,.36,1) .55s both; }
-    .dl-anim-5 { animation: dl-fadeUp .7s cubic-bezier(.22,1,.36,1) .70s both; }
-    .dl-card-in { animation: dl-scaleIn .7s cubic-bezier(.22,1,.36,1) .55s both; }
-
-    .dl-float   { animation: dl-float 7s ease-in-out infinite; }
-    .dl-float-r { animation: dl-float 9s ease-in-out infinite reverse; }
-    .dl-pulse   { animation: dl-pulse-ring 2.2s infinite; }
-
-    .dl-shimmer {
-      background: linear-gradient(90deg,#ddf1f8 25%,#b8e4f3 50%,#ddf1f8 75%);
-      background-size: 200% auto;
-      animation: dl-shimmer 1.5s linear infinite;
-    }
-
-    .dl-lift { transition: transform .3s ease, box-shadow .3s ease; }
-    .dl-lift:hover { transform: translateY(-6px); box-shadow: 0 18px 48px rgba(0,150,199,.14); }
-
-    .dl-doc-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg,#0096C7,#00B4D8);
-      transform: scaleX(0); transform-origin: left;
-      transition: transform .35s ease;
-      border-radius: 2px;
-    }
-    .dl-doc-card:hover::before { transform: scaleX(1); }
-
-    .dl-offer-arrow { transition: transform .25s ease, background .25s, color .25s; }
-    .dl-offer-card:hover .dl-offer-arrow { transform: translate(3px,-3px); }
-  `}</style>
-);
-
-/* ── Icon helpers ── */
+//--------------- Icon helpers -------------
 const ArrowRight = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -80,7 +30,7 @@ const StarIcon = () => (
   </svg>
 );
 
-/* ═══════════════════════════════════════════════════════ */
+
 const DoctorLanding = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,12 +49,9 @@ const DoctorLanding = () => {
   }, []);
 
   return (
-    <div className="dl-root min-h-screen bg-slate-50">
-      <GlobalStyles />
-
-      {/* ══════════════════════
-           HERO
-      ══════════════════════ */}
+    <div className="h-root min-h-screen bg-slate-50 ">
+      <GlobalStyles/>
+      {/* -------------- Hero section ---------------- */}
       <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
 
         {/* dark backdrop */}
@@ -119,10 +66,16 @@ const DoctorLanding = () => {
           }} />
 
         {/* glow blobs */}
-        <div className="dl-float absolute -top-48 -right-32 w-[700px] h-[700px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)", filter: "blur(72px)" }} />
-        <div className="dl-float-r absolute -bottom-28 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)", filter: "blur(64px)" }} />
+        <motion.div
+          {...floatY(12, 7)}
+          className="absolute -top-48 -right-32 w-[700px] h-[700px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)", filter: "blur(72px)" }}
+        />
+        <motion.div
+          {...floatYReverse(12, 9)}
+          className="absolute -bottom-28 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)", filter: "blur(64px)" }}
+        />
 
         {/* inner */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-20 flex items-center justify-between gap-12">
@@ -130,54 +83,80 @@ const DoctorLanding = () => {
           {/* ── Left copy ── */}
           <div className="flex-1 min-w-0 space-y-7">
 
-            <div className="dl-anim-1 inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[11px] font-bold tracking-[.12em] uppercase"
-              style={{ background: "rgba(0,150,199,.12)", borderColor: "rgba(0,150,199,.3)", color: "#48cae4" }}>
-              <span className="dl-pulse w-1.5 h-1.5 rounded-full inline-block" style={{ background: "#0096C7" }} />
+            <motion.div
+              variants={fadeUp} custom={0.10} initial="hidden" animate="visible"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[11px] tracking-[.12em] uppercase"
+              style={{ background: "rgba(0,150,199,.12)", borderColor: "rgba(0,150,199,.3)", color: "#48cae4" }}
+            >
+              <motion.span
+                {...pulseRing}
+                className="w-1.5 h-1.5 rounded-full inline-block"
+                style={{ background: "#0096C7" }}
+              />
               Trusted by 50,000+ patients
-            </div>
+            </motion.div>
 
-            <h1 className="dl-serif dl-anim-2 text-5xl md:text-6xl lg:text-[4.25rem] font-bold text-white leading-[1.07]">
+            <motion.h1
+              variants={fadeUp} custom={0.25} initial="hidden" animate="visible"
+              className="font-[Georgia,serif] text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.09] "
+            >
               Healthcare<br />
               at your&nbsp;
               <em className="not-italic" style={{ color: "#48cae4" }}>fingertips</em>
-            </h1>
+            </motion.h1>
 
-            <p className="dl-anim-3 text-[1.05rem] leading-relaxed max-w-[480px]" style={{ color: "rgba(255,255,255,.55)" }}>
+            <motion.p
+              variants={fadeUp} custom={0.40} initial="hidden" animate="visible"
+              className="text-[1.05rem] leading-relaxed max-w-[480px]"
+              style={{ color: "rgba(255,255,255,.55)" }}
+            >
               Consult online or book appointments with trusted, verified doctors — instantly, from anywhere.
-            </p>
+            </motion.p>
 
-            <div className="dl-anim-4 flex flex-wrap gap-3">
-              <button
+            <motion.div
+              variants={fadeUp} custom={0.55} initial="hidden" animate="visible"
+              className="flex flex-wrap gap-3"
+            >
+              <motion.button
+                {...tapScale}
                 className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-white transition-all duration-200"
                 style={{ background: "#0096C7", boxShadow: "0 6px 28px rgba(0,150,199,.45)" }}
                 onMouseEnter={e => e.currentTarget.style.background = "#007aa3"}
                 onMouseLeave={e => e.currentTarget.style.background = "#0096C7"}
               >
                 Find your doctor <ArrowRight />
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                {...tapScale}
                 className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold transition-all duration-200"
                 style={{ border: "1.5px solid rgba(255,255,255,.18)", color: "rgba(255,255,255,.65)" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,.07)"; e.currentTarget.style.color = "#fff"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,.65)"; }}
               >
                 How it works
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
 
             {/* stats */}
-            <div className="dl-anim-5 flex gap-10 pt-6 border-t" style={{ borderColor: "rgba(255,255,255,.1)" }}>
+            <motion.div
+              variants={fadeUp} custom={0.70} initial="hidden" animate="visible"
+              className="flex gap-10 pt-6 border-t"
+              style={{ borderColor: "rgba(255,255,255,.1)" }}
+            >
               {[["1,200+", "Verified Doctors"], ["4.9 ★", "Avg. Rating"], ["15 min", "Avg. Wait"]].map(([v, l]) => (
                 <div key={l}>
-                  <div className="dl-serif text-2xl font-bold text-white">{v}</div>
+                  <div className="font-[Georgia,serif] text-2xl font-bold text-white">{v}</div>
                   <div className="text-[10px] uppercase tracking-widest mt-0.5" style={{ color: "rgba(255,255,255,.38)" }}>{l}</div>
                 </div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
           {/* ── Right floating card ── */}
-          <div className="hidden lg:block shrink-0 dl-card-in">
+          <motion.div
+            variants={scaleIn} custom={0.55} initial="hidden" animate="visible"
+            className="hidden lg:block shrink-0"
+          >
             <div className="w-72 rounded-3xl p-6 space-y-4 border backdrop-blur-2xl"
               style={{ background: "rgba(255,255,255,.07)", borderColor: "rgba(255,255,255,.12)" }}>
               <div className="flex items-center gap-3">
@@ -200,14 +179,17 @@ const DoctorLanding = () => {
                 ))}
               </div>
 
-              <button className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200"
+              <motion.button
+                {...tapScale}
+                className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200"
                 style={{ background: "#0096C7" }}
                 onMouseEnter={e => e.currentTarget.style.background="#007aa3"}
-                onMouseLeave={e => e.currentTarget.style.background="#0096C7"}>
+                onMouseLeave={e => e.currentTarget.style.background="#0096C7"}
+              >
                 Book Appointment
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* wave bottom */}
@@ -218,90 +200,125 @@ const DoctorLanding = () => {
         </div>
       </section>
 
-
-      {/* ══════════════════════
-           WHAT WE OFFER
-      ══════════════════════ */}
+                {/* ---------------- What we offer -------------- */}
       <section className="max-w-6xl mx-auto px-6 lg:px-10 py-20">
-        <div className="mb-10 space-y-2">
+        <motion.div
+          variants={fadeUp} custom={0} initial="hidden" whileInView="visible" viewport={viewportOnce}
+          className="mb-10 space-y-2"
+        >
           <p className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>What we offer</p>
-          <h2 className="dl-serif text-3xl md:text-4xl font-bold text-slate-900">
+          <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-slate-900">
             Care that fits your <em className="not-italic" style={{ color: "#0096C7" }}>lifestyle</em>
           </h2>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <motion.div
+          variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        >
           {[
-            { icon:"📞", title:"Instant Voice Consultation",  desc:"Talk to verified doctors in real-time through secure, high-quality voice calls.", featured:true },
-            { icon:"🏥", title:"Offline Visit Bookings",      desc:"Find specialists nearby and book in-person consultations with ease." },
-            { icon:"💊", title:"Digital Prescriptions",       desc:"Receive e-prescriptions instantly after your consultation." },
-            { icon:"📋", title:"Health Records",              desc:"Store and share your medical history securely with any doctor." },
-          ].map(c => <OfferCard key={c.title} {...c} />)}
-        </div>
+            {
+              icon: "mdi:phone",
+              title: "Voice Consultation",
+              desc: "Talk to verified doctors in real-time.",
+            },
+            {
+              icon: "mdi:hospital-building",
+              title: "Offline Visits",
+              desc: "Book physical consultations nearby.",
+            },
+            {
+              icon: "mdi:pill",
+              title: "Digital Prescription",
+              desc: "Receive prescriptions instantly.",
+            },
+            {
+              icon: "mdi:file-document",
+              title: "Health Records",
+              desc: "Securely store medical history.",
+            },
+          ].map((c) => (
+            <OfferCard key={c.title} {...c} />
+          ))}
+        </motion.div>
       </section>
 
 
-      {/* ══════════════════════
-           FIND A DOCTOR
-      ══════════════════════ */}
+      {/* -------------- Find a doctor --------------------- */}
       <section className="max-w-6xl mx-auto px-6 lg:px-10 pb-20">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
+        <motion.div
+          variants={fadeUp} custom={0} initial="hidden" whileInView="visible" viewport={viewportOnce}
+          className="flex items-end justify-between flex-wrap gap-4 mb-8"
+        >
           <div className="space-y-1">
             <p className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>Our specialists</p>
-            <h2 className="dl-serif text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-slate-900">
               Find a <em className="not-italic" style={{ color: "#0096C7" }}>Doctor</em>
             </h2>
           </div>
 
-          <button
+          <motion.button
+            {...tapScale}
             className="px-5 py-2.5 rounded-full text-sm font-bold border-2 transition-all duration-200"
             style={{ borderColor: "#0096C7", color: "#0096C7" }}
             onMouseEnter={e => { e.currentTarget.style.background = "#0096C7"; e.currentTarget.style.color = "#fff"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#0096C7"; }}
           >
             View all
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="dl-shimmer rounded-2xl h-60" />
+              <div key={i} className="rounded-2xl h-60"
+                style={{
+                  background: "linear-gradient(90deg,#ddf1f8 25%,#b8e4f3 50%,#ddf1f8 75%)",
+                  backgroundSize: "200% auto",
+                  animation: "shimmer 1.5s linear infinite",
+                }}
+              />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <motion.div
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}
+            className="grid grid-cols-2 md:grid-cols-4 gap-5"
+          >
             {doctors.slice(0, 8).map(doc => <DoctorCard key={doc._id} doctor={doc} />)}
-          </div>
+          </motion.div>
         )}
       </section>
 
 
-      {/* ══════════════════════
-           TESTIMONIALS
-      ══════════════════════ */}
+     {/* ---------------- Testimonials---------------- */}
       <section className="py-20" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
         <div className="max-w-6xl mx-auto px-6 lg:px-10">
-          <div className="mb-10 space-y-2">
+          <motion.div
+            variants={fadeUp} custom={0} initial="hidden" whileInView="visible" viewport={viewportOnce}
+            className="mb-10 space-y-2"
+          >
             <p className="text-[11px] font-bold tracking-[.14em] uppercase" style={{ color: "#0096C7" }}>Patient stories</p>
-            <h2 className="dl-serif text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-slate-900">
               What people <em className="not-italic" style={{ color: "#0096C7" }}>say</em>
             </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          </motion.div>
+          <motion.div
+            variants={staggerContainer} initial="hidden" whileInView="visible" viewport={viewportOnce}
+            className="grid grid-cols-1 md:grid-cols-3 gap-5"
+          >
             <Testimonial name="Hari Narayanan"   rating={4.8} text="The consultation was smooth and reassuring. Got answers in minutes and felt genuinely heard. Great experience." />
             <Testimonial name="Ajith Sudharsnan" rating={4.8} text="Quick diagnosis and friendly doctor. Took time to explain everything clearly. Highly recommended to all." />
             <Testimonial name="Anoop Raj"         rating={4.8} text="Very professional and helpful. Clear, actionable guidance without the usual long wait times. Will use again." />
-          </div>
+          </motion.div>
         </div>
       </section>
 
 
-      {/* ══════════════════════
-           FOOTER CTA
-      ══════════════════════ */}
+      {/* ---------------- Footer ---------------- */}
       <section className="px-6 lg:px-10 py-14">
-        <div
+        <motion.div
+          variants={scaleIn} custom={0} initial="hidden" whileInView="visible" viewport={viewportOnce}
           className="max-w-6xl mx-auto rounded-3xl px-10 py-12 flex flex-wrap items-center justify-between gap-8"
           style={{
             background: "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
@@ -309,21 +326,22 @@ const DoctorLanding = () => {
           }}
         >
           <div>
-            <h2 className="dl-serif text-3xl md:text-4xl font-bold text-white leading-tight">
+            <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-white leading-tight">
               Ready to take charge<br />
               of your <em className="not-italic" style={{ color: "#90e0ef" }}>health?</em>
             </h2>
             <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,.5)" }}>Join thousands who trust us every day.</p>
           </div>
-          <button
+          <motion.button
+            {...tapScale}
             className="flex items-center gap-2.5 px-8 py-4 rounded-full font-bold text-sm transition-all duration-200"
             style={{ background: "#fff", color: "#0096C7", boxShadow: "0 4px 20px rgba(0,0,0,.12)" }}
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
           >
             Get Started Now <ArrowRight />
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </section>
 
     </div>
@@ -331,37 +349,42 @@ const DoctorLanding = () => {
 };
 
 
-/* ─────────────────────────────
-   SUB-COMPONENTS
-───────────────────────────── */
+// ---------------------sub components -------------------
 const OfferCard = ({ icon, title, desc, featured }) => (
-  <div
-    className={`dl-offer-card dl-lift relative rounded-2xl p-6 flex flex-col gap-4 cursor-pointer border overflow-hidden`}
+  <motion.div
+    variants={staggerChild}
+    {...hoverLift}
+    {...tapScale}
+    className="relative rounded-2xl p-6 flex flex-col gap-4 cursor-pointer border overflow-hidden"
     style={featured
       ? { background: "linear-gradient(150deg,#003554,#0077a8)", borderColor: "transparent" }
       : { background: "#fff", borderColor: "#e2f4f9" }}
   >
     <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
       style={{ background: featured ? "rgba(255,255,255,.15)" : "#ddf1f8" }}>
-      {icon}
+      <Icon icon={icon} className="text-blue-400"/>
     </div>
     <div className="flex-1 space-y-1.5">
       <h3 className={`font-bold text-[1rem] ${featured ? "text-white" : "text-slate-900"}`}>{title}</h3>
       <p className={`text-sm leading-relaxed ${featured ? "text-white/55" : "text-slate-500"}`}>{desc}</p>
     </div>
     <div
-      className="dl-offer-arrow self-end w-8 h-8 rounded-full flex items-center justify-center"
+      className="self-end w-8 h-8 rounded-full flex items-center justify-center"
       style={featured
         ? { background: "rgba(255,255,255,.15)", color: "#fff" }
         : { background: "#ddf1f8", color: "#0096C7" }}
     >
       <ArrowRight size={14} />
     </div>
-  </div>
+  </motion.div>
 );
 
 const DoctorCard = ({ doctor }) => (
-  <div className="dl-doc-card dl-lift relative bg-white rounded-2xl p-5 text-center border border-slate-100 cursor-pointer overflow-hidden">
+  <motion.div
+    variants={staggerChild}
+    {...hoverLift}
+    className="relative bg-white rounded-2xl p-5 text-center border border-slate-100 cursor-pointer overflow-hidden"
+  >
     <div className="relative w-20 h-20 mx-auto mb-4">
       <div
         className="w-full h-full rounded-2xl bg-cover bg-center"
@@ -383,20 +406,25 @@ const DoctorCard = ({ doctor }) => (
 
     <div className="my-3 border-t border-slate-100" />
 
-    <button
+    <motion.button
+      {...tapScale}
       className="w-full py-2 rounded-xl text-xs font-bold transition-all duration-200"
       style={{ background: "#ddf1f8", color: "#0096C7" }}
       onMouseEnter={e => { e.currentTarget.style.background = "#0096C7"; e.currentTarget.style.color = "#fff"; }}
       onMouseLeave={e => { e.currentTarget.style.background = "#ddf1f8"; e.currentTarget.style.color = "#0096C7"; }}
     >
       Book Now
-    </button>
-  </div>
+    </motion.button>
+  </motion.div>
 );
 
 const Testimonial = ({ name, rating, text }) => (
-  <div className="dl-lift bg-white rounded-2xl p-6 border border-slate-100 space-y-4">
-    <div className="dl-serif text-5xl leading-none font-bold" style={{ color: "#0096C7" }}>"</div>
+  <motion.div
+    variants={staggerChild}
+    {...hoverLift}
+    className="bg-white rounded-2xl p-6 border border-slate-100 space-y-4"
+  >
+    <div className="font-[Georgia,serif] text-5xl leading-none font-bold" style={{ color: "#0096C7" }}>"</div>
     <p className="text-slate-600 text-sm leading-relaxed">{text}</p>
     <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
       <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
@@ -411,7 +439,7 @@ const Testimonial = ({ name, rating, text }) => (
         </div>
       </div>
     </div>
-  </div>
+  </motion.div>
 );
 
 export default DoctorLanding;

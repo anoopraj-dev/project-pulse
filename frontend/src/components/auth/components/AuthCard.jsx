@@ -11,6 +11,8 @@ import { ClipLoader } from "react-spinners";
 import { EmailModal } from "../../ui/modals/ModalInputs";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
+import {motion} from 'framer-motion'
+import { fadeIn, fadeUp, scaleIn } from "@/utilis/animations";
 
 //------------- AUTH SERVICES ---------------
 import { signup, signin, adminLogin, updateClerkUser } from "../../../api/auth/authService";
@@ -58,6 +60,11 @@ const AuthCard = ({ role: initialRole }) => {
     openSignIn();
   };
 
+  const isValidPassword = (password) =>{
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      return regex.test(password);
+  }
+
   // ----------- FORM SUBMISSION HANDLER ----------------
   const onSubmit = async (data) => {
     try {
@@ -66,11 +73,13 @@ const AuthCard = ({ role: initialRole }) => {
 
         // ---------- SIGNUP (DOCTOR / PATIENT) ----------
         if (isSignup && !isAdmin) {
-          if (data.password !== data.confirmPassword) {
-            openModal("Passwords do not match!");
-            return;
+          if(!isValidPassword(data.password)){
+            return toast.error('Password should of minimum length 8 & alpha numeric combination')
           }
-
+          if (data.password !== data.confirmPassword) {
+            return toast.error('Passwords do not match')
+          }
+          
           const signupData = {
             name: data.name,
             email: data.email,
@@ -118,20 +127,25 @@ const AuthCard = ({ role: initialRole }) => {
 
         // ---------- DOCTOR / PATIENT LOGIN ----------
         const response = await signin(data.email, data.password, role);
-
+        console.log(response)
+        if(!response.user.isVerified){
+          return toast.error('Verify your email')
+        }
         if (response.success) {
           const fetchedUser = response.user;
           dispatch({ type: "SET_USER", payload: fetchedUser });
           toast.success(response.message);
 
           const firstLoginFlag = fetchedUser?.firstLogin;
+
+          console.log( 'firstLogin',firstLoginFlag)
           const target = firstLoginFlag
             ? role === "doctor"
               ? "/doctor/personal-info"
               : "/patient/personal-info"
             : `/${role}/profile`;
 
-          refreshUser().catch(() => {});
+          // refreshUser().catch(() => {});
           navigate(target, { replace: true });
         } else {
           toast.error(response.message);
@@ -145,6 +159,13 @@ const AuthCard = ({ role: initialRole }) => {
 
   useEffect(() => {
     if (!isLoaded || !user || !isSignedIn) return;
+
+    if(!user.emailAddresses[0].verified){
+      toast.error('Please verify your email befor continuing');
+      signOut({redirectUrl:'/signin'});
+      dispatch({type:'CLEAR_USER'});
+      return 
+    }
      setOauthProgress(true)
     const controller = new AbortController();
     const signal = controller.signal;
@@ -199,12 +220,15 @@ const AuthCard = ({ role: initialRole }) => {
   }, [isLoaded, user, isSignedIn]);
 
   return (
+    <motion.div custom={0.5} variants={fadeIn} initial='hidden' animate='visible'>
     <div className="flex flex-col">
       <div className="flex flex-col items-center">
         {!isAdmin && !email && <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />}
-        <h1 className="text-2xl font-bold my-2">{`${isAdmin ? "ADMIN" : isDoctor ? "DOCTOR" : "PATIENT"} ${isSignup ? "SIGNUP" : "LOGIN"}`}</h1>
+       <div className=" w-full flex justify-center align-center p-1 rounded-md">
+         <h1 className=" font-[Georgia] font-semibold text-2xl my-2">{`${isAdmin ? "ADMIN" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "SignUp" : "SignIn"}`}</h1>
       </div>
-
+       </div>
+      
       <form className="my-2 bg-white rounded-xl" onSubmit={handleSubmit(onSubmit)}>
         <div className={`flex flex-col items-center w-sm bg-white rounded-xl ${isAdmin ? "p-10" : "p-2"}`}>
           {!isAdmin && isSignup && (
@@ -298,7 +322,9 @@ const AuthCard = ({ role: initialRole }) => {
           </div>
         </div>
       </form>
+     
     </div>
+     </motion.div>
   );
 };
 

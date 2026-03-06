@@ -1,10 +1,10 @@
-// animations.js
-// ─────────────────────────────────────────────────────────
-// Shared Framer Motion variants & helpers for Pulse360.
-// Import what you need in any page/component.
-// ─────────────────────────────────────────────────────────
 
-/* ── Fade up (general purpose staggered entrance) ── */
+
+//------------ Shared Framer Motion variants & helpers ----------------
+
+
+
+//------------- Fade up --------------
 export const fadeUp = {
   hidden:  { opacity: 0, y: 28 },
   visible: (delay = 0) => ({
@@ -14,7 +14,7 @@ export const fadeUp = {
   }),
 };
 
-/* ── Scale in (cards, modals, floating panels) ── */
+//-------------- Scale in -----------------
 export const scaleIn = {
   hidden:  { opacity: 0, scale: 0.93 },
   visible: (delay = 0) => ({
@@ -24,7 +24,7 @@ export const scaleIn = {
   }),
 };
 
-/* ── Fade in (no translation) ── */
+//-------------- Fade in ------------------
 export const fadeIn = {
   hidden:  { opacity: 0 },
   visible: (delay = 0) => ({
@@ -33,7 +33,7 @@ export const fadeIn = {
   }),
 };
 
-/* ── Slide in from left ── */
+//---------------- Slide in left -----------------
 export const slideInLeft = {
   hidden:  { opacity: 0, x: -40 },
   visible: (delay = 0) => ({
@@ -43,7 +43,7 @@ export const slideInLeft = {
   }),
 };
 
-/* ── Slide in from right ── */
+//-------- Slide in from right ------------
 export const slideInRight = {
   hidden:  { opacity: 0, x: 40 },
   visible: (delay = 0) => ({
@@ -53,12 +53,7 @@ export const slideInRight = {
   }),
 };
 
-/* ── Stagger container (wraps a list of children) ──
-   Usage:
-     <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-       <motion.div variants={fadeUp} custom={0}>...</motion.div>
-     </motion.div>
-*/
+//------------- Stagger Container ------------------
 export const staggerContainer = {
   hidden:  {},
   visible: {
@@ -66,7 +61,7 @@ export const staggerContainer = {
   },
 };
 
-/* ── Stagger child (use inside staggerContainer) ── */
+//------------------- Stagger Child ------------
 export const staggerChild = {
   hidden:  { opacity: 0, y: 22 },
   visible: {
@@ -76,7 +71,7 @@ export const staggerChild = {
   },
 };
 
-/* ── Floating / bobbing (infinite, for blobs or cards) ── */
+//------------- Floating -----------------
 export const floatY = (yRange = 12, duration = 7) => ({
   animate: {
     y: [0, -yRange, 0],
@@ -91,7 +86,7 @@ export const floatYReverse = (yRange = 12, duration = 9) => ({
   },
 });
 
-/* ── Pulse ring (for live indicator dots) ── */
+//--------------- Pulse ring animation -------------
 export const pulseRing = {
   animate: {
     boxShadow: [
@@ -103,7 +98,7 @@ export const pulseRing = {
   },
 };
 
-/* ── Hover lift (for cards) ── */
+//-------------- Hover Lift -------------------
 export const hoverLift = {
   whileHover: {
     y: -6,
@@ -112,7 +107,15 @@ export const hoverLift = {
   },
 };
 
-/* ── Hover lift subtle (lighter version) ── */
+//-------------- Hover Lift -------------------
+export const simpleHover = {
+  whileHover: {
+    y: -6,
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
+
+//--------------- Hover lift lighter version -----------------
 export const hoverLiftSubtle = {
   whileHover: {
     y: -3,
@@ -121,12 +124,12 @@ export const hoverLiftSubtle = {
   },
 };
 
-/* ── Button tap (press effect) ── */
+//-------------------- Button Click -----------------
 export const tapScale = {
   whileTap: { scale: 0.97, transition: { duration: 0.1 } },
 };
 
-/* ── Top border reveal (for doc cards) ── */
+//---------------- Border reveal top ----------- (selection)
 export const borderReveal = {
   hidden:  { scaleX: 0, originX: 0 },
   visible: { scaleX: 1, originX: 0, transition: { duration: 0.35, ease: "easeOut" } },
@@ -142,16 +145,40 @@ export const counterVariant = {
   }),
 };
 
-/* ── Wave/section divider ── */
+//------------- Section divider --------------
 export const waveFadeIn = {
   hidden:  { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.8, delay: 0.3 } },
 };
 
-/* ──────────────────────────────────────────────────────────
-   VIEWPORT DEFAULTS
-   Use these as the default `viewport` prop on whileInView
-   so elements only animate once they enter the screen.
-────────────────────────────────────────────────────────── */
+export const slideLeft = {
+  hidden: { x: "-100%", opacity: 0 },
+  show: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.6, ease: "easeInOut" }
+  },
+  exit: {
+    x: "-100%",
+    opacity: 0,
+    transition: { duration: 0.4 }
+  }
+};
+
+export const slideRight = {
+  hidden: { x: "100%", opacity: 0 },
+  show: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.6, ease: "easeInOut" }
+  },
+  exit: {
+    x: "100%",
+    opacity: 0,
+    transition: { duration: 0.4 }
+  }
+};
+
+
 export const viewportOnce     = { once: true, margin: "-60px" };
 export const viewportOnceEarly = { once: true, margin: "0px" };

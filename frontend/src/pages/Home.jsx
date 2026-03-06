@@ -15,6 +15,9 @@ import {
   hoverLift,
   hoverLiftSubtle,
   viewportOnce,
+  simpleHover,
+  slideInLeft,
+  slideInRight,
 } from "../utilis/animations";
 import Heart from "@/components/ui/3D/Heart";
 import HeartbeatPulse from "@/components/ui/3D/Heartbeatpulse";
@@ -112,7 +115,7 @@ const Home = () => {
   };
 
   return (
-    <div className="h-root min-h-screen bg-slate-50">
+    <div className="h-root min-h-screen bg-slate-50 font-[Georgia,serif]">
       <GlobalStyles />
 
       {/* ------------ Hero Section ------------ */}
@@ -179,19 +182,19 @@ const Home = () => {
             </motion.div>
 
             <motion.h1
-              variants={staggerChild}
-              className="h-serif text-5xl md:text-6xl lg:text-[4.25rem] font-bold text-white leading-[1.07]"
+              variants={staggerChild}{...simpleHover}
+              className="font-[Georgia] text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.09] "
             >
-              Care That Fits
+              Care that fits
               <br />
-              Your&nbsp;
+              your&nbsp;
               <em className="not-italic" style={{ color: "#48cae4" }}>
-                Lifestyle
+                lifestyle
               </em>
             </motion.h1>
 
             <motion.p
-              variants={staggerChild}
+              variants={staggerChild}{...simpleHover}
               className="text-[1.05rem] leading-relaxed max-w-[480px]"
               style={{ color: "rgba(255,255,255,.55)" }}
             >
@@ -199,7 +202,7 @@ const Home = () => {
             </motion.p>
 
             <motion.div
-              variants={staggerChild}
+              variants={staggerChild}{...simpleHover}
               className="flex flex-wrap gap-3"
             >
               <PrimaryBtn>
@@ -251,7 +254,7 @@ const Home = () => {
 
           <motion.div
             className="hidden lg:flex shrink-0 items-center justify-center lg:w-[650px] lg:aspect-square relative"
-            variants={scaleIn}
+            variants={slideInRight}
             initial="hidden"
             animate="visible"
             custom={0.5}
@@ -322,7 +325,7 @@ const Home = () => {
 
           <motion.div
             className="relative"
-            variants={scaleIn}
+            variants={slideInRight}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}

@@ -11,6 +11,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
       <div className="flex">
         <SidebarShimmer/>
         <ProfileShimmer/>
+     
       </div>
     ); 
   }

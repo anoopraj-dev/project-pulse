@@ -36,6 +36,16 @@ export const userSignin = async (req, res) => {
       });
     }
 
+    //------------- CHECK IF VERIFIED EMAIL-----------
+    const isVerifiedUser = user.isVerified === true;
+    if(!isVerifiedUser){
+      res.clearCookie('token')
+      return res.status(401).json({
+        success:false,
+        message:'Verify your email to continue'
+      })
+    }
+
     // ----------CREATE JWT PAYLOAD-----------
     const payload = {
       id: user._id,
@@ -57,8 +67,6 @@ export const userSignin = async (req, res) => {
       maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
-  
-
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -70,6 +78,7 @@ export const userSignin = async (req, res) => {
         firstLogin: user.firstLogin,
         name: user.name,
         profilePicture: user.profilePicture,
+        isVerified:user.isVerified
       },
     });
   } catch (error) {

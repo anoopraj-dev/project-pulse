@@ -9,6 +9,7 @@ import { emailTemplate } from "../../utils/emailTemplate.js";
 //------------------ VERIFY OTP CONTROLLER -------------------
 export const verifyOtp = async (req, res) => {
   try {
+    console.log(req.session);
     if (!req.session || !req.session.OTP) {
       return res.status(400).json({ success: false, message: 'Session expired or OTP not generated' });
     }
@@ -57,7 +58,7 @@ export const resetPassword = async (req, res) => {
     await Otp.create({
       email,
       otp: otpCode,
-      expiresAt: new Date(Date.now() + 2 * 60 * 1000) // 2 minutes
+      expiresAt: new Date(Date.now() + 60 * 1000) // 1minutes
     });
 
     req.session.OTP = { email, type, role };
@@ -117,7 +118,7 @@ export const resendOtp = async (req, res) => {
       { otp: otpCode, expiresAt: new Date(Date.now() + 2 * 60 * 1000) },
       { new: true, upsert: true }
     );
-
+    req.session.OTP = { email, type };
     const user = await Patient.findOne({ email }) || await Doctor.findOne({ email });
 
     const mailOptions = {

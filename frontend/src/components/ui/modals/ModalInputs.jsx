@@ -63,6 +63,8 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   );
 };
 
+
+
 //----------------- set Password modal ---------------------
 
 export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
