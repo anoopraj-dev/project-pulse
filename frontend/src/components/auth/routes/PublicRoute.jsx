@@ -10,7 +10,7 @@ const PublicRoute = ({ children }) => {
   if (isLoading) return <ShimmerCard />;
 
 
-  const publicPaths = [ "/","/signin", "/signup","/verify-email"];
+  const publicPaths = [ "/","/signin", "/signup","/verify-email","/about-us"];
   const isPublicPage = publicPaths.includes(location.pathname);
 
   if (isAuthenticated === true  && isPublicPage) {

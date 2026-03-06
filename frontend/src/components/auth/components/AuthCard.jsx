@@ -12,7 +12,7 @@ import { EmailModal } from "../../ui/modals/ModalInputs";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
 import {motion} from 'framer-motion'
-import { fadeIn, fadeUp, scaleIn } from "@/utilis/animations";
+import { fadeIn} from "@/utilis/animations";
 
 //------------- AUTH SERVICES ---------------
 import { signup, signin, adminLogin, updateClerkUser } from "../../../api/auth/authService";
@@ -225,7 +225,7 @@ const AuthCard = ({ role: initialRole }) => {
       <div className="flex flex-col items-center">
         {!isAdmin && !email && <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />}
        <div className=" w-full flex justify-center align-center p-1 rounded-md">
-         <h1 className=" font-[Georgia] font-semibold text-2xl my-2">{`${isAdmin ? "ADMIN" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "SignUp" : "SignIn"}`}</h1>
+         <h1 className=" font-[Georgia] font-semibold text-2xl my-2">{`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "SignUp" : "SignIn"}`}</h1>
       </div>
        </div>
       
