@@ -5,6 +5,7 @@ import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { doctorOnboarding } from "../../components/forms/config/doctorOnboarding";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
+import { useModal } from "@/contexts/ModalContext";
 
 import {
   submitDoctorPersonalInfo,
@@ -14,6 +15,7 @@ import {
 
 import { useFileUploadContext } from "../../contexts/FileUploadContext";
 import { useUser } from "../../contexts/UserContext";
+import ShimmerCard from "@/components/ui/loaders/ShimmerCard";
 
 const FILE_FIELDS = [
   "profilePicture",
@@ -27,11 +29,16 @@ const DoctorOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const submitAction = useAsyncAction();
-  const { dispatch } = useUser();
+  const { email, id, isLoading, dispatch } = useUser();
+  const { openModal } = useModal();
 
   const { files, clearField } = useFileUploadContext();
 
   const handleNext = async (data) => {
+    if (isLoading || !email || !id) {
+      openModal("User data not loaded yet. Please wait.");
+      return;
+    }
     try {
       await submitAction.executeAsyncFn(async () => {
         const formData = new FormData();
@@ -102,7 +109,7 @@ const DoctorOnboarding = () => {
           services.push({
             serviceType: "online",
             fees: Number(data.online_fee),
-            availableDates: [], 
+            availableDates: [],
           });
         }
 
@@ -203,12 +210,19 @@ const DoctorOnboarding = () => {
             </div>
           ))}
         </div>
-
-        <DynamicForm
-          config={doctorOnboarding[stepKeys[currentStep]]}
-          onSubmit={handleNext}
-          loading={submitAction.loading}
-        />
+        {isLoading ? (
+          <div>
+            <ShimmerCard />
+            <ShimmerCard />
+            <ShimmerCard />
+          </div>
+        ) : (
+          <DynamicForm
+            config={doctorOnboarding[stepKeys[currentStep]]}
+            onSubmit={handleNext}
+            loading={submitAction.loading}
+          />
+        )}
       </div>
     </div>
   );

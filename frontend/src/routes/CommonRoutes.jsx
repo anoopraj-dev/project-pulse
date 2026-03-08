@@ -42,9 +42,9 @@ const CommonRoutes = [
     ),
   },
 
-  { path: "/admin/login", element: <AdminLogin /> },
-  { path: "/about-us", element: <AboutUs /> },
-  { path: "/reset-password", element: <VerifyEmail /> },
+  { path: "/admin/login", element: <PublicRoute><AdminLogin /></PublicRoute> },
+  { path: "/about-us", element: <PublicRoute><AboutUs /> </PublicRoute>},
+  { path: "/reset-password", element:<PublicRoute><VerifyEmail /></PublicRoute>  },
   { path: "/page-not-found", element: <NotFound /> },
 ];
 

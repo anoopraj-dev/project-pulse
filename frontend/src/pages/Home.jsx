@@ -16,7 +16,6 @@ import {
   hoverLiftSubtle,
   viewportOnce,
   simpleHover,
-  slideInLeft,
   slideInRight,
 } from "../utilis/animations";
 import Heart from "@/components/ui/3D/Heart";

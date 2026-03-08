@@ -6,21 +6,35 @@ const initialState = {
   email: "",
   id: "",
   role: "",
-  firstLogin: true,
+  firstLogin: null,
   name: "",
   profilePicture: "",
   isLoading: true,
-  isAuthenticated:null,
+  isAuthenticated: null,
 };
 
 // -------- REDUCER --------
 const userReducer = (state, action) => {
   switch (action.type) {
     case "SET_USER":
-      return { ...state, ...action.payload, isAuthenticated:true, isLoading: false };
+      return {
+        ...state,
+        ...action.payload,
+        isAuthenticated: true,
+        isLoading: false,
+      };
 
     case "CLEAR_USER":
-      return { ...initialState, isAuthenticated:null, isLoading: false };
+      return {
+        email: "",
+        id: "",
+        role: "",
+        firstLogin: true,
+        name: "",
+        profilePicture: "",
+        isLoading: false,
+        isAuthenticated: false,
+      };
 
     case "SET_LOADING":
       return { ...state, isLoading: action.payload };
@@ -33,7 +47,6 @@ const userReducer = (state, action) => {
   }
 };
 
-
 // -------- CONTEXT --------
 const UserContext = createContext({
   ...initialState,
@@ -42,9 +55,8 @@ const UserContext = createContext({
 });
 
 export const UserProvider = ({ children }) => {
-
   const [state, dispatch] = useReducer(userReducer, initialState);
-  
+
   // -------- REFRESH USER (manual trigger) --------
   const refreshUser = async () => {
     dispatch({ type: "SET_LOADING", payload: true });
@@ -59,14 +71,12 @@ export const UserProvider = ({ children }) => {
 
       dispatch({ type: "CLEAR_USER" });
       return null;
-    } catch (error){
-      
-        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
+    } catch (error) {
+      if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
         return;
       }
       dispatch({ type: "CLEAR_USER" });
     }
-    
   };
 
   // -------- INITIAL LOAD --------
@@ -80,26 +90,28 @@ export const UserProvider = ({ children }) => {
         if (data?.success) {
           dispatch({ type: "SET_USER", payload: data.user });
         } else {
-          dispatch({ type:'CLEAR_USER' });
+          dispatch({ type: "CLEAR_USER" });
         }
-      } catch (error){
-        if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") {
-        return;
+      } catch (error) {
+        if (
+          error?.name === "CanceledError" ||
+          error?.code === "ERR_CANCELED" ||
+          error?.name === "AbortError"
+        ) {
+          return;
         }
-         dispatch({ type:'CLEAR_USER' });
+
+        dispatch({ type: "CLEAR_USER" });
       }
-     
     };
-    
 
     initUser();
 
     return () => controller.abort();
   }, []);
 
-  
   return (
-    <UserContext.Provider value={{ ...state, dispatch, refreshUser,}}>
+    <UserContext.Provider value={{ ...state, dispatch, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

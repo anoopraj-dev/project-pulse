@@ -18,13 +18,11 @@
 
 // export default AuthImage;
 
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 
 import {
-
   fadeUp,
   fadeIn,
   staggerContainer,
@@ -37,22 +35,20 @@ import { EmailModal } from "@/components/ui/modals/ModalInputs";
 import { useNavigate } from "react-router-dom";
 
 const AuthImage = () => {
-  
   const navigate = useNavigate();
-  const{openModal} = useModal();
+  const { openModal } = useModal();
   const [sent, setSent] = useState(false);
 
   const handleVerifyEmail = () => {
-    openModal(`Didn't verify your email?`, EmailModal,{
-      endPoint:'/api/auth/resend-otp',
-      type:'emailVerification',
-      onSubmit:() => navigate('/verify-email')
-    })
-  }
+    openModal(`Didn't verify your email?`, EmailModal, {
+      endPoint: "/api/auth/resend-otp",
+      type: "emailVerification",
+      onSubmit: () => navigate("/verify-email"),
+    });
+  };
 
   return (
     <div className="relative flex items-center justify-center w-full h-screen overflow-hidden font-[Georgia,serif]">
-
       {/* Background gradient */}
       <motion.div
         initial="hidden"
@@ -79,7 +75,8 @@ const AuthImage = () => {
       >
         {/* Tag */}
         <motion.div
-          variants={fadeUp}{...simpleHover}
+          variants={fadeUp}
+          {...simpleHover}
           custom={0.4}
           className="flex items-center gap-[7px] mb-9"
         >
@@ -96,19 +93,19 @@ const AuthImage = () => {
 
         {/* Headline */}
         <motion.h2
-          variants={fadeUp}{...simpleHover}
+          variants={fadeUp}
+          {...simpleHover}
           custom={0.5}
           className="text-[44px] font-normal text-white/90 leading-[1.3] mb-[14px] tracking-[-0.02em]"
         >
           One step from <br />
-          <em className="text-white/35 italic">
-            your first consultation.
-          </em>
+          <em className="text-white/35 italic">your first consultation.</em>
         </motion.h2>
 
         {/* Body */}
         <motion.p
-          variants={fadeUp}{...simpleHover}
+          variants={fadeUp}
+          {...simpleHover}
           custom={0.6}
           className="text-[13px] leading-[1.8] text-white/30 mb-8 font-sans font-light"
         >
@@ -134,9 +131,7 @@ const AuthImage = () => {
           >
             <Icon
               icon={
-                sent
-                  ? "solar:check-circle-linear"
-                  : "solar:shield-check-linear"
+                sent ? "solar:check-circle-linear" : "solar:shield-check-linear"
               }
               width="14"
               className={

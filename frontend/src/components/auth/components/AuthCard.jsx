@@ -11,11 +11,16 @@ import { ClipLoader } from "react-spinners";
 import { EmailModal } from "../../ui/modals/ModalInputs";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import toast from "react-hot-toast";
-import {motion} from 'framer-motion'
-import { fadeIn} from "@/utilis/animations";
+import { motion } from "framer-motion";
+import { fadeIn } from "@/utilis/animations";
 
 //------------- AUTH SERVICES ---------------
-import { signup, signin, adminLogin, updateClerkUser } from "../../../api/auth/authService";
+import {
+  signup,
+  signin,
+  adminLogin,
+  updateClerkUser,
+} from "../../../api/auth/authService";
 
 const AuthCard = ({ role: initialRole }) => {
   const [isDoctor, setIsDoctor] = useState(() => {
@@ -23,7 +28,9 @@ const AuthCard = ({ role: initialRole }) => {
     return storedRole === "doctor";
   });
 
-  const [oauthProgress, setOauthProgress] = useState(() => sessionStorage.getItem("oauthProgress") === "true");
+  const [oauthProgress, setOauthProgress] = useState(
+    () => sessionStorage.getItem("oauthProgress") === "true",
+  );
   const [showPassword, setShowPassword] = useState(false);
 
   const location = useLocation();
@@ -34,15 +41,21 @@ const AuthCard = ({ role: initialRole }) => {
   const { openSignIn, signOut } = useClerk();
   const buttonRef = useRef(null);
   const isSignup = location.pathname === "/signup";
-  const isAdmin = initialRole === "admin" || location.pathname.includes("/admin");
+  const isAdmin =
+    initialRole === "admin" || location.pathname.includes("/admin");
   const { getToken } = useAuth();
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
   const authFormAction = useAsyncAction();
 
   // -------------- UTILITY HANDLERS ----------------
-  const handleShowPassword = () => setShowPassword(prev => !prev);
-  const toggleRole = () => setIsDoctor(prev => !prev);
+  const handleShowPassword = () => setShowPassword((prev) => !prev);
+  const toggleRole = () => setIsDoctor((prev) => !prev);
 
   const handleForgotPassword = () => {
     openModal("Forgot your password?", EmailModal, {
@@ -56,14 +69,15 @@ const AuthCard = ({ role: initialRole }) => {
     const role = isDoctor ? "doctor" : "patient";
     sessionStorage.setItem("userRole", role);
     sessionStorage.setItem("oauthProgress", "true");
-   
+
     openSignIn();
   };
 
-  const isValidPassword = (password) =>{
-      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      return regex.test(password);
-  }
+  const isValidPassword = (password) => {
+    const regex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
 
   // ----------- FORM SUBMISSION HANDLER ----------------
   const onSubmit = async (data) => {
@@ -73,13 +87,15 @@ const AuthCard = ({ role: initialRole }) => {
 
         // ---------- SIGNUP (DOCTOR / PATIENT) ----------
         if (isSignup && !isAdmin) {
-          if(!isValidPassword(data.password)){
-            return toast.error('Password should of minimum length 8 & alpha numeric combination')
+          if (!isValidPassword(data.password)) {
+            return toast.error(
+              "Password should of minimum length 8 & alpha numeric combination",
+            );
           }
           if (data.password !== data.confirmPassword) {
-            return toast.error('Passwords do not match')
+            return toast.error("Passwords do not match");
           }
-          
+
           const signupData = {
             name: data.name,
             email: data.email,
@@ -90,7 +106,7 @@ const AuthCard = ({ role: initialRole }) => {
           };
 
           const response = await signup(signupData);
-          
+
           if (response.success) {
             toast.success(response.message);
 
@@ -99,12 +115,11 @@ const AuthCard = ({ role: initialRole }) => {
               email: data.email,
               type: "emailVerification",
               role,
-              expiryTime
+              expiryTime,
             };
             sessionStorage.setItem("otpSession", JSON.stringify(payload));
             navigate("/verify-email");
           } else {
-        
             toast.error(response.message);
           }
           return;
@@ -127,18 +142,18 @@ const AuthCard = ({ role: initialRole }) => {
 
         // ---------- DOCTOR / PATIENT LOGIN ----------
         const response = await signin(data.email, data.password, role);
-        console.log(response)
-        if(!response.user.isVerified){
-          return toast.error('Verify your email')
+        console.log(response);
+        if (!response.user.isVerified) {
+          return toast.error("Verify your email");
         }
         if (response.success) {
           const fetchedUser = response.user;
+          console.log("fetchedUser", fetchedUser);
           dispatch({ type: "SET_USER", payload: fetchedUser });
           toast.success(response.message);
 
           const firstLoginFlag = fetchedUser?.firstLogin;
 
-          console.log( 'firstLogin',firstLoginFlag)
           const target = firstLoginFlag
             ? role === "doctor"
               ? "/doctor/personal-info"
@@ -152,7 +167,7 @@ const AuthCard = ({ role: initialRole }) => {
         }
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
   };
@@ -160,13 +175,13 @@ const AuthCard = ({ role: initialRole }) => {
   useEffect(() => {
     if (!isLoaded || !user || !isSignedIn) return;
 
-    if(!user.emailAddresses[0].verified){
-      toast.error('Please verify your email befor continuing');
-      signOut({redirectUrl:'/signin'});
-      dispatch({type:'CLEAR_USER'});
-      return 
+    if (!user.emailAddresses[0].verified) {
+      toast.error("Please verify your email befor continuing");
+      signOut({ redirectUrl: "/signin" });
+      dispatch({ type: "CLEAR_USER" });
+      return;
     }
-     setOauthProgress(true)
+    setOauthProgress(true);
     const controller = new AbortController();
     const signal = controller.signal;
 
@@ -211,7 +226,7 @@ const AuthCard = ({ role: initialRole }) => {
         dispatch({ type: "CLEAR_USER" });
       } finally {
         sessionStorage.removeItem("oauthProgress");
-        setOauthProgress(false)
+        setOauthProgress(false);
       }
     };
 
@@ -220,111 +235,170 @@ const AuthCard = ({ role: initialRole }) => {
   }, [isLoaded, user, isSignedIn]);
 
   return (
-    <motion.div custom={0.5} variants={fadeIn} initial='hidden' animate='visible'>
-    <div className="flex flex-col">
-      <div className="flex flex-col items-center">
-        {!isAdmin && !email && <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />}
-       <div className=" w-full flex justify-center align-center p-1 rounded-md">
-         <h1 className=" font-[Georgia] font-semibold text-2xl my-2">{`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "SignUp" : "SignIn"}`}</h1>
-      </div>
-       </div>
-      
-      <form className="my-2 bg-white rounded-xl" onSubmit={handleSubmit(onSubmit)}>
-        <div className={`flex flex-col items-center w-sm bg-white rounded-xl ${isAdmin ? "p-10" : "p-2"}`}>
-          {!isAdmin && isSignup && (
+    <motion.div
+      custom={0.5}
+      variants={fadeIn}
+      initial="hidden"
+      animate="visible"
+    >
+      <div className="flex flex-col">
+        <div className="flex flex-col items-center">
+          {!isAdmin && !email && (
+            <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />
+          )}
+          <div className=" w-full flex justify-center align-center p-1 rounded-md">
+            <h1 className=" font-[Georgia] font-semibold text-2xl my-2">{`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "SignUp" : "SignIn"}`}</h1>
+          </div>
+        </div>
+
+        <form
+          className="my-2 bg-white rounded-xl"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <div
+            className={`flex flex-col items-center w-sm bg-white rounded-xl ${isAdmin ? "p-10" : "p-2"}`}
+          >
+            {!isAdmin && isSignup && (
+              <div className="w-full my-2">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  {...register("name", { required: "Name is required" })}
+                  className="w-full p-4 border border-gray-300 rounded-md"
+                />
+                {errors.name && (
+                  <span className="text-red-600 text-sm">
+                    {errors.name.message}
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="w-full my-2">
               <input
-                type="text"
-                placeholder="Name"
-                {...register("name", { required: "Name is required" })}
+                type="email"
+                placeholder="Email"
+                {...register("email", { required: "Email is required" })}
                 className="w-full p-4 border border-gray-300 rounded-md"
               />
-              {errors.name && <span className="text-red-600 text-sm">{errors.name.message}</span>}
+              {errors.email && (
+                <span className="text-red-600 text-sm">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
-          )}
 
-          <div className="w-full my-2">
-            <input
-              type="email"
-              placeholder="Email"
-              {...register("email", { required: "Email is required" })}
-              className="w-full p-4 border border-gray-300 rounded-md"
-            />
-            {errors.email && <span className="text-red-600 text-sm">{errors.email.message}</span>}
-          </div>
-
-          <div className="w-full my-2 relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              {...register("password", { required: "Password is required" })}
-              className="w-full p-4 border border-gray-300 rounded-md"
-            />
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" onClick={handleShowPassword}>
-              <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" />
-            </span>
-            {errors.password && <span className="text-red-600 text-sm">{errors.password.message}</span>}
-          </div>
-
-          {!isAdmin && isSignup && (
             <div className="w-full my-2 relative">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Confirm Password"
-                {...register("confirmPassword", { required: "Confirm your password" })}
+                placeholder="Password"
+                {...register("password", { required: "Password is required" })}
                 className="w-full p-4 border border-gray-300 rounded-md"
               />
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500" onClick={handleShowPassword}>
-                <Icon icon={showPassword ? "mdi:eye-off" : "mdi:eye"} width="20" height="20" />
+              <span
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                onClick={handleShowPassword}
+              >
+                <Icon
+                  icon={showPassword ? "mdi:eye-off" : "mdi:eye"}
+                  width="20"
+                  height="20"
+                />
               </span>
-              {errors.confirmPassword && <span className="text-red-600 text-sm">{errors.confirmPassword.message}</span>}
+              {errors.password && (
+                <span className="text-red-600 text-sm">
+                  {errors.password.message}
+                </span>
+              )}
             </div>
-          )}
 
-          {!authFormAction.loading ? (
-            <PrimaryButton ref={buttonRef} text={isSignup ? "SIGN UP" : "SIGN IN"} className="w-full mt-2 text-white bg-[#0096C7]" type="submit" />
-          ) : (
-            <div className="my-4">
-              <ClipLoader color="#0096C7" />
-            </div>
-          )}
-
-          {!isSignup && !isAdmin && (
-            <PrimaryButton
-              type="button"
-              onClick={handleGoogleSignin}
-              disabled={oauthProgress}
-              text={oauthProgress ? "Signing in.." : "SIGN IN WITH GOOGLE"}
-              className="w-full bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
-            />
-          )}
-
-          <div className="my-5 text-center">
-            {isAdmin ? (
-              <p className="text-gray-600">Login with your admin credentials</p>
-            ) : isSignup ? (
-              <p>
-                Already a member? <Link to="/signin" className="text-blue-600 underline">SignIn Now</Link>
-              </p>
-            ) : (
-              <>
-                <p>
-                  Forgot Password?{" "}
-                  <span className="text-blue-600 underline cursor-pointer" onClick={handleForgotPassword}>
-                    Reset Password
+            {!isAdmin && isSignup && (
+              <div className="w-full my-2 relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  {...register("confirmPassword", {
+                    required: "Confirm your password",
+                  })}
+                  className="w-full p-4 border border-gray-300 rounded-md"
+                />
+                <span
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                  onClick={handleShowPassword}
+                >
+                  <Icon
+                    icon={showPassword ? "mdi:eye-off" : "mdi:eye"}
+                    width="20"
+                    height="20"
+                  />
+                </span>
+                {errors.confirmPassword && (
+                  <span className="text-red-600 text-sm">
+                    {errors.confirmPassword.message}
                   </span>
-                </p>
-                <p>
-                  Not a member yet? <Link to="/signup" className="text-blue-600 underline">Signup Now</Link>
-                </p>
-              </>
+                )}
+              </div>
             )}
+
+            {!authFormAction.loading ? (
+              <PrimaryButton
+                ref={buttonRef}
+                text={isSignup ? "SIGN UP" : "SIGN IN"}
+                className="w-full mt-2 text-white bg-[#0096C7]"
+                type="submit"
+              />
+            ) : (
+              <div className="my-4">
+                <ClipLoader color="#0096C7" />
+              </div>
+            )}
+
+            {!isSignup && !isAdmin && (
+              <PrimaryButton
+                type="button"
+                onClick={handleGoogleSignin}
+                disabled={oauthProgress}
+                text={oauthProgress ? "Signing in.." : "SIGN IN WITH GOOGLE"}
+                className="w-full bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
+              />
+            )}
+
+            <div className="my-5 text-center">
+              {isAdmin ? (
+                <p className="text-gray-600">
+                  Login with your admin credentials
+                </p>
+              ) : isSignup ? (
+                <p>
+                  Already a member?{" "}
+                  <Link to="/signin" className="text-blue-600 underline">
+                    SignIn Now
+                  </Link>
+                </p>
+              ) : (
+                <>
+                  <p>
+                    Forgot Password?{" "}
+                    <span
+                      className="text-blue-600 underline cursor-pointer"
+                      onClick={handleForgotPassword}
+                    >
+                      Reset Password
+                    </span>
+                  </p>
+                  <p>
+                    Not a member yet?{" "}
+                    <Link to="/signup" className="text-blue-600 underline">
+                      Signup Now
+                    </Link>
+                  </p>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </form>
-     
-    </div>
-     </motion.div>
+        </form>
+      </div>
+    </motion.div>
   );
 };
 

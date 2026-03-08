@@ -25,6 +25,7 @@ const PatientOnboarding = () => {
   const submitAction = useAsyncAction();
 
   const { email, id, isLoading, dispatch } = useUser();
+
   const { openModal } = useModal();
   const { files, clearField } = useFileUploadContext();
 
@@ -54,7 +55,6 @@ const PatientOnboarding = () => {
         if (files?.profilePicture) {
           formData.append("profilePicture", files.profilePicture);
         }
-
 
         // ---------- API CALL ----------
         let response;

@@ -38,12 +38,12 @@ export const userSignin = async (req, res) => {
 
     //------------- CHECK IF VERIFIED EMAIL-----------
     const isVerifiedUser = user.isVerified === true;
-    if(!isVerifiedUser){
-      res.clearCookie('token')
+    if (!isVerifiedUser) {
+      res.clearCookie("token");
       return res.status(401).json({
-        success:false,
-        message:'Verify your email to continue'
-      })
+        success: false,
+        message: "Verify your email to continue",
+      });
     }
 
     // ----------CREATE JWT PAYLOAD-----------
@@ -78,7 +78,7 @@ export const userSignin = async (req, res) => {
         firstLogin: user.firstLogin,
         name: user.name,
         profilePicture: user.profilePicture,
-        isVerified:user.isVerified
+        isVerified: user.isVerified,
       },
     });
   } catch (error) {
@@ -93,8 +93,8 @@ export const userSignin = async (req, res) => {
 export const authCheck = async (req, res) => {
   try {
     // authMiddleware already sets req.user
-    res.status(200).json({ user: req.user });
+    res.status(200).json({ success: true, user: req.user });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
