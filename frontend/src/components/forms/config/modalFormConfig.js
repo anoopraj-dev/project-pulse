@@ -23,12 +23,14 @@ export const setPasswordFormConfig = {
       label: "New Password",
       type: "password",
       required: true,
+      icon:'mdi-eye'
     },
     {
       name: "confirmPassword",
       label: "Confirm Password",
       type: "password",
       required: true,
+      icon:'mdi-eye'
     },
   ],
   buttonText: "Update Password",

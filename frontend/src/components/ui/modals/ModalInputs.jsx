@@ -23,6 +23,7 @@ import { Icon } from "@iconify/react";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { revokeProfileStatus } from "../../../api/admin/adminApis";
 
+//-------------- Email & role modal --------------------
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
 
@@ -71,9 +72,23 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData) => {
+    const {newPassword,confirmPassword} = formData;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
+
+    if(!passwordRegex.test(newPassword)){
+      toast.error(
+        'Password must be atleast 8 characters and include a letter, number and symbol'
+      );
+      return ;
+    }
+
+    if(newPassword !== confirmPassword){
+      toast.error('Passwords do not match')
+    }
     try {
       setLoading(true);
       const payload = { ...formData, type };
+      
       const { data } = await api.post(endPoint, payload);
       sessionStorage.setItem(
         "forgotPasswordVerification",

@@ -49,6 +49,7 @@ export const verifyOtp = async (req, res) => {
 // ------------------------- RESET PASSWORD CONTROLLER ---------------------
 export const resetPassword = async (req, res) => {
   try {
+    console.log(req.body)
     const { email, role, type } = req.body;
     const Model = role === 'doctor' ? Doctor : Patient;
     const user = await Model.findOne({ email });
