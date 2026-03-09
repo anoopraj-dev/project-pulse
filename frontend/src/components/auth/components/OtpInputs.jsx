@@ -81,15 +81,35 @@ const OtpInputs = () => {
   };
 
   // ---------------- TIMER ----------------
+  // useEffect(() => {
+  //   if (secondsLeft <= 0) return;
+
+  //   const timer = setInterval(() => {
+  //     setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
+  //   }, 1000);
+
+  //   return () => clearInterval(timer);
+  // }, [secondsLeft]);
+
   useEffect(() => {
-    if (secondsLeft <= 0) return;
+  const interval = setInterval(() => {
+    const session = JSON.parse(sessionStorage.getItem("otpSession") || "{}");
 
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
+    if (!session.expiryTime) {
+      setSecondsLeft(0);
+      return;
+    }
 
-    return () => clearInterval(timer);
-  }, [secondsLeft]);
+    const remaining = Math.max(
+      Math.floor((session.expiryTime - Date.now()) / 1000),
+      0
+    );
+
+    setSecondsLeft(remaining);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
 
   // ---------------- SUBMIT OTP ----------------
   const handleSubmit = async (e) => {
@@ -174,11 +194,16 @@ const OtpInputs = () => {
         Didn’t receive the OTP?{" "}
         {!loading ? (
           <button
-            onClick={handleResendOtp}
-            className="text-blue-500 cursor-pointer"
-          >
-            {secondsLeft === 0 ? "Resend" : time}
-          </button>
+  disabled={secondsLeft > 0}
+  onClick={handleResendOtp}
+  className={`${
+    secondsLeft > 0
+      ? "text-gray-400 cursor-not-allowed"
+      : "text-blue-500 cursor-pointer"
+  }`}
+>
+  {secondsLeft === 0 ? "Resend OTP" : time}
+</button>
         ) : (
           <Icon icon="line-md:loading-twotone-loop" className="w-5 h-5" />
         )}

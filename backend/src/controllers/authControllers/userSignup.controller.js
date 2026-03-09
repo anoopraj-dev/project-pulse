@@ -96,10 +96,11 @@ export const userSignup = async (req, res) => {
 
     //---------- Generate OTP-----------------
     const otpCode = generateOtp();
+    const expiryTime = new Date(Date.now() +60*1000)
     await Otp.create({
       email,
       otp: otpCode,
-      expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
+      expiresAt: expiryTime, // 1 minutes
     });
 
     // ----------Email options for node mailer----------
@@ -134,6 +135,7 @@ export const userSignup = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: ` Verify your email with the OTP sent to your email`,
+      expiryTime: expiryTime.getTime()
     });
   } catch (error) {
     console.log(error);

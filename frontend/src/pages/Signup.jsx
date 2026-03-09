@@ -1,7 +1,7 @@
 import AuthCard from "../components/auth/components/AuthCard";
-import AuthImage from "../components/auth/components/AuthImage";
 import {motion} from 'framer-motion'
 import { slideLeft,slideRight } from "@/utilis/animations";
+import SignupImage from "@/components/auth/components/SignupImage";
 
 const Signup = () => {
   return (
@@ -11,7 +11,7 @@ const Signup = () => {
           <AuthCard />
         </motion.div>
         <motion.div variants={slideLeft} initial="hidden" animate="show" exit='exit' className="hidden md:block md:scale-100 ">
-          <AuthImage />
+          <SignupImage/>
         </motion.div>
         
 

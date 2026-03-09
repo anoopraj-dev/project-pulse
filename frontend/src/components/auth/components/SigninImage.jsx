@@ -34,7 +34,7 @@ import { useModal } from "@/contexts/ModalContext";
 import { EmailModal } from "@/components/ui/modals/ModalInputs";
 import { useNavigate } from "react-router-dom";
 
-const AuthImage = () => {
+const SigninImage = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [sent, setSent] = useState(false);
@@ -149,4 +149,4 @@ const AuthImage = () => {
   );
 };
 
-export default AuthImage;
+export default SigninImage;
