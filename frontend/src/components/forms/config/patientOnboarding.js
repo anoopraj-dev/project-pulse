@@ -36,6 +36,7 @@ const patientPersonalInfoConfig = {
       label: "Date of Birth",
       type: "date",
       required: true,
+      max:new Date().toISOString().split('T')[0]
     },
     {
       name: "profilePicture",
@@ -61,18 +62,18 @@ const patientMedicalInfoConfig = {
     },
     {
       name: "bloodPressure",
-      label: "Blood Pressure",
-      type: "text",
+      label: "Blood Pressure (mmHg)",
+      type: "number",
     },
     {
       name: "sugarLevel",
-      label: "Sugar Level",
-      type: "text",
+      label: "Sugar Level (mg/dL)",
+      type: "number",
     },
     {
       name: "cholesterol",
-      label: "Cholesterol",
-      type: "text",
+      label: "Cholesterol (mg/dL)",
+      type: "number",
     },
     {
       name: "height",

@@ -45,7 +45,7 @@ export const uploadImage = async (req, res) => {
       case "patientProfilePicture":
         updatedDoc = await Patient.findByIdAndUpdate(
           req.user.id,
-          { profilePicture: urls[0] },
+          { $set:{profilePicture: urls[0]}},
           { new: true }
         );
         break;
@@ -53,7 +53,7 @@ export const uploadImage = async (req, res) => {
       case "doctorProfilePicture":
         updatedDoc = await Doctor.findByIdAndUpdate(
           req.user.id,
-          { profilePicture: urls[0] },
+          { $set:{profilePicture: urls[0]}},
           { new: true }
         );
         break;

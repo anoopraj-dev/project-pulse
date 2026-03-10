@@ -30,11 +30,27 @@ export const getPatientProfile = async (req, res) => {
 // ---------------- UPDATE PATIENT PROFILE --------------
 
 export const updatePatientProfile = async (req, res) => {
-  const { _id, ...updatedData } = req.body;
+ 
   try {
-    const patient = await Patient.findByIdAndUpdate(_id, { $set: updatedData}, {
+    const updatedData = {...req.body};
+
+    if(req.file){
+      updatedData.profilePicture = req.file.path;
+    }
+
+    //------------ remove undefined or null fields ------------
+    Object.keys(updatedData).forEach((key) =>{
+      if(
+        updatedData[key] === undefined ||
+        updatedData[key] === null ||
+        updatedData[key] === ''
+      ){
+        delete updatedData[key];
+      }
+    })
+    const patient = await Patient.findByIdAndUpdate(req.user.id, { $set: updatedData}, {
       new: true,
-    });
+    }).select('-password');
 
     if (!patient) {
       return res.status(404).json({

@@ -83,10 +83,22 @@ const PatientOnboarding = () => {
             response = await submitPatientMedicalInfo(formData);
             break;
           case 2:
-            response = await submitPatientLifestyleInfo(formData);
+            if (response?.data?.data) {
+              const updatedPatient = response.data.data;
+
+              dispatch({
+                type: "SET_USER",
+                payload: {
+                  id: updatedPatient._id,
+                  email: updatedPatient.email,
+                  name: updatedPatient.name,
+                  role: "patient",
+                  profilePicture: updatedPatient.profilePicture,
+                  firstLogin: updatedPatient.firstLogin,
+                },
+              });
+            }
             break;
-          default:
-            return;
         }
 
         if (!response?.data?.success) {
@@ -140,8 +152,6 @@ const PatientOnboarding = () => {
         {/* -------- FORM -------- */}
         {isLoading ? (
           <>
-            <ShimmerCard />
-            <ShimmerCard />
             <ShimmerCard />
           </>
         ) : (

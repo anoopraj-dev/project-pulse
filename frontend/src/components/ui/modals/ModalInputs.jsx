@@ -22,6 +22,7 @@ import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 import { Icon } from "@iconify/react";
 import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { revokeProfileStatus } from "../../../api/admin/adminApis";
+import { uploadFileService } from "@/api/fileUpload/fileUploadService";
 
 //-------------- Email & role modal --------------------
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
@@ -123,7 +124,7 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
 
 //------------- Profile Picture upload ---------------
 export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
-  const { role } = useUser();
+  const { role , dispatch} = useUser();
   const { files, clearField } = useFileUploadContext();
   const [loading, setLoading] = useState(false);
 
@@ -140,21 +141,31 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
         return;
       }
 
-      let response;
-      if (role === "patient") {
-        response = await submitPatientPersonalInfo(formData);
-      } else {
-        response = await submitDoctorPersonalInfo(formData);
-      }
+      // let response;
+      // if (role === "patient") {
+      //   response = await submitPatientPersonalInfo(formData);
+      // } else {
+      //   response = await submitDoctorPersonalInfo(formData);
+      // }
 
-      if (!response?.data?.success) {
-        toast.error(response?.data?.message || "Upload failed");
+      const response = await uploadFileService({
+        file:files.profilePicture,
+        fieldPath: 'profilePicture',
+        userType:role
+      })
+
+      console.log(response)
+
+      if (!response?.success) {
+        toast.error(response?.message || "Upload failed");
         return;
       }
 
-      toast.success(response.data.message || "Profile picture updated!");
+      
+      toast.success(response.message || "Profile picture updated!");
       clearField("profilePicture"); // clear file input
-      if (onSubmit) onSubmit(response.data);
+      if (onSubmit) onSubmit(response.user);
+      dispatch({type:'SET_USER',payload:response.user})
       closeModal();
     } catch (error) {
       console.error(error);

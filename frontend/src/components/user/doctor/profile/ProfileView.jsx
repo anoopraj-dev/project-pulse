@@ -86,7 +86,7 @@ const ProfileView = ({
               <div className="text-center mb-4 sm:mb-5">
                 <div className="relative inline-block mb-3 sm:mb-4">
                   <img
-                    src={user?.profilePicture || "/default-avatar.png"}
+                    src={user?.profilePicture || "/profile.png"}
                     alt={user?.name}
                     onError={(e) => {
                       e.target.src = "/default-avatar.png";

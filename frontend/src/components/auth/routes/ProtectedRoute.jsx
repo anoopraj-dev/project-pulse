@@ -1,4 +1,3 @@
-
 import { useUser } from "../../../contexts/UserContext";
 import { Navigate, useLocation } from "react-router-dom";
 import SidebarShimmer from "../../ui/loaders/SidebarShimmer";
@@ -22,14 +21,13 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   }
 
   // ------------ Force onboarding if first login
-  const onboardingPath = `/${role}/personal-info`;
+  let onboardingPath;
+  if (role !== "admin") {
+    onboardingPath = `/${role}/personal-info`;
 
-  // if (firstLogin && isAuthenticated && location.pathname !== onboardingPath) {
-  //   return <Navigate to={onboardingPath} replace />;
-  // }
-
-  if (firstLogin === true && !location.pathname.startsWith(onboardingPath)) {
-    return <Navigate to={onboardingPath} replace />;
+    if (firstLogin === true && location.pathname !== onboardingPath) {
+      return <Navigate to={onboardingPath} replace />;
+    }
   }
 
   // Role protection

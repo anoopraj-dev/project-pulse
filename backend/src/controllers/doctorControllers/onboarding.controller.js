@@ -257,6 +257,7 @@ export const updateServicesInfo = async (req, res) => {
       success: true,
       message: "Service info updated successfully",
       data: doctor.services,
+      firstLogin:doctor.firstLogin
     });
   } catch (error) {
     console.error(error);

@@ -35,7 +35,7 @@ export const getCurrentUserInfo = async (req, res) => {
         name: user.name,
         email: user.email,
         role,
-        firsLogin: user.firstLogin,
+        firstLogin: user.firstLogin,
         isVerified: user.isVerified,
         profilePicture: user.profilePicture || "",
       },

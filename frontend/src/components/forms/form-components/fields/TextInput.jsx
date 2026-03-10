@@ -2,13 +2,15 @@ import { Icon } from "@iconify/react";
 import React, { useState } from "react";
 
 export default function TextInput({ field, formMethods, errors }) {
-  const {register} = formMethods;
-  const isPassword = field.type === 'password';
-  const[showPassword,setShowPassword] = useState(false);
+  const { register } = formMethods;
+  const isPassword = field.type === "password";
+  const [showPassword, setShowPassword] = useState(false);
 
-  const inputType = isPassword ?( showPassword ?'text':field.type):
-  field.type || 'text'
-
+  const inputType = isPassword
+    ? showPassword
+      ? "text"
+      : field.type
+    : field.type || "text";
 
   return (
     <div>
@@ -17,12 +19,24 @@ export default function TextInput({ field, formMethods, errors }) {
           {field.label}
         </label>
       )}
-       <div className="relative">
+      <div className="relative">
         <input
           type={inputType}
           placeholder={field.placeholder || ""}
+          max={field.max || ""}
+          min={field.min || 0}
           {...register(field.name, {
-            required: field.required ? `${field.label} is required` : false,
+            ...field.validation,
+            required: field.required
+              ? field.validation?.required || `${field.label} is required`
+              : false,
+            min:
+              field.min !== undefined
+                ? {
+                    value: field.min,
+                    message: "Value cannot be negative",
+                  }
+                : undefined,
           })}
           className="w-full p-3 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 outline-none"
         />
