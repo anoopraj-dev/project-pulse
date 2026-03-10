@@ -83,6 +83,7 @@ const PatientOnboarding = () => {
             response = await submitPatientMedicalInfo(formData);
             break;
           case 2:
+            response = await submitPatientLifestyleInfo(formData)
             if (response?.data?.data) {
               const updatedPatient = response.data.data;
 

@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import React, { useState } from "react";
+import { get } from "react-hook-form";
 
 export default function TextInput({ field, formMethods, errors }) {
   const { register } = formMethods;
@@ -11,6 +12,9 @@ export default function TextInput({ field, formMethods, errors }) {
       ? "text"
       : field.type
     : field.type || "text";
+
+  //------------ read nested errors -------------
+  const error = get(errors, field.name);
 
   return (
     <div>
@@ -49,11 +53,7 @@ export default function TextInput({ field, formMethods, errors }) {
           />
         )}
       </div>
-      {errors?.[field.name] && (
-        <span className="text-red-500 text-sm">
-          {errors[field.name]?.message}
-        </span>
-      )}
+      {error && <span className="text-red-500 text-sm">{error.message}</span>}
     </div>
   );
 }

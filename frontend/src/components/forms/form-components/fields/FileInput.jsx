@@ -2,20 +2,30 @@ import { Icon } from "@iconify/react";
 import { useRef } from "react";
 import { useFileUploadContext } from "../../../../contexts/FileUploadContext";
 
-export default function FileInput({ field }) {
+export default function FileInput({ field, value, onChange, error }) {
   const inputRef = useRef(null);
-  const { handleFileSelect, removeFile, previews } =
-    useFileUploadContext();
+  const { handleFileSelect, removeFile, previews } = useFileUploadContext();
 
   const preview = previews[field.name];
 
+  //----------------- File change/selection ---------------
   const handleFileChange = (e) => {
     const fileList = e.target.files;
     if (!fileList || fileList.length === 0) return;
 
+    const newFiles = Array.from(fileList);
+
+    const updatedFiles = field.multiple
+      ? [...(value || []), ...newFiles]
+      : newFiles[0];
+
+    //------------ File preview -------------
     handleFileSelect(field.name, fileList, {
       multiple: field.multiple,
     });
+
+    // ------------- send to react-hook-form ----------
+    onChange(updatedFiles);
 
     e.target.value = "";
   };
@@ -68,7 +78,11 @@ export default function FileInput({ field }) {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                removeFile(field.name);
+
+                removeFile(field.name, i);
+
+                const updated = value.filter((_, index) => index !== i);
+                onChange(updated);
               }}
               className="absolute -top-0 -right-0 bg-black/70 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition"
             >
@@ -79,31 +93,31 @@ export default function FileInput({ field }) {
 
         {/* ---------- MULTIPLE PREVIEW ---------- */}
         {Array.isArray(preview) && preview.length > 0 && (
-  <div className="flex gap-3 flex-wrap">
-    {preview.map((src, i) => (
-      <div key={src} className="relative group">
-        <img
-          src={src}
-          className="h-26 object-contain rounded-lg shadow-md"
-        />
+          <div className="flex gap-3 flex-wrap">
+            {preview.map((src, i) => (
+              <div key={src} className="relative group">
+                <img
+                  src={src}
+                  className="h-26 object-contain rounded-lg shadow-md"
+                />
 
-        {/* Remove button (hover only) */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeFile(field.name, i);
-          }}
-          className="absolute -top-0 -right-0 bg-black/70 p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-        >
-          <Icon icon="mdi:close" width={12} className="text-white" />
-        </button>
+                {/* Remove button (hover only) */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(field.name, i);
+                  }}
+                  className="absolute -top-0 -right-0 bg-black/70 p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                >
+                  <Icon icon="mdi:close" width={12} className="text-white" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    ))}
-  </div>
-)}
-
-      </div>
+      {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
     </div>
   );
 }

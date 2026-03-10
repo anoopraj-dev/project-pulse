@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import FieldRenderer from "./FieldRenderer";
 import useFilePreview from "../form-components/hooks/useFilePreview";
 import PrimaryButton from "../../shared/components/PrimaryButton";
-import useConditionalFields from "../form-components/hooks/useConditionalFields"; // Fixed import
+import useConditionalFields from "../form-components/hooks/useConditionalFields";
 import { useEffect } from "react";
 
 const DynamicForm = ({
@@ -48,7 +48,7 @@ const DynamicForm = ({
       <div
         className={
           mode === "modal"
-            ? "flex flex-col min-w-[400px] max-w-[600px]" 
+            ? "flex flex-col min-w-[400px] max-w-[600px]"
             : "grid sm:grid-cols-1 md:grid-cols-2 space-x-6 space-y-2"
         }
       >
@@ -63,8 +63,9 @@ const DynamicForm = ({
               loading={loading}
               watch={watch}
               visibleFields={visibleFields}
+              errors={errors}
             />
-          ) : null
+          ) : null,
         )}
       </div>
       {!hideSubmit && (

@@ -39,7 +39,7 @@ const DoctorOnboarding = () => {
       openModal("User data not loaded yet. Please wait.");
       return;
     }
-  
+
     try {
       await submitAction.executeAsyncFn(async () => {
         const formData = new FormData();
@@ -154,17 +154,17 @@ const DoctorOnboarding = () => {
             response = await submitDoctorServicesInfo(formData);
             const updatedDoctor = response.data.data;
             dispatch({
-                type: "SET_USER",
-                payload: {
-                  id: updatedDoctor._id,
-                  name: updatedDoctor.name,
-                  email: updatedDoctor.email,
-                  role: "doctor",
-                  profilePicture: updatedDoctor.profilePicture,
-                  firstLogin: updatedDoctor.firstLogin,
-                },
-              });
-            
+              type: "SET_USER",
+              payload: {
+                id: updatedDoctor._id,
+                name: updatedDoctor.name,
+                email: updatedDoctor.email,
+                role: "doctor",
+                profilePicture: updatedDoctor.profilePicture,
+                firstLogin: updatedDoctor.firstLogin,
+              },
+            });
+
             break;
           default:
             return;

@@ -148,39 +148,53 @@ const doctorProfessionalInfoConfig = {
     // Experience Section (repeatable) - Add certificate upload
     {
       name: "experience",
-      label: "Experience *",
+      label: "Experience",
       type: "repeatable",
+      required: true,
       validation: {
         validate: (value) =>
           (value && value.length > 0) ||
           "At least one experience entry is required",
       },
       fields: [
-        { name: "years", label: "Years", type: "number", required: true,validation: {
-        required: "This field is required",
-      }, },
+        {
+          name: "years",
+          label: "Years",
+          type: "number",
+          required: true,
+          min: 1,
+          validation: {
+            required: "This field is required",
+          },
+        },
         {
           name: "hospital",
           label: "Hospital Name",
           type: "text",
           required: true,
           validation: {
-        required: "This field is required",
-      }
+            required: "This field is required",
+          },
         },
-        { name: "location", label: "Location", type: "text", required: true ,validation: {
-        required: "This field is required",
-      }},
+        {
+          name: "location",
+          label: "Location",
+          type: "text",
+          required: true,
+          validation: {
+            required: "This field is required",
+          },
+        },
         {
           name: "experienceCertificate",
           label: "Upload Certificates",
           type: "file",
           accept: "image/*,application/pdf",
           multiple: false,
-          required:true,
+          required: true,
           validation: {
-        required: "This field is required",
-      }
+            required: "This field is required",
+          },
         },
       ],
     },
@@ -190,6 +204,7 @@ const doctorProfessionalInfoConfig = {
       name: "education",
       label: "Education",
       type: "repeatable",
+      required: true,
       validation: {
         validate: (value) =>
           (value && value.length > 0) ||
@@ -203,8 +218,8 @@ const doctorProfessionalInfoConfig = {
           type: "text",
           required: true,
           validation: {
-        required: "This field is required",
-      }
+            required: "This field is required",
+          },
         },
         {
           name: "completionYear",
@@ -212,19 +227,19 @@ const doctorProfessionalInfoConfig = {
           type: "number",
           required: true,
           validation: {
-        required: "This field is required",
-      }
+            required: "This field is required",
+          },
         },
         {
           name: "educationCertificate",
           label: "Upload Certificates",
           type: "file",
           multiple: false,
-           accept: "image/*,application/pdf",
-           required:true,
-           validation: {
-        required: "This field is required",
-      }
+          accept: "image/*,application/pdf",
+          required: true,
+          validation: {
+            required: "This field is required",
+          },
         },
       ],
     },
@@ -243,7 +258,7 @@ const doctorServicesConfig = {
       required: true,
       validation: {
         required: "This field is required",
-      }
+      },
     },
 
     {
@@ -252,6 +267,7 @@ const doctorServicesConfig = {
       type: "number",
       placeholder: "₹0",
       min: 0,
+      required: true,
       validation: {
         min: {
           value: 0,

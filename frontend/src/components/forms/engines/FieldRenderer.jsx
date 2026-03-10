@@ -1,5 +1,4 @@
 import { Controller } from "react-hook-form";
-
 import FieldArrayGroup from "./FieldArrayGroup";
 import TextInput from "../form-components/fields/TextInput";
 import SelectInput from "../form-components/fields/SelectInput";
@@ -12,7 +11,6 @@ import Titles from "../form-components/fields/Titles";
 
 export default function FieldRenderer({ field, formMethods, visibleFields }) {
   const {
-    register,
     control,
     formState: { errors },
   } = formMethods;
@@ -35,6 +33,7 @@ export default function FieldRenderer({ field, formMethods, visibleFields }) {
         name={field.name}
         control={control}
         defaultValue={field.multiple ? [] : null}
+        rules={field.validation}
         render={({ field: controllerField }) => (
           <FileInput
             field={field}
