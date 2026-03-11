@@ -8,6 +8,8 @@ import { UpdateProfilePictureModal } from "../../components/ui/modals/ModalInput
 import ProfileView from "../../components/user/patient/profile/ProfileView";
 import PatientStatusBanner from "../../components/user/patient/profile/PatientStatusBanner";
 import BlockedProfile from "../../components/shared/components/BlockedProfile";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const PatientsProfile = () => {
   const [user, setUser] = useState(null);
@@ -61,12 +63,15 @@ const PatientsProfile = () => {
       {user?.status === "active" && (
         
          
-
-          <ProfileView
+          <div>
+            <PageBanner config={pageBannerConfig.patientProfile} activeTab='Overview'/>
+             <ProfileView
             user={user}
             onEdit={handleProfileEdit}
             onUpdateProfilePicture={handleUpdateProfilePicture}
           />
+          </div>
+         
         
       )}
     </>

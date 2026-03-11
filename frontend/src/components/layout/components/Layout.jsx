@@ -2,7 +2,8 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useUser } from "../../../contexts/UserContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getDeviceTypes } from "@/utilis/deviceTypes";
 
 import {
   adminSidebarMenu,
@@ -15,6 +16,23 @@ const NAVBAR_HEIGHT = "h-16"; // navbar height
 const Layout = () => {
   const { role } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const device = getDeviceTypes(window.innerWidth);
+
+      if (device === "desktop") {
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    handleResize(); // run once on mount
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const config =
     role === "patient"
@@ -60,11 +78,11 @@ const Layout = () => {
       {/* Main content */}
       <main
         className={`
-          mt-16 h-[calc(100vh-4rem)] overflow-y-auto
-          transition-all duration-300
-          px-2 sm:px-4 md:px-6 lg:px-20 xl:px-48
-          ${isSidebarOpen ? "ml-22" : "ml-22"}
-        `}
+    mt-26 h-[calc(100vh-4rem)] overflow-y-auto
+    transition-all duration-300
+    px-2 sm:px-4 md:px-6 lg:px-8 xl:px-32
+    ${isSidebarOpen ? "ml-60 sm:ml-64" : "ml-16 sm:ml-20"}
+  `}
       >
         <Outlet />
       </main>

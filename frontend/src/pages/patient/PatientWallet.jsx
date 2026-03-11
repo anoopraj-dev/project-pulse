@@ -5,6 +5,8 @@ import { createWalletOrder, getPatientWallet } from "../../api/patient/patientAp
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
 import { handleRazorpayPayment } from "@/utilis/handleRazorpayPayment";
 import { createRazorpayOrder } from "@/api/user/userApis";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const categoryIcon = {
   refund: "mdi:arrow-down-circle",
@@ -72,21 +74,7 @@ const PatientWallet = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Banner */}
-      <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
-        <div className="px-2 sm:px-4 md:px-6 lg:px-20 xl:px-48 pb-6 pt-20">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-              Patient · Wallet
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              My Wallet
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              Manage your wallet balance and view your transaction history.
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageBanner config={pageBannerConfig.patientWallet}/>
 
       <div className=" w-full px-2 pt-3 pb-10 flex flex-col gap-4 lg:flex-row">
         {/* Balance Card */}

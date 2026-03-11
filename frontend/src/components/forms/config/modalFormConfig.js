@@ -72,7 +72,7 @@ export const certificateUploadConfig = (closeModal) => ({
       name: "experienceCertificate",
       label: "Upload Experience Certificate",
       type: "file",
-      accept: "image/*,.pdf",
+      accept: "image/*,application/pdf",
       condition: {
         dependsOn: "certificateCategory",
         type: "equals",
@@ -85,7 +85,7 @@ export const certificateUploadConfig = (closeModal) => ({
       name: "educationCertificate",
       label: "Upload Education Certificate",
       type: "file",
-      accept: "image/*,.pdf",
+      accept: "image/*,application/pdf",
       condition: {
         dependsOn: "certificateCategory",
         type: "equals",
@@ -98,7 +98,7 @@ export const certificateUploadConfig = (closeModal) => ({
       name: "proofDocument",
       label: "Upload ID Proof / License",
       type: "file",
-      accept: "image/*,.pdf",
+      accept: "image/*,application/pdf",
       multiple: true,
       condition: {
         dependsOn: "certificateCategory",

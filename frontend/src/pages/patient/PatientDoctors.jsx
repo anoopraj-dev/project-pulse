@@ -10,7 +10,8 @@ import { useSearch } from "../../hooks/useSearch";
 import ApplyFilters from "../../components/shared/components/ApplyFilters";
 import { doctorFilterConfig } from "../../components/shared/configs/FilterConfigs";
 import { fetchSearchSuggestions } from "../../api/user/userApis";
-
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const PatientDoctors = () => {
   const [doctors, setDoctors] = useState([]);
@@ -108,48 +109,10 @@ const PatientDoctors = () => {
   return (
     <div className="min-h-screen ">
       {/* Full-width Header Banner */}
-      <section className="my-2 rounded-xl mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-sky-50 via-white to-cyan-100 pt-20 pb-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 text-sky-600">
-                <Icon icon="mdi:account-heart-outline" className="text-lg" />
-                <span className="text-xs font-semibold uppercase tracking-wider">
-                  Find a doctor
-                </span>
-              </div>
-
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl lg:text-4xl">
-                Available Doctors
-              </h1>
-
-              <p className="mt-2 max-w-xl text-sm text-slate-600">
-                Browse verified doctors and compare consultation charges before booking.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start gap-2 sm:items-end">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs shadow-sm ring-1 ring-slate-200">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="text-slate-700">
-                  {approvedDoctors.length}{" "}
-                  <span className="font-medium text-slate-900">doctors available</span>
-                </span>
-              </div>
-
-              {isInitialLoading && (
-                <div className="inline-flex items-center gap-2 text-[11px] text-slate-500">
-                  <Icon icon="mdi:loading" className="animate-spin text-sm" />
-                  Loading doctors…
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageBanner config={pageBannerConfig.patientDoctors} activeTab='Available' isLoading={isInitialLoading} count={visibleDoctors.length}/>
 
       {/* Content Area */}
-      <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 pb-12 sm:px-6 lg:px-8">
         {/* Search Bar */}
         <div className="relative z-40 mb-8">
           <SearchInput

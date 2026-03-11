@@ -13,20 +13,7 @@ const Sidebar = ({ toggleSidebar, config, isOpen }) => {
   if (isLoading) return <SidebarShimmer />;
 
   return (
-    <aside className="rounded-lg h-full bg-[#0096C7] text-white flex flex-col ">
-      
-      {/* Toggle button */}
-      <div className="flex justify-center p-4">
-        <Icon
-          icon={
-            isOpen
-              ? "mingcute:square-arrow-left-line"
-              : "mingcute:square-arrow-right-line"
-          }
-          className="w-7 h-7 text-[#7bcbe6] cursor-pointer"
-          onClick={() => toggleSidebar(!isOpen)}
-        />
-      </div>
+    <aside className="rounded-lg h-full bg-[#0096C7] text-white flex flex-col py-6 font-[Georgia]">
 
       {/* Navigation */}
       <ul className="flex-1 space-y-2 px-2">
