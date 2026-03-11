@@ -18,12 +18,19 @@ const patientPersonalInfoConfig = {
       label: "Phone Number",
       type: "text",
       required: true,
+      validation: {
+        required: "Phone number is required",
+        pattern: {
+          value: /^[6-9]\d{9}$/,
+          message: "Enter a valid 10 digit phone number",
+        },
     },
+  },
     {
       name: "work",
       label: "Work",
       type: "text",
-      required: false,
+      required: true,
     },
     {
       name: "address",

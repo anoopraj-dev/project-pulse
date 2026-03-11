@@ -27,7 +27,6 @@ export const updatePersonalInfo = async (req, res) => {
       return res.status(404).json({ success: false, message: "Doctor not found" });
     }
 
-    console.log(doctor.profilePicture)
     let profilePictureUrl = doctor.profilePicture || "";
     console.log('req.file', req.file)
     if (req.file) {
@@ -176,7 +175,7 @@ export const updateProfessionalInfo = async (req, res) => {
       req.user.id,
       updateQuery,
       { new: true }
-    );
+    ).select('-password');
 
     return res.status(200).json({
       success: true,
@@ -244,7 +243,7 @@ export const updateServicesInfo = async (req, res) => {
         },
       },
       { new: true }
-    );
+    ).select('-password');
 
     if (!doctor) {
       return res.status(404).json({
@@ -256,7 +255,7 @@ export const updateServicesInfo = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Service info updated successfully",
-      data: doctor.services,
+      data: doctor,
       firstLogin:doctor.firstLogin
     });
   } catch (error) {

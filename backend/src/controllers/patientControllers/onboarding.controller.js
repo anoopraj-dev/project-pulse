@@ -95,7 +95,7 @@ export const updateMedicalInfo = async (req, res) => {
         $set: { medical_history: medicalData },
       },
       { new: true, runValidators: true }
-    );
+    ).select('-password');
 
     if (!patient) {
       return res.status(404).json({
@@ -165,7 +165,7 @@ export const updateLifeStyleInfo = async (req, res) => {
         },
       },
       { new: true, runValidators: true }
-    );
+    ).select('-password');
 
     if (!patient) {
       return res.status(404).json({
@@ -177,7 +177,7 @@ export const updateLifeStyleInfo = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Lifestyle information updated successfully",
-      data: patient.lifestyle_habits,
+      data: patient,
     });
   } catch (error) {
     console.error("updateLifeStyleInfo error:", error);
