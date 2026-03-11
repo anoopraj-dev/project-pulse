@@ -16,6 +16,7 @@ import {
 } from "@/utilis/animations";
 import GlobalStyles from "@/components/shared/components/GlobalStyles";
 import { Icon } from "@iconify/react";
+import Footer from "@/components/layout/components/Footer";
 
 //--------------- Icon helpers -------------
 const ArrowRight = ({ size = 15 }) => (
@@ -344,6 +345,8 @@ const DoctorLanding = () => {
         </motion.div>
       </section>
 
+      <Footer/>
+
     </div>
   );
 };
@@ -440,6 +443,7 @@ const Testimonial = ({ name, rating, text }) => (
       </div>
     </div>
   </motion.div>
+  
 );
 
 export default DoctorLanding;
