@@ -65,31 +65,29 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   );
 };
 
-
-
 //----------------- set Password modal ---------------------
 
 export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData) => {
-    const {newPassword,confirmPassword} = formData;
+    const { newPassword, confirmPassword } = formData;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
-    if(!passwordRegex.test(newPassword)){
+    if (!passwordRegex.test(newPassword)) {
       toast.error(
-        'Password must be atleast 8 characters and include a letter, number and symbol'
+        "Password must be atleast 8 characters and include a letter, number and symbol",
       );
-      return ;
+      return;
     }
 
-    if(newPassword !== confirmPassword){
-      toast.error('Passwords do not match')
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
     }
     try {
       setLoading(true);
       const payload = { ...formData, type };
-      
+
       const { data } = await api.post(endPoint, payload);
       sessionStorage.setItem(
         "forgotPasswordVerification",
@@ -124,7 +122,7 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
 
 //------------- Profile Picture upload ---------------
 export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
-  const { role , dispatch} = useUser();
+  const { role, dispatch } = useUser();
   const { files, clearField } = useFileUploadContext();
   const [loading, setLoading] = useState(false);
 
@@ -149,23 +147,22 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
       // }
 
       const response = await uploadFileService({
-        file:files.profilePicture,
-        fieldPath: 'profilePicture',
-        userType:role
-      })
+        file: files.profilePicture,
+        fieldPath: "profilePicture",
+        userType: role,
+      });
 
-      console.log(response)
+      console.log(response);
 
       if (!response?.success) {
         toast.error(response?.message || "Upload failed");
         return;
       }
 
-      
       toast.success(response.message || "Profile picture updated!");
       clearField("profilePicture"); // clear file input
       if (onSubmit) onSubmit(response.user);
-      dispatch({type:'SET_USER',payload:response.user})
+      dispatch({ type: "SET_USER", payload: response.user });
       closeModal();
     } catch (error) {
       console.error(error);
@@ -294,11 +291,17 @@ export const ImageModal = ({ url, label, onClose }) => {
 
       {/* Image */}
       <div className="flex-1 flex items-center justify-center overflow-hidden">
-        <img
-          src={url}
-          alt="Preview"
-          className="max-w-full max-h-full object-contain"
-        />
+        {url.endsWith(".pdf") ? (
+          <object data={url} type="application/pdf" className="w-full h-full">
+            <p className="text-white">PDF preview not available</p>
+          </object>
+        ) : (
+          <img
+            src={url}
+            alt="Preview"
+            className="max-w-full max-h-full object-contain"
+          />
+        )}
       </div>
     </div>
   );
@@ -392,7 +395,9 @@ export const AppointmentsActionModal = ({
       .toISOString()
       .split("T")[0];
 
-    const appointmentDateTime = new Date(`${datePart}T${appointment.timeSlot}:00`);
+    const appointmentDateTime = new Date(
+      `${datePart}T${appointment.timeSlot}:00`,
+    );
     const now = new Date();
 
     const diffInHours =
@@ -403,30 +408,29 @@ export const AppointmentsActionModal = ({
   }, [appointment, role]);
 
   const formConfig = {
-  ...setAppointmentStatusConfig,
-  fields: setAppointmentStatusConfig.fields.map((field) => {
-    if (field.name === "appointmentStatus") {
-      // Determine available actions by role
-      let options = [];
+    ...setAppointmentStatusConfig,
+    fields: setAppointmentStatusConfig.fields.map((field) => {
+      if (field.name === "appointmentStatus") {
+        // Determine available actions by role
+        let options = [];
 
-      if (role === "doctor") {
-        options = ["confirm", "cancel", "re-schedule"];
-        // Only restrict actions if within 24h
-        if (!isActionAllowed) options = [];
-      } else if (role === "patient") {
-        options = ["cancel"];
-        if (!isActionAllowed) options = [];
-      } else if (role === "admin") {
-        // Admin has all actions, no 24h restriction
-        options = ["confirm", "cancel", "re-schedule", "complete"];
+        if (role === "doctor") {
+          options = ["confirm", "cancel", "re-schedule"];
+          // Only restrict actions if within 24h
+          if (!isActionAllowed) options = [];
+        } else if (role === "patient") {
+          options = ["cancel"];
+          if (!isActionAllowed) options = [];
+        } else if (role === "admin") {
+          // Admin has all actions, no 24h restriction
+          options = ["confirm", "cancel", "re-schedule", "complete"];
+        }
+
+        return { ...field, options };
       }
-
-      return { ...field, options };
-    }
-    return field;
-  }),
-};
-
+      return field;
+    }),
+  };
 
   const handleSubmit = async (data) => {
     try {
@@ -450,7 +454,9 @@ export const AppointmentsActionModal = ({
   };
 
   if (!appointment)
-    return <p className="text-sm text-red-500">Appointment details not available</p>;
+    return (
+      <p className="text-sm text-red-500">Appointment details not available</p>
+    );
 
   return (
     <div>
@@ -467,7 +473,8 @@ export const AppointmentsActionModal = ({
             </p>
             <p>
               <strong>Specialization:</strong>{" "}
-              {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+              {appointment.doctor?.professionalInfo?.specializations[0] ||
+                "N/A"}
             </p>
           </>
         )}
@@ -490,7 +497,8 @@ export const AppointmentsActionModal = ({
             </p>
             <p>
               <strong>Specialization:</strong>{" "}
-              {appointment.doctor?.professionalInfo?.specializations[0] || "N/A"}
+              {appointment.doctor?.professionalInfo?.specializations[0] ||
+                "N/A"}
             </p>
           </>
         )}
