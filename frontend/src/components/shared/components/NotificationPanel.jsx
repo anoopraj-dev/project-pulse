@@ -4,7 +4,7 @@ import  {useUser} from '../../../contexts/UserContext'
 import { markNotificationsRead } from "../../../api/user/userApis";
 import toast from 'react-hot-toast'
 
-const NotificationPanel = () => {
+const NotificationPanel = ({setOpenNotification}) => {
   const { notifications, dispatch } = useNotifications();
   const {role} = useUser();
 
@@ -17,7 +17,9 @@ const NotificationPanel = () => {
     }
 
     dispatch({ type: "MARK_ALL_READ" });
+    setOpenNotification(false)
   } catch (error) {
+    console.log(error)
     toast.error("Something went wrong");
   }
 };

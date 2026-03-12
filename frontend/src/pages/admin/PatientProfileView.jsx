@@ -28,7 +28,6 @@ const PatientProfileView = () => {
             error?.res?.data?.message || "Something went wrong"
           );
         setUser(res?.data?.user);
-        toast.success(res?.data?.message || "Profile loaded");
       } catch (error) {
         console.log(error);
         toast.error(error.res.data.message);

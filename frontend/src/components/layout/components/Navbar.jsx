@@ -23,13 +23,14 @@ const Navbar = () => {
   const isLoggedIn = !!email;
   const { width } = useWindowSize();
   const isMobile = width <= 768;
-  const profileImage = user?.imageUrl || profilePicture || "";
+  const profileImage = user?.imageUrl || profilePicture || '/profile.png';
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setProfileMenuOpen(false);
         setNavMenuOpen(false);
+        setOpenNotification(false)
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -167,7 +168,7 @@ const Navbar = () => {
 
                     {openNotification && (
                       <div className="absolute right-0 top-12 z-50">
-                        <NotificationPanel />
+                        <NotificationPanel setOpenNotification={setOpenNotification}/>
                       </div>
                     )}
                   </div>

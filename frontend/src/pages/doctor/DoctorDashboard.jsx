@@ -8,7 +8,7 @@ import DoctorStatusBanner from "@/components/user/doctor/profile/DoctorStatusBan
 const DoctorDashboard = () => {
   const { user } = useUser();
   return (
-    <div>
+    <div className="min-h-screen">
        <DoctorStatusBanner
             approvalStatus={user?.status}
             submissionCount={user?.submissionCount}
