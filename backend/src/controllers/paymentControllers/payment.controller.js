@@ -12,11 +12,11 @@ const razorpay = new Razorpay({
 
 //--------------- Create Razorpay Order --------------
 export const createOrder = async (req, res) => {
-  const { amount, doctorId,date,time,serviceType,reason,notes} = req.body;
-  
+  const { amount, doctorId, date, time, serviceType, reason, notes } = req.body;
+
   try {
     const options = {
-      amount: amount * 100, // ------- convert to paise 
+      amount: amount * 100, // ------- convert to paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
@@ -31,7 +31,7 @@ export const createOrder = async (req, res) => {
       currency: order.currency,
       receipt: order.receipt,
       status: "created",
-      attempts:0,
+      attempts: 0,
       bookingData: {
         doctorId,
         date,
@@ -39,7 +39,7 @@ export const createOrder = async (req, res) => {
         serviceType,
         reason,
         notes,
-      }
+      },
     });
 
     res.status(200).json({
@@ -123,12 +123,7 @@ export const updatePaymentStatus = async (req, res) => {
         .json({ success: false, message: "OrderId and status are required" });
     }
 
-    const validStatuses = [
-      "created",
-      "verified",
-      "failed",
-      "refunded",
-    ];
+    const validStatuses = ["created", "verified", "failed", "refunded"];
 
     if (!validStatuses.includes(status)) {
       return res
@@ -163,6 +158,14 @@ export const updatePaymentStatus = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid state transition",
+      });
+    }
+
+    // only verified payments can credit wallet
+    if (status !== "verified") {
+      return res.status(200).json({
+        success: true,
+        message: "Payment not verified, wallet not credited",
       });
     }
 
@@ -204,11 +207,10 @@ export const updatePaymentStatus = async (req, res) => {
   }
 };
 
-
 //--------------------- Retry Payment --------------------
 export const retryPayment = async (req, res) => {
   try {
-    const { id:paymentId } = req.params;
+    const { id: paymentId } = req.params;
 
     const payment = await Payment.findById(paymentId);
 
@@ -263,9 +265,8 @@ export const retryPayment = async (req, res) => {
       success: true,
       message: "Retry order created successfully",
       order: newOrder,
-      bookingData:payment.bookingData
+      bookingData: payment.bookingData,
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({

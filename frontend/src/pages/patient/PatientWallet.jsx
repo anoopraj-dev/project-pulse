@@ -88,9 +88,9 @@ const PatientWallet = () => {
         status={user?.status}
         blockedReason={user?.blockedReason}
       />
-      {user.status === "blocked" ? (
+      {user?.status === "blocked" ? (
         <>
-          <BlockedProfile reason={user.blockedReason}/>
+          <BlockedProfile reason={user?.blockedReason}/>
         </>
       ) : (
         <>

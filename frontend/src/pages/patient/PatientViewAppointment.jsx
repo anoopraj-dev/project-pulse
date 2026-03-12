@@ -137,7 +137,7 @@ const PatientViewAppointment = () => {
   // -------- Allow cancellation only if---------:
   // 1. Not already cancelled
   // 2. More than 24 hours remaining
-  const isCancellable = status !== "cancelled" && diffInHours > 24;
+  const isCancellable = status !== "cancelled" && diffInHours > 2;
 
   return (
     <div className="min-h-screen px-4 ">

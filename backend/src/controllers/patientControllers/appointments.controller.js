@@ -4,8 +4,8 @@ import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
 import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
 import Payment from "../../models/payments.model.js";
-import Wallet from '../../models/wallet.model.js'
-import Transaction from '../../models/transaction.model.js'
+import Wallet from "../../models/wallet.model.js";
+import Transaction from "../../models/transaction.model.js";
 import { refundToWallet } from "./wallet.controller.js";
 
 //-------------- Get booking info ----------------
@@ -87,7 +87,7 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const { doctorId, date, time, reason, notes, serviceType, orderId } =
       req.body;
     const patientId = req.user.id;
@@ -113,7 +113,6 @@ export const bookAppointment = async (req, res) => {
       patient: patientId,
       status: "verified",
     });
-    
 
     if (!payment) {
       return res.status(403).json({
@@ -123,11 +122,11 @@ export const bookAppointment = async (req, res) => {
     }
 
     if (payment.appointment) {
-  return res.status(400).json({
-    success: false,
-    message: "Appointment already created for this payment",
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: "Appointment already created for this payment",
+      });
+    }
 
     const appointmentDate = new Date(date);
 
@@ -251,7 +250,6 @@ export const getAppointmentById = async (req, res) => {
   }
 };
 
-
 export const cancelAppointment = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -290,39 +288,47 @@ export const cancelAppointment = async (req, res) => {
     const now = new Date();
     const timeDifference = appointmentDateTime - now;
 
-    const twentyFourHours = 24 * 60 * 60 * 1000;
+    let refundPercentage;
 
-    if (timeDifference <= twentyFourHours) {
+    const hoursLeft = timeDifference / (1000 * 60 * 60);
+
+    if (hoursLeft > 24) {
+      refundPercentage = 1; // 100%
+    } else if (hoursLeft > 6) {
+      refundPercentage = 0.8; // 80%
+    } else if (hoursLeft > 2) {
+      refundPercentage = 0.5; // 50%
+    } else {
       throw new Error(
-        "Appointment cannot be cancelled within 24 hours of consultation"
+        "Appointment cannot be cancelled within 2 hours of consultation",
       );
     }
 
     // -------------------  Update Appointment -------------------
     appointment.status = "cancelled";
     appointment.cancelledBy = "patient";
-    appointment.cancellationReason = 'Patient cancelled'
+    appointment.cancellationReason = "Patient cancelled";
 
     await appointment.save({ session });
 
     // -------------------  Free the Slot -------------------
     await DoctorAvailability.updateOne(
       {
-        doctor: appointment.doctor,
+        doctorId: appointment.doctor,
         date: appointment.appointmentDate,
-        "slots.time": appointment.timeSlot,
+        "slots.startTime": appointment.timeSlot,
+        "slots.isBooked": true,
       },
       {
         $set: { "slots.$.isBooked": false },
       },
-      { session }
+      { session },
     );
 
     //-------------- Initiate refund --------------------
     const payment = await Payment.findOne({ appointment: appointment._id });
 
     if (payment && payment.status !== "refunded") {
-
       //--------------- 10% platform fee deduction ----------------
       const platformFee = payment.amount * 0.1;
       const refundAmount = payment.amount - platformFee;
@@ -351,10 +357,10 @@ export const cancelAppointment = async (req, res) => {
             amount: refundAmount,
             referenceType: "refund",
             referenceId: payment._id,
-            notes: `Refund (90%) after 10% platform fee deduction for appointment #${appointment.id.toString()}`,
+            notes: `Refund (${refundPercentage * 100}%) for cancelled appointment #${appointment._id.toString().slice(-6)}`,
           },
         ],
-        { session }
+        { session },
       );
 
       payment.status = "refunded";
@@ -366,11 +372,9 @@ export const cancelAppointment = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message:
-        "Appointment cancelled successfully (10% platform fee deducted)",
+      message: "Appointment cancelled successfully (10% platform fee deducted)",
       appointment,
     });
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
