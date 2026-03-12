@@ -133,6 +133,25 @@ export const pageBannerConfig = {
     loadingText: "Loading wallet details...",
   },
 
+  //---------------- patient edit profile -------------
+   patientEditProfile: {
+    icon:"mdi:edit-profile-outline",
+    roleLabel: "Patient",
+    pageLabel:"Edit Profile",
+    title: "Edit & Update Profile Info",
+    description:
+      "Update your persnal info & stay ahead of in your health journey",
+  },
+
+  //--------------- patient appoiontments -----------
+  patientAppointmentView:{
+    icon:'mdi:calender',
+    roleLabel:'Patient',
+    pageLabel:'Appointment Info',
+    title:'View Appointment Details',
+    description: " View and manage appointment specifics"
+  },
+
 
   //---------------- DOCTOR BANNER CONFIGS ----------------
 
@@ -219,7 +238,7 @@ export const pageBannerConfig = {
     loadingText: "Loading dashboard data...",
   },
 
-//---------------- patient messages --------------
+//---------------- doctor messages --------------
   doctorMessages: {
     icon: "mdi:message-text-outline",
 
@@ -234,6 +253,16 @@ export const pageBannerConfig = {
     activeTabLabel: "Inbox",
 
     loadingText: "Loading messages...",
+  },
+
+  //------------------- doctor availability -------------
+  doctorAvailability: {
+    icon:"mdi:calendar-outline",
+    roleLabel: "Doctor",
+    pageLabel:"Availability",
+    title: "Manage Weekly Availability",
+    description:
+      "Select dates till Saturday and assign time slots. Save once.",
   },
 
 };

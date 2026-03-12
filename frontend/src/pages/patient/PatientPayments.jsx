@@ -18,6 +18,8 @@ import { retryPayment } from "@/api/patient/patientApis";
 import { useNavigate } from "react-router-dom";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import BlockedProfile from "@/components/shared/components/BlockedProfile";
+import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
 
 const PatientPayments = () => {
   const [payments, setPayments] = useState(null);
@@ -25,6 +27,7 @@ const PatientPayments = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
   const { role, user } = useUser();
   const navigate = useNavigate();
+ 
 
   const {
     query,
@@ -153,21 +156,31 @@ const PatientPayments = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header band */}
-      <PageBanner
-        config={pageBannerConfig.patientPayments}
-        activeTab={activeTab}
-        isLoading={isLoading}
-        tabsComponent={
-          <PatientPaymentTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        }
+      <PatientStatusBanner
+        status={user?.status}
+        blockedReason={user?.blockedReason}
       />
+      {user?.status === "blocked" ? (
+        <>
+          <BlockedProfile />
+        </>
+      ) : (
+        <>
+          {/* Header band */}
+          <PageBanner
+            config={pageBannerConfig.patientPayments}
+            activeTab={activeTab}
+            isLoading={isLoading}
+            tabsComponent={
+              <PatientPaymentTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            }
+          />
 
-      {/* Search Section */}
-      {/* {activeTab !== "book" && (
+          {/* Search Section */}
+          {/* {activeTab !== "book" && (
         <div className="mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
@@ -191,58 +204,60 @@ const PatientPayments = () => {
         </div>
       )} */}
 
-      {/* Content section */}
-      <div className="mx-auto  px-4 pb-12 pt-4 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                <Icon icon="mdi:clipboard-text-outline" />
-                {activeTab === "upcoming"
-                  ? "All payments"
-                  : activeTab === "history"
-                    ? "Past Appointments"
-                    : "Book New Appointment"}
-              </h2>
+          {/* Content section */}
+          <div className="mx-auto  px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+              <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <Icon icon="mdi:clipboard-text-outline" />
+                    {activeTab === "upcoming"
+                      ? "All payments"
+                      : activeTab === "history"
+                        ? "Past Appointments"
+                        : "Book New Appointment"}
+                  </h2>
 
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
-                <Icon icon="mdi:format-list-bulleted" />
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
-                  {filteredPayments?.length ?? 0}
-                </span>
-                records in this view
+                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
+                    <Icon icon="mdi:format-list-bulleted" />
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
+                      {filteredPayments?.length ?? 0}
+                    </span>
+                    records in this view
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-2 py-3 sm:px-4">
+                {filteredPayments && filteredPayments.length > 0 ? (
+                  <DataTable
+                    data={displayedPayments}
+                    columns={patientPaymentColumns}
+                    onView={handleAction}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+                      <Icon
+                        icon="mdi:calendar-remove-outline"
+                        className="text-xl text-slate-400"
+                      />
+                    </div>
+                    <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                      No payments in this view
+                    </h3>
+                    <p className="mt-1 max-w-sm text-xs text-slate-500">
+                      {activeTab === "upcoming"
+                        ? "You have no upcoming payments. Book one to get started!"
+                        : "You have no past payments yet."}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
-          <div className="px-2 py-3 sm:px-4">
-            {filteredPayments && filteredPayments.length > 0 ? (
-              <DataTable
-                data={displayedPayments}
-                columns={patientPaymentColumns}
-                onView={handleAction}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
-                  <Icon
-                    icon="mdi:calendar-remove-outline"
-                    className="text-xl text-slate-400"
-                  />
-                </div>
-                <h3 className="mt-4 text-sm font-semibold text-slate-900">
-                  No payments in this view
-                </h3>
-                <p className="mt-1 max-w-sm text-xs text-slate-500">
-                  {activeTab === "upcoming"
-                    ? "You have no upcoming payments. Book one to get started!"
-                    : "You have no past payments yet."}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

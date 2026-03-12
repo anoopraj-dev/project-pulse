@@ -12,12 +12,16 @@ import { doctorFilterConfig } from "../../components/shared/configs/FilterConfig
 import { fetchSearchSuggestions } from "../../api/user/userApis";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import { useUser } from "@/contexts/UserContext";
+import BlockedProfile from "@/components/shared/components/BlockedProfile";
+import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
 
 const PatientDoctors = () => {
   const [doctors, setDoctors] = useState([]);
   const fetchDoctorsAction = useAsyncAction();
   const navigate = useNavigate();
   const [searchFilters, setSearchFilters] = useState({});
+  const { user } = useUser();
 
   const {
     query,
@@ -74,7 +78,7 @@ const PatientDoctors = () => {
         }
 
         return true;
-      })
+      }),
     );
   };
 
@@ -108,82 +112,105 @@ const PatientDoctors = () => {
 
   return (
     <div className="min-h-screen ">
-      {/* Full-width Header Banner */}
-      <PageBanner config={pageBannerConfig.patientDoctors} activeTab='Available' isLoading={isInitialLoading} count={visibleDoctors.length}/>
-
-      {/* Content Area */}
-      <div className="mx-auto px-4 pb-12 sm:px-6 lg:px-8">
-        {/* Search Bar */}
-        <div className="relative z-40 mb-8">
-          <SearchInput
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search doctors "
-            fetchSuggestions={fetchSuggestions}
-            onSelectSuggestion={handleSelectSuggestion}
-            role='patient'
-            entity='doctors'
+      <PatientStatusBanner
+        status={user?.status}
+        blockedReason={user?.blockedReason}
+      />
+      {user?.status === "blocked" ? (
+        <>
+          <BlockedProfile reason={user?.blockedReason} />
+        </>
+      ) : (
+        <>
+          {/* Full-width Header Banner */}
+          <PageBanner
+            config={pageBannerConfig.patientDoctors}
+            activeTab="Available"
+            isLoading={isInitialLoading}
+            count={visibleDoctors.length}
           />
 
-          {searchLoading && (
-            <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-              <Icon icon="mdi:loading" className="animate-spin" />
-              Searching…
-            </div>
-          )}
-        </div>
+          {/* Content Area */}
+          <div className="mx-auto px-4 pb-12 sm:px-6 lg:px-8">
+            {/* Search Bar */}
+            <div className="relative z-40 mb-8">
+              <SearchInput
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search doctors "
+                fetchSuggestions={fetchSuggestions}
+                onSelectSuggestion={handleSelectSuggestion}
+                role="patient"
+                entity="doctors"
+              />
 
-        {/* Filters + Grid */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Right Sidebar: ApplyFilters */}
-          <div className="lg:w-80 lg:flex-shrink-0 hidden lg:block">
-            <ApplyFilters onApply={setSearchFilters} config={doctorFilterConfig} />
-          </div>
-
-          {/* Main Content: Doctors Grid */}
-          <div className="flex-1 lg:min-w-0">
-            <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
-              {visibleDoctors?.map((doc) => (
-                <DoctorCard
-                  key={doc._id}
-                  doctor={doc}
-                  onView={() => handleProfileView(doc._id)}
-                />
-              ))}
-            </div>
-
-            {!isInitialLoading &&
-              !searchLoading &&
-              visibleDoctors?.length === 0 && (
-                <div className="mt-20 flex flex-col items-center text-center text-slate-500">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-                    <Icon
-                      icon="mdi:stethoscope"
-                      className="text-2xl text-slate-400"
-                    />
-                  </div>
-
-                  <h2 className="mt-4 text-base font-semibold text-slate-900">
-                    {query.trim()
-                      ? "No matching doctors found"
-                      : "No doctors available"}
-                  </h2>
-
-                  <p className="mt-1 max-w-sm text-sm text-slate-500">
-                    {query.trim()
-                      ? "Try searching with a different name or specialization."
-                      : "Approved doctors will appear here once they are added by the admin."}
-                  </p>
+              {searchLoading && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                  <Icon icon="mdi:loading" className="animate-spin" />
+                  Searching…
                 </div>
               )}
-          </div>
-        </div>
+            </div>
 
-        {/* Mobile Filters */}
-        <div className="lg:hidden mt-8">
-          <ApplyFilters onApply={setSearchFilters} config={doctorFilterConfig} />
-        </div>
-      </div>
+            {/* Filters + Grid */}
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Right Sidebar: ApplyFilters */}
+              <div className="lg:w-80 lg:flex-shrink-0 hidden lg:block">
+                <ApplyFilters
+                  onApply={setSearchFilters}
+                  config={doctorFilterConfig}
+                />
+              </div>
+
+              {/* Main Content: Doctors Grid */}
+              <div className="flex-1 lg:min-w-0">
+                <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+                  {visibleDoctors?.map((doc) => (
+                    <DoctorCard
+                      key={doc._id}
+                      doctor={doc}
+                      onView={() => handleProfileView(doc._id)}
+                    />
+                  ))}
+                </div>
+
+                {!isInitialLoading &&
+                  !searchLoading &&
+                  visibleDoctors?.length === 0 && (
+                    <div className="mt-20 flex flex-col items-center text-center text-slate-500">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+                        <Icon
+                          icon="mdi:stethoscope"
+                          className="text-2xl text-slate-400"
+                        />
+                      </div>
+
+                      <h2 className="mt-4 text-base font-semibold text-slate-900">
+                        {query.trim()
+                          ? "No matching doctors found"
+                          : "No doctors available"}
+                      </h2>
+
+                      <p className="mt-1 max-w-sm text-sm text-slate-500">
+                        {query.trim()
+                          ? "Try searching with a different name or specialization."
+                          : "Approved doctors will appear here once they are added by the admin."}
+                      </p>
+                    </div>
+                  )}
+              </div>
+            </div>
+
+            {/* Mobile Filters */}
+            <div className="lg:hidden mt-8">
+              <ApplyFilters
+                onApply={setSearchFilters}
+                config={doctorFilterConfig}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

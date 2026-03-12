@@ -10,7 +10,7 @@ export const doctorColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={doc.profilePicture}
+            src={doc.profilePicture || '/profile.png'}
             alt={doc.name}
             className="w-full h-full object-cover"
           />
@@ -76,7 +76,7 @@ export const patientColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={patient.profilePicture}
+            src={patient.profilePicture || '/profile.png'}
             alt={patient.name}
             className="w-full h-full object-cover"
           />
@@ -134,7 +134,7 @@ export const patientAppointmentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={appointment.doctor?.profilePicture}
+            src={appointment.doctor?.profilePicture || '/profile.png'}
             alt={appointment.doctor?.name}
             className="w-full h-full object-cover"
           />
@@ -203,7 +203,7 @@ export const doctorAppointmentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={appointment.patient?.profilePicture}
+            src={appointment.patient?.profilePicture || '/profile.png'}
             alt={appointment.patient?.name}
             className="w-full h-full object-cover"
           />
@@ -277,7 +277,7 @@ export const adminAppointmentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={appointment.patient?.profilePicture || "/default-avatar.png"}
+            src={appointment.patient?.profilePicture || "/profile.png"}
             alt={appointment.patient?.name || "Patient"}
             className="w-full h-full object-cover"
           />
@@ -300,7 +300,7 @@ export const adminAppointmentColumns = [
     <div className="flex items-center gap-4">
       <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
         <img
-          src={appointment.doctor?.profilePicture || "/default-avatar.png"}
+          src={appointment.doctor?.profilePicture || "/profile.png"}
           alt={appointment.doctor?.name || "Doctor"}
           className="w-full h-full object-cover"
         />
@@ -386,7 +386,7 @@ export const patientPaymentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={payment.doctor?.profilePicture || "/default-avatar.png"}
+            src={payment.doctor?.profilePicture || "/profile.png"}
             alt={payment.doctor?.name || "Doctor"}
             className="w-full h-full object-cover"
           />
@@ -471,7 +471,7 @@ export const doctorPaymentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={payment.patient?.profilePicture || "/default-avatar.png"}
+            src={payment.patient?.profilePicture || "/profile.png"}
             alt={payment.patient?.name || "Doctor"}
             className="w-full h-full object-cover"
           />

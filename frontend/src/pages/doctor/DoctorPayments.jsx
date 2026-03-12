@@ -10,13 +10,17 @@ import DoctorPaymentTabs from "../../components/user/doctor/payments/DoctorPayme
 import { useUser } from "@/contexts/UserContext";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import DoctorStatusBanner from "@/components/user/doctor/profile/DoctorStatusBanner";
+import BlockedProfile from "@/components/shared/components/BlockedProfile";
+
 
 const DoctorPayments = () => {
   const [payments, setPayments] = useState(null);
   const [activeTab, setActiveTab] = useState("all");
 
+
   const fetchPaymentsAction = useAsyncAction();
-  const { role } = useUser();
+  const { role,user } = useUser();
 
   // -------- Fetch All Doctor Payments ----------
   const fetchAllPayments = () => {
@@ -70,18 +74,31 @@ const DoctorPayments = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
+      <DoctorStatusBanner
+            approvalStatus={user?.status}
+            submissionCount={user?.submissionCount}
+            variant="doctor"
+          />
+     {
+      user?.isBlocked ? (
+        <>
+          
+          <BlockedProfile/>
+        </>
+      ):(
+        <>
+           {/* Header */}
       <PageBanner
-  config={pageBannerConfig.doctorPayments}
-  activeTab={activeTab}
-  isLoading={isLoading}
-  tabsComponent={
-    <DoctorPaymentTabs
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-    />
-  }
-/>
+        config={pageBannerConfig.doctorPayments}
+        activeTab={activeTab}
+        isLoading={isLoading}
+        tabsComponent={
+          <DoctorPaymentTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        }
+      />
 
       {/* Table Section */}
       <div className="mx-auto px-4 pb-12 pt-4 sm:px-6 lg:px-8">
@@ -131,6 +148,9 @@ const DoctorPayments = () => {
           </div>
         </div>
       </div>
+        </>
+      )
+     }
     </div>
   );
 };

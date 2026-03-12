@@ -3,6 +3,7 @@ import { fetchCurrentUser } from "../api/auth/userService";
 
 // -------- INITIAL STATE --------
 const initialState = {
+  user:null,
   email: "",
   id: "",
   role: "",

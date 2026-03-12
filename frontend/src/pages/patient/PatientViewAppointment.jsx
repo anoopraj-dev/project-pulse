@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
-  fetchAppointments,
   viewAppointmentDetails,
 } from "@/api/patient/patientApis";
 import { cancelAppointment } from "@/api/patient/patientApis";
 import { Icon } from "@iconify/react";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import BlockedProfile from "@/components/shared/components/BlockedProfile";
+import { useUser } from "@/contexts/UserContext";
+import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
 
 const statusConfig = {
   confirmed: {
@@ -45,6 +49,7 @@ const PatientViewAppointment = () => {
   const [cancelling, setCancelling] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
+  const {user} = useUser();
 
   useEffect(() => {
     const fetchAppointment = async () => {
@@ -135,22 +140,20 @@ const PatientViewAppointment = () => {
   const isCancellable = status !== "cancelled" && diffInHours > 24;
 
   return (
-    <div className="min-h-screen px-20 ">
-      <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
-        <div className=" px-4 pb-6 pt-20">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-              Patient · Appointment
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Appointment Details
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              Review your upcoming consultation info and doctor details below.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen px-4 ">
+      <PatientStatusBanner
+        status={user?.status}
+        blockedReason={user?.blockedReason}
+      />
+      {
+        user.status ==='blocked' ? (
+          <>
+            <BlockedProfile reason={user?.blockedReason}/>
+          </>
+        ):
+        (
+          <>
+            <PageBanner config={pageBannerConfig.patientAppointmentView}/>
 
       <div className="mx-auto px-2 pb-16">
         <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
@@ -353,6 +356,9 @@ const PatientViewAppointment = () => {
           </div>
         </div>
       </div>
+          </>
+        )
+      }
     </div>
   );
 };

@@ -10,6 +10,7 @@ import {
   doctorSidebarMenu,
   patientSidebarMenu,
 } from "../configs/sidebarConfig";
+import ProtectedFooter from "./ProtectedFooter";
 
 const NAVBAR_HEIGHT = "h-16"; // navbar height
 
@@ -42,7 +43,7 @@ const Layout = () => {
         : adminSidebarMenu;
 
   return (
-    <div className="h-screen overflow-hidden relative">
+    <div className="flex flex-col h-screen overflow-hidden">
       {/* Navbar */}
       <header className={`fixed top-0 left-0 right-0 z-50 ${NAVBAR_HEIGHT}`}>
         <Navbar toggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
@@ -85,6 +86,7 @@ const Layout = () => {
   `}
       >
         <Outlet />
+        <ProtectedFooter/>
       </main>
     </div>
   );

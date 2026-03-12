@@ -131,14 +131,14 @@ const DoctorProfile = () => {
   return (
     <div className="flex flex-col pb-12">
       <DoctorStatusBanner
-        approvalStatus={user.status}
-        submissionCount={user.submissionCount}
+        approvalStatus={user?.status}
+        submissionCount={user?.submissionCount}
         variant="doctor"
       />
 
-      {user.isBlocked && <BlockedProfile />}
+      {user?.isBlocked && <BlockedProfile />}
 
-      {!user.isBlocked && (
+      {!user?.isBlocked && (
         <div>
           <PageBanner config={pageBannerConfig.doctorProfile} activeTab='Overview'/>
           <ProfileView

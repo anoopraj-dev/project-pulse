@@ -7,6 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { startOfDay, isBefore, addDays, format } from "date-fns";
 import { saveAvailability, getAvailability } from "../../api/doctor/doctorApis";
 import toast from "react-hot-toast";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const DoctorAvailability = () => {
   const today = startOfDay(new Date());
@@ -201,21 +203,7 @@ const DoctorAvailability = () => {
 
   return (
     <div className="min-h-screen pb-12">
-      <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
-        <div className="mx-auto max-w-4xl px-4 pb-6 pt-20">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-              Doctor · Availability
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Manage Weekly Availability
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              Select dates till Saturday and assign time slots. Save once.
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageBanner config={pageBannerConfig.doctorAvailability}/>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>

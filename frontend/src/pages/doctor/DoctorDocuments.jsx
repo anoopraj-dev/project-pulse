@@ -9,6 +9,9 @@ import { deleteDocuments } from "../../api/doctor/doctorApis";
 import PrimaryButton from "../../components/shared/components/PrimaryButton";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import { useUser } from "@/contexts/UserContext";
+import BlockedProfile from "@/components/shared/components/BlockedProfile";
+import DoctorStatusBanner from "@/components/user/doctor/profile/DoctorStatusBanner";
 
 // ------------------ Doctor Documents Page ---------------
 const DoctorDocuments = () => {
@@ -16,6 +19,7 @@ const DoctorDocuments = () => {
   const { openModal, closeModal } = useModal();
   const deleteCertificateAction = useAsyncAction();
   const fetchDoctorAction = useAsyncAction();
+  const { user } = useUser();
 
   // ----------- Delete Document -----------------
   const deleteDoc = async (id, label) => {
@@ -73,9 +77,26 @@ const DoctorDocuments = () => {
   if (!professionalInfo) return null;
 
   return (
-    <div className="min-h-screen pb-12 ">
-      <PageBanner config={pageBannerConfig.doctorDocuments}/>
-      <DocumentView professionalInfo={professionalInfo} deleteDoc={deleteDoc} />
+    <div className="min-h-screen pb-12">
+       <DoctorStatusBanner
+            approvalStatus={user?.status}
+            submissionCount={user?.submissionCount}
+            variant="doctor"
+          />
+      {user?.isBlocked ? (
+        <>
+         
+          <BlockedProfile />
+        </>
+      ) : (
+        <>
+          <PageBanner config={pageBannerConfig.doctorDocuments} />
+          <DocumentView
+            professionalInfo={professionalInfo}
+            deleteDoc={deleteDoc}
+          />
+        </>
+      )}
     </div>
   );
 };

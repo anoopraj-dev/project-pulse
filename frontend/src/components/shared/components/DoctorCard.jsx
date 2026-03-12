@@ -25,7 +25,7 @@ const DoctorCard = ({ doctor, onView }) => {
         <div className="absolute inset-0 bg-gradient-to-br from-sky-100 via-cyan-50 to-white" />
         {profilePicture && (
           <img
-            src={profilePicture}
+            src={profilePicture || '/profile.png'}
             alt={name}
             className="relative h-full w-full object-cover"
           />

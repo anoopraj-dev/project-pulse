@@ -3,6 +3,8 @@ import DynamicForm from "../../components/forms/engines/DynamicForm";
 import { patientEditProfileConfig } from "../../components/forms/config/editPatientProfile";
 import { fetchPatientProfile, updatePatientProfile } from "../../api/patient/patientApis";
 import { replace, useNavigate } from "react-router-dom";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 
 //----------- EDIT & UPDATE PROFILE ------------
@@ -42,14 +44,18 @@ const PatientEditProfile = () => {
     getUser();
   }, []);
   return (
-    <div className="mt-18  flex flex-col items-center mb-18">
-      <DynamicForm
+    <div className="min-h-screen pb-12">
+      <PageBanner config={pageBannerConfig.patientEditProfile}/>
+
+      <div className="px-8">
+        <DynamicForm
         config={patientEditProfileConfig}
         onSubmit={handleUpdateProfile}
         mode="page"
         defaultValues={{}}
         values={user}
       />
+      </div>
     </div>
   );
 };

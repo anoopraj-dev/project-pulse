@@ -104,7 +104,7 @@ const Dashboard = () => {
                 >
                   <div className="flex items-center gap-3">
                     <img
-                      src={doctor?.profilePicture || null}
+                      src={doctor?.profilePicture || '/profile.png'}
                       alt=""
                       className="w-10 h-10 rounded-full object-cover"
                     />

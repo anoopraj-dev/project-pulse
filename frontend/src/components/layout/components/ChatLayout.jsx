@@ -17,7 +17,7 @@ const ChatLayout = ({ sidebar, children, isChatOpen }) => {
   const isDesktop = deviceType === "desktop";
 
   return (
-    <div className="flex mt-1 h-[calc(100vh-80px)] bg-slate-50   gap-3">
+    <div className="flex mt-1 h-[calc(80vh-80px)] bg-slate-50   gap-3">
       
       {/* Sidebar */}
       {(isDesktop || !isChatOpen) && (
