@@ -133,4 +133,107 @@ export const pageBannerConfig = {
     loadingText: "Loading wallet details...",
   },
 
+
+  //---------------- DOCTOR BANNER CONFIGS ----------------
+
+  //---------- appointments -----------------
+  doctorAppointments: {
+    icon: "mdi:calendar-heart",
+
+    roleLabel: "Doctor",
+    pageLabel: "Appointments",
+
+    title: "Manage Appointments",
+
+    description:
+      "Review upcoming consultations, manage confirmations, and track completed or cancelled appointments.",
+
+    activeTabLabel: "Active tab",
+
+    loadingText: "Loading appointments...",
+  },
+
+
+  //--------- doctor profile view -self ----------
+
+  doctorProfile: {
+    icon: "mdi:account-circle-outline",
+
+    roleLabel: "Doctor",
+    pageLabel: "Profile",
+
+    title: "Your Profile",
+
+    description:
+      "View and manage your personal information, contact details, and profile picture.",
+
+    activeTabLabel: "Section",
+
+    loadingText: "Loading profile...",
+  },
+
+  //------------------ doctor documents ---------------
+  doctorDocuments: {
+    icon: "mdi:file-document-outline",
+
+    roleLabel: "Doctor",
+    pageLabel: "Documents",
+
+    title: "Documents & Certifications",
+
+    description:
+      "Upload, view, and manage your medical reports, prescriptions, and other healthcare documents securely in one place.",
+
+    loadingText: "Loading documents...",
+  },
+
+  //----------------- doctor payments ----------------
+  doctorPayments: {
+    icon: "mdi:stethoscope",
+
+    roleLabel: "Doctor",
+    pageLabel: "Payments",
+
+    title: "Earnings & Transactions",
+
+    description:
+      "Track your consultation earnings, review completed transactions, and download official payment receipts.",
+
+    activeTabLabel: "Active tab",
+
+    loadingText: "Loading payments...",
+  },
+
+  //---------------- doctor dashboard ------------------
+  doctorDashboard: {
+    icon: "mdi:view-dashboard-outline",
+
+    roleLabel: "Doctor",
+    pageLabel: "Dashboard",
+
+    title: "Your Practice Overview",
+
+    description:
+      "Monitor appointments, track earnings, and stay updated with your patient activity all in one place.",
+
+    loadingText: "Loading dashboard data...",
+  },
+
+//---------------- patient messages --------------
+  doctorMessages: {
+    icon: "mdi:message-text-outline",
+
+    roleLabel: "Doctor",
+    pageLabel: "Messages",
+
+    title: "Messages",
+
+    description:
+      "Send messages & review previous conversations, stay connected.",
+
+    activeTabLabel: "Inbox",
+
+    loadingText: "Loading messages...",
+  },
+
 };

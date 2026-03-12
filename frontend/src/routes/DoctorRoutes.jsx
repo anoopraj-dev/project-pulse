@@ -69,6 +69,7 @@ import DoctorViewAppointment from "@/pages/doctor/DoctorViewAppointment";
 import DoctorPatientProfile from "@/pages/doctor/DoctorPatientProfile";
 import DoctorPatientRecords from "@/pages/doctor/DoctorPatientRecords";
 import NotFound from "@/pages/NotFound";
+import DoctorDashboard from "@/pages/doctor/DoctorDashboard";
 
 const DoctorRoutes = () => {
   return useRoutes([
@@ -79,6 +80,7 @@ const DoctorRoutes = () => {
         </ProtectedRoute>
       ),
       children: [
+        { path: "dashboard", element: <DoctorDashboard /> },
         { path: "profile", element: <DoctorProfile /> },
         { path: "edit-profile", element: <DoctorEditProfile /> },
         { path: "documents", element: <DoctorDocuments /> },

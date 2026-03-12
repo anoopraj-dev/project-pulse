@@ -53,17 +53,9 @@ const DocumentView = ({professionalInfo,deleteDoc}) => {
 
 
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-6">
-      <div className="max-w-5xl mx-auto space-y-16">
+    <div className="min-h-screen ">
+      <div className=" mx-auto space-y-10">
         {/* Welcome message */}
-        {
-          isDocumentReview
-        }
-        <div className="text-center mb-12">
-          <p className="text-slate-500 text-lg mt-1">
-            Access all your professional documents below.
-          </p>
-        </div>
 
         {/* Medical License */}
         <Section

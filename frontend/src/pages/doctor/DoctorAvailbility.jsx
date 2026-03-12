@@ -200,7 +200,7 @@ const DoctorAvailability = () => {
   }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen pb-12">
       <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
         <div className="mx-auto max-w-4xl px-4 pb-6 pt-20">
           <div className="flex flex-col gap-2">

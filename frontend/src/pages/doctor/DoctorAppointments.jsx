@@ -12,6 +12,8 @@ import toast from "react-hot-toast";
 import { useModal } from "@/contexts/ModalContext";
 import { AppointmentsActionModal } from "@/components/ui/modals/ModalInputs";
 import { useNavigate } from "react-router-dom";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState(null);
@@ -110,63 +112,19 @@ const DoctorAppointments = () => {
   return (
     <div className="min-h-screen">
       {/* Header band */}
-      <div className="my-2">
-        <div className="my-2 rounded-xl mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-indigo-50 via-white to-sky-100 pt-20 pb-3">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            {/* Title + subtitle */}
-            <div>
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
-                <Icon icon="mdi:calendar-heart" />
-                Doctor · Appointments
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
-                Manage Appointments
-              </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-600">
-                View and manage your appointments.
-              </p>
-            </div>
-
-            {/* Status meta + loading */}
-            <div className="flex flex-col items-start gap-2 sm:items-end">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm ring-1 ring-slate-200">
-                <Icon
-                  icon="mdi:circle"
-                  className="text-[10px] text-emerald-500"
-                />
-                <span>
-                  Active tab:{" "}
-                  <span className="capitalize font-semibold text-slate-900">
-                    {activeTab}
-                  </span>
-                </span>
-              </div>
-
-              {isLoading && (
-                <span className="inline-flex items-center gap-2 text-[11px] text-slate-500">
-                  <Icon
-                    icon="mdi:loading"
-                    className="animate-spin text-indigo-500"
-                  />
-                  Loading appointments...
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mt-5">
-            <DoctorAppointmentTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </div>
-        </div>
-      </div>
+      <PageBanner  config={pageBannerConfig.doctorAppointments}
+  activeTab={activeTab}
+  isLoading={isLoading}
+  tabsComponent={
+    <DoctorAppointmentTabs
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+    />
+  }/>
 
       {/* Search Section */}
       {activeTab !== "book" && (
-        <div className="mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 pb-2 pt-2 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
               <SearchInput
@@ -190,7 +148,7 @@ const DoctorAppointments = () => {
       )}
 
       {/* Content section */}
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 pt-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

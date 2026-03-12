@@ -8,6 +8,8 @@ import { getReceipt } from "@/api/user/userApis";
 import { doctorPaymentColumns } from "@/components/shared/configs/TableConfigs";
 import DoctorPaymentTabs from "../../components/user/doctor/payments/DoctorPaymentTabs";
 import { useUser } from "@/contexts/UserContext";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const DoctorPayments = () => {
   const [payments, setPayments] = useState(null);
@@ -69,56 +71,20 @@ const DoctorPayments = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="my-2">
-        <div className="rounded-xl mx-auto max-w-7xl px-4 pt-20 pb-6 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-indigo-50 via-white to-sky-100">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-600">
-                <Icon icon="mdi:stethoscope" />
-                Doctor · Payments
-              </p>
-
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
-                Earnings & Transactions
-              </h1>
-
-              <p className="mt-2 max-w-xl text-sm text-slate-600">
-                View and download your payment receipts and earnings details.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-start gap-2 sm:items-end">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm ring-1 ring-slate-200">
-                <Icon icon="mdi:circle" className="text-[10px] text-emerald-500" />
-                <span>
-                  Active tab:{" "}
-                  <span className="capitalize font-semibold text-slate-900">
-                    {activeTab}
-                  </span>
-                </span>
-              </div>
-
-              {isLoading && (
-                <span className="inline-flex items-center gap-2 text-[11px] text-slate-500">
-                  <Icon icon="mdi:loading" className="animate-spin text-indigo-500" />
-                  Loading payments...
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="mt-5">
-            <DoctorPaymentTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </div>
-        </div>
-      </div>
+      <PageBanner
+  config={pageBannerConfig.doctorPayments}
+  activeTab={activeTab}
+  isLoading={isLoading}
+  tabsComponent={
+    <DoctorPaymentTabs
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+    />
+  }
+/>
 
       {/* Table Section */}
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 pb-12 pt-4 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
             <div className="flex items-center justify-between">

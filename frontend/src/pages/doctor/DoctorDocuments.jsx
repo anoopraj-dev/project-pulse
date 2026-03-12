@@ -7,6 +7,8 @@ import DocumentView from "../../components/user/doctor/documents/DocumentView";
 import { useModal } from "../../contexts/ModalContext";
 import { deleteDocuments } from "../../api/doctor/doctorApis";
 import PrimaryButton from "../../components/shared/components/PrimaryButton";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 // ------------------ Doctor Documents Page ---------------
 const DoctorDocuments = () => {
@@ -71,7 +73,8 @@ const DoctorDocuments = () => {
   if (!professionalInfo) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-6">
+    <div className="min-h-screen pb-12 ">
+      <PageBanner config={pageBannerConfig.doctorDocuments}/>
       <DocumentView professionalInfo={professionalInfo} deleteDoc={deleteDoc} />
     </div>
   );

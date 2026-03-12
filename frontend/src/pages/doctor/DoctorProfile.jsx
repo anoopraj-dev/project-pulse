@@ -18,6 +18,8 @@ import {
 import PrimaryButton from "../../components/shared/components/PrimaryButton";
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
 import BlockedProfile from "../../components/shared/components/BlockedProfile";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const DoctorProfile = () => {
   const [user, setUser] = useState(null);
@@ -127,7 +129,7 @@ const DoctorProfile = () => {
   if (!user) return null;
 
   return (
-    <div className="flex flex-col mt-18">
+    <div className="flex flex-col pb-12">
       <DoctorStatusBanner
         approvalStatus={user.status}
         submissionCount={user.submissionCount}
@@ -137,7 +139,9 @@ const DoctorProfile = () => {
       {user.isBlocked && <BlockedProfile />}
 
       {!user.isBlocked && (
-        <ProfileView
+        <div>
+          <PageBanner config={pageBannerConfig.doctorProfile} activeTab='Overview'/>
+          <ProfileView
           viewer= 'doctor'
           user={user}
           availability={availability}
@@ -148,6 +152,7 @@ const DoctorProfile = () => {
           onResubmission={handleResubmission}
           onManageAvailability={handleManageAvailability}
         />
+        </div>
       )}
     </div>
   );
