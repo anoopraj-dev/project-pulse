@@ -9,7 +9,7 @@ import PatientAppointmentTabs from "../../components/user/patient/appointments/A
 import SearchInput from "../../components/shared/components/SearchInput";
 import { useSearch } from "../../hooks/useSearch";
 import { fetchSearchSuggestions } from "../../api/user/userApis";
-import BookAppointmentForm from "@/components/user/patient/appointments/BookAppointmentForm";
+import BookAppointmentForm from "@/components/user/patient/appointments/booking/BookAppointmentForm";
 import { fetchAppointments, getBookingInfo } from "@/api/patient/patientApis";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
@@ -37,7 +37,7 @@ const PatientAppointments = () => {
   const location = useLocation();
   const navigationState = location.state;
   const [activeTab, setActiveTab] = useState(
-    navigationState?.defaultTab || "upcoming",
+    navigationState?.defaultTab || "confirmed",
   );
 
   //------------- Get all appointments -----------------
@@ -183,10 +183,12 @@ const PatientAppointments = () => {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Icon icon="mdi:clipboard-text-outline" />
-                    {activeTab === "upcoming"
+                    {activeTab === "confirmed"
                       ? "Upcoming Appointments"
                       : activeTab === "history"
                         ? "Past Appointments"
+                      :activeTab === 'cancelled'
+                      ?'Cancelled Appointments'
                         : "Book New Appointment"}
                   </h2>
 

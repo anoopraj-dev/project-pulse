@@ -146,7 +146,7 @@ const PatientViewAppointment = () => {
         blockedReason={user?.blockedReason}
       />
       {
-        user.status ==='blocked' ? (
+        user?.status ==='blocked' ? (
           <>
             <BlockedProfile reason={user?.blockedReason}/>
           </>
@@ -162,8 +162,8 @@ const PatientViewAppointment = () => {
             <div className="flex h-24 w-24 items-center justify-center rounded-full ring-2 ring-sky-200 overflow-hidden bg-white shadow-sm">
               {doctor?.profilePicture ? (
                 <img
-                  src={doctor.profilePicture}
-                  alt={doctor.name}
+                  src={doctor?.profilePicture}
+                  alt={doctor?.name}
                   className="h-full w-full object-cover"
                 />
               ) : (

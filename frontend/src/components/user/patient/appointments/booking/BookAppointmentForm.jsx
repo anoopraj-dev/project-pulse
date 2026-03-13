@@ -1,0 +1,208 @@
+
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useUser } from "@/contexts/UserContext";
+import {
+  bookAppointment,
+  fetchAppointments,
+  getBookingInfo,
+} from "@/api/patient/patientApis";
+import { fetchSearchSuggestions } from "@/api/user/userApis";
+import DoctorSearchSection from "./DoctorSearchSection";
+import AppointmentFormSection from "./AppointmentFormSection";
+import CheckoutSection from "./CheckoutSection";
+
+const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
+  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [query, setQuery] = useState("");
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  const user = useUser();
+
+  const activeDoctor = selectedDoctor || bookingInfo;
+  const hasBookingInfo = !!activeDoctor?.doctorId;
+
+  const [formData, setFormData] = useState({
+    doctorId: "",
+    specialty: "",
+    serviceType: "",
+    date: "",
+    time: "",
+    reason: "",
+    notes: "",
+  });
+
+  // ---------- Prefill when bookingInfo exists ----------
+  useEffect(() => {
+    if (!activeDoctor?.doctorId) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      doctorId: activeDoctor?.doctorId,
+      specialty: activeDoctor?.specialty || "",
+    }));
+  }, [activeDoctor]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "date" ? { time: "" } : {}),
+    }));
+  };
+
+  //-------------------- Get available dates ------------
+  const getAvailableDates = () => {
+    if (!hasBookingInfo) return [];
+
+    const now = new Date();
+
+    return activeDoctor?.availability
+      ?.map((day) => new Date(day.date))
+      .filter((date) => {
+        return date >= new Date(now.setHours(0, 0, 0, 0));
+      })
+      .map((date) => date.toISOString().split("T")[0]);
+  };
+
+  const availableSlots = () => {
+    if (!hasBookingInfo || !formData.date) return [];
+
+    const day = activeDoctor?.availability?.find(
+      (d) => d.date.split("T")[0] === formData.date,
+    );
+
+    if (!day?.slots) return [];
+
+    const now = new Date();
+
+    return day.slots.filter((slot) => {
+      const slotDateTime = new Date(`${formData.date}T${slot.startTime}`);
+      return slotDateTime.getTime() - now.getTime() >= 60 * 60 * 1000;
+    });
+  };
+
+  const today = new Date().toISOString().split("T")[0];
+
+  //------------- amount to pay --------------
+  const selectedService = activeDoctor?.services?.find(
+    (s) => s.serviceType === formData.serviceType,
+  );
+
+  const amountToPay = selectedService?.fees;
+
+  //--------------------- Handle Book appointment -------------
+  const handleBooking = async (orderId) => {
+    try {
+      const res = await bookAppointment({ ...formData, orderId });
+
+      if (res.data?.success) {
+        await fetchAppointments();
+        setActiveTab("confirmed");
+        toast.success("Appointment booked successfully");
+      } else {
+        toast.error("Failed to book appointment");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  //------------------- Handle wallet payment -----------------
+  const handleWalletPayment = async () => {
+    try {
+      const res = await bookAppointment({
+        ...formData,
+        paymentMethod: "wallet",
+      });
+
+      if (res.data?.success) {
+        await fetchAppointments();
+        setActiveTab("confirmed");
+        toast.success("Appointment booked using wallet");
+      } else {
+        toast.error("Wallet payment failed");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  //------------------- Search Suggestions ------------
+  const fetchSuggestions = (query) => {
+    return fetchSearchSuggestions({
+      role: "patient",
+      query,
+      type: "doctor",
+    });
+  };
+
+  //---------------- Select search suggestion --------------------
+  const handleSelectSuggestion = async (item) => {
+    try {
+      setQuery(item.name);
+
+      const res = await getBookingInfo(item._id);
+
+      if (res.data?.success) {
+        const doctor = res.data.bookingInfo;
+
+        setSelectedDoctor(doctor);
+
+        setFormData({
+          doctorId: doctor.doctorId,
+          specialty: doctor.specialty || "",
+          serviceType: doctor.services?.[0]?.serviceType || "",
+          date: "",
+          time: "",
+          reason: "",
+          notes: "",
+        });
+      }
+    } catch (error) {
+      console.error("Booking info error:", error);
+      toast.error("Failed to load doctor availability");
+    }
+  };
+
+  return (
+    <div className="p-6 sm:p-8">
+      <DoctorSearchSection
+        query={query}
+        setQuery={setQuery}
+        fetchSuggestions={fetchSuggestions}
+        handleSelectSuggestion={handleSelectSuggestion}
+      />
+
+      <div className="grid sm:grid-cols-1 md:grid-cols-2 space-x-6 space-y-2">
+        <AppointmentFormSection
+          hasBookingInfo={hasBookingInfo}
+          activeDoctor={activeDoctor}
+          formData={formData}
+          handleChange={handleChange}
+          getAvailableDates={getAvailableDates}
+          availableSlots={availableSlots}
+          today={today}
+        />
+
+        <CheckoutSection
+          hasBookingInfo={hasBookingInfo}
+          activeDoctor={activeDoctor}
+          formData={formData}
+          amountToPay={amountToPay}
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          handleBooking={handleBooking}
+          handleWalletPayment={handleWalletPayment}
+          user={user}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default BookAppointmentForm;

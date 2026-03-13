@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import Doctor from "../../models/doctor.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
-import { isAppointmentActionAllowed } from "../../utils/appointmentAction.js";
 import Payment from "../../models/payments.model.js";
 import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
-import { refundToWallet } from "./wallet.controller.js";
+import { sendEmail } from "../../config/nodemailer.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
+import Patient from '../../models/patient.model.js';
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -69,6 +70,7 @@ export const getBookingInfo = async (req, res) => {
       specialty: doctor.professionalInfo?.specializations?.[0] || "",
       services,
       availability,
+      profileImage:doctor.profilePicture
     };
 
     return res.status(200).json({
@@ -87,10 +89,12 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
-    console.log(req.body);
     const { doctorId, date, time, reason, notes, serviceType, orderId } =
       req.body;
     const patientId = req.user.id;
+
+    const doctor = await Doctor.findById(doctorId).select("email,name");
+    const patient = await Patient.findById(patientId).select("email,name");
 
     // ---------------- Validation ----------------
     if (!doctorId || !date || !time || !reason) {
@@ -169,6 +173,60 @@ export const bookAppointment = async (req, res) => {
     //---------------- Link appointment to payment --------------
     payment.appointment = appointment._id;
     await payment.save();
+
+    // ---------- Patient Email ----------
+    const patientMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: patient.email,
+      subject: "Appointment Confirmation",
+      html: emailTemplate({
+        title: "Appointment Booked Successfully",
+        subtitle: "Your appointment is confirmed",
+        body: `
+      <p>Hello <strong>${patient.name}</strong>,</p>
+      <p>Your appointment has been successfully booked.</p>
+
+      <p><strong>Doctor:</strong> ${doctor.name}</p>
+      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+      <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} confirmed`,
+        highlightType: "success",
+      }),
+    };
+
+    // ---------- Doctor Email ----------
+    const doctorMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: doctor.email,
+      subject: "New Appointment Booked",
+      html: emailTemplate({
+        title: "New Appointment Scheduled",
+        subtitle: "A patient has booked a consultation",
+        body: `
+      <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+      <p>A new appointment has been booked.</p>
+
+      <p><strong>Patient:</strong> ${patient.name}</p>
+      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+      <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} scheduled`,
+        highlightType: "info",
+      }),
+    };
+
+    // ---------- Send Emails ----------
+    try {
+      await Promise.all([
+        sendEmail(patientMailOptions),
+        sendEmail(doctorMailOptions),
+      ]);
+    } catch (error) {
+      console.log("Email sending error:", error);
+    }
 
     return res.status(201).json({
       success: true,
@@ -329,8 +387,8 @@ export const cancelAppointment = async (req, res) => {
     const payment = await Payment.findOne({ appointment: appointment._id });
 
     if (payment && payment.status !== "refunded") {
-      //--------------- 10% platform fee deduction ----------------
-      const platformFee = payment.amount * 0.1;
+      //--------------- 5% platform fee deduction ----------------
+      const platformFee = payment.amount * 0.05;
       const refundAmount = payment.amount - platformFee;
 
       let wallet = await Wallet.findOne({
@@ -357,7 +415,7 @@ export const cancelAppointment = async (req, res) => {
             amount: refundAmount,
             referenceType: "refund",
             referenceId: payment._id,
-            notes: `Refund (${refundPercentage * 100}%) for cancelled appointment #${appointment._id.toString().slice(-6)}`,
+            notes: `Refund (${refundPercentage * 100}%), platformFee deduction 5% for cancelled appointment #${appointment._id.toString().slice(-6)}`,
           },
         ],
         { session },

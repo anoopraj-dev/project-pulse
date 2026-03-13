@@ -210,14 +210,14 @@ const ProfileView = ({
                         }
                         className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                       />
-                      <ActionButton
+                      {/* <ActionButton
                         action="message"
                         activeAction={activeAction}
                         icon="mdi:message-text"
                         text="Message"
                         onClick={() => handleAction("message", handleMessages)}
                         className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
-                      />
+                      /> */}
                     </>
                   )}
 

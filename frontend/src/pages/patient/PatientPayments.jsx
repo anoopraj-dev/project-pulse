@@ -24,7 +24,7 @@ import PatientStatusBanner from "@/components/user/patient/profile/PatientStatus
 const PatientPayments = () => {
   const [payments, setPayments] = useState(null);
   const fetchPaymentsAction = useAsyncAction();
-  const [activeTab, setActiveTab] = useState("upcoming");
+  const [activeTab, setActiveTab] = useState("all");
   const { role, user } = useUser();
   const navigate = useNavigate();
  
@@ -211,11 +211,15 @@ const PatientPayments = () => {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Icon icon="mdi:clipboard-text-outline" />
-                    {activeTab === "upcoming"
+                    {activeTab === "all"
                       ? "All payments"
-                      : activeTab === "history"
-                        ? "Past Appointments"
-                        : "Book New Appointment"}
+                      : activeTab === "success"
+                        ? "Succesful Payments"
+                      : activeTab === "failed"
+                        ? "Failed Payments"
+                        : activeTab === "refunds"
+                        ? "Refunds"
+                        : ""}
                   </h2>
 
                   <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">

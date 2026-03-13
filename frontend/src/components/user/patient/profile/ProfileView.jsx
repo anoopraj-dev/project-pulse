@@ -33,7 +33,7 @@ const ProfileView = ({
   const isDoctorViewing = viewer === "doctor";
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen "> 
 
       <div className="w-full px-4 pb-6">
         {/* Main Grid Layout */}

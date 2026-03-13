@@ -79,7 +79,7 @@ const Layout = () => {
       {/* Main content */}
       <main
         className={`
-    mt-26 h-[calc(100vh-4rem)] overflow-y-auto
+    mt-20 h-[calc(100vh-4rem)] overflow-y-auto
     transition-all duration-300
     px-2 sm:px-4 md:px-6 lg:px-8 xl:px-32
     ${isSidebarOpen ? "ml-60 sm:ml-64" : "ml-16 sm:ml-20"}

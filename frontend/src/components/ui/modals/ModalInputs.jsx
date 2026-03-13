@@ -547,3 +547,4 @@ export const AppointmentsActionModal = ({
     </div>
   );
 };
+
