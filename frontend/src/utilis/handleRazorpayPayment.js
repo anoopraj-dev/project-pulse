@@ -1,11 +1,15 @@
 import toast from "react-hot-toast";
 import { verifyRazorpayPayment } from "@/api/user/userApis";
-import { updatePaymentStatus } from "@/api/patient/patientApis";
+import {
+  updatePaymentStatus,
+  verifyWalletPayment,
+} from "@/api/patient/patientApis";
 
 export const handleRazorpayPayment = async ({
   order,
   role,
   user,
+  type = "appointment",
   onSuccess,
   onFailure,
 }) => {
@@ -21,7 +25,6 @@ export const handleRazorpayPayment = async ({
     name: "Pulse360",
     description: "Payment Transaction",
     order_id: order.id,
-
     retry: { enabled: false },
 
     modal: {
@@ -33,19 +36,38 @@ export const handleRazorpayPayment = async ({
     //---------------- Verify payment on success ----------------
     handler: async function (response) {
       try {
-        //--------------- Verify payment on server ---------------
-        const verifyRes = await verifyRazorpayPayment(
-          {
+        //--------- adding fund to wallet -------
+        if (type === "wallet") {
+          const res = await verifyWalletPayment({
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
-          },
-          role
-        );
+            amount: order.amount,
+          });
 
-        if (!verifyRes.data?.success) {
-          toast.error("Payment verification failed");
+          if (!res.data?.success) {
+            toast.error(res.data?.message || "Wallet top-up failed");
+            return;
+          }
+          toast.success("Wallet credited successfully!");
+
+          if (onSuccess) onSuccess(response);
           return;
+        } else {
+          //------------ booking appointment ---------------
+          const verifyRes = await verifyRazorpayPayment(
+            {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            },
+            role,
+          );
+
+          if (!verifyRes.data?.success) {
+            toast.error("Payment verification failed");
+            return;
+          }
         }
 
         //---------------- Update payment status -----------------
@@ -62,7 +84,7 @@ export const handleRazorpayPayment = async ({
         toast.success("Payment Successful!");
 
         if (onSuccess) {
-          onSuccess(order.id);
+          onSuccess(response);
         }
       } catch (error) {
         console.log(error);

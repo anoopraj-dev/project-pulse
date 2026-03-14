@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import {
   createWalletOrder,
   getPatientWallet,
+  verifyWalletPayment,
 } from "../../api/patient/patientApis";
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
 import { handleRazorpayPayment } from "@/utilis/handleRazorpayPayment";
@@ -25,7 +26,7 @@ const PatientWallet = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addAmount, setAddAmount] = useState("");
-  const {user} = useUser();
+  const { user } = useUser();
 
   const fetchWallet = async () => {
     setLoading(true);
@@ -53,12 +54,16 @@ const PatientWallet = () => {
         notes: "Wallet top-up",
       });
 
-      const order = orderRes.data.order;
+      const order = orderRes?.data?.order;
+
+      console.log("order", order);
 
       handleRazorpayPayment({
-        order,
+        order: order,
         role: "patient",
-        onSuccess: () => {
+        user: user,
+        type: "wallet",
+        onSuccess: async () => {
           fetchWallet();
           setAddAmount("");
         },
@@ -90,7 +95,7 @@ const PatientWallet = () => {
       />
       {user?.status === "blocked" ? (
         <>
-          <BlockedProfile reason={user?.blockedReason}/>
+          <BlockedProfile reason={user?.blockedReason} />
         </>
       ) : (
         <>

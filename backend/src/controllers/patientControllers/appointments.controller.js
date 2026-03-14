@@ -7,7 +7,7 @@ import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
-import Patient from '../../models/patient.model.js';
+import Patient from "../../models/patient.model.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -70,7 +70,7 @@ export const getBookingInfo = async (req, res) => {
       specialty: doctor.professionalInfo?.specializations?.[0] || "",
       services,
       availability,
-      profileImage:doctor.profilePicture
+      profileImage: doctor.profilePicture,
     };
 
     return res.status(200).json({
@@ -89,8 +89,16 @@ export const getBookingInfo = async (req, res) => {
 //------------------------ Book Appointment -----------------------
 export const bookAppointment = async (req, res) => {
   try {
-    const { doctorId, date, time, reason, notes, serviceType, orderId } =
-      req.body;
+    const {
+      doctorId,
+      date,
+      time,
+      reason,
+      notes,
+      serviceType,
+      orderId,
+      paymentMethod,
+    } = req.body;
     const patientId = req.user.id;
 
     const doctor = await Doctor.findById(doctorId).select("email,name");
@@ -111,29 +119,30 @@ export const bookAppointment = async (req, res) => {
       });
     }
 
-    //--------------- Check payment Verification --------------
-    const payment = await Payment.findOne({
-      orderId,
-      patient: patientId,
-      status: "verified",
-    });
-
-    if (!payment) {
-      return res.status(403).json({
-        success: false,
-        message: "Payment not verified",
-      });
-    }
-
-    if (payment.appointment) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment already created for this payment",
-      });
-    }
-
     const appointmentDate = new Date(date);
+    let payment;
+    if (paymentMethod !== "wallet") {
+      //--------------- Check razorpay payment Verification --------------
+      payment = await Payment.findOne({
+        orderId: orderId.razorpay_order_id || orderId,
+        patient: patientId,
+        status: "verified",
+      });
 
+      if (!payment) {
+        return res.status(403).json({
+          success: false,
+          message: "Payment not verified",
+        });
+      }
+
+      if (payment.appointment) {
+        return res.status(400).json({
+          success: false,
+          message: "Appointment already created for this payment",
+        });
+      }
+    }
     // ---------------- Update availability ----------------
     const availabilityUpdate = await mongoose
       .model("DoctorAvailability")

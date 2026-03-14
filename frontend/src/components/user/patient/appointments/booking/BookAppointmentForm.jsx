@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useUser } from "@/contexts/UserContext";
@@ -6,6 +5,7 @@ import {
   bookAppointment,
   fetchAppointments,
   getBookingInfo,
+  walletPayment,
 } from "@/api/patient/patientApis";
 import { fetchSearchSuggestions } from "@/api/user/userApis";
 import DoctorSearchSection from "./DoctorSearchSection";
@@ -93,6 +93,30 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
 
   const amountToPay = selectedService?.fees;
 
+  //------------------- Handle wallet payment -----------------
+  const handleWalletPayment = async () => {
+    try {
+      const res = await walletPayment({
+        ...formData,
+        amount: amountToPay,
+      });
+
+      if (res.data?.success) {
+        const orderId = res.data.payment.orderId;
+
+        // create appointment
+        await handleBooking(orderId);
+
+        toast.success("Appointment booked using wallet");
+      } else {
+        toast.error("Wallet payment failed");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  };
+
   //--------------------- Handle Book appointment -------------
   const handleBooking = async (orderId) => {
     try {
@@ -104,27 +128,6 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
         toast.success("Appointment booked successfully");
       } else {
         toast.error("Failed to book appointment");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Something went wrong");
-    }
-  };
-
-  //------------------- Handle wallet payment -----------------
-  const handleWalletPayment = async () => {
-    try {
-      const res = await bookAppointment({
-        ...formData,
-        paymentMethod: "wallet",
-      });
-
-      if (res.data?.success) {
-        await fetchAppointments();
-        setActiveTab("confirmed");
-        toast.success("Appointment booked using wallet");
-      } else {
-        toast.error("Wallet payment failed");
       }
     } catch (error) {
       console.log(error);

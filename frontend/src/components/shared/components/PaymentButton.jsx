@@ -1,17 +1,31 @@
-
 import React from "react";
 import toast from "react-hot-toast";
 import { createRazorpayOrder } from "@/api/user/userApis";
 import { handleRazorpayPayment } from "@/utilis/handleRazorpayPayment";
 import { useNavigate } from "react-router-dom";
 
-const PaymentButton = ({ amount, user, role,doctorId, bookingData, onSuccess }) => {
+const PaymentButton = ({
+  amount,
+  user,
+  role,
+  doctorId,
+  bookingData,
+  onSuccess,
+}) => {
   const navigate = useNavigate();
+
+  
 
   const handlePayment = async () => {
     try {
-      console.log('bookingData',bookingData)
-      const response = await createRazorpayOrder({amount, role,doctorId,...bookingData});
+
+    //------------------ Create Razorpay order ---------------
+      const response = await createRazorpayOrder({
+        amount,
+        role,
+        doctorId,
+        ...bookingData,
+      });
 
       if (!response.data?.success) {
         return toast.error("Failed to create order");
@@ -22,14 +36,13 @@ const PaymentButton = ({ amount, user, role,doctorId, bookingData, onSuccess }) 
         role,
         user,
         onSuccess,
-        onFailure:() =>{
-          navigate('/patient/payments')
+        onFailure: () => {
+          navigate("/patient/payments");
         },
       });
-
     } catch (error) {
       console.error(error);
-      toast.error("Payment failed. Please try again");
+      toast.error(error.response.data?.message ||'Payment failed! Try agin');
     }
   };
 

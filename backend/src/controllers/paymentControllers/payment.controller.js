@@ -4,6 +4,7 @@ import Payment from "../../models/payments.model.js";
 import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
 import Admin from "../../models/admin.model.js";
+import DoctorAvailability from "../../models/availability.model.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -15,6 +16,29 @@ export const createOrder = async (req, res) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = req.body;
 
   try {
+    // ---------------- Validation  ----------------
+    if (!doctorId || !date || !time || !serviceType || !reason) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing booking fields",
+      });
+    }
+
+    const slot = await DoctorAvailability.findOne({
+      doctorId,
+      date: new Date(date),
+      "slots.startTime": time,
+      "slots.isBooked": false,
+    });
+
+    if (!slot) {
+      return res.status(409).json({
+        success: false,
+        message: "Selected slot not available",
+      });
+    }
+
+    //-------------- payment options -------------
     const options = {
       amount: amount * 100, // ------- convert to paise
       currency: "INR",
@@ -29,6 +53,7 @@ export const createOrder = async (req, res) => {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
+      method: "razorpay",
       receipt: order.receipt,
       status: "created",
       attempts: 0,
@@ -61,6 +86,8 @@ export const verifyPayment = async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       req.body;
 
+    console.log(razorpay_order_id, razorpay_payment_id);
+
     const generated_signature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(razorpay_order_id + "|" + razorpay_payment_id)
@@ -86,7 +113,7 @@ export const verifyPayment = async (req, res) => {
           paymentDetails.status === "captured"
             ? "verified"
             : paymentDetails.status,
-        method: paymentDetails.method,
+        method: "razorpay",
         notes: `Paid via ${paymentDetails.method}`,
       },
       { new: true },
@@ -273,5 +300,183 @@ export const retryPayment = async (req, res) => {
       success: false,
       message: "Retry failed",
     });
+  }
+};
+
+//--------------- Wallet payment controller ---------------
+
+export const walletPayment = async (req, res) => {
+  try {
+    const { amount, doctorId, date, time, serviceType, reason, notes } =
+      req.body;
+    const patientId = req.user.id;
+
+    //-------------- Validate Slot ------------
+    const slot = await DoctorAvailability.findOne({
+      doctorId,
+      date: new Date(date),
+      "slots.startTime": time,
+      "slots.isBooked": false,
+    });
+
+    if (!slot) {
+      return res.status(409).json({
+        success: false,
+        message: "Selected slot is not available",
+      });
+    }
+
+    //------------- Find patient Wallet -------------
+    const wallet = await Wallet.findOne({
+      userId: patientId,
+      role: "patient",
+    });
+
+    if (!wallet || wallet.balance < amount * 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient wallet balance",
+      });
+    }
+
+    //--------------- Deduct wallet balance --------------
+    wallet.balance -= amount * 100;
+    await wallet.save();
+
+    //-------------- Generate orderId ------------------
+    const orderId = `wal_${Date.now()}`;
+
+    //------------------ Create payment record --------------
+    const payment = await Payment.create({
+      patient: patientId,
+      doctor: doctorId,
+      orderId,
+      amount: amount * 100,
+      currency: "INR",
+      method: "wallet",
+      status: "verified",
+      bookingData: {
+        doctorId,
+        date,
+        time,
+        serviceType,
+        reason,
+        notes,
+      },
+    });
+
+    //------------- Record patient transaction -------------
+    await Transaction.create({
+      wallet: wallet._id,
+      type: "debit",
+      amount: amount * 100,
+      referenceType: "payment",
+      referenceId: payment._id,
+      notes: "Appointment payment via wallet",
+    });
+
+    await wallet.save();
+
+    const admin = await Admin.findOne();
+
+    //-------------- Credit admin wallet -------------
+    let adminWallet = await Wallet.findOne({ role: "admin" });
+
+    if (!adminWallet) {
+      adminWallet = await Wallet.create({
+        userId: admin._id,
+        role: "admin",
+        balance: amount * 100,
+        transactions: [],
+      });
+    } else {
+      adminWallet.balance += amount * 100;
+    }
+
+    await Transaction.create({
+      wallet: adminWallet._id,
+      type: "credit",
+      amount: amount * 100,
+      referenceType: "payment",
+      referenceId: payment._id,
+      notes: `Wallet payment from patient ${patientId}`,
+    });
+
+    await adminWallet.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Wallet payment successful",
+      payment,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Wallet payment failed",
+    });
+  }
+};
+
+export const verifyWalletPayment = async (req, res) => {
+  try {
+    const {
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+      amount,
+    } = req.body;
+
+    // -------------- Verify signature with Razorpay HMAC -------
+    const generated_signature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (generated_signature !== razorpay_signature) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid signature" });
+    }
+
+    // -------------------- Credit wallet -------------------------
+    let wallet = await Wallet.findOne({
+      userId: req.user._id,
+      role: "patient",
+    });
+    if (!wallet) {
+      wallet = await Wallet.create({
+        userId: req.user._id,
+        role: "patient",
+        balance: 0,
+        transactions: [],
+      });
+    }
+    wallet.balance += amount;
+    await wallet.save();
+
+    //--- Create wallet transaction ------
+    const txn = await Transaction.create({
+      wallet: wallet._id,
+      type: "credit",
+      amount,
+      referenceType: "topup",
+      referenceId: razorpay_payment_id,
+      notes: "Wallet top-up via Razorpay",
+    });
+    wallet.transactions.push(txn._id);
+    await wallet.save();
+
+    return res.json({
+      success: true,
+      message: "Wallet credited successfully",
+      wallet,
+      transaction: txn,
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to verify payment" });
   }
 };
