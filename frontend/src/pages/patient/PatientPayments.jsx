@@ -88,8 +88,6 @@ const PatientPayments = () => {
         const order = response.data.order;
         const bookingData = response.data.bookingData;
 
-        console.log(bookingData);
-
         await handleRazorpayPayment({
           order,
           role,
@@ -131,20 +129,18 @@ const PatientPayments = () => {
       return payment?.status === "verified";
     } else if (activeTab === "failed") {
       return payment?.status === "failed";
-    } else if (activeTab === "refunds") {
+    } else if (activeTab === "refunded") {
       return payment?.status === "refunded";
     }
     return true;
   });
 
-  const filteredSearchResult = results?.filter((payment) => {
-    if (activeTab === "success") {
-      return payment?.status === "verified";
-    } else if (activeTab === "history") {
-      return payment?.status === "completed";
-    }
-    return true;
-  });
+const filteredSearchResult = results?.filter((payment) => {
+  if (activeTab === "success") return payment?.status === "verified";
+  if (activeTab === "failed") return payment?.status === "failed";
+  if (activeTab === "refunded") return payment?.status === "refunded";
+  return payment?.status !== "created";
+});
 
   useEffect(() => {}, [activeTab]);
 
@@ -217,7 +213,7 @@ const PatientPayments = () => {
                         ? "Succesful Payments"
                       : activeTab === "failed"
                         ? "Failed Payments"
-                        : activeTab === "refunds"
+                        : activeTab === "refunded"
                         ? "Refunds"
                         : ""}
                   </h2>
@@ -225,7 +221,7 @@ const PatientPayments = () => {
                   <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
                     <Icon icon="mdi:format-list-bulleted" />
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
-                      {filteredPayments?.length ?? 0}
+                      {displayedPayments?.length ?? 0}
                     </span>
                     records in this view
                   </div>
@@ -233,7 +229,7 @@ const PatientPayments = () => {
               </div>
 
               <div className="px-2 py-3 sm:px-4">
-                {filteredPayments && filteredPayments.length > 0 ? (
+                {displayedPayments && displayedPayments.length > 0 ? (
                   <DataTable
                     data={displayedPayments}
                     columns={patientPaymentColumns}

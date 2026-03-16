@@ -4,7 +4,7 @@ const PatientPaymentTabs = ({ activeTab, setActiveTab }) => {
     { key: "all", label: "All Payments" },
     { key: "success", label: "Successful Payments" },
     { key: "failed", label: "Failed Payments" },
-    { key: "refunds", label: "Refunds" },
+    { key: "refunded", label: "Refunds" },
     
   ];
 

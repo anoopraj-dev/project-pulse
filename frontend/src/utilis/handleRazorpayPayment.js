@@ -78,7 +78,7 @@ export const handleRazorpayPayment = async ({
         });
 
         if (!updateRes.data?.success) {
-          return toast.error("Failed to update Wallet and status");
+          return toast.error(error.response?.data?.message || 'Failed to update payment status');
         }
 
         toast.success("Payment Successful!");

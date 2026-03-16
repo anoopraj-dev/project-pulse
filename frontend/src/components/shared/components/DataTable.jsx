@@ -4,8 +4,7 @@ const DataTable = ({
   onView,
   emptyMessage = "No data available",
 }) => {
-  const failedPayments = data.filter((d) => d.status === "failed");
-  console.log(failedPayments);
+
   return (
     <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl">
       <div className="overflow-auto max-h-[70vh]">

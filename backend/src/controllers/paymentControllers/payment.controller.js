@@ -5,13 +5,14 @@ import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
 import Admin from "../../models/admin.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
+import Appointment from "../../models/appointments.model.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-//--------------- Create Razorpay Order --------------
+//----------------- PAYMENT WITH RAZORPAY -----------------
 export const createOrder = async (req, res) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = req.body;
 
@@ -47,24 +48,31 @@ export const createOrder = async (req, res) => {
 
     const order = await razorpay.orders.create(options);
 
+    const appointment = await Appointment.create({
+      patient: req.user.id,
+      doctor: doctorId,
+      appointmentDate: date,
+      timeSlot: time,
+      reason,
+      notes,
+      serviceType,
+      status: "pending",
+      isActive: false,
+    });
+
+    await appointment.save();
+
     await Payment.create({
       patient: req.user.id,
       doctor: doctorId,
+      appointment: appointment._id,
+      method: "razorpay",
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      method: "razorpay",
       receipt: order.receipt,
       status: "created",
       attempts: 0,
-      bookingData: {
-        doctorId,
-        date,
-        time,
-        serviceType,
-        reason,
-        notes,
-      },
     });
 
     res.status(200).json({
@@ -85,8 +93,6 @@ export const verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       req.body;
-
-    console.log(razorpay_order_id, razorpay_payment_id);
 
     const generated_signature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -109,10 +115,6 @@ export const verifyPayment = async (req, res) => {
       {
         paymentId: razorpay_payment_id,
         signature: razorpay_signature,
-        status:
-          paymentDetails.status === "captured"
-            ? "verified"
-            : paymentDetails.status,
         method: "razorpay",
         notes: `Paid via ${paymentDetails.method}`,
       },
@@ -141,36 +143,17 @@ export const verifyPayment = async (req, res) => {
 
 //--------------------- Update Payment Status --------------------
 export const updatePaymentStatus = async (req, res) => {
+  console.log("upadating payment status");
   try {
     const { orderId, status, notes } = req.body;
 
-    if (!orderId || !status) {
-      return res
-        .status(400)
-        .json({ success: false, message: "OrderId and status are required" });
-    }
-
-    const validStatuses = ["created", "verified", "failed", "refunded"];
-
-    if (!validStatuses.includes(status)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid Payment Status" });
-    }
-
-    const payment = await Payment.findOneAndUpdate(
-      { orderId },
-      { status, notes: notes || "" },
-      { new: true },
-    );
+    const payment = await Payment.findOne({ orderId });
 
     if (!payment) {
       return res
         .status(404)
         .json({ success: false, message: "Payment record not found" });
     }
-
-    //--------------- update admin wallet & transactions after successful payment -----------------
 
     //---------- Prevent double credit -----------
     if (payment.status === "verified") {
@@ -180,15 +163,25 @@ export const updatePaymentStatus = async (req, res) => {
       });
     }
 
-    //-------- Only allow crated-- verified --------
-    if (status === "verified" && payment.status !== "created") {
+    //-------- Validate state transition --------
+    if (
+      status === "verified" &&
+      !["created", "failed"].includes(payment.status)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid state transition",
       });
     }
 
-    // only verified payments can credit wallet
+    payment.status = status;
+    payment.notes = notes || "";
+    await payment.save();
+
+    console.log("verified payment status", payment.status);
+
+    //--------------- update admin wallet & transactions after successful payment -----------------
+
     if (status !== "verified") {
       return res.status(200).json({
         success: true,
@@ -213,7 +206,7 @@ export const updatePaymentStatus = async (req, res) => {
       adminWallet.balance += payment.amount;
     }
 
-    const txn = await Transaction.create({
+    await Transaction.create({
       wallet: adminWallet._id,
       type: "credit",
       amount: payment.amount,
@@ -222,7 +215,6 @@ export const updatePaymentStatus = async (req, res) => {
       notes: `Received from patient ${payment.patient}`,
     });
 
-    adminWallet.transactions.push(txn._id);
     await adminWallet.save();
 
     return res.status(200).json({ success: true, payment });
@@ -264,6 +256,22 @@ export const retryPayment = async (req, res) => {
       });
     }
 
+    //-------------- find the appointment ------------
+    const appointment = await Appointment.findOne({
+      _id: payment?.appointment._id,
+    });
+
+    //--------------- Build payload for booking --------------
+    const payload = {
+      doctorId: appointment.doctor,
+      date: appointment.appointmentDate,
+      time: appointment.timeSlot,
+      reason: appointment.reason,
+      notes: appointment.notes,
+      serviceType: appointment.serviceType,
+      paymentMethod: "razorpay",
+    };
+
     const now = new Date();
     const createdAt = new Date(payment.createdAt);
     const diffInHours = (now - createdAt) / (1000 * 60 * 60);
@@ -286,13 +294,20 @@ export const retryPayment = async (req, res) => {
     //------------- Update payment record ----------------
     payment.orderId = newOrder.id;
     payment.attempts += 1;
+
+    const data = {
+      ...payload,
+      doctorId: payment.doctor,
+      paymentMethod: "razorpay",
+    };
+
     await payment.save();
 
     return res.status(200).json({
       success: true,
       message: "Retry order created successfully",
       order: newOrder,
-      bookingData: payment.bookingData,
+      bookingData: data,
     });
   } catch (error) {
     console.log(error);
@@ -307,8 +322,17 @@ export const retryPayment = async (req, res) => {
 
 export const walletPayment = async (req, res) => {
   try {
-    const { amount, doctorId, date, time, serviceType, reason, notes } =
-      req.body;
+    console.log("wallet payment route hit");
+    const {
+      amount,
+      doctorId,
+      date,
+      time,
+      serviceType,
+      reason,
+      notes,
+      paymentMethod,
+    } = req.body;
     const patientId = req.user.id;
 
     //-------------- Validate Slot ------------
@@ -346,23 +370,30 @@ export const walletPayment = async (req, res) => {
     //-------------- Generate orderId ------------------
     const orderId = `wal_${Date.now()}`;
 
+    //-------------- create Appointment ----------------
+    const appointment = await Appointment.create({
+      patient: patientId,
+      doctor: doctorId,
+      appointmentDate: date,
+      timeSlot: time,
+      reason,
+      notes,
+      serviceType,
+      status: "pending",
+      isActive: false,
+    });
+
     //------------------ Create payment record --------------
     const payment = await Payment.create({
       patient: patientId,
       doctor: doctorId,
+      appointment: appointment._id,
+      method: "wallet",
       orderId,
       amount: amount * 100,
       currency: "INR",
       method: "wallet",
       status: "verified",
-      bookingData: {
-        doctorId,
-        date,
-        time,
-        serviceType,
-        reason,
-        notes,
-      },
     });
 
     //------------- Record patient transaction -------------

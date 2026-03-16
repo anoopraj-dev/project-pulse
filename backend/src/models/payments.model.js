@@ -101,14 +101,6 @@ const paymentSchema = new mongoose.Schema(
       default: null,
     },
 
-    bookingData: {
-      date: Date,
-      time: String,
-      serviceType: String,
-      reason: String,
-      notes: String,
-    },
-
     method: {
       type: String,
       enum: ["razorpay", "wallet"],

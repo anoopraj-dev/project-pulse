@@ -101,15 +101,17 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
         amount: amountToPay,
       });
 
+
+      let payload;
       if (res.data?.success) {
-        const orderId = res.data.payment.orderId;
+        payload = {
+          ...formData,
+          paymentMethod: res.data?.payment?.method,
+          doctorId: res.data?.payment?.doctor,
+          orderId: res.data?.payment?.orderId,
+        };
 
-        // create appointment
-        await handleBooking(orderId);
-
-        toast.success("Appointment booked using wallet");
-      } else {
-        toast.error("Wallet payment failed");
+        handleBooking(payload);
       }
     } catch (error) {
       console.log(error);
@@ -118,9 +120,9 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   };
 
   //--------------------- Handle Book appointment -------------
-  const handleBooking = async (orderId) => {
+  const handleBooking = async (payload) => {
     try {
-      const res = await bookAppointment({ ...formData, orderId });
+      const res = await bookAppointment(payload);
 
       if (res.data?.success) {
         await fetchAppointments();

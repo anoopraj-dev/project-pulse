@@ -10,7 +10,7 @@ export const doctorColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={doc.profilePicture || '/profile.png'}
+            src={doc.profilePicture || "/profile.png"}
             alt={doc.name}
             className="w-full h-full object-cover"
           />
@@ -76,7 +76,7 @@ export const patientColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={patient.profilePicture || '/profile.png'}
+            src={patient.profilePicture || "/profile.png"}
             alt={patient.name}
             className="w-full h-full object-cover"
           />
@@ -134,7 +134,7 @@ export const patientAppointmentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={appointment.doctor?.profilePicture || '/profile.png'}
+            src={appointment.doctor?.profilePicture || "/profile.png"}
             alt={appointment.doctor?.name}
             className="w-full h-full object-cover"
           />
@@ -203,7 +203,7 @@ export const doctorAppointmentColumns = [
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
           <img
-            src={appointment.patient?.profilePicture || '/profile.png'}
+            src={appointment.patient?.profilePicture || "/profile.png"}
             alt={appointment.patient?.name}
             className="w-full h-full object-cover"
           />
@@ -262,7 +262,6 @@ export const doctorAppointmentColumns = [
   },
 ];
 
-
 //-------------------------- Admin appointment columns ----------------
 export const adminAppointmentColumns = [
   {
@@ -294,29 +293,28 @@ export const adminAppointmentColumns = [
     ),
   },
 
- {
-  header: "Doctor",
-  render: (appointment) => (
-    <div className="flex items-center gap-4">
-      <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
-        <img
-          src={appointment.doctor?.profilePicture || "/profile.png"}
-          alt={appointment.doctor?.name || "Doctor"}
-          className="w-full h-full object-cover"
-        />
+  {
+    header: "Doctor",
+    render: (appointment) => (
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-full overflow-hidden ring-2 ring-gray-100">
+          <img
+            src={appointment.doctor?.profilePicture || "/profile.png"}
+            alt={appointment.doctor?.name || "Doctor"}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-900">
+            {appointment.doctor?.name || "-"}
+          </span>
+          <span className="text-xs text-gray-500">
+            {appointment.doctor?.professionalInfo?.specializations?.[0] || "-"}
+          </span>
+        </div>
       </div>
-      <div className="flex flex-col">
-        <span className="font-semibold text-gray-900">
-          {appointment.doctor?.name || "-"}
-        </span>
-        <span className="text-xs text-gray-500">
-          {appointment.doctor?.professionalInfo?.specializations?.[0] || "-"}
-        </span>
-      </div>
-    </div>
-  ),
-},
-
+    ),
+  },
 
   {
     header: "Consultation",
@@ -371,7 +369,6 @@ export const adminAppointmentColumns = [
   },
 ];
 
-
 //-------------------------- Patient payment columns ----------------
 export const patientPaymentColumns = [
   {
@@ -404,17 +401,17 @@ export const patientPaymentColumns = [
   },
 
   {
-  header: "Amount",
-  render: (payment) => (
-    <span className="font-semibold text-gray-900">
-      ₹{((payment.amount || 0) / 100).toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}
-    </span>
-  ),
-},
-
+    header: "Amount",
+    render: (payment) => (
+      <span className="font-semibold text-gray-900">
+        ₹
+        {((payment.amount || 0) / 100).toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </span>
+    ),
+  },
 
   {
     header: "Status",
@@ -423,14 +420,15 @@ export const patientPaymentColumns = [
         created: "bg-amber-100 text-amber-700",
         verified: "bg-emerald-100 text-emerald-700",
         failed: "bg-red-100 text-red-700",
-        cancelled:'bg-yellow-100 text-yellow-700'
+        cancelled: "bg-yellow-100 text-yellow-700",
       };
 
       const statusLabelMap = {
         created: "Pending",
         verified: "Successful",
         failed: "Failed",
-        cancelled:'Cancelled'
+        cancelled: "Cancelled",
+        refunded: "Refunded",
       };
 
       return (
@@ -454,7 +452,6 @@ export const patientPaymentColumns = [
     header: "Order ID",
     render: (payment) => payment.orderId || "-",
   },
-  
 ];
 
 //------------------------ Doctor Payment Columns -------------
@@ -486,17 +483,17 @@ export const doctorPaymentColumns = [
   },
 
   {
-  header: "Amount",
-  render: (payment) => (
-    <span className="font-semibold text-gray-900">
-      ₹{((payment.amount || 0) / 100).toLocaleString("en-IN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}
-    </span>
-  ),
-},
-
+    header: "Amount",
+    render: (payment) => (
+      <span className="font-semibold text-gray-900">
+        ₹
+        {((payment.amount || 0) / 100).toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </span>
+    ),
+  },
 
   {
     header: "Status",
@@ -535,4 +532,3 @@ export const doctorPaymentColumns = [
     render: (payment) => payment.orderId || "-",
   },
 ];
-

@@ -373,7 +373,7 @@ const PatientWallet = () => {
                 ) : (
                   <div style={{ padding: "8px 0" }}>
                     {transactions.map((txn, i) => {
-                      const isCredit = txn.amount > 0;
+                      const isCredit = txn.type === 'credit';
                       const icon =
                         categoryIcon[txn.category] ||
                         (isCredit
@@ -474,7 +474,7 @@ const PatientWallet = () => {
                           >
                             {isCredit
                               ? `+₹${(txn.amount / 100).toFixed(2)}`
-                              : `-₹${Math.abs(txn.amount).toFixed(2)}`}
+                              : `-₹${Math.abs(txn.amount/100).toFixed(2)}`}
                           </p>
                         </div>
                       );

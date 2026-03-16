@@ -1,4 +1,3 @@
-
 import { Icon } from "@iconify/react";
 import PaymentButton from "@/components/shared/components/PaymentButton";
 
@@ -15,7 +14,6 @@ const CheckoutSection = ({
 }) => {
   return (
     <div className="flex flex-col gap-3">
-
       {/* Doctor card */}
       {hasBookingInfo && (
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0096C7] to-[#0077B6] px-5 py-4 flex items-center gap-4">
@@ -26,8 +24,12 @@ const CheckoutSection = ({
             className="relative z-10 w-11 h-11 rounded-full object-cover border-2 border-white/30 shrink-0"
           />
           <div className="relative z-10 flex-1 min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{activeDoctor?.doctorName}</p>
-            <p className="text-white/65 text-xs mt-0.5">{activeDoctor?.specialty}</p>
+            <p className="text-white text-sm font-semibold truncate">
+              {activeDoctor?.doctorName}
+            </p>
+            <p className="text-white/65 text-xs mt-0.5">
+              {activeDoctor?.specialty}
+            </p>
           </div>
           <span className="relative z-10 text-[11px] font-medium text-white bg-white/[0.18] border border-white/25 px-2.5 py-1 rounded-full shrink-0">
             Available
@@ -47,13 +49,15 @@ const CheckoutSection = ({
           <div className="space-y-2.5">
             {[
               { label: "Service", value: formData.serviceType || "—" },
-              { label: "Date",    value: formData.date || "—" },
-              { label: "Time",    value: formData.time || "—" },
+              { label: "Date", value: formData.date || "—" },
+              { label: "Time", value: formData.time || "—" },
             ].map(({ label, value }, i) => (
               <div key={i}>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-slate-400">{label}</span>
-                  <span className="text-sm font-medium text-sky-950">{value}</span>
+                  <span className="text-sm font-medium text-sky-950">
+                    {value}
+                  </span>
                 </div>
                 {i < 2 && <div className="h-px bg-sky-100 mt-2.5" />}
               </div>
@@ -111,22 +115,32 @@ const CheckoutSection = ({
               user={user}
               doctorId={formData.doctorId}
               bookingData={formData}
-              onSuccess={(orderId) => handleBooking(orderId)}
+              onSuccess={(orderId) =>
+                handleBooking({
+                  ...formData,
+                  doctorId: activeDoctor?.doctorId,
+                  paymentMethod: "razorpay",
+                  orderId,
+                })
+              }
               className="w-full py-3 bg-gradient-to-br from-[#0096C7] to-[#0077B6] text-white rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.99] transition-all"
             />
           ) : (
             <button
               type="button"
-              onClick={handleWalletPayment}
+              onClick={()=>handleWalletPayment({
+                ...formData,
+                doctorId: activeDoctor?.doctorId,
+                paymentMethod:'wallet',
+              })}
               disabled={!amountToPay}
-              className="w-full py-3 bg-gradient-to-br from-[#0096C7] to-[#0077B6] text-white rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gradient-to-br from-[#0096C7] to-blue-400 text-white rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Pay ₹{amountToPay || 0} with Wallet
             </button>
           )}
         </div>
       </div>
-
     </div>
   );
 };

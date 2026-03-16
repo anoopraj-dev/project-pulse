@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import Appointment from "../../models/appointments.model.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import Payment from '../../models/payments.model.js'
+import Admin from '../../models/admin.model.js'
 
 //----------- Get patients Wallet and transactions ------------
 export const getPatientWallet = async (req, res) => {
@@ -58,24 +60,36 @@ export const refundToWallet = async (req, res) => {
     }
 
     //------------ Get / create Wallet ---------------
-    let wallet = await Wallet.findOne({
+    let patientWallet = await Wallet.findOne({
       userId: patientId,
       role: "patient",
     }).session(session);
 
-    if (!wallet) {
-      wallet = await Wallet.create(
-        [{ userId: patientId, role: "patient", balance: 0 }],
+    if (!patientWallet) {
+      patientWallet = await Wallet.create(
+        { userId: patientId, role: "patient", balance: 0 },
         { session },
       );
-      wallet = wallet[0];
+    }
+
+    let admin = await Admin.findOne({role:'admin'})
+    let adminWallet = await Wallet.findOne({
+      role:'admin'
+    }).session(session);
+
+    if(!adminWallet) {
+      adminWallet = await Wallet.create({
+        userId:admin._id,
+        role:'admin',
+        balance:0
+      },{session})
     }
 
     //------------- Create a transaction ---------------
     const transaction = await Transaction.create(
       [
         {
-          wallet: wallet._id,
+          wallet: patienttWallet._id,
           type: "credit",
           amount,
           referenceType: "refund",
@@ -86,10 +100,23 @@ export const refundToWallet = async (req, res) => {
       { session },
     );
 
-    //------------- Update Wallet and push transaction -------------
-    wallet.balance += amount;
-    wallet.transactions.push(transaction[0]._id);
-    await wallet.save({ session });
+    //------------- Update Wallet  -------------
+    patientWallet.balance += amount;
+    await patientWallet.save({ session });
+
+    adminWallet.balance -= amount;
+    await adminWallet.save({session})
+
+    //----------- Find payment related to appointment ------------
+    const payment = await Payment.findOne({
+      appointment: appointment._id,
+    }).session(session);
+
+    if (payment) {
+      payment.status = "refunded";
+      payment.refundedAt = new Date();
+      await payment.save({ session });
+    }
 
     await session.commitTransaction();
     session.endSession();
@@ -97,8 +124,8 @@ export const refundToWallet = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Refund credited to wallet",
-      wallet,
-      transaction: transaction[0],
+      patientWallet,
+      transaction,
     });
   } catch (error) {
     await session.abortTransaction();

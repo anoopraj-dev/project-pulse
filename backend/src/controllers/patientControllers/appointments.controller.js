@@ -121,28 +121,21 @@ export const bookAppointment = async (req, res) => {
 
     const appointmentDate = new Date(date);
     let payment;
-    if (paymentMethod !== "wallet") {
-      //--------------- Check razorpay payment Verification --------------
-      payment = await Payment.findOne({
-        orderId: orderId.razorpay_order_id || orderId,
-        patient: patientId,
-        status: "verified",
+
+    //--------------- Check razorpay payment Verification --------------
+    payment = await Payment.findOne({
+      orderId: orderId.razorpay_order_id || orderId,
+      patient: patientId,
+      status: "verified",
+    });
+
+    if (!payment) {
+      return res.status(403).json({
+        success: false,
+        message: "Payment not verified",
       });
-
-      if (!payment) {
-        return res.status(403).json({
-          success: false,
-          message: "Payment not verified",
-        });
-      }
-
-      if (payment.appointment) {
-        return res.status(400).json({
-          success: false,
-          message: "Appointment already created for this payment",
-        });
-      }
     }
+
     // ---------------- Update availability ----------------
     const availabilityUpdate = await mongoose
       .model("DoctorAvailability")
@@ -168,74 +161,66 @@ export const bookAppointment = async (req, res) => {
       });
     }
 
-    // ----------------  Create appointment ----------------
-    const appointment = await Appointment.create({
-      patient: patientId,
-      doctor: doctorId,
-      appointmentDate,
-      timeSlot: time,
-      serviceType,
-      reason,
-      notes,
-    });
+    //------------------ update appointment status ------------
+    const appointment = await Appointment.findByIdAndUpdate(
+      payment?.appointment._id,
+      { status: "confirmed" },
+      { new: true },
+    );
 
-    //---------------- Link appointment to payment --------------
-    payment.appointment = appointment._id;
-    await payment.save();
+    // // ---------- Patient Email ----------
+    // const patientMailOptions = {
+    //   from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+    //   to: patient.email,
+    //   subject: "Appointment Confirmation",
+    //   html: emailTemplate({
+    //     title: "Appointment Booked Successfully",
+    //     subtitle: "Your appointment is confirmed",
+    //     body: `
+    //   <p>Hello <strong>${patient.name}</strong>,</p>
+    //   <p>Your appointment has been successfully booked.</p>
 
-    // ---------- Patient Email ----------
-    const patientMailOptions = {
-      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-      to: patient.email,
-      subject: "Appointment Confirmation",
-      html: emailTemplate({
-        title: "Appointment Booked Successfully",
-        subtitle: "Your appointment is confirmed",
-        body: `
-      <p>Hello <strong>${patient.name}</strong>,</p>
-      <p>Your appointment has been successfully booked.</p>
+    //   <p><strong>Doctor:</strong> ${doctor.name}</p>
+    //   <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+    //   <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+    //   <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    // `,
+    //     highlightText: `Appointment #${appointment._id.toString().slice(-6)} confirmed`,
+    //     highlightType: "success",
+    //   }),
+    // };
 
-      <p><strong>Doctor:</strong> ${doctor.name}</p>
-      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
-      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
-      <p><strong>Service:</strong> ${appointment.serviceType}</p>
-    `,
-        highlightText: `Appointment #${appointment._id.toString().slice(-6)} confirmed`,
-        highlightType: "success",
-      }),
-    };
+    // // ---------- Doctor Email ----------
+    // const doctorMailOptions = {
+    //   from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+    //   to: doctor.email,
+    //   subject: "New Appointment Booked",
+    //   html: emailTemplate({
+    //     title: "New Appointment Scheduled",
+    //     subtitle: "A patient has booked a consultation",
+    //     body: `
+    //   <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+    //   <p>A new appointment has been booked.</p>
 
-    // ---------- Doctor Email ----------
-    const doctorMailOptions = {
-      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-      to: doctor.email,
-      subject: "New Appointment Booked",
-      html: emailTemplate({
-        title: "New Appointment Scheduled",
-        subtitle: "A patient has booked a consultation",
-        body: `
-      <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
-      <p>A new appointment has been booked.</p>
+    //   <p><strong>Patient:</strong> ${patient.name}</p>
+    //   <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+    //   <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+    //   <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    // `,
+    //     highlightText: `Appointment #${appointment._id.toString().slice(-6)} scheduled`,
+    //     highlightType: "info",
+    //   }),
+    // };
 
-      <p><strong>Patient:</strong> ${patient.name}</p>
-      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
-      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
-      <p><strong>Service:</strong> ${appointment.serviceType}</p>
-    `,
-        highlightText: `Appointment #${appointment._id.toString().slice(-6)} scheduled`,
-        highlightType: "info",
-      }),
-    };
-
-    // ---------- Send Emails ----------
-    try {
-      await Promise.all([
-        sendEmail(patientMailOptions),
-        sendEmail(doctorMailOptions),
-      ]);
-    } catch (error) {
-      console.log("Email sending error:", error);
-    }
+    // // ---------- Send Emails ----------
+    // try {
+    //   await Promise.all([
+    //     sendEmail(patientMailOptions),
+    //     sendEmail(doctorMailOptions),
+    //   ]);
+    // } catch (error) {
+    //   console.log("Email sending error:", error);
+    // }
 
     return res.status(201).json({
       success: true,
@@ -256,7 +241,9 @@ export const bookAppointment = async (req, res) => {
 export const getAllAppointments = async (req, res) => {
   try {
     const { id } = req.user;
-    const appointments = await Appointment.find({ patient: id }).populate(
+    const appointments = await Appointment.find({ patient: id })
+    .sort({createdAt:-1})
+    .populate(
       "doctor",
       "name profilePicture professionalInfo.specializations",
     );
