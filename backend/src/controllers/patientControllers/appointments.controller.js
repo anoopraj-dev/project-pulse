@@ -8,6 +8,8 @@ import Transaction from "../../models/transaction.model.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
 import Patient from "../../models/patient.model.js";
+import { getIO } from "../../socket.js";
+import {Notification} from '../../models/notification.model.js'
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -101,8 +103,8 @@ export const bookAppointment = async (req, res) => {
     } = req.body;
     const patientId = req.user.id;
 
-    const doctor = await Doctor.findById(doctorId).select("email,name");
-    const patient = await Patient.findById(patientId).select("email,name");
+    const doctor = await Doctor.findById(doctorId).select("email name");
+    const patient = await Patient.findById(patientId).select("email name");
 
     // ---------------- Validation ----------------
     if (!doctorId || !date || !time || !reason) {
@@ -168,59 +170,83 @@ export const bookAppointment = async (req, res) => {
       { new: true },
     );
 
-    // // ---------- Patient Email ----------
-    // const patientMailOptions = {
-    //   from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-    //   to: patient.email,
-    //   subject: "Appointment Confirmation",
-    //   html: emailTemplate({
-    //     title: "Appointment Booked Successfully",
-    //     subtitle: "Your appointment is confirmed",
-    //     body: `
-    //   <p>Hello <strong>${patient.name}</strong>,</p>
-    //   <p>Your appointment has been successfully booked.</p>
+    // ---------- Patient Email ----------
+    const patientMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: patient.email,
+      subject: "Appointment Confirmation",
+      html: emailTemplate({
+        title: "Appointment Booked Successfully",
+        subtitle: "Your appointment is confirmed",
+        body: `
+      <p>Hello <strong>${patient.name}</strong>,</p>
+      <p>Your appointment has been successfully booked.</p>
 
-    //   <p><strong>Doctor:</strong> ${doctor.name}</p>
-    //   <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
-    //   <p><strong>Time:</strong> ${appointment.timeSlot}</p>
-    //   <p><strong>Service:</strong> ${appointment.serviceType}</p>
-    // `,
-    //     highlightText: `Appointment #${appointment._id.toString().slice(-6)} confirmed`,
-    //     highlightType: "success",
-    //   }),
-    // };
+      <p><strong>Doctor:</strong> ${doctor.name}</p>
+      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+      <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} confirmed`,
+        highlightType: "success",
+      }),
+    };
 
-    // // ---------- Doctor Email ----------
-    // const doctorMailOptions = {
-    //   from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-    //   to: doctor.email,
-    //   subject: "New Appointment Booked",
-    //   html: emailTemplate({
-    //     title: "New Appointment Scheduled",
-    //     subtitle: "A patient has booked a consultation",
-    //     body: `
-    //   <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
-    //   <p>A new appointment has been booked.</p>
+    // ---------- Doctor Email ----------
+    const doctorMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: doctor.email,
+      subject: "New Appointment Booked",
+      html: emailTemplate({
+        title: "New Appointment Scheduled",
+        subtitle: "A patient has booked a consultation",
+        body: `
+      <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+      <p>A new appointment has been booked.</p>
 
-    //   <p><strong>Patient:</strong> ${patient.name}</p>
-    //   <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
-    //   <p><strong>Time:</strong> ${appointment.timeSlot}</p>
-    //   <p><strong>Service:</strong> ${appointment.serviceType}</p>
-    // `,
-    //     highlightText: `Appointment #${appointment._id.toString().slice(-6)} scheduled`,
-    //     highlightType: "info",
-    //   }),
-    // };
+      <p><strong>Patient:</strong> ${patient.name}</p>
+      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+      <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} scheduled`,
+        highlightType: "info",
+      }),
+    };
 
-    // // ---------- Send Emails ----------
-    // try {
-    //   await Promise.all([
-    //     sendEmail(patientMailOptions),
-    //     sendEmail(doctorMailOptions),
-    //   ]);
-    // } catch (error) {
-    //   console.log("Email sending error:", error);
-    // }
+    // ---------- Send Emails ----------
+    try {
+      await Promise.all([
+        sendEmail(patientMailOptions),
+        sendEmail(doctorMailOptions),
+      ]);
+    } catch (error) {
+      console.log("Email sending error:", error);
+    }
+
+    //---------- notifications ------------------
+  
+    const io = getIO();
+    
+    const patientNotification = await Notification.create({
+      title:'Appointment Confirmed',
+      message:`Your appointment with Dr. ${doctor.name} has been confrimed`,
+      recipient:patientId,
+      role:'patient',
+      read:false,
+    })
+
+    io.to(patientId).emit('notification:new',patientNotification)
+
+    const doctorNotification = await Notification.create({
+      title:'Appointment Booked',
+      message:`You have a new appointment with ${patient.name}`,
+      recipient:doctorId,
+      role:'doctor',
+      read:false
+    })
+
+    io.to(doctorId).emit('notification:new',doctorNotification)
 
     return res.status(201).json({
       success: true,
@@ -310,13 +336,19 @@ export const cancelAppointment = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const patientId = req.user?.id;
+
+    const appointment = await Appointment.findById(id);
+
+    const patientId = req?.user?.id;
+    const doctorId = appointment?.doctor;
+
+    const doctor = await Doctor.findById(doctorId).select("email name");
+    const patient = await Patient.findById(patientId).select("email name");
+
 
     if (!id) {
       throw new Error("Appointment ID is required");
     }
-
-    const appointment = await Appointment.findById(id);
 
     if (!appointment) {
       throw new Error("Appointment not found");
@@ -424,9 +456,94 @@ export const cancelAppointment = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+
+    //---------------- Email and notificaitons ---------------
+
+     // ---------- Patient Email ----------
+    const patientMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: patient.email,
+      subject: "Appointment Cancellation",
+      html: emailTemplate({
+        title: "Appointment Cancelled",
+        subtitle: `Your appointment with ${doctor.name} has been cancelled`,
+        body: `
+      <p>Hello <strong>${patient.name}</strong>,</p>
+      <p>You've cancelled your appointment with ${doctor.name}.</p>
+
+      <p><strong>Doctor:</strong> ${doctor.name}</p>
+      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+      <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} cancelled`,
+        highlightType: "info",
+      }),
+    };
+
+    // ---------- Doctor Email ----------
+    const doctorMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: doctor.email,
+      subject: "Appointment Cancellation",
+      html: emailTemplate({
+        title: "Appointment cancelled",
+        subtitle: "A patient cancelled appointment",
+        body: `
+      <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+      <p>Your appointment with ${patient.name} has been cancelled by patient.</p>
+
+      <p><strong>Patient:</strong> ${patient.name}</p>
+      <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+      <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+      <p><strong>Service:</strong> ${appointment.serviceType}</p>
+    `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} cancelled`,
+        highlightType: "info",
+      }),
+    };
+
+    // ---------- Send Emails ----------
+    try {
+      await Promise.all([
+        sendEmail(patientMailOptions),
+        sendEmail(doctorMailOptions),
+      ]);
+    } catch (error) {
+      console.log("Email sending error:", error);
+    }
+
+    //---------- notifications ------------------
+  
+    const io = getIO();
+    
+    const patientNotification = await Notification.create({
+      title:'Appointment Cancelled',
+      message:`You've cancelled your appointment with Dr. ${doctor.name}`,
+      recipient:patientId,
+      role:'patient',
+      read:false,
+    })
+
+    io.to(patientId).emit('notification:new',patientNotification)
+
+    console.log(typeof doctorId)
+
+    const doctorNotification = await Notification.create({
+      title:'Appointment Cancelled',
+      message:`Your appointment with  ${patient.name} has been cancelled by the patient.` ,
+      recipient:doctorId,
+      role:'doctor',
+      read:false
+    })
+
+    io.to(doctorId.toString()).emit('notification:new',doctorNotification)
+
+
+
     return res.status(200).json({
       success: true,
-      message: "Appointment cancelled successfully (10% platform fee deducted)",
+      message: "Appointment cancelled successfully (5% platform fee deducted)",
       appointment,
     });
   } catch (error) {
