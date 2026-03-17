@@ -81,10 +81,10 @@ const PatientWallet = () => {
   if (loading) return <ProfileShimmer />;
 
   const totalIn = transactions
-    .filter((t) => t.amount > 0)
+    .filter((t) => t.type ==='credit')
     .reduce((s, t) => s + t.amount, 0);
   const totalOut = transactions
-    .filter((t) => t.amount < 0)
+    .filter((t) => t.type === 'debit')
     .reduce((s, t) => s + Math.abs(t.amount), 0);
 
   return (
@@ -289,29 +289,6 @@ const PatientWallet = () => {
                       <Icon icon="mdi:plus" style={{ width: 18, height: 18 }} />
                       Add Funds
                     </button>
-                    {/* <button
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 7,
-                    background: "rgba(255,255,255,0.15)",
-                    color: "#fff",
-                    border: "1px solid rgba(255,255,255,0.25)",
-                    borderRadius: 12,
-                    padding: "11px 0",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Icon
-                    icon="mdi:bank-transfer-out"
-                    style={{ width: 18, height: 18 }}
-                  />
-                  Withdraw
-                </button> */}
                   </div>
                 </div>
               </div>

@@ -136,7 +136,7 @@ const PatientViewAppointment = () => {
 
   // -------- Allow cancellation only if---------:
   // 1. Not already cancelled
-  // 2. More than 24 hours remaining
+  // 2. More than 2 hours remaining
   const isCancellable = status !== "cancelled" && diffInHours > 2;
 
   return (
@@ -348,8 +348,7 @@ const PatientViewAppointment = () => {
             ) : (
               <div className="flex flex-col gap-3 rounded-xl bg-red-50 px-5 py-4 ring-1 ring-red-100">
                 <p className="text-sm text-red-500 font-medium">
-                  Appointment cannot be cancelled within 24 hours to
-                  consultation
+                  {status === 'cancelled' ? 'Appointment cancelled' : 'Appointment cannot be cancelled within 2 hours to consultation'}
                 </p>
               </div>
             )}
