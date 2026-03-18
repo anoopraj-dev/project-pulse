@@ -87,16 +87,7 @@ export const patientColumns = [
       </div>
     ),
   },
-  {
-    header: "Age",
-    render: (patient) => (
-      <div className="flex items-center gap-4">
-        <span className="font-semibold text-gray-900">
-          {calculateAge(patient.dob) || "-"}
-        </span>
-      </div>
-    ),
-  },
+
   {
     header: "Gender",
     render: (patient) => (
@@ -286,7 +277,7 @@ export const adminAppointmentColumns = [
             {appointment.patient?.name || "-"}
           </span>
           <span className="text-xs text-gray-500">
-            {appointment.patient?.gender || "-"}
+            {appointment.patient?.work || "-"}
           </span>
         </div>
       </div>
@@ -328,7 +319,7 @@ export const adminAppointmentColumns = [
   },
 
   {
-    header: "Time",
+    header: "Appointment Time",
     render: (appointment) => (
       <span className="font-semibold text-gray-900">
         {appointment.timeSlot || "-"}

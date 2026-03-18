@@ -435,8 +435,11 @@ const PatientWallet = () => {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",
+                                hour:'2-digit',
+                                minute:'2-digit'
                               })}
                             </p>
+                            
                           </div>
 
                           {/* Amount */}

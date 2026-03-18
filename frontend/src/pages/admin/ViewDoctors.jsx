@@ -49,7 +49,7 @@ const ViewDoctors = () => {
     return fetchSearchSuggestions ({
       role: 'admin',
       query,
-      type: 'doctor',
+      type: 'doctors',
   
     })
   }
@@ -143,7 +143,7 @@ const ViewDoctors = () => {
           <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search doctors "
+            placeholder="Search doctors - name/ specilizaitions"
             fetchSuggestions={fetchSuggestions}
             onSelectSuggestion={handleSelectSuggestions}
             role= 'admin'

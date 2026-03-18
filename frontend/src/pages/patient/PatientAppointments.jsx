@@ -67,7 +67,7 @@ const PatientAppointments = () => {
     return fetchSearchSuggestions({
       role: "patient",
       query,
-      type: "appointment",
+      type: "appointments",
     });
   };
 

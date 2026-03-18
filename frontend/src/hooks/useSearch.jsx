@@ -25,7 +25,7 @@ export const useSearch = ({ role,type, minLength = 1, debounce = 400,filters={} 
             type,
           });
 
-          setResults(res?.data?.users || []);
+          setResults(res?.data?.data || []);
         } catch (error) {
           console.error("Search failed", error);
         }

@@ -24,7 +24,7 @@ export const getAllAppointments = async (req, res) => {
 
     // Fetch appointments
     const appointments = await Appointment.find(query)
-      .populate("patient", "name profilePicture")
+      .populate("patient", "name profilePicture work")
       .populate("doctor", "name professionalInfo.specializations profilePicture")
       .sort({ appointmentDate: 1, timeSlot: 1 });
 

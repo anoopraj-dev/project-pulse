@@ -8,8 +8,8 @@ const PageBanner = ({
   count
 }) => {
   return (
-    <div className="sticky top-0 z-40 w-full overflow-hidden rounded-xl ">
-      <div className="my-2 rounded-xl mx-auto pb-6 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-indigo-50 via-white to-sky-100 pt-5 pb-3">
+    <div className=" z-40 w-full overflow-hidden rounded-xl ">
+      <div className="my-2 rounded-xl mx-auto pb-1 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-indigo-50 via-white to-sky-100 pt-5 pb-3">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           
           <div>
@@ -52,7 +52,7 @@ const PageBanner = ({
         </div>
 
         {tabsComponent && (
-          <div className="mt-5">
+          <div className="mt-2">
             {tabsComponent}
           </div>
         )}

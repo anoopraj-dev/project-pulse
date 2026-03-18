@@ -21,6 +21,7 @@ import { getAvailability, saveAvailability } from "../controllers/doctorControll
 import { cancelAppointment, getAllAppointments, getDoctorAppointmentById } from "../controllers/doctorControllers/appointments.controller.js";
 import { getDoctorPaymentHistory } from "../controllers/doctorControllers/paymentHistory.controller.js";
 import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient.controller.js";
+import { searchController, searchSuggestionsController } from "../controllers/userControllers/search.controller.js";
 
 const router = Router();
 
@@ -77,5 +78,9 @@ router.get('/appointments/patient-profile/:id',viewPatientProfile)
 
 //----------------- payments ----------------
 router.get('/payments',getDoctorPaymentHistory)
+
+//---------------- Search ----------------
+router.get('/search',searchController)
+router.get('/search/suggestions',searchSuggestionsController)
 
 export default router;

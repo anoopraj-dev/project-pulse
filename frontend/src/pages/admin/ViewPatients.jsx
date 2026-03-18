@@ -48,7 +48,7 @@ const ViewPatients = () => {
     return fetchSearchSuggestions({
       role:'admin',
       query,
-      type:'patient'
+      type:'patients'
     })
   }
 
@@ -71,7 +71,7 @@ const ViewPatients = () => {
   );
 
   const displayedPatients = query.trim()
-    ? filteredSearchResult
+    ? results
     : filteredPatients;
 
   const isLoading = fetchPatientsAction.loading;
@@ -179,7 +179,7 @@ const ViewPatients = () => {
           </div>
 
           <div className="px-2 py-3 sm:px-4">
-            {filteredPatients && filteredPatients.length > 0 ? (
+            {displayedPatients && displayedPatients.length > 0 ? (
               <DataTable
                 data={displayedPatients}
                 columns={patientColumns}

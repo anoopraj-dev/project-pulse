@@ -25,7 +25,7 @@ const ViewAppointments = () => {
     loading: searchLoading,
   } = useSearch({
     type: "appointments",
-    role: "patient",
+    role: "admin",
   });
 
   const fetchAllAppointments = () => {
@@ -50,9 +50,9 @@ const ViewAppointments = () => {
   // ------------ Search Suggestions ------------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
-      role: "patient",
+      role: "admin",
       query,
-      type: "appointment",
+      type: "appointments",
     });
   };
 
@@ -165,7 +165,7 @@ const ViewAppointments = () => {
               <SearchInput
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search appointments"
+                placeholder="Search appointments- doctor/patient/appointment date"
                 fetchSuggestions={fetchSuggestions}
                 onSelectSuggestion={handleSelectSuggestion}
                 role="patient"

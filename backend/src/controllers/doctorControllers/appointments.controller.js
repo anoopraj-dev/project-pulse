@@ -3,7 +3,13 @@ import DoctorAvailability from "../../models/availability.model.js";
 import Wallet from "../../models/wallet.model.js";
 import Payment from "../../models/payments.model.js";
 import Transaction from "../../models/transaction.model.js";
+import Doctor from "../../models/doctor.model.js";
 import mongoose from "mongoose";
+import Patient from "../../models/patient.model.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
+import { sendEmail } from "../../config/nodemailer.js";
+import { getIO } from "../../socket.js";
+import { Notification } from "../../models/notification.model.js";
 
 //---------------- Get all appointments --------------
 export const getAllAppointments = async (req, res) => {
@@ -106,6 +112,13 @@ export const cancelAppointment = async (req, res) => {
     const { reason } = req.body;
     const doctorId = req.user?.id;
 
+    const appointment = await Appointment.findById(id);
+    const patientId = appointment.patient;
+
+    //--------- find users --------
+    const patient = await Patient.findById(patientId).select("-password");
+    const doctor = await Doctor.findOne({ _id: doctorId }).select("-password");
+
     if (!id) {
       throw new Error("Appointment ID is required");
     }
@@ -113,8 +126,6 @@ export const cancelAppointment = async (req, res) => {
     if (!reason || !reason.trim()) {
       throw new Error("Cancellation reason is required");
     }
-
-    const appointment = await Appointment.findById(id);
 
     if (!appointment) {
       throw new Error("Appointment not found");
@@ -157,7 +168,10 @@ export const cancelAppointment = async (req, res) => {
     const payment = await Payment.findOne({ appointment: appointment._id });
 
     if (payment && payment.status !== "refunded") {
-      let wallet = await Wallet.findOne({userId: appointment.patient,role:'patient'});
+      let wallet = await Wallet.findOne({
+        userId: appointment.patient,
+        role: "patient",
+      });
 
       if (!wallet) {
         wallet = new Wallet({
@@ -185,7 +199,6 @@ export const cancelAppointment = async (req, res) => {
         ],
         { session },
       );
-      
 
       //--------- update payment status -----------
       payment.status = "refunded";
@@ -194,6 +207,85 @@ export const cancelAppointment = async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    //------------- Email & notification ----------------
+    // ---------- Patient Email ----------
+    const patientMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: patient.email,
+      subject: "Appointment Cancellation",
+      html: emailTemplate({
+        title: "Doctor Cancelled Appointment",
+        subtitle: `Your appointment with ${doctor.name} has been cancelled`,
+        body: `
+          <p>Hello <strong>${patient.name}</strong>,</p>
+          <p>You've cancelled your appointment with ${doctor.name} has been cancelled by the doctor.</p>
+    
+          <p><strong>Doctor:</strong> ${doctor.name}</p>
+          <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+          <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+          <p><strong>Service:</strong> ${appointment.serviceType}</p>
+        `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} cancelled`,
+        highlightType: "info",
+      }),
+    };
+
+    // ---------- Doctor Email ----------
+    const doctorMailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: doctor.email,
+      subject: "Appointment Cancellation",
+      html: emailTemplate({
+        title: "Appointment cancelled",
+        subtitle: "Appointment cancelled ",
+        body: `
+          <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
+          <p>You cancelled your appointment with ${patient.name}.</p>
+    
+          <p><strong>Patient:</strong> ${patient.name}</p>
+          <p><strong>Date:</strong> ${appointment.appointmentDate.toDateString()}</p>
+          <p><strong>Time:</strong> ${appointment.timeSlot}</p>
+          <p><strong>Service:</strong> ${appointment.serviceType}</p>
+        `,
+        highlightText: `Appointment #${appointment._id.toString().slice(-6)} cancelled`,
+        highlightType: "info",
+      }),
+    };
+
+    // ---------- Send Emails ----------
+    try {
+      await Promise.all([
+        sendEmail(patientMailOptions),
+        sendEmail(doctorMailOptions),
+      ]);
+    } catch (error) {
+      console.log("Email sending error:", error);
+    }
+
+    //---------- notifications ------------------
+
+    const io = getIO();
+
+    const patientNotification = await Notification.create({
+      title: "Appointment Cancelled",
+      message: `Your appointment with Dr. ${doctor.name} has been cancelled by doctor`,
+      recipient: patientId,
+      role: "patient",
+      read: false,
+    });
+
+    io.to(patientId.toString()).emit("notification:new", patientNotification);
+
+    const doctorNotification = await Notification.create({
+      title: "Appointment Cancelled",
+      message: `Your appointment with  ${patient.name} has been cancelled .`,
+      recipient: doctorId,
+      role: "doctor",
+      read: false,
+    });
+
+    io.to(doctorId.toString()).emit("notification:new", doctorNotification);
 
     return res.status(200).json({
       success: true,

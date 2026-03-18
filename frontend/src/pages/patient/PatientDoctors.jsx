@@ -137,7 +137,7 @@ const PatientDoctors = () => {
               <SearchInput
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search doctors "
+                placeholder="Search doctors -name/specialization"
                 fetchSuggestions={fetchSuggestions}
                 onSelectSuggestion={handleSelectSuggestion}
                 role="patient"

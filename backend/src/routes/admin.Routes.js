@@ -4,7 +4,7 @@ import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { getAdminDashboard, getDoctorDocuments, getPendingDoctorProfile,getAdminNotifications } from "../controllers/adminControllers/adminDashboard.controller.js";
 import { approveDoctorsRequest,rejectDoctorsRequest,blockDoctorProfile,unblockDoctorProfile,revokeDoctorStatus,getAllDoctors } from "../controllers/adminControllers/adminViewDoctors.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
-import { searchController, searchSuggestionsController } from "../controllers/adminControllers/search.controller.js";
+import { searchSuggestionsController,searchController } from "../controllers/userControllers/search.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 import { getAllAppointments, setAdminAppointmentStatus } from "../controllers/adminControllers/adminAppoiintments.controller.js";
 const router = Router();
@@ -32,6 +32,7 @@ router.patch('/patient/unblock/:id',unblockPatientProfile)
 
 router.get('/search',searchController)
 router.get('/search/suggestions', searchSuggestionsController)
+
 router.get('/notifications',getAdminNotifications)
 router.patch('/notifications/mark-all-read', setMarkAllRead)
 

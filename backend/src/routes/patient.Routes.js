@@ -16,7 +16,7 @@ import {
 import {
   searchController,
   searchSuggestionsController,
-} from "../controllers/patientControllers/search.controller.js";
+} from "../controllers/userControllers/search.controller.js";
 import upload from "../middlewares/multer.js";
 import { uploadImage } from "../controllers/uploadController.js/imageUpload.controller.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
