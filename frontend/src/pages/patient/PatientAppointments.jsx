@@ -91,14 +91,16 @@ const PatientAppointments = () => {
     return true;
   });
 
-  const filteredSearchResult = results?.filter((appointment) => {
-    if (activeTab === "upcoming") {
-      return appointment?.status === "upcoming";
-    } else if (activeTab === "history") {
-      return appointment?.status === "completed";
-    }
-    return true;
-  });
+ const filteredSearchResult = results?.filter((appointment) => {
+  if (activeTab === "confirmed") {
+    return appointment?.status === "confirmed";
+  } else if (activeTab === "history") {
+    return appointment?.status === "completed";
+  } else if (activeTab === "cancelled") {
+    return appointment?.status === "cancelled";
+  }
+  return true;
+});
 
   //------------------- Fetch selected doc info (prefill form) -----------
   useEffect(() => {
@@ -153,7 +155,7 @@ const PatientAppointments = () => {
           />
           {/* Search Section */}
           {activeTab !== "book" && (
-            <div className="mx-auto  px-4 pb-2 pt-2 sm:px-6 lg:px-8">
+            <div className="z-10 mx-auto  px-4 pb-2 pt-2 sm:px-6 lg:px-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <SearchInput

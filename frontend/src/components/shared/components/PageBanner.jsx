@@ -18,7 +18,7 @@ const PageBanner = ({
               {config.roleLabel} · {config.pageLabel}
             </p>
 
-            <h1 className="mt-2 text-xl text-slate-900 sm:text-4xl font-[Georgia] font-medium">
+            <h1 className="mt-2 text-xl text-slate-700 sm:text-4xl font-[Georgia] font-medium">
               {config.title}
             </h1>
 

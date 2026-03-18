@@ -16,7 +16,7 @@ const Heart = () => {
         <pointLight position={[0, 1, 2.5]} intensity={5} color="#ff4d4d" />
 
         {/* -------- Controls -------- */}
-        {/* <OrbitControls
+        <OrbitControls
           enablePan={false}
           enableZoom={false}
           minPolarAngle={Math.PI / 2}
@@ -25,7 +25,7 @@ const Heart = () => {
           // maxAzimuthAngle={Math.PI / 2}
           enableDamping
           dampingFactor={0.02}
-        /> */}
+        />
 
         {/* -------- Animated Heart -------- */}
         <Suspense fallback={null}>

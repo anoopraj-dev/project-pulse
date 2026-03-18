@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 const AnimatedHeart = () => {
   const group = useRef();
-  const { scene, animations } = useGLTF("/models/heart.glb");
+  const { scene, animations } = useGLTF("/models/doc2.glb");
   const { actions } = useAnimations(animations, group);
   const [materialApplied, setMaterialApplied] = useState(false);
 
@@ -13,18 +13,18 @@ const AnimatedHeart = () => {
     if (!scene) return;
 
     // Custom material
-    const customMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0a9292f,
-      emissive: 0x0a192f,
-      emissiveIntensity: 0.6,
-      roughness: 0.5,
-      metalness: 0.1,
-    });
+    // const customMaterial = new THREE.MeshStandardMaterial({
+    //   color: 0x0a9292f,
+    //   emissive: 0x0a192f,
+    //   emissiveIntensity: 0.6,
+    //   roughness: 0.5,
+    //   metalness: 0.1,
+    // });
 
     // Apply material to all meshes
     scene.traverse((child) => {
       if (child.isMesh) {
-        child.material = customMaterial;
+        // child.material = customMaterial;
         child.castShadow = true;
         child.receiveShadow = true;
       }
@@ -46,10 +46,10 @@ const AnimatedHeart = () => {
   return (
     <group
       ref={group}
-      position={[2, 0, 0]}
-      scale={0.8}
+      position={[0, 2, 0]}
+      scale={1.5}
       rotation={[0, -0.55, 0]}
-      visible={materialApplied} // hide until materials applied
+      // visible={materialApplied} // hide until materials applied
     >
       <primitive object={scene} />
     </group>

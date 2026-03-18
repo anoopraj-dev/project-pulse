@@ -17,7 +17,7 @@ const CheckoutSection = ({
       {/* Doctor card */}
       {hasBookingInfo && (
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0096C7] to-[#0077B6] px-5 py-4 flex items-center gap-4">
-          <div className="absolute -top-7 -right-7 w-28 h-28 rounded-full bg-white/[0.09]" />
+          <div className="absolute -top-10 -right-7 w-28 h-28 rounded-full bg-white/[0.09]" />
           <div className="absolute -bottom-5 left-10 w-18 h-18 rounded-full bg-white/[0.06]" />
           <img
             src={activeDoctor?.profileImage || "/profile.png"}

@@ -417,7 +417,7 @@ export const cancelAppointment = async (req, res) => {
     if (payment && payment.status !== "refunded") {
       //--------------- 5% platform fee deduction ----------------
       const platformFee = payment.amount * 0.05;
-      const refundAmount = payment.amount - platformFee;
+      const refundAmount = (payment.amount - platformFee)*refundPercentage;
 
       let wallet = await Wallet.findOne({
         userId: appointment.patient,

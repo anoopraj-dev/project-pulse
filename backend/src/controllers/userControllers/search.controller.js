@@ -242,10 +242,11 @@ export const searchSuggestionsController = async (req, res) => {
     if (type === "doctors") {
       //--------- doctor name matches -------------
       const doctorMatches = await Doctor.find({ name: regex })
-        .select("name")
+        .select("_id name")
         .limit(Number(limit));
 
       const doctorSuggestions = doctorMatches.map((doc) => ({
+        _id: doc._id,
         name: doc.name,
       }));
 
@@ -271,7 +272,6 @@ export const searchSuggestionsController = async (req, res) => {
       data = unique.slice(0, Number(limit));
     }
     //------------------ appointment suggestions -------------
-
     else if (type === "appointments") {
       let queryFilter = {};
 

@@ -86,7 +86,7 @@ const Layout = () => {
   `}
       >
         <Outlet />
-        <ProtectedFooter/>
+        <ProtectedFooter />
       </main>
     </div>
   );

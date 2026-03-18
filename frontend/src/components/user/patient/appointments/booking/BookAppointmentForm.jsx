@@ -103,6 +103,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
 
 
       let payload;
+      console.log(res?.data?.payment?.doctor)
       if (res.data?.success) {
         payload = {
           ...formData,
@@ -142,7 +143,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     return fetchSearchSuggestions({
       role: "patient",
       query,
-      type: "doctor",
+      type: "doctors",
     });
   };
 
@@ -150,6 +151,11 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   const handleSelectSuggestion = async (item) => {
     try {
       setQuery(item.name);
+
+      if(!item?._id) {
+        console.error('Invalid doctor Item:',item);
+        return 
+      }
 
       const res = await getBookingInfo(item._id);
 

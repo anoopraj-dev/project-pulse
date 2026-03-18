@@ -348,7 +348,7 @@ const PatientViewAppointment = () => {
             ) : (
               <div className="flex flex-col gap-3 rounded-xl bg-red-50 px-5 py-4 ring-1 ring-red-100">
                 <p className="text-sm text-red-500 font-medium">
-                  {status === 'cancelled' ? 'Appointment cancelled' : 'Appointment cannot be cancelled within 2 hours to consultation'}
+                  {status === 'cancelled' ? `Appointment cancelled by ${appointment?.cancelledBy}` : 'Appointment cannot be cancelled within 2 hours to consultation'}
                 </p>
               </div>
             )}
