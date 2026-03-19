@@ -3,6 +3,7 @@ import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
 import Transaction from "../../models/transaction.model.js";
 import Patient from "../../models/patient.model.js";
+import Wallet from "../../models/wallet.model.js";
 
 //------------- SEARCH CONTROLLER ----------------
 
@@ -182,22 +183,35 @@ const searchPayments = async (regex, filters, role, userId) => {
 
 //--------------- Search Transactions ------------------
 const searchTransactions = async (regex, filters, role, userId) => {
-  let query = {
-    $or: [{ type: regex }, { status: regex }],
-  };
+  const wallet = await Wallet.findOne({ user: userId });
+  if (!wallet) return [];
 
-  if (role === "patient") {
-    query.user = userId;
-  } else if (role === "doctor") {
-    query.user = userId;
-  }
+  const transactions = await Transaction.find({ wallet: wallet._id })
+    .select("type referenceType amount notes createdAt")
+    .sort({ createdAt: -1 })
+    .lean();
 
-  return Transaction.find(query).limit(10);
+  //----------- filter by type , referenceType or date ----------
+  const results = transactions.filter((t) => {
+    const matchType = regex.test(t.type);
+    const matchReferenceType = regex.test(t.referenceType);
+
+    //---------- format date search --------
+    const formattedDate = t.createdAt
+      ? new Date(t.createdAt).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "numeric",
+        })
+      : "";
+
+    const matchDate = regex.test(formattedDate);
+    return matchType || matchReferenceType || matchDate;
+  });
+  return results.slice(0, 10);
 };
 
 //-------------- Search patients -----------------
 const searchPatients = async (regex, filters, role, userId) => {
-  console.log("role inside searchPatient", role);
   const limit = Number(filters.limit) || 10;
 
   let query = {
@@ -376,6 +390,34 @@ export const searchSuggestionsController = async (req, res) => {
       data = await Patient.find({ name: regex })
         .select("name profilePicture")
         .limit(Number(limit));
+    }
+    //------------- transactions suggestions ----------
+    else if (type === "transactions") {
+      const wallet = await Wallet.findOne({ user: req.user.id });
+      if (!wallet) return res.status(200).json({ success: true, data: [] });
+
+      const transactions = await Transaction.find({ wallet: wallet._id })
+        .select("type referenceType amount notes createdAt")
+        .limit(50)
+        .lean();
+
+      data = transactions
+        .filter((t) => {
+          const formattedDate = t.createdAt
+            ? `${t.createdAt.getDate()}/${t.createdAt.getMonth() + 1}`
+            : "";
+          return (
+            regex.test(t.type || "") ||
+            regex.test(t.referenceType || "") ||
+            regex.test(formattedDate)
+          );
+        })
+        .map((t) => ({
+          name: `${t.type || ""} - ${t.referenceType || ""} - ₹${(t.amount / 100).toFixed(2)} - ${
+            t.createdAt ? t.createdAt.toLocaleDateString("en-GB") : ""
+          }`,
+          _id: t._id,
+        }));
     } else {
       return res.status(400).json({
         success: false,

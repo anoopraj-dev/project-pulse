@@ -4,16 +4,17 @@ import toast from "react-hot-toast";
 import {
   createWalletOrder,
   getPatientWallet,
-  verifyWalletPayment,
 } from "../../api/patient/patientApis";
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
 import { handleRazorpayPayment } from "@/utilis/handleRazorpayPayment";
-import { createRazorpayOrder } from "@/api/user/userApis";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
 import { useUser } from "@/contexts/UserContext";
+import SearchInput from "@/components/shared/components/SearchInput";
+import { useSearch } from "@/hooks/useSearch";
+import { fetchSearchSuggestions } from "@/api/user/userApis";
 
 const categoryIcon = {
   refund: "mdi:arrow-down-circle",
@@ -27,6 +28,15 @@ const PatientWallet = () => {
   const [loading, setLoading] = useState(false);
   const [addAmount, setAddAmount] = useState("");
   const { user } = useUser();
+  const {
+    query,
+    setQuery,
+    results,
+    loading: searchLoading,
+  } = useSearch({
+    type: "transactions",
+    role: "patient",
+  });
 
   const fetchWallet = async () => {
     setLoading(true);
@@ -39,14 +49,25 @@ const PatientWallet = () => {
       setWallet(res.data.wallet);
       setTransactions(res.data.transactions || []);
     } catch (err) {
-      // fallback to mock
       console.log(err);
     } finally {
       setLoading(false);
     }
   };
 
-  //------------- Add fund to Wallet --------------
+  //------------- Search Suggestions ------------
+  const fetchSuggestions = (query) => {
+    return fetchSearchSuggestions({
+      role: "patient",
+      query,
+      type: "transactions",
+    });
+  };
+
+  const handleSelectSuggestion = (item) => {
+    setQuery(item.name);
+  };
+
   const handleAddFunds = async (amount) => {
     try {
       const orderRes = await createWalletOrder({
@@ -81,11 +102,22 @@ const PatientWallet = () => {
   if (loading) return <ProfileShimmer />;
 
   const totalIn = transactions
-    .filter((t) => t.type ==='credit')
+    .filter((t) => t.type === "credit")
     .reduce((s, t) => s + t.amount, 0);
   const totalOut = transactions
-    .filter((t) => t.type === 'debit')
+    .filter((t) => t.type === "debit")
     .reduce((s, t) => s + Math.abs(t.amount), 0);
+
+  //------------- filtered transactions --------------
+  const filteredTransactions = transactions.filter((txn) => {
+    const searchText = query.toLowerCase();
+    return (
+      txn.type.toLowerCase().includes(searchText) ||
+      (txn.referenceType &&
+        txn.referenceType.toLowerCase().includes(searchText)) ||
+      (txn.notes && txn.notes.toLowerCase().includes(searchText))
+    );
+  });
 
   return (
     <div className="min-h-screen">
@@ -102,161 +134,66 @@ const PatientWallet = () => {
           {/* Banner */}
           <PageBanner config={pageBannerConfig.patientWallet} />
 
-          <div className=" w-full px-2 pt-3 pb-10 flex flex-col gap-4 lg:flex-row">
+          <div className="w-full px-2 pt-3 pb-10 flex flex-col gap-4 lg:flex-row">
             {/* Balance Card */}
             <div className="w-full lg:w-1/3">
               <div
+                className="relative overflow-hidden rounded-[20px] p-[28px_28px_24px]"
                 style={{
                   background:
                     "linear-gradient(135deg, #0096C7 0%, #0077B6 60%, #023E8A 100%)",
-                  borderRadius: "20px",
-                  padding: "28px 28px 24px",
-                  position: "relative",
-                  overflow: "hidden",
                   boxShadow: "0 8px 32px rgba(0,150,199,0.18)",
                 }}
               >
                 {/* Decorative circles */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: -40,
-                    right: -40,
-                    width: 180,
-                    height: 180,
-                    borderRadius: "50%",
-                    background: "rgba(255,255,255,0.06)",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: -30,
-                    right: 60,
-                    width: 110,
-                    height: 110,
-                    borderRadius: "50%",
-                    background: "rgba(255,255,255,0.05)",
-                  }}
-                />
+                <div className="absolute -top-10 -right-10 w-[180px] h-[180px] rounded-full bg-white/[0.06]" />
+                <div className="absolute -bottom-[30px] right-[60px] w-[110px] h-[110px] rounded-full bg-white/[0.05]" />
 
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
+                <div className="relative z-[1]">
+                  <div className="flex justify-between items-start">
                     <div>
-                      <p
-                        style={{
-                          color: "rgba(255,255,255,0.65)",
-                          fontSize: 12,
-                          letterSpacing: "0.1em",
-                          textTransform: "uppercase",
-                          marginBottom: 8,
-                        }}
-                      >
+                      <p className="text-white/65 text-[12px] tracking-[0.1em] uppercase mb-2">
                         Available Balance
                       </p>
-                      <p
-                        style={{
-                          color: "#fff",
-                          fontSize: 38,
-                          fontWeight: 700,
-                          letterSpacing: "-1px",
-                          lineHeight: 1,
-                        }}
-                      >
+                      <p className="text-white text-[38px] font-bold tracking-[-1px] leading-none">
                         ₹{(wallet?.balance / 100 || 0).toFixed(2) || "0.00"}
                       </p>
                     </div>
-                    <div
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        background: "rgba(255,255,255,0.15)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
+                    <div className="w-11 h-11 rounded-xl bg-white/[0.15] flex items-center justify-center">
                       <Icon
                         icon="mdi:wallet-outline"
-                        style={{ width: 24, height: 24, color: "#fff" }}
+                        className="w-6 h-6 text-white"
                       />
                     </div>
                   </div>
 
                   {/* Stats row */}
-                  <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-                    <div
-                      style={{
-                        flex: 1,
-                        background: "rgba(255,255,255,0.1)",
-                        borderRadius: 12,
-                        padding: "10px 14px",
-                      }}
-                    >
-                      <p
-                        style={{
-                          color: "rgba(255,255,255,0.6)",
-                          fontSize: 11,
-                          marginBottom: 4,
-                        }}
-                      >
-                        Money In
-                      </p>
-                      <p
-                        style={{ color: "#fff", fontSize: 15, fontWeight: 600 }}
-                      >
+                  <div className="flex gap-3 mt-6">
+                    <div className="flex-1 bg-white/10 rounded-xl px-[14px] py-[10px]">
+                      <p className="text-white/60 text-[11px] mb-1">Money In</p>
+                      <p className="text-white text-[15px] font-semibold">
                         +₹{(totalIn / 100).toFixed(2)}
                       </p>
                     </div>
-                    <div
-                      style={{
-                        flex: 1,
-                        background: "rgba(255,255,255,0.1)",
-                        borderRadius: 12,
-                        padding: "10px 14px",
-                      }}
-                    >
-                      <p
-                        style={{
-                          color: "rgba(255,255,255,0.6)",
-                          fontSize: 11,
-                          marginBottom: 4,
-                        }}
-                      >
+                    <div className="flex-1 bg-white/10 rounded-xl px-[14px] py-[10px]">
+                      <p className="text-white/60 text-[11px] mb-1">
                         Money Out
                       </p>
-                      <p
-                        style={{ color: "#fff", fontSize: 15, fontWeight: 600 }}
-                      >
+                      <p className="text-white text-[15px] font-semibold">
                         -₹{(totalOut / 100).toFixed(2)}
                       </p>
                     </div>
                   </div>
 
                   {/* Action buttons */}
-                  <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                  <div className="flex gap-[10px] mt-4">
                     {/* Amount input */}
                     <input
                       type="number"
                       value={addAmount}
                       onChange={(e) => setAddAmount(e.target.value)}
                       placeholder="amount"
-                      style={{
-                        width: "120px",
-                        borderRadius: 12,
-                        padding: "10px 14px",
-                        border: "1px solid rgba(0,0,0,0.15)",
-                        fontSize: 14,
-                        color: "white",
-                        fontWeight: 700,
-                      }}
+                      className="w-[120px] rounded-xl px-[14px] py-[10px] border border-black/15 text-[14px] text-white font-bold bg-transparent"
                     />
                     <button
                       onClick={() => {
@@ -269,24 +206,9 @@ const PatientWallet = () => {
                         }
                         handleAddFunds(Number(addAmount));
                       }}
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 7,
-                        background: "#fff",
-                        color: "#0077B6",
-                        border: "none",
-                        borderRadius: 12,
-                        padding: "11px 0",
-                        fontSize: 14,
-                        fontWeight: 600,
-                        cursor: "pointer",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                      }}
+                      className="flex-1 flex items-center justify-center gap-[7px] bg-white text-[#0077B6] border-none rounded-xl py-[11px] text-[14px] font-semibold cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
                     >
-                      <Icon icon="mdi:plus" style={{ width: 18, height: 18 }} />
+                      <Icon icon="mdi:plus" className="w-[18px] h-[18px]" />
                       Add Funds
                     </button>
                   </div>
@@ -294,63 +216,48 @@ const PatientWallet = () => {
               </div>
             </div>
 
+            {/* Transactions */}
             <div className="w-full lg:w-2/3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              {/* Transactions */}
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div
-                  style={{
-                    padding: "18px 20px 12px",
-                    borderBottom: "1px solid #f1f5f9",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <h3
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: "#0f172a",
-                      margin: 0,
-                    }}
-                  >
+                <div className="flex justify-between items-center px-5 pt-[18px] pb-3 border-b border-slate-100">
+                  <h3 className="text-[14px] font-bold text-[#0f172a] m-0">
                     Recent Transactions
                   </h3>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "#0096C7",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                    }}
-                  >
+                  <span className="text-[12px] text-[#0096C7] font-medium cursor-pointer">
                     See all
                   </span>
                 </div>
+                <div className="px-2">
+                  {/* ------------- Search ------------ */}
+                  <SearchInput
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search transactions - type-credit/debit/refund/topup - date"
+                    role="patient"
+                    fetchSuggestions={fetchSuggestions}
+                    onSelectSuggestion={handleSelectSuggestion}
+                    entity="transactions"
+                  />
+                  {searchLoading && (
+                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                      <Icon icon="mdi:loading" className="animate-spin" />
+                      Searching…
+                    </div>
+                  )}
+                </div>
 
-                {transactions.length === 0 ? (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "48px 20px",
-                      color: "#94a3b8",
-                    }}
-                  >
+                {filteredTransactions.length === 0 ? (
+                  <div className="text-center py-12 px-5 text-slate-400">
                     <Icon
                       icon="mdi:wallet-outline"
-                      style={{
-                        width: 40,
-                        height: 40,
-                        marginBottom: 10,
-                        opacity: 0.4,
-                      }}
+                      className="w-10 h-10 mb-[10px] opacity-40 mx-auto"
                     />
-                    <p style={{ fontSize: 14 }}>No transactions yet</p>
+                    <p className="text-[14px]">No transactions yet</p>
                   </div>
                 ) : (
-                  <div style={{ padding: "8px 0" }}>
-                    {transactions.map((txn, i) => {
-                      const isCredit = txn.type === 'credit';
+                  <div className="py-2">
+                    {filteredTransactions.map((txn, i) => {
+                      const isCredit = txn.type === "credit";
                       const icon =
                         categoryIcon[txn.category] ||
                         (isCredit
@@ -359,102 +266,54 @@ const PatientWallet = () => {
                       return (
                         <div
                           key={txn.id}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 14,
-                            padding: "12px 20px",
-                            borderBottom:
-                              i < transactions.length - 1
-                                ? "1px solid #f8fafc"
-                                : "none",
-                            transition: "background 0.15s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#f8fafc")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "transparent")
-                          }
+                          className={`flex items-center gap-[14px] px-5 py-3 transition-colors duration-150 hover:bg-slate-50 ${
+                            i < transactions.length - 1
+                              ? "border-b border-[#f8fafc]"
+                              : ""
+                          }`}
                         >
                           {/* Icon */}
                           <div
-                            style={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 12,
-                              flexShrink: 0,
-                              background: isCredit ? "#f0fdf4" : "#fff5f5",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
+                            className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${
+                              isCredit ? "bg-green-50" : "bg-red-50"
+                            }`}
                           >
                             <Icon
                               icon={icon}
-                              style={{
-                                width: 22,
-                                height: 22,
-                                color: isCredit ? "#10b981" : "#ef4444",
-                              }}
+                              className={`w-[22px] h-[22px] ${
+                                isCredit ? "text-emerald-500" : "text-red-500"
+                              }`}
                             />
                           </div>
 
                           {/* Label */}
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p
-                              style={{
-                                fontSize: 13,
-                                fontWeight: 600,
-                                color: "#1e293b",
-                                margin: 0,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                            >
-                              {txn.type}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-slate-800 m-0 truncate">
+                              {txn.type} - {txn.referenceType}
                             </p>
-                            <p
-                              style={{
-                                fontSize: 13,
-                                color: "#336bdbff",
-                                margin: "2px 0 0",
-                              }}
-                            >
+                            <p className="text-[13px] text-[#336bdb] mt-[2px] mb-0">
                               {txn.notes}
                             </p>
-                            <p
-                              style={{
-                                fontSize: 13,
-                                color: "#608ce4ff",
-                                margin: "2px 0 0",
-                              }}
-                            >
+                            <p className="text-[13px] text-[#608ce4] mt-[2px] mb-0">
                               {new Date(txn.date).toLocaleDateString("en-IN", {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",
-                                hour:'2-digit',
-                                minute:'2-digit'
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })}
                             </p>
-                            
                           </div>
 
                           {/* Amount */}
                           <p
-                            style={{
-                              fontSize: 14,
-                              fontWeight: 700,
-                              margin: 0,
-                              flexShrink: 0,
-                              color: isCredit ? "#10b981" : "#ef4444",
-                            }}
+                            className={`text-[14px] font-bold m-0 flex-shrink-0 ${
+                              isCredit ? "text-emerald-500" : "text-red-500"
+                            }`}
                           >
                             {isCredit
                               ? `+₹${(txn.amount / 100).toFixed(2)}`
-                              : `-₹${Math.abs(txn.amount/100).toFixed(2)}`}
+                              : `-₹${Math.abs(txn.amount / 100).toFixed(2)}`}
                           </p>
                         </div>
                       );
