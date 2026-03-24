@@ -144,6 +144,49 @@ export const initSocket = (server) => {
       });
     });
 
+    //------------ WEBRTC SIGNALING -------------------
+    socket.on('consultation:join',({sessionId})=>{
+      if(!sessionId) return;
+
+      socket.join(sessionId);
+      console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
+
+      const clients = io.sockets.adapter.rooms.get(sessionId);
+      const count = clients? clients.size:0;
+
+      if(count >= 2){
+        io.to(sessionId).emit('consultation:both-joined');
+      }
+      //------- notify other user--------
+      socket.to(sessionId).emit('consultation:user-joined',{
+        userId,
+      })
+    })
+
+    //------------ offer (caller to receiver) --------
+    socket.on('webrtc:offer',({sessionId,offer}) => {
+      socket.to(sessionId).emit('webrtc:offer',{
+        offer,
+        from:userId,
+      })
+    })
+
+    //-------- answer (receiver to caller) ---------
+    socket.on('webrtc:answer', ({sessionId,answer})=>{
+      socket.to(sessionId).emit('webrtc:answer',{
+        answer,
+        from:userId
+      })
+    })
+
+    //------------ ice candidate ---------------
+    socket.on('webrtc:ice-candidate',({sessionId,candidate})=>{
+      socket.to(sessionId).emit('webrtc:ice-candidate',{
+        candidate,
+        from:userId,
+      })
+    })
+    
     // ---------------- DISCONNECT ----------------
     socket.on("disconnect", async () => {
       console.log(`Socket disconnected: ${socket.id}`);

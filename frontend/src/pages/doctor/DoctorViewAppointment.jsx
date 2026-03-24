@@ -241,7 +241,7 @@ const DoctorViewAppointment = () => {
             <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
               Consultation Link
             </p>
-            {appointment.consultationLink ? (
+            {/* {appointment.consultationLink ? ( */}
               <div className="flex flex-col gap-3 rounded-xl bg-sky-50 px-5 py-4 ring-1 ring-sky-100">
                 <div className="flex items-center gap-2">
                   <Icon
@@ -257,17 +257,15 @@ const DoctorViewAppointment = () => {
                     {appointment.consultationLink}
                   </a>
                 </div>
-                <a
-                  href={appointment.consultationLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={()=>navigate('/doctor/appointments/consultation')}
                   className="flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"
                 >
                   <Icon icon="mdi:video-outline" className="h-4 w-4" />
                   Talk to Doctor
-                </a>
+                </button>
               </div>
-            ) : (
+            {/* ) : (
               <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-5 py-4 ring-1 ring-slate-100">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200">
                   <Icon
@@ -285,7 +283,7 @@ const DoctorViewAppointment = () => {
                   </p>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* View Patient Profile */}

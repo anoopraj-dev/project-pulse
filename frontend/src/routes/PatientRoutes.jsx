@@ -67,6 +67,7 @@ import PatientPayments from "@/pages/patient/PatientPayments";
 import PatientViewAppointment from "@/pages/patient/PatientViewAppointment";
 import PatientWallet from "@/pages/patient/PatientWallet";
 import NotFound from "../pages/NotFound";
+import PatientConsultationPage from "@/pages/patient/PatientConsultationPage";
 
 const PatientRoutes = () => {
   return useRoutes([
@@ -88,9 +89,7 @@ const PatientRoutes = () => {
         { path: "appointments/:id", element: <PatientViewAppointment /> },
         { path: "payments", element: <PatientPayments /> },
         { path: "wallet", element: <PatientWallet /> },
-
-  
-        
+    
       ],
     },
     { path: "*", element: <NotFound /> },
@@ -105,6 +104,17 @@ const PatientRoutes = () => {
         </ProtectedRoute>
       ),
     },
+    {
+      path:'/appointments/consultation',
+      element:(
+        <ProtectedRoute allowedRoles={['patient']}>
+          <>
+            {/* <Navbar/> */}
+            <PatientConsultationPage/>
+          </>
+        </ProtectedRoute>
+      )
+    }
   ]);
 };
 
