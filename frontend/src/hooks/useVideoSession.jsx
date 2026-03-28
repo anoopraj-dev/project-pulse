@@ -9,6 +9,7 @@ export const useVideoSession = (sessionId, role) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [remoteVideoOff, setRemoteVideoOff] = useState(false);
+  const [callDuration,setCallDuration] = useState(0)
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -210,6 +211,12 @@ export const useVideoSession = (sessionId, role) => {
     // ---------------- Emit join AFTER listeners are attached ----------------
     socket.emit("consultation:join", { sessionId });
 
+    socket.on('consultation:status-update',(data)=>{
+      if(data?.status){
+        setStatus(data.status)
+      }
+    })
+
     // Cleanup
     return () => {
       socket.off("consultation:both-joined");
@@ -218,6 +225,7 @@ export const useVideoSession = (sessionId, role) => {
       socket.off("webrtc:ice-candidate");
       socket.off("consultation:end");
       socket.off("consultation:camera-state");
+      socket.off('consultation:status-update')
     };
   }, [socket, sessionId, streamReady, role]);
 
@@ -254,6 +262,24 @@ export const useVideoSession = (sessionId, role) => {
     }
   }, [bothJoined, streamReady, role]);
 
+  useEffect(()=> {
+    let interval;
+
+    if(status === 'connected'){
+      setInterval(()=>{
+        setCallDuration(prev=>prev+1)
+      },1000)
+    }
+
+    if(status === 'ended'){
+      setCallDuration(0)
+    }
+
+    return(()=>{
+      if(interval) clearInterval(interval)
+    })
+  },[status])
+
   return {
     status,
     setStatus,
@@ -265,5 +291,6 @@ export const useVideoSession = (sessionId, role) => {
     isCameraOff,
     endCall,
     remoteVideoOff,
+    callDuration
   };
 };

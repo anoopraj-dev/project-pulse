@@ -1,9 +1,13 @@
 import ConsultationVideo from "@/components/shared/components/ConsultationVideo";
 import { useUser } from "@/contexts/UserContext";
 import { useVideoSession } from "@/hooks/useVideoSession";
+import { useLocation, useParams } from "react-router-dom";
 
 const PatientConsultationPage = () => {
+  const{id:sessionId} = useParams();
   const {user} = useUser();
+  const {state} = useLocation();
+  const {participants} = state
   const {
     status,
     setStatus,
@@ -15,7 +19,8 @@ const PatientConsultationPage = () => {
     isMuted,
     isCameraOff,
     remoteVideoOff,
-  } = useVideoSession("SESSION_ID", "patient",user);
+    callDuration
+  } = useVideoSession(sessionId, "patient",user);
 
   //-------------- End Call --------------------
   const handleEndCall = () => {
@@ -35,6 +40,9 @@ const PatientConsultationPage = () => {
         isCameraOff={isCameraOff}
         isMuted={isMuted}
         remoteVideoOff={remoteVideoOff}
+        participants={participants}
+        callDuration={callDuration}
+     
       />
     </div>
   );

@@ -1,3 +1,4 @@
+import { useUser } from "@/contexts/UserContext";
 import { Icon } from "@iconify/react";
 
 const ConsultationVideo = ({
@@ -10,8 +11,19 @@ const ConsultationVideo = ({
   isMuted,
   isCameraOff,
   remoteVideoOff,
+  participants,
+  callDuration
 }) => {
   const isConnected = status === "connected";
+
+  const { role } = useUser();
+
+  const formattedTime = (seconds)=>{
+    const mins = Math.floor(seconds/60);
+    const secs = seconds%60;
+
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  }
 
   return (
     <div className="h-screen w-full bg-[#0a0a0f] relative flex items-center justify-center overflow-hidden rounded-2xl border ">
@@ -38,8 +50,16 @@ const ConsultationVideo = ({
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-slate-900 to-black" />
 
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-xl font-semibold">
-              D
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-white/20">
+              <img
+                src={
+                  role === "patient"
+                    ? participants?.doctor?.profilePicture
+                    : participants?.patient?.profilePicture
+                }
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </>
@@ -69,6 +89,17 @@ const ConsultationVideo = ({
             <p className="text-white/90 text-lg font-light tracking-wide">
               {status === "waiting" && "Waiting for the other user…"}
               {status === "connecting" && "Connecting your call…"}
+
+              {status === "in-progress" && (
+                <div className="absolute top-6 left-6 flex gap-2">
+                  {participants.patientJoined && (
+                    <span className="text-green-400">P</span>
+                  )}
+                  {participants.doctorJoined && (
+                    <span className="text-green-400">D</span>
+                  )}
+                </div>
+              )}
               {status === "ended" && "Call ended"}
             </p>
             {status !== "ended" && (
@@ -98,6 +129,19 @@ const ConsultationVideo = ({
               Live consultation
             </span>
           </div>
+          <div
+            className="rounded-2xl px-4 py-2.5 text-white/60 text-sm font-mono"
+            style={{
+              background: "rgba(0,0,0,0.45)",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            <span className="text-white/80 text-md font-bold tracking-wide">
+              {role === "patient"
+                ? participants?.doctor?.name
+                : participants?.patient?.name}
+            </span>
+          </div>
 
           {/* Call timer placeholder */}
           <div
@@ -107,7 +151,7 @@ const ConsultationVideo = ({
               backdropFilter: "blur(16px)",
             }}
           >
-            00:00
+            {formattedTime(callDuration)}
           </div>
         </div>
       )}
@@ -130,9 +174,18 @@ const ConsultationVideo = ({
           {isCameraOff && (
             <>
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/40 via-slate-800 to-black" />
+
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white font-semibold">
-                  A
+                <div className="w-16 h-16 rounded-full overflow-hidden bg-white/20">
+                  <img
+                    src={
+                      role === "patient"
+                        ? participants?.patient?.profilePicture
+                        : participants?.doctor?.profilePicture
+                    }
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             </>

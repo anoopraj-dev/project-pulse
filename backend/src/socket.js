@@ -145,13 +145,18 @@ export const initSocket = (server) => {
     });
 
     //------------ WEBRTC SIGNALING -------------------
-    socket.on('consultation:join',({sessionId})=>{
+    socket.on('consultation:join',async({sessionId})=>{
       if(!sessionId) return;
 
       socket.join(sessionId);
       console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
 
+      
+
       const clients = io.sockets.adapter.rooms.get(sessionId);
+
+      const users = await io.in(sessionId).allSockets();
+console.log("ROOM MEMBERS:", sessionId, users);
       const count = clients? clients.size:0;
 
       if(count >= 2){
@@ -185,6 +190,15 @@ export const initSocket = (server) => {
         candidate,
         from:userId,
       })
+    })
+
+    //--------- Camera state sync ------------------
+    socket.on('consultation:camera-state',({sessionId,isOff})=>{
+      console.log('Camera state',isOff);
+
+      if(!sessionId) return;
+
+      socket.to(sessionId).emit('consultation:camera-state',{isOff})
     })
     
     // ---------------- DISCONNECT ----------------

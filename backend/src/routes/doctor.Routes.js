@@ -22,6 +22,7 @@ import { cancelAppointment, getAllAppointments, getDoctorAppointmentById } from 
 import { getDoctorPaymentHistory } from "../controllers/doctorControllers/paymentHistory.controller.js";
 import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/userControllers/search.controller.js";
+import { joinConsultation } from "../controllers/userControllers/consultation.controller.js";
 
 const router = Router();
 
@@ -82,5 +83,8 @@ router.get('/payments',getDoctorPaymentHistory)
 //---------------- Search ----------------
 router.get('/search',searchController)
 router.get('/search/suggestions',searchSuggestionsController)
+
+//------------- consultation-----------
+router.post('/appointments/consultation/:id',joinConsultation)
 
 export default router;

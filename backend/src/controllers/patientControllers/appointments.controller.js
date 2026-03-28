@@ -10,6 +10,7 @@ import { emailTemplate } from "../../utils/emailTemplate.js";
 import Patient from "../../models/patient.model.js";
 import { getIO } from "../../socket.js";
 import {Notification} from '../../models/notification.model.js'
+import { createConsultation } from "../../services/consultationService.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfo = async (req, res) => {
@@ -170,6 +171,11 @@ export const bookAppointment = async (req, res) => {
       { new: true },
     );
 
+    //------------- Create Consultation ------------
+    const consultation = await createConsultation({
+      appointmentId:appointment._id
+    })
+
     // ---------- Patient Email ----------
     const patientMailOptions = {
       from: `"PULSE360" <${process.env.GMAIL_USER}>`,
@@ -308,7 +314,9 @@ export const getAppointmentById = async (req, res) => {
         "doctor",
         "name profilePicture professionalInfo.specializations",
       )
-      .populate("patient", "name email");
+      .populate("patient", "name email")
+      .populate('consultation',"_id status")
+
 
     if (!appointment) {
       return res.status(404).json({

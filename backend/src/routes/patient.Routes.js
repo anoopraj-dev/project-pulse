@@ -48,6 +48,7 @@ import {
   refundToWallet,
   verifyWalletPayment,
 } from "../controllers/patientControllers/wallet.controller.js";
+import { joinConsultation } from "../controllers/userControllers/consultation.controller.js";
 
 const router = Router();
 
@@ -99,5 +100,8 @@ router.get("/wallet", getPatientWallet);
 router.post("/create-wallet-order", createWalletOrder);
 router.post("/verify-wallet-payment", verifyWalletPayment);
 router.post("/wallet-pay", walletPayment);
+
+//--------------- Consultation --------------
+router.post('/appointments/consultation/:id',joinConsultation)
 
 export default router;

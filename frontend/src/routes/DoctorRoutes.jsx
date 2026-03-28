@@ -54,7 +54,7 @@ const DoctorRoutes = () => {
       ),
     },
     {
-      path:'/appointments/consultation',
+      path:'/appointments/consultation/:id',
       element: (
         <ProtectedRoute allowedRoles={['doctor']}>
           <>

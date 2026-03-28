@@ -61,7 +61,14 @@ const appointmentSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    consultation:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Consultation',
+      default:null
+    }
   },
+  
   { timestamps: true },
 );
 

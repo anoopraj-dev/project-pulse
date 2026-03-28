@@ -7,7 +7,7 @@ import {
   cancelAppointment,
 } from "@/api/doctor/doctorApis";
 
-import { refundToWallet } from "@/api/patient/patientApis";
+import { joinConsultation } from "@/api/user/userApis";
 
 const statusConfig = {
   confirmed: {
@@ -117,6 +117,48 @@ const DoctorViewAppointment = () => {
     }
   };
 
+  //--------------- Join consultation ---------------
+
+  const handleJoinConsultation = async () => {
+    try {
+      console.log("appointment", appointment);
+      const consultationId = appointment?.consultation;
+      console.log("consultationId", consultationId);
+      if (!consultationId) {
+        return toast.error("Consultation not available yet");
+      }
+
+      const res = await joinConsultation(consultationId, "doctor");
+
+      if (!res.data?.success) {
+        return toast.error("Unable to join the call");
+      }
+
+      console.log('res.data.consultation',res.data.consultation)
+      const { sessionId } = res.data?.consultation;
+
+
+      const participants = {
+        patient: {
+          name: res.data?.consultation?.participants?.patient?.name,
+          profilePicture: res.data?.consultation?.participants?.patient?.profilePicture,
+        },
+        doctor: {
+          name: res.data?.consultation?.participants?.doctor?.name,
+          profilePicture: res.data?.consultation?.participants?.doctor?.profilePicture,
+        },
+      };
+
+      navigate(`/doctor/appointments/consultation/${consultationId}`, {
+        state: { sessionId, participants },
+      });
+    } catch (error) {
+      console.log(error)
+      toast.error(
+        error?.response?.data.message || "Failed to join consultation",
+      );
+    }
+  };
 
   if (loading)
     return (
@@ -242,29 +284,29 @@ const DoctorViewAppointment = () => {
               Consultation Link
             </p>
             {/* {appointment.consultationLink ? ( */}
-              <div className="flex flex-col gap-3 rounded-xl bg-sky-50 px-5 py-4 ring-1 ring-sky-100">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    icon="mdi:link-variant"
-                    className="h-4 w-4 shrink-0 text-sky-500"
-                  />
-                  <a
-                    href={appointment.consultationLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="truncate text-sm font-medium text-sky-600 underline underline-offset-2 hover:text-sky-800"
-                  >
-                    {appointment.consultationLink}
-                  </a>
-                </div>
-                <button
-                  onClick={()=>navigate('/doctor/appointments/consultation')}
-                  className="flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"
+            <div className="flex flex-col gap-3 rounded-xl bg-sky-50 px-5 py-4 ring-1 ring-sky-100">
+              <div className="flex items-center gap-2">
+                <Icon
+                  icon="mdi:link-variant"
+                  className="h-4 w-4 shrink-0 text-sky-500"
+                />
+                <a
+                  href={appointment.consultationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate text-sm font-medium text-sky-600 underline underline-offset-2 hover:text-sky-800"
                 >
-                  <Icon icon="mdi:video-outline" className="h-4 w-4" />
-                  Talk to Doctor
-                </button>
+                  {appointment.consultationLink}
+                </a>
               </div>
+              <button
+                onClick={handleJoinConsultation}
+                className="flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"
+              >
+                <Icon icon="mdi:video-outline" className="h-4 w-4" />
+                Talk to Doctor
+              </button>
+            </div>
             {/* ) : (
               <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-5 py-4 ring-1 ring-slate-100">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200">
@@ -385,7 +427,6 @@ const DoctorViewAppointment = () => {
                 </div>
               </div>
             )}
-         
           </div>
         </div>
       </div>
