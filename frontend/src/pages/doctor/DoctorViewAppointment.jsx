@@ -301,10 +301,15 @@ const DoctorViewAppointment = () => {
               </div>
               <button
                 onClick={handleJoinConsultation}
-                className="flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"
+                disabled={appointment.status === "cancelled" || appointment.status === "completed"}
+                className={`flex w-fit items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  appointment.status === "cancelled" || appointment.status === "completed"
+                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    : "bg-sky-600 text-white hover:bg-sky-700"
+                }`}
               >
                 <Icon icon="mdi:video-outline" className="h-4 w-4" />
-                Talk to Doctor
+                {appointment.status === "completed" ? "Consultation Completed" : "Talk to Doctor"}
               </button>
             </div>
             {/* ) : (

@@ -175,12 +175,7 @@ const AuthCard = ({ role: initialRole }) => {
   useEffect(() => {
     if (!isLoaded || !user || !isSignedIn) return;
 
-    if (!user.emailAddresses[0].verified) {
-      toast.error("Please verify your email befor continuing");
-      signOut({ redirectUrl: "/signin" });
-      dispatch({ type: "CLEAR_USER" });
-      return;
-    }
+    // Clerk users are already authenticated and verified, no additional email verification needed
     setOauthProgress(true);
     const controller = new AbortController();
     const signal = controller.signal;

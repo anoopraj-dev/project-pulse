@@ -22,7 +22,7 @@ import { cancelAppointment, getAllAppointments, getDoctorAppointmentById } from 
 import { getDoctorPaymentHistory } from "../controllers/doctorControllers/paymentHistory.controller.js";
 import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/userControllers/search.controller.js";
-import { joinConsultation } from "../controllers/userControllers/consultation.controller.js";
+import { getConsultationDetails, joinConsultation, endConsultation } from "../controllers/userControllers/consultation.controller.js";
 
 const router = Router();
 
@@ -86,5 +86,7 @@ router.get('/search/suggestions',searchSuggestionsController)
 
 //------------- consultation-----------
 router.post('/appointments/consultation/:id',joinConsultation)
+router.get('/appointments/consultation/:id',getConsultationDetails)
+router.patch('/appointments/consultation/:id/end',endConsultation)
 
 export default router;

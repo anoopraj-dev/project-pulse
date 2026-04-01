@@ -1,3 +1,4 @@
+import React, { useEffect, useRef, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Icon } from "@iconify/react";
 
@@ -11,19 +12,41 @@ const ConsultationVideo = ({
   isMuted,
   isCameraOff,
   remoteVideoOff,
+  remoteMuted,
   participants,
-  callDuration
+  mode,
+  setMode,
+  setBgImage,
+  onTogglePatientPanel,
 }) => {
+  const [callDuration, setCallDuration] = useState(0);
+
+  useEffect(() => {
+    let interval;
+
+    if (status === "connected") {
+      interval = setInterval(() => {
+        setCallDuration((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setCallDuration(0);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [status]);
   const isConnected = status === "connected";
 
-  const { role } = useUser();
+  const fileInputRef = useRef(null);
 
-  const formattedTime = (seconds)=>{
-    const mins = Math.floor(seconds/60);
-    const secs = seconds%60;
+  const { role } = useUser();
+  const formattedTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
 
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  }
+  };
 
   return (
     <div className="h-screen w-full bg-[#0a0a0f] relative flex items-center justify-center overflow-hidden rounded-2xl border ">
@@ -65,6 +88,16 @@ const ConsultationVideo = ({
         </>
       )}
 
+      {/* Overlay when remote is MUTED */}
+      {remoteMuted && !remoteVideoOff && (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
+            <Icon icon="mdi:microphone-off" className="text-red-400 text-sm" />
+            <span className="text-white text-xs font-medium">Muted</span>
+          </div>
+        </div>
+      )}
+
       {/* ------------ Status overlay ---------------*/}
       {!isConnected && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-5 bg-black/40 backdrop-blur-sm">
@@ -86,22 +119,22 @@ const ConsultationVideo = ({
           )}
 
           <div className="text-center">
-            <p className="text-white/90 text-lg font-light tracking-wide">
+            <div className="text-white/90 text-lg font-light tracking-wide">
               {status === "waiting" && "Waiting for the other user…"}
               {status === "connecting" && "Connecting your call…"}
-
-              {status === "in-progress" && (
-                <div className="absolute top-6 left-6 flex gap-2">
-                  {participants.patientJoined && (
-                    <span className="text-green-400">P</span>
-                  )}
-                  {participants.doctorJoined && (
-                    <span className="text-green-400">D</span>
-                  )}
-                </div>
-              )}
               {status === "ended" && "Call ended"}
-            </p>
+            </div>
+
+            {status === "in-progress" && (
+              <div className="absolute top-6 left-6 flex gap-2">
+                {participants.patientJoined && (
+                  <span className="text-green-400">P</span>
+                )}
+                {participants.doctorJoined && (
+                  <span className="text-green-400">D</span>
+                )}
+              </div>
+            )}
             {status !== "ended" && (
               <p className="text-white/40 text-xs mt-1 tracking-widest uppercase">
                 Please keep this window open
@@ -152,7 +185,15 @@ const ConsultationVideo = ({
             }}
           >
             {formattedTime(callDuration)}
+            
           </div>
+          {/* -------- patient panel button -------- */}
+            <button
+              onClick={onTogglePatientPanel}
+              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm"
+            >
+              Patient
+            </button>
         </div>
       )}
 
@@ -249,9 +290,6 @@ const ConsultationVideo = ({
             </span>
           </button>
 
-          {/* Divider */}
-          <div className="w-px h-10 bg-white/10 mx-1" />
-
           {/* End Call */}
           <button
             onClick={onEndCall}
@@ -264,10 +302,100 @@ const ConsultationVideo = ({
               End
             </span>
           </button>
+
+          {/* Divider */}
+          <div className="w-px h-10 bg-white/10 mx-1" />
+
+         {/* -------- Effects -------- */}
+
+{/* Normal */}
+<button
+  onClick={() => setMode("none")}
+  className="flex flex-col items-center gap-1 group"
+>
+  <div
+    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
+      mode === "none"
+        ? "bg-indigo-500 text-white"
+        : "bg-white/10 hover:bg-white/20 text-white"
+    }`}
+  >
+    <Icon icon="mdi:checkbox-blank-circle-outline" className="text-xl" />
+  </div>
+  <span
+    className={`text-[10px] ${
+      mode === "none" ? "text-indigo-400" : "text-white/40"
+    }`}
+  >
+    Normal
+  </span>
+</button>
+
+{/* Blur */}
+<button
+  onClick={() => setMode("blur")}
+  className="flex flex-col items-center gap-1 group"
+>
+  <div
+    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
+      mode === "blur"
+        ? "bg-indigo-500 text-white"
+        : "bg-white/10 hover:bg-white/20 text-white"
+    }`}
+  >
+    <Icon icon="mdi:blur" className="text-xl" />
+  </div>
+  <span
+    className={`text-[10px] ${
+      mode === "blur" ? "text-indigo-400" : "text-white/40"
+    }`}
+  >
+    Blur
+  </span>
+</button>
+
+{/* Background Image */}
+<button
+  onClick={() => fileInputRef.current.click()}
+  className="flex flex-col items-center gap-1 group"
+>
+  <div
+    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
+      mode === "image"
+        ? "bg-indigo-500 text-white"
+        : "bg-white/10 hover:bg-white/20 text-white"
+    }`}
+  >
+    <Icon icon="mdi:image" className="text-xl" />
+  </div>
+  <span
+    className={`text-[10px] ${
+      mode === "image" ? "text-indigo-400" : "text-white/40"
+    }`}
+  >
+    BG
+  </span>
+</button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+
+              const url = URL.createObjectURL(file);
+
+              setMode("image");
+              setBgImage(url);
+            }}
+          />
         </div>
       </div>
     </div>
   );
 };
 
-export default ConsultationVideo;
+export default React.memo(ConsultationVideo);

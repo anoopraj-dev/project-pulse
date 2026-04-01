@@ -106,6 +106,16 @@ export const fetchDoctorPayments = () =>{
 }
 
 
+//-------------- consultation --------------
+export const fetchPatientStats = (id) =>{
+  return api.get(`/api/doctor/appointments/consultation/${id}`,)
+}
+
+export const endConsultation = (id) => {
+  return api.patch(`/api/doctor/appointments/consultation/${id}/end`)
+}
+
+
 
 
 

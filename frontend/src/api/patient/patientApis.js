@@ -106,3 +106,8 @@ export const createWalletOrder = (payload) => {
 export const verifyWalletPayment = (payload) => {
   return api.post("/api/patient/verify-wallet-payment", payload);
 };
+
+//-------------- consultation --------------
+export const endConsultation = (id) => {
+  return api.patch(`/api/patient/appointments/consultation/${id}/end`)
+};

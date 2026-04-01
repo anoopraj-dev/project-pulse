@@ -67,12 +67,18 @@ export const SocketProvider = ({ children }) => {
 
     const handlePresenceOnline = ({ userId }) => {
       if (!userId || userId === id) return;
-      setOnlineUsers((prev) => new Set(prev).add(userId));
+      setOnlineUsers((prev) => {
+        if (prev.has(userId)) return prev;
+        const copy = new Set(prev);
+        copy.add(userId);
+        return copy;
+      });
     };
 
     const handlePresenceOffline = ({ userId }) => {
       if (!userId || userId === id) return;
       setOnlineUsers((prev) => {
+        if (!prev.has(userId)) return prev;
         const copy = new Set(prev);
         copy.delete(userId);
         return copy;

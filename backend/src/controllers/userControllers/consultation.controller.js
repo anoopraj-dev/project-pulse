@@ -2,6 +2,7 @@ import crypto from "crypto";
 import Consultation from "../../models/consultation.model.js";
 import Appointment from "../../models/appointments.model.js";
 import { getIO } from "../../socket.js";
+import Patient from "../../models/patient.model.js";
 
 
 //----------------- Join consultation --------------------
@@ -142,7 +143,7 @@ export const endConsultation = async (req, res) => {
     const { consultationId } = req.params;
     const userId = req.user.id;
 
-    const consultation = await Consultation.findById(consulationId);
+    const consultation = await Consultation.findById(consultationId);
 
     if (!consultation) {
       return res.status(400).json({
@@ -186,6 +187,16 @@ export const endConsultation = async (req, res) => {
 
     await consultation.save();
 
+    //----------- Update appointment status -----------
+    try {
+      await Appointment.findByIdAndUpdate(consultation.appointment, {
+        status: "completed"
+      });
+      console.log(`Updated appointment ${consultation.appointment} status to completed`);
+    } catch (appointmentError) {
+      console.error("Error updating appointment status:", appointmentError);
+    }
+
     //--------------- Calculate duration -------------
     let duration = 0;
 
@@ -210,5 +221,47 @@ export const endConsultation = async (req, res) => {
       success: false,
       message: "Server error",
     });
+  }
+};
+
+
+
+
+export const getConsultationDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const consultation = await Consultation.findById(id)
+      .populate({
+        path: "patient",
+        select: "name gender dob medical_history lifestyle_habits"
+      })
+      .populate({
+        path: "appointment",
+        select: "appointmentDate timeSlot reason"
+      })
+      .populate({
+        path: "doctor",
+        select: "name"
+      });
+
+    if (!consultation) {
+      return res.status(404).json({ message: "Consultation not found" });
+    }
+
+    res.status(200).json({
+      patient: consultation.patient,
+      appointment: {
+        date: consultation.appointment.appointmentDate,
+        time: consultation.appointment.timeSlot,
+        reason: consultation.appointment.reason
+      },
+      consultation: consultation,
+      doctor: consultation.doctor
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };

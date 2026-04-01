@@ -71,11 +71,6 @@ const DoctorAvailability = () => {
 
     const selected = startOfDay(date);
 
-    if (selected.getTime() === today.getTime()) {
-      toast.error("Availability must be set 24 hours in advance.");
-      return;
-    }
-
     if (isBefore(selected, today)) return;
 
     if (selected > lastAllowedDate) {
@@ -111,6 +106,19 @@ const DoctorAvailability = () => {
     if (endMinutes > 24 * 60) {
       toast.error("Invalid duration");
       return;
+    }
+
+    // Check if slot is in the future for today
+    if (dateKey === format(today, "yyyy-MM-dd")) {
+      const now = new Date();
+      const slotStartTime = new Date();
+      const [hours, minutes] = startTime.split(":").map(Number);
+      slotStartTime.setHours(hours, minutes, 0, 0);
+
+      if (slotStartTime <= now) {
+        toast.error("Slot time must be in the future.");
+        return;
+      }
     }
 
     const formattedEndTime = formatMinutesToTime(endMinutes);

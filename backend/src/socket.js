@@ -138,69 +138,81 @@ export const initSocket = (server) => {
     socket.on("message:read", async ({ conversationId }) => {
       if (!conversationId) return;
 
-      await markConversationAsRead({conversationId});
+      await markConversationAsRead({ conversationId });
       socket.to(conversationId.toString()).emit("message:read", {
         conversationId,
       });
     });
 
     //------------ WEBRTC SIGNALING -------------------
-    socket.on('consultation:join',async({sessionId})=>{
-      if(!sessionId) return;
+    socket.on("consultation:join", async ({ sessionId }) => {
+  if (!sessionId) return;
 
-      socket.join(sessionId);
-      console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
+  socket.join(sessionId);
+  console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
 
-      
+  const clients = io.sockets.adapter.rooms.get(sessionId);
+  const count = clients ? clients.size : 0;
 
-      const clients = io.sockets.adapter.rooms.get(sessionId);
+  // ---------- INITIAL CONNECT ----------
+  // emit both-joined only when the second user actually joins (prevent repeated events)
+  if (count === 2) {
+    io.to(sessionId).emit("consultation:both-joined");
+  }
 
-      const users = await io.in(sessionId).allSockets();
-console.log("ROOM MEMBERS:", sessionId, users);
-      const count = clients? clients.size:0;
-
-      if(count >= 2){
-        io.to(sessionId).emit('consultation:both-joined');
-      }
-      //------- notify other user--------
-      socket.to(sessionId).emit('consultation:user-joined',{
-        userId,
-      })
-    })
+  // ---------- notify the other participant ----------
+  socket.to(sessionId).emit("consultation:user-joined", {
+    userId,
+  });
+});
 
     //------------ offer (caller to receiver) --------
-    socket.on('webrtc:offer',({sessionId,offer}) => {
-      socket.to(sessionId).emit('webrtc:offer',{
+    socket.on("webrtc:offer", ({ sessionId, offer }) => {
+      socket.to(sessionId).emit("webrtc:offer", {
         offer,
-        from:userId,
-      })
-    })
+        from: userId,
+      });
+    });
 
     //-------- answer (receiver to caller) ---------
-    socket.on('webrtc:answer', ({sessionId,answer})=>{
-      socket.to(sessionId).emit('webrtc:answer',{
+    socket.on("webrtc:answer", ({ sessionId, answer }) => {
+      socket.to(sessionId).emit("webrtc:answer", {
         answer,
-        from:userId
-      })
-    })
+        from: userId,
+      });
+    });
 
     //------------ ice candidate ---------------
-    socket.on('webrtc:ice-candidate',({sessionId,candidate})=>{
-      socket.to(sessionId).emit('webrtc:ice-candidate',{
+    socket.on("webrtc:ice-candidate", ({ sessionId, candidate }) => {
+      socket.to(sessionId).emit("webrtc:ice-candidate", {
         candidate,
-        from:userId,
-      })
-    })
+        from: userId,
+      });
+    });
 
     //--------- Camera state sync ------------------
-    socket.on('consultation:camera-state',({sessionId,isOff})=>{
-      console.log('Camera state',isOff);
+    socket.on("consultation:camera-state", ({ sessionId, isOff }) => {
+      console.log("Camera state", isOff);
 
-      if(!sessionId) return;
+      if (!sessionId) return;
 
-      socket.to(sessionId).emit('consultation:camera-state',{isOff})
-    })
-    
+      socket.to(sessionId).emit("consultation:camera-state", { isOff });
+    });
+
+    //--------- End consultation ------------------
+    socket.on("consultation:end", ({ sessionId }) => {
+      if (!sessionId) return;
+
+      io.to(sessionId).emit("consultation:ended");
+    });
+
+    //--------- Mute state sync ------------------
+    socket.on("consultation:mute-state", ({ sessionId, isMuted }) => {
+      if (!sessionId) return;
+
+      socket.to(sessionId).emit("consultation:mute-state", { isMuted });
+    });
+
     // ---------------- DISCONNECT ----------------
     socket.on("disconnect", async () => {
       console.log(`Socket disconnected: ${socket.id}`);
