@@ -16,6 +16,7 @@ import PatientViewAppointment from "@/pages/patient/PatientViewAppointment";
 import PatientWallet from "@/pages/patient/PatientWallet";
 import NotFound from "../pages/NotFound";
 import PatientConsultationPage from "@/pages/patient/PatientConsultationPage";
+import PatientRecords from "@/pages/patient/PatientRecords";
 
 const PatientRoutes = () => {
   return useRoutes([
@@ -37,6 +38,7 @@ const PatientRoutes = () => {
         { path: "appointments/:id", element: <PatientViewAppointment /> },
         { path: "payments", element: <PatientPayments /> },
         { path: "wallet", element: <PatientWallet /> },
+        { path: "records", element: <PatientRecords/> },
     
       ],
     },

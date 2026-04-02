@@ -96,9 +96,9 @@ export const viewPatientProfile = (id) => {
   return api.get(`/api/doctor/appointments/patient-profile/${id}`)
 }
 
-export const getPatientMedicalRecords = () =>{
-  return api.get(`/api/doctor/appointments/patient-records`)
-}
+export const getPatientMedicalRecords = (patientId) => {
+  return api.get(`/api/doctor/appointments/patient-records/${patientId}`);
+};
 
 //------------------- PAYMENTS --------------------
 export const fetchDoctorPayments = () =>{
@@ -115,9 +115,6 @@ export const endConsultation = (id) => {
   return api.patch(`/api/doctor/appointments/consultation/${id}/end`)
 }
 
-
-
-
-
-
-
+export const submitPrescription = (consultationId, prescriptionData) => {
+  return api.post(`/api/doctor/appointments/consultation/${consultationId}/prescription`, prescriptionData)
+}

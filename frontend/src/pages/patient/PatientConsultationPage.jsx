@@ -6,21 +6,20 @@ import { useCamera } from "@/hooks/useCamera";
 import { useVideoProcessor } from "@/hooks/useVideoProcessor";
 import { useState, useRef, useEffect } from "react";
 import { endConsultation } from "@/api/patient/patientApis";
+import { socket } from "@/socket";
+import toast from "react-hot-toast";
 
 const PatientConsultationPage = () => {
   const{id:sessionId} = useParams();
   const {user} = useUser();
   const navigate = useNavigate();
-  const renderCount = useRef(0);
-  renderCount.current += 1;
-  console.log("PatientConsultationPage render count:", renderCount.current);
   const {state} = useLocation();
   const {participants} = state;
 
   const rawStream = useCamera();
   const[mode,setMode] = useState('none');
   const [bgImage,setBgImage] = useState('/healthcare1.jpg')
-
+  const[isPrescriptionSubmitted,setIsPrescriptionSubmitted] = useState(false);
   const processedStream = useVideoProcessor(
     rawStream,
     mode,
@@ -56,26 +55,37 @@ const PatientConsultationPage = () => {
     };
   }, [rawStream]);
 
+  useEffect(()=>{
+    socket.on('prescription:submitted',(data)=>{
+      if(data.sessionId === sessionId){
+        setIsPrescriptionSubmitted(true);
+        toast.success('Prescription received!');
+      }
+    });
+    return () =>{
+      socket.off('prescription:submitted');
+    }
+  },[sessionId])
+
   //-------------- End Call --------------------
   const handleEndCall = async () => {
-    try {
-      // Call API to end consultation
-      await endConsultation(sessionId);
+  if (!isPrescriptionSubmitted) {
+    toast.error("Waiting for doctor to submit prescription");
+    return;
+  }
 
-      // End the video call
-      endCall();
-      setStatus("ended");
-
-      // Navigate back to appointments or dashboard
-      navigate("/patient/appointments");
-    } catch (error) {
-      console.error("Error ending consultation:", error);
-      // Still end the call even if API fails
-      endCall();
-      setStatus("ended");
-      navigate("/patient/appointments");
-    }
-  };
+  try {
+    await endConsultation(sessionId);
+    endCall();
+    setStatus("ended");
+    navigate("/patient/appointments");
+  } catch (error) {
+    console.error(error);
+    endCall();
+    setStatus("ended");
+    navigate("/patient/appointments");
+  }
+};
 
   return (
     <div className="border border-blue-500">

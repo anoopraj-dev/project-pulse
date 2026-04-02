@@ -9,7 +9,7 @@ import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import { useUser } from "@/contexts/UserContext";
 import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
-import { joinConsultation } from "@/api/user/userApis";
+import { joinConsultation, getConsultationPDF } from "@/api/user/userApis";
 
 const statusConfig = {
   confirmed: {
@@ -131,6 +131,19 @@ const PatientViewAppointment = () => {
       toast.error(
         error?.response?.data.message || "Failed to join consultation",
       );
+    }
+  };
+
+  //------------- View PDF -------------------
+  const handleViewPDF = async () => {
+    try {
+      const consultationId = appointment.consultation?._id || appointment.consultation;
+      const res = await getConsultationPDF(consultationId, "patient");
+      const url = window.URL.createObjectURL(res.data);
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("Error loading PDF:", error);
+      toast.error("Failed to load PDF");
     }
   };
 
@@ -333,6 +346,28 @@ const PatientViewAppointment = () => {
                   // )
                 }
 
+                {/* Consultation PDF */}
+                {appointment.status === "completed" && (
+                  <div className="mt-4 rounded-xl bg-green-50 px-5 py-4 ring-1 ring-green-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Icon
+                        icon="mdi:file-pdf-box"
+                        className="h-4 w-4 shrink-0 text-green-500"
+                      />
+                      <span className="text-sm font-medium text-green-700">
+                        Consultation Report PDF
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleViewPDF}
+                      className="flex w-fit items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                    >
+                      <Icon icon="mdi:eye-outline" className="h-4 w-4" />
+                      View Report
+                    </button>
+                  </div>
+                )}
+
                 {/* Message Doctor */}
                 <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-5 py-4 ring-1 ring-slate-100">
                   <div>
@@ -403,6 +438,7 @@ const PatientViewAppointment = () => {
           </div>
         </>
       )}
+
     </div>
   );
 };

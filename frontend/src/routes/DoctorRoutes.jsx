@@ -37,7 +37,7 @@ const DoctorRoutes = () => {
         { path: "appointments", element: <DoctorAppointments /> },
         { path: "appointments/:id", element: <DoctorViewAppointment /> },
         { path: "appointments/patient-profile/:id", element: <DoctorPatientProfile /> },
-        { path: "appointments/patient/records", element: <DoctorPatientRecords /> },
+        { path: "appointments/patient/records/:patientId", element: <DoctorPatientRecords /> },
         { path: "payments", element: <DoctorPayments /> },
       ],
     },

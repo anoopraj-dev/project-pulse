@@ -8,8 +8,11 @@ import {
   updateLifeStyleInfo,
   updatePersonalInfo,
   updateMedicalInfo,
-} from "../controllers/patientControllers/onboarding.controller.js";
-import {
+} from "../controllers/patientControllers/onboarding.controller.js";import {
+  createPatientMedicalRecord,
+  getPatientMedicalRecords,
+  deletePatientMedicalRecord,
+} from "../controllers/patientControllers/medicalRecords.controller.js";import {
   getApprovedDoctors,
   viewDoctorProfile,
 } from "../controllers/patientControllers/viewDoctors.controller.js";
@@ -42,6 +45,7 @@ import {
 } from "../controllers/paymentControllers/payment.controller.js";
 import { getPatientPaymentHistory } from "../controllers/patientControllers/paymentHistory.controller.js";
 import { viewReceipt } from "../controllers/userControllers/receipt.controller.js";
+import { generateConsultationPDF } from "../controllers/userControllers/consultation.controller.js";
 import {
   createWalletOrder,
   getPatientWallet,
@@ -101,8 +105,14 @@ router.post("/create-wallet-order", createWalletOrder);
 router.post("/verify-wallet-payment", verifyWalletPayment);
 router.post("/wallet-pay", walletPayment);
 
+//---------------- Patient Medical Records -----------------
+router.post("/medical-records", upload.single("file"), createPatientMedicalRecord);
+router.get("/medical-records", getPatientMedicalRecords);
+router.delete("/medical-records/:id", deletePatientMedicalRecord);
+
 //--------------- Consultation --------------
 router.post('/appointments/consultation/:id',joinConsultation)
 router.patch('/appointments/consultation/:id/end',endConsultation)
+router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
 
 export default router;

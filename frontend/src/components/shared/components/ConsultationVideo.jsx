@@ -13,6 +13,7 @@ const ConsultationVideo = ({
   isCameraOff,
   remoteVideoOff,
   remoteMuted,
+  endCallDisabled = false,
   participants,
   mode,
   setMode,
@@ -88,16 +89,6 @@ const ConsultationVideo = ({
         </>
       )}
 
-      {/* Overlay when remote is MUTED */}
-      {remoteMuted && !remoteVideoOff && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
-            <Icon icon="mdi:microphone-off" className="text-red-400 text-sm" />
-            <span className="text-white text-xs font-medium">Muted</span>
-          </div>
-        </div>
-      )}
-
       {/* ------------ Status overlay ---------------*/}
       {!isConnected && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-5 bg-black/40 backdrop-blur-sm">
@@ -148,20 +139,31 @@ const ConsultationVideo = ({
       {isConnected && (
         <div className="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between">
           <div
-            className="flex items-center gap-2.5 rounded-2xl px-4 py-2.5"
-            style={{
-              background: "rgba(0,0,0,0.45)",
-              backdropFilter: "blur(16px)",
-            }}
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-            </span>
-            <span className="text-white/80 text-sm font-light tracking-wide">
-              Live consultation
-            </span>
-          </div>
+  className="flex flex-col items-start gap-1 rounded-2xl px-4 py-2.5"
+  style={{
+    background: "rgba(0,0,0,0.45)",
+    backdropFilter: "blur(16px)",
+  }}
+>
+  {/* Live status */}
+  <div className="flex items-center gap-2.5">
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+    </span>
+    <span className="text-white/80 text-sm font-light tracking-wide">
+      Live consultation
+    </span>
+  </div>
+
+ 
+  {remoteMuted && !remoteVideoOff && (
+    <div className="flex items-center gap-2 text-xs text-red-400">
+      <Icon icon="mdi:microphone-off" className="text-sm" />
+      <span>Muted</span>
+    </div>
+  )}
+</div>
           <div
             className="rounded-2xl px-4 py-2.5 text-white/60 text-sm font-mono"
             style={{
@@ -185,15 +187,18 @@ const ConsultationVideo = ({
             }}
           >
             {formattedTime(callDuration)}
-            
           </div>
           {/* -------- patient panel button -------- */}
-            <button
-              onClick={onTogglePatientPanel}
-              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm"
-            >
-              Patient
-            </button>
+          {
+            role === 'doctor' && (
+              <button
+            onClick={onTogglePatientPanel}
+            className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm"
+          >
+            View more
+          </button>
+            )
+          }
         </div>
       )}
 
@@ -293,9 +298,12 @@ const ConsultationVideo = ({
           {/* End Call */}
           <button
             onClick={onEndCall}
-            className="flex flex-col items-center gap-1 group"
+            disabled={endCallDisabled}
+            className={`flex flex-col items-center gap-1 group ${endCallDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            <div className="w-14 h-12 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 transition-all duration-150 flex items-center justify-center shadow-lg shadow-red-500/30">
+            <div
+              className={`w-14 h-12 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 transition-all duration-150 flex items-center justify-center shadow-lg shadow-red-500/30 ${endCallDisabled ? "hover:bg-red-500" : ""}`}
+            >
               <Icon icon="mdi:phone-hangup" className="text-white text-xl" />
             </div>
             <span className="text-[10px] text-white/40 group-hover:text-red-400 transition-colors tracking-wide">
@@ -306,76 +314,79 @@ const ConsultationVideo = ({
           {/* Divider */}
           <div className="w-px h-10 bg-white/10 mx-1" />
 
-         {/* -------- Effects -------- */}
+          {/* -------- Effects -------- */}
 
-{/* Normal */}
-<button
-  onClick={() => setMode("none")}
-  className="flex flex-col items-center gap-1 group"
->
-  <div
-    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
-      mode === "none"
-        ? "bg-indigo-500 text-white"
-        : "bg-white/10 hover:bg-white/20 text-white"
-    }`}
-  >
-    <Icon icon="mdi:checkbox-blank-circle-outline" className="text-xl" />
-  </div>
-  <span
-    className={`text-[10px] ${
-      mode === "none" ? "text-indigo-400" : "text-white/40"
-    }`}
-  >
-    Normal
-  </span>
-</button>
+          {/* Normal */}
+          <button
+            onClick={() => setMode("none")}
+            className="flex flex-col items-center gap-1 group"
+          >
+            <div
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
+                mode === "none"
+                  ? "bg-indigo-500 text-white"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            >
+              <Icon
+                icon="mdi:checkbox-blank-circle-outline"
+                className="text-xl"
+              />
+            </div>
+            <span
+              className={`text-[10px] ${
+                mode === "none" ? "text-indigo-400" : "text-white/40"
+              }`}
+            >
+              Normal
+            </span>
+          </button>
 
-{/* Blur */}
-<button
-  onClick={() => setMode("blur")}
-  className="flex flex-col items-center gap-1 group"
->
-  <div
-    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
-      mode === "blur"
-        ? "bg-indigo-500 text-white"
-        : "bg-white/10 hover:bg-white/20 text-white"
-    }`}
-  >
-    <Icon icon="mdi:blur" className="text-xl" />
-  </div>
-  <span
-    className={`text-[10px] ${
-      mode === "blur" ? "text-indigo-400" : "text-white/40"
-    }`}
-  >
-    Blur
-  </span>
-</button>
+          {/* Blur */}
+          <button
+            onClick={() => setMode("blur")}
+            className="flex flex-col items-center gap-1 group"
+          >
+            <div
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
+                mode === "blur"
+                  ? "bg-indigo-500 text-white"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            >
+              <Icon icon="mdi:blur" className="text-xl" />
+            </div>
+            <span
+              className={`text-[10px] ${
+                mode === "blur" ? "text-indigo-400" : "text-white/40"
+              }`}
+            >
+              Blur
+            </span>
+          </button>
 
-{/* Background Image */}
-<button
-  onClick={() => fileInputRef.current.click()}
-  className="flex flex-col items-center gap-1 group"
->
-  <div
-    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
-      mode === "image"
-        ? "bg-indigo-500 text-white"
-        : "bg-white/10 hover:bg-white/20 text-white"
-    }`}
-  >
-    <Icon icon="mdi:image" className="text-xl" />
-  </div>
-  <span
-    className={`text-[10px] ${
-      mode === "image" ? "text-indigo-400" : "text-white/40"
-    }`}
-  >
-    BG
-  </span>
-</button>
+          {/* Background Image */}
+          <button
+            onClick={() => fileInputRef.current.click()}
+            className="flex flex-col items-center gap-1 group"
+          >
+            <div
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 ${
+                mode === "image"
+                  ? "bg-indigo-500 text-white"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            >
+              <Icon icon="mdi:image" className="text-xl" />
+            </div>
+            <span
+              className={`text-[10px] ${
+                mode === "image" ? "text-indigo-400" : "text-white/40"
+              }`}
+            >
+              BG
+            </span>
+          </button>
 
           <input
             ref={fileInputRef}

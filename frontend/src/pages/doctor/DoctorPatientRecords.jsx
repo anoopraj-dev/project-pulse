@@ -2,16 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getPatientMedicalRecords } from "../../api/doctor/doctorApis"; // assume this API exists
+import { getPatientMedicalRecords } from "../../api/doctor/doctorApis";
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import { useImageModal } from "@/contexts/ImageModalContext";
 
 const DoctorPatientRecords = () => {
   const { patientId } = useParams();
+  const { openImage } = useImageModal();
   const [records, setRecords] = useState([]);
   const [patient, setPatient] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const fetchRecords = async () => {
+    if (!patientId) return;
     setLoading(true);
     try {
       const res = await getPatientMedicalRecords(patientId);
@@ -43,22 +48,7 @@ const DoctorPatientRecords = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Banner */}
-      <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
-        <div className="px-2 sm:px-4 md:px-6 lg:px-20 xl:px-48 pb-6 pt-20">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-              Doctor · Patient Records
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              {patient?.name || "Patient"} Medical Records
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              View all medical records and vitals uploaded by the patient.
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageBanner config={pageBannerConfig.doctorPatientRecords} activeTab="Records" count={records.length} />
 
       <div className="w-full px-4 pb-6">
         {records.length === 0 ? (
@@ -80,7 +70,7 @@ const DoctorPatientRecords = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {records.map((record) => (
               <div
-                key={record.id}
+                key={record._id}
                 className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-5 flex flex-col justify-between"
               >
                 <div>
@@ -91,18 +81,17 @@ const DoctorPatientRecords = () => {
                     {record.description || "No description provided"}
                   </p>
                   <p className="text-[10px] sm:text-xs text-gray-400">
-                    Uploaded on: {new Date(record.uploadedAt).toLocaleDateString()}
+                    Uploaded on: {new Date(record.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <a
-                    href={record.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => openImage(record.fileUrl, record.title)}
                     className="flex-1 text-center bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
                   >
                     View
-                  </a>
+                  </button>
                   <a
                     href={record.fileUrl}
                     download

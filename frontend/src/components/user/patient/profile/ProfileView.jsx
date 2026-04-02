@@ -88,7 +88,7 @@ const ProfileView = ({
                   {isDoctorViewing && (
                     <ActionButton
                       action="viewMedicalRecords"
-                      onClick={onViewMedicalRecords}
+                      onClick={() => onViewMedicalRecords(user?._id)}
                       icon="mdi:folder-account"
                       text="View Medical Records"
                       className="w-full bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"

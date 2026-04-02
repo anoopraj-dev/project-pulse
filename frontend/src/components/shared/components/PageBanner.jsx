@@ -8,8 +8,8 @@ const PageBanner = ({
   count
 }) => {
   return (
-    <div className=" z-40 w-full overflow-hidden rounded-xl ">
-      <div className="my-2 rounded-xl mx-auto pb-1 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-indigo-50 via-white to-sky-100 pt-5 pb-3">
+    <div className=" z-40 w-full overflow-hidden ">
+      <div className="my-2 mx-auto pb-1 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-indigo-50 via-white to-sky-100 pt-5 pb-3">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           
           <div>
@@ -18,7 +18,7 @@ const PageBanner = ({
               {config.roleLabel} · {config.pageLabel}
             </p>
 
-            <h1 className="mt-2 text-xl text-slate-700 sm:text-2xl font-[Georgia] font-medium">
+            <h1 className="mt-2 text-xl text-slate-700 sm:text-2xl  font-medium">
               {config.title}
             </h1>
 

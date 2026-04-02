@@ -1,28 +1,58 @@
-const DoctorPaymentTabs = ({ activeTab, setActiveTab }) => {
+import { Icon } from "@iconify/react";
+
+const DoctorPaymentTabs = ({ activeTab, setActiveTab, counts = {} }) => {
   const tabs = [
-   
-    { key: "all", label: "All Payments" },
-    { key: "success", label: "Successful Payments" },
-    { key: "pending", label: "Pending Payments" },
-    { key: "refunds", label: "Refunds" },
-    
+    { key: "all", label: "All", icon: "solar:wallet-linear" },
+    { key: "success", label: "Success", icon: "solar:check-circle-linear" },
+    { key: "pending", label: "Pending", icon: "solar:clock-circle-linear" },
+    { key: "refunds", label: "Refunds", icon: "solar:refresh-linear" },
   ];
 
   return (
-    <div className="flex border-b border-blue-200 mb-6">
-      {tabs?.map((tab) => (
-        <button
-          key={tab.key}
-          onClick={() => setActiveTab(tab.key)}
-          className={`px-4 py-2 font-medium transition ${
-            activeTab === tab.key
-              ? "border-b-2 border-blue-500 text-blue-600"
-              : "text-gray-500"
-          }`}
-        >
-          {tab.label}
-        </button>
-      ))}
+    <div className="mb-4">
+      <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 rounded-xl w-full lg:justify-center">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.key;
+
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`
+                flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-lg
+                text-sm font-medium transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }
+              `}
+            >
+              {/* Icon */}
+              <Icon icon={tab.icon} width="18" height="18" />
+
+              {/* Label */}
+              <span>{tab.label}</span>
+
+              {/* Optional Badge */}
+              {counts[tab.key] !== undefined && (
+                <span
+                  className={`
+                    text-xs px-2 py-0.5 rounded-full
+                    ${
+                      isActive
+                        ? "bg-blue-100 text-blue-600"
+                        : "bg-slate-200 text-slate-600"
+                    }
+                  `}
+                >
+                  {counts[tab.key]}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

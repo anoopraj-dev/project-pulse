@@ -1,5 +1,6 @@
 import { Icon } from "@iconify/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const PDFViewer = ({ file, timestamp, isRead }) => {
   const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ const PDFViewer = ({ file, timestamp, isRead }) => {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
     } catch (err) {
       console.error("Failed to open PDF", err);
-      alert("Unable to open PDF");
+      toast.error("Unable to open PDF");
     } finally {
       setLoading(false);
     }

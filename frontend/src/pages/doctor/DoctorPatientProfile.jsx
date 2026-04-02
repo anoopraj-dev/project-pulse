@@ -35,8 +35,8 @@ const DoctorPatientProfile = () => {
     });
   };
 
-  const viewMedicalRecords = (id) =>{
-    navigate(`/doctor/appointments/patient/records`)
+  const viewMedicalRecords = (id) => {
+    navigate(`/doctor/appointments/patient/records/${id}`);
   }
 
   useEffect(() => {

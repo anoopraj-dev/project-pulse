@@ -86,6 +86,21 @@ export const retryPayment = (id) => {
   return api.post(`/api/patient/payments/retry/${id}`);
 };
 
+//---------------- Patient Records -----------------
+export const fetchPatientRecords = () => {
+  return api.get('/api/patient/medical-records');
+};
+
+export const uploadPatientRecord = (formData) => {
+  return api.post('/api/patient/medical-records', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+export const deletePatientRecord = (id) => {
+  return api.delete(`/api/patient/medical-records/${id}`);
+};
+
 //------------------- Wallet -------------
 export const getPatientWallet = () => {
   return api.get("/api/patient/wallet");

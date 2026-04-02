@@ -199,6 +199,10 @@ export const initSocket = (server) => {
       socket.to(sessionId).emit("consultation:camera-state", { isOff });
     });
 
+    //---------- Submit prescription ------------
+    socket.on('prescription:submitted',({sessionId})=>{
+      socket.emit('prescription:submitted',{sessionId})
+    })
     //--------- End consultation ------------------
     socket.on("consultation:end", ({ sessionId }) => {
       if (!sessionId) return;
