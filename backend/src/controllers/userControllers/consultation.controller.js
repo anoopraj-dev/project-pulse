@@ -5,7 +5,8 @@ import Prescription from "../../models/prescription.model.js";
 import { getIO } from "../../socket.js";
 import Patient from "../../models/patient.model.js";
 import { getBrowser } from "../../config/puppeteer.js";
-
+import { sendEmail } from "../../config/nodemailer.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
 
 //----------------- Join consultation --------------------
 
@@ -18,12 +19,10 @@ export const joinConsultation = async (req, res) => {
     console.log("consultationId", consultationId);
 
     //------------ find consultation & appointment ------------
-    const consultation = await Consultation.findById(consultationId).populate(
-      "appointment",
-      "appointmentDate",
-    )
-    .populate('patient', 'name profilePicture')
-    .populate('doctor','name profilePicture');
+    const consultation = await Consultation.findById(consultationId)
+      .populate("appointment", "appointmentDate")
+      .populate("patient", "name profilePicture")
+      .populate("doctor", "name profilePicture");
 
     if (!consultation) {
       return res.status(400).json({
@@ -45,7 +44,7 @@ export const joinConsultation = async (req, res) => {
         message: "Consultation already completed",
       });
     }
-    console.log('consultation.patient',consultation.patient)
+    console.log("consultation.patient", consultation.patient);
     //------------ Authorization Check ------------
     if (
       ![
@@ -108,15 +107,15 @@ export const joinConsultation = async (req, res) => {
     });
 
     const participants = {
-      patient:{
-        name:consultation.patient.name,
-        profilePicture:consultation.patient.profilePicture,
+      patient: {
+        name: consultation.patient.name,
+        profilePicture: consultation.patient.profilePicture,
       },
-      doctor:{
-        name:consultation.doctor.name,
-        profilePicture:consultation.doctor.profilePicture 
-      }
-    }
+      doctor: {
+        name: consultation.doctor.name,
+        profilePicture: consultation.doctor.profilePicture,
+      },
+    };
 
     //------------- Response ------------
     res.status(200).json({
@@ -126,7 +125,7 @@ export const joinConsultation = async (req, res) => {
         consultationId: consultation._id,
         sessionId: consultation.sessionId,
         status: consultation.status,
-        participants
+        participants,
       },
     });
   } catch (error) {
@@ -172,7 +171,10 @@ export const endConsultation = async (req, res) => {
       });
     }
 
-    if (consultation.status !== "in-progress" && consultation.status !== "scheduled") {
+    if (
+      consultation.status !== "in-progress" &&
+      consultation.status !== "scheduled"
+    ) {
       return res.status(400).json({
         success: false,
         message: "Consultation cannot be ended",
@@ -180,11 +182,14 @@ export const endConsultation = async (req, res) => {
     }
 
     // Check if prescription exists
-    const prescription = await Prescription.findOne({ consultation: consultationId });
+    const prescription = await Prescription.findOne({
+      consultation: consultationId,
+    });
     if (!prescription) {
       return res.status(400).json({
         success: false,
-        message: "Prescription must be submitted before ending the consultation",
+        message:
+          "Prescription must be submitted before ending the consultation",
       });
     }
 
@@ -211,9 +216,11 @@ export const endConsultation = async (req, res) => {
     //----------- Update appointment status -----------
     try {
       await Appointment.findByIdAndUpdate(consultation.appointment, {
-        status: "completed"
+        status: "completed",
       });
-      console.log(`Updated appointment ${consultation.appointment} status to completed`);
+      console.log(
+        `Updated appointment ${consultation.appointment} status to completed`,
+      );
     } catch (appointmentError) {
       console.error("Error updating appointment status:", appointmentError);
     }
@@ -228,7 +235,6 @@ export const endConsultation = async (req, res) => {
     if (consultation.startTime) {
       duration = (consultation.endTime - consultation.startTime) / (1000 * 60);
     }
-    
 
     //--------- response -------------
     res.status(200).json({
@@ -259,15 +265,15 @@ export const generateConsultationPDF = async (req, res) => {
     const consultation = await Consultation.findById(id)
       .populate({
         path: "patient",
-        select: "name gender dob "
+        select: "name gender dob ",
       })
       .populate({
         path: "appointment",
-        select: "appointmentDate timeSlot reason"
+        select: "appointmentDate timeSlot reason",
       })
       .populate({
         path: "doctor",
-        select: "name"
+        select: "name",
       });
 
     if (!consultation) {
@@ -288,7 +294,9 @@ export const generateConsultationPDF = async (req, res) => {
     }
 
     // Find prescription
-    const prescription = await Prescription.findOne({ consultation: id }).populate('doctor', 'name');
+    const prescription = await Prescription.findOne({
+      consultation: id,
+    }).populate("doctor", "name");
 
     if (!prescription) {
       return res.status(404).json({ message: "Prescription not found" });
@@ -340,9 +348,9 @@ export const generateConsultationPDF = async (req, res) => {
             <h3>Consultation Details</h3>
             <div class="info-grid">
               <div class="info-item"><span class="label">Status:</span> ${consultation.status}</div>
-              <div class="info-item"><span class="label">Start Time:</span> ${consultation.startTime ? new Date(consultation.startTime).toLocaleString() : 'N/A'}</div>
-              <div class="info-item"><span class="label">End Time:</span> ${consultation.endTime ? new Date(consultation.endTime).toLocaleString() : 'N/A'}</div>
-              <div class="info-item"><span class="label">Duration:</span> ${consultation.startTime && consultation.endTime ? Math.round((consultation.endTime - consultation.startTime) / (1000 * 60)) + ' minutes' : 'N/A'}</div>
+              <div class="info-item"><span class="label">Start Time:</span> ${consultation.startTime ? new Date(consultation.startTime).toLocaleString() : "N/A"}</div>
+              <div class="info-item"><span class="label">End Time:</span> ${consultation.endTime ? new Date(consultation.endTime).toLocaleString() : "N/A"}</div>
+              <div class="info-item"><span class="label">Duration:</span> ${consultation.startTime && consultation.endTime ? Math.round((consultation.endTime - consultation.startTime) / (1000 * 60)) + " minutes" : "N/A"}</div>
             </div>
           </div>
 
@@ -354,13 +362,17 @@ export const generateConsultationPDF = async (req, res) => {
           <div class="section">
             <h3>Prescribed Medicines</h3>
             <div class="medicines">
-              ${prescription.medicines.map((med, index) => `
+              ${prescription.medicines
+                .map(
+                  (med, index) => `
                 <div class="medicine-item">
                   <div class="info-item"><span class="label">Medicine ${index + 1}:</span> ${med.medicine}</div>
                   <div class="info-item"><span class="label">Dosage:</span> ${med.dosage}</div>
-                  <div class="info-item"><span class="label">Timing:</span> ${med.timing === 'before' ? 'Before meals' : 'After meals'}</div>
+                  <div class="info-item"><span class="label">Timing:</span> ${med.timing === "before" ? "Before meals" : "After meals"}</div>
                 </div>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </div>
           </div>
 
@@ -375,28 +387,33 @@ export const generateConsultationPDF = async (req, res) => {
     // Generate PDF
     const browser = getBrowser();
     if (!browser) {
-      return res.status(500).json({ message: "PDF generation service unavailable" });
+      return res
+        .status(500)
+        .json({ message: "PDF generation service unavailable" });
     }
 
     const page = await browser.newPage();
     await page.setContent(htmlContent);
     const pdfBuffer = await page.pdf({
-      format: 'A4',
+      format: "A4",
       printBackground: true,
       margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px'
-      }
+        top: "20px",
+        right: "20px",
+        bottom: "20px",
+        left: "20px",
+      },
     });
+
     await page.close();
 
     // Set headers for PDF download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename=consultation-${id}.pdf`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename=consultation-${id}.pdf`,
+    );
     res.send(pdfBuffer);
-
   } catch (error) {
     console.error("Generate consultation PDF error:", error);
     res.status(500).json({
@@ -406,9 +423,6 @@ export const generateConsultationPDF = async (req, res) => {
   }
 };
 
-
-
-
 export const getConsultationDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -416,15 +430,15 @@ export const getConsultationDetails = async (req, res) => {
     const consultation = await Consultation.findById(id)
       .populate({
         path: "patient",
-        select: "name gender dob medical_history lifestyle_habits"
+        select: "name gender dob medical_history lifestyle_habits",
       })
       .populate({
         path: "appointment",
-        select: "appointmentDate timeSlot reason"
+        select: "appointmentDate timeSlot reason",
       })
       .populate({
         path: "doctor",
-        select: "name"
+        select: "name",
       });
 
     if (!consultation) {
@@ -436,12 +450,11 @@ export const getConsultationDetails = async (req, res) => {
       appointment: {
         date: consultation.appointment.appointmentDate,
         time: consultation.appointment.timeSlot,
-        reason: consultation.appointment.reason
+        reason: consultation.appointment.reason,
       },
       consultation: consultation,
-      doctor: consultation.doctor
+      doctor: consultation.doctor,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -457,7 +470,10 @@ export const submitPrescription = async (req, res) => {
     const doctorId = req.user.id;
 
     // Find consultation
-    const consultation = await Consultation.findById(consultationId).populate('appointment patient doctor');
+    const consultation = await Consultation.findById(consultationId)
+      .populate("appointment")
+      .populate("patient", "name email")
+      .populate("doctor", "name");
 
     if (!consultation) {
       return res.status(404).json({
@@ -493,6 +509,131 @@ export const submitPrescription = async (req, res) => {
     });
 
     await prescription.save();
+
+    //------------- generate prescription pdf -------------
+    const browser = getBrowser();
+    const page = await browser.newPage();
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Consultation Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .section { margin-bottom: 20px; }
+            .section h3 { color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .info-item { margin-bottom: 8px; }
+            .label { font-weight: bold; }
+            .medicines { margin-top: 10px; }
+            .medicine-item { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Pulse Medical Consultation Report</h1>
+            <p>Consultation ID: ${consultation._id}</p>
+          </div>
+
+          <div class="section">
+            <h3>Patient Information</h3>
+            <div class="info-grid">
+              <div class="info-item"><span class="label">Name:</span> ${consultation.patient.name}</div>
+              <div class="info-item"><span class="label">Gender:</span> ${consultation.patient.gender}</div>
+              <div class="info-item"><span class="label">Date of Birth:</span> ${new Date(consultation.patient.dob).toLocaleDateString()}</div>
+              <div class="info-item"><span class="label">Appointment Date:</span> ${new Date(consultation.appointment.appointmentDate).toLocaleDateString()}</div>
+              <div class="info-item"><span class="label">Time Slot:</span> ${consultation.appointment.timeSlot}</div>
+              <div class="info-item"><span class="label">Reason:</span> ${consultation.appointment.reason}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Doctor Information</h3>
+            <div class="info-item"><span class="label">Doctor:</span> ${consultation.doctor.name}</div>
+          </div>
+
+          <div class="section">
+            <h3>Consultation Details</h3>
+            <div class="info-grid">
+              <div class="info-item"><span class="label">Status:</span> ${consultation.status}</div>
+              <div class="info-item"><span class="label">Start Time:</span> ${consultation.startTime ? new Date(consultation.startTime).toLocaleString() : "N/A"}</div>
+              <div class="info-item"><span class="label">End Time:</span> ${consultation.endTime ? new Date(consultation.endTime).toLocaleString() : "N/A"}</div>
+              <div class="info-item"><span class="label">Duration:</span> ${consultation.startTime && consultation.endTime ? Math.round((consultation.endTime - consultation.startTime) / (1000 * 60)) + " minutes" : "N/A"}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Diagnosis</h3>
+            <p>${prescription.diagnosis}</p>
+          </div>
+
+          <div class="section">
+            <h3>Prescribed Medicines</h3>
+            <div class="medicines">
+              ${prescription.medicines
+                .map(
+                  (med, index) => `
+                <div class="medicine-item">
+                  <div class="info-item"><span class="label">Medicine ${index + 1}:</span> ${med.medicine}</div>
+                  <div class="info-item"><span class="label">Dosage:</span> ${med.dosage}</div>
+                  <div class="info-item"><span class="label">Timing:</span> ${med.timing === "before" ? "Before meals" : "After meals"}</div>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+          </div>
+
+
+          <div style="margin-top: 50px; text-align: center; font-size: 12px; color: #666;">
+            <p>This is a computer-generated report. Generated on ${new Date().toLocaleString()}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await page.setContent(htmlContent);
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
+    await page.close();
+
+    //--------------- send prescription to patient ---------------
+    const mailOptions = {
+      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+      to: consultation.patient.email,
+      subject: "Your Prescription",
+      html: emailTemplate({
+        title: "Prescription Available",
+        subtitle: `Dr. ${consultation.doctor.name}`,
+        body: `
+      <p>Hello <strong>${consultation.patient.name}</strong>,</p>
+
+      <p>Your prescription is ready.</p>
+
+      <p><strong>Diagnosis:</strong> ${diagnosis}</p>
+
+      <p>Please find the detailed prescription attached.</p>
+    `,
+        highlightText: `Prescription for consultation #${consultation._id.toString().slice(-6)}`,
+        highlightType: "success",
+      }),
+
+      attachments: [
+        {
+          filename: `prescription-${consultation._id}.pdf`,
+          content: pdfBuffer,
+        },
+      ],
+    };
+
+    sendEmail(mailOptions);
 
     res.status(201).json({
       success: true,
