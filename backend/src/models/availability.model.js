@@ -29,17 +29,6 @@ const doctorAvailabilitySchema = new mongoose.Schema(
       required: true,
     },
 
-    weekStart: { //Monday of that week
-      type: Date, 
-      required: true,
-      index: true,
-    },
-
-    weekEnd: {
-      type: Date, // Saturday of that week
-      required: true,
-      index: true,
-    },
   },
   { timestamps: true }
 );

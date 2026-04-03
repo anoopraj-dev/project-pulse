@@ -11,13 +11,13 @@ export const getAvailability = async (req, res) => {
     const formattedAvailability = availability.map((day) => ({
       date: day.date.toISOString().split("T")[0],
       slots: day.slots.map((slot) => ({
-        startTime: slot.startTime.trim(),
-        endTime: slot.endTime.trim(),
-        isBooked: slot.isBooked ?? false, // preserve isBooked
+        start: slot.startTime.trim(),
+        end: slot.endTime.trim(),
+        isBooked: slot.isBooked ?? false,
       })),
     }));
 
-    console.log(formattedAvailability)
+    console.log(formattedAvailability);
 
     res.status(200).json({
       success: true,
@@ -35,74 +35,122 @@ export const saveAvailability = async (req, res) => {
     const { id } = req.user;
     const payload = req.body;
 
-    if (!payload || payload.length === 0) {
+    if (!Array.isArray(payload) || payload.length === 0) {
       return res.status(400).json({
         success: false,
         message: "No availability provided",
       });
     }
 
-    //----------------- filter empty slot dates -----------------
-    const filtered = payload.filter((day) => day.slots && day.slots.length > 0);
+    // Group slots by date
+    const grouped = payload.reduce((acc, item) => {
+      if (!acc[item.date]) acc[item.date] = [];
+      acc[item.date].push(item);
+      return acc;
+    }, {});
 
-    //----------------- remove all existing availability (weekly snapshot logic) -----------------
-    await DoctorAvailability.deleteMany({ doctorId: id });
+    for (const date in grouped) {
+      const slotsPayload = grouped[date];
 
-    //----------------- prepare new documents -----------------
-    const documents = filtered.map((day) => {
-      const dateObj = new Date(day.date);
+      // Format slots
+      const formattedSlots = slotsPayload.map((slot) => ({
+        startTime: slot.start,
+        endTime: slot.end,
+        isBooked: false,
+      }));
 
-      // Calculate Monday of that week
-      const dayOfWeek = dateObj.getDay(); // 0 = Sunday
-      const diffToMonday = (dayOfWeek + 6) % 7;
-
-      const weekStart = new Date(dateObj);
-      weekStart.setDate(dateObj.getDate() - diffToMonday);
-      weekStart.setHours(0, 0, 0, 0);
-
-      // Saturday of that week
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 5);
-      weekEnd.setHours(23, 59, 59, 999);
-
-      const slots = day.slots.map((slot) => {
-        let startTime, endTime;
-
-        if (typeof slot === "string") {
-          [startTime, endTime] = slot.split("-").map((s) => s.trim());
-        } else if (typeof slot === "object" && slot.time) {
-          [startTime, endTime] = slot.time.split("-").map((s) => s.trim());
-        } else {
-          throw new Error("Invalid slot format");
-        }
-
-        return {
-          startTime,
-          endTime,
-          isBooked: slot.isBooked ?? false,
-        };
+      // Check existing availability
+      let availability = await DoctorAvailability.findOne({
+        doctorId: id,
+        date: new Date(date),
       });
 
-      return {
-        doctorId: id,
-        date: dateObj,
-        weekStart,
-        weekEnd,
-        slots,
-      };
-    });
+      if (availability) {
+        // Preserve already booked slots
+        const bookedSlots = availability.slots.filter((s) => s.isBooked);
 
-    //----------------- insert fresh availability -----------------
-    if (documents.length > 0) {
-      await DoctorAvailability.insertMany(documents);
+        // Filter out duplicates: don't save if slot already exists (booked or not)
+        const existingSlotKeys = availability.slots.map(
+          (s) => `${s.startTime}-${s.endTime}`
+        );
+
+        const newSlots = formattedSlots.filter(
+          (s) => !existingSlotKeys.includes(`${s.startTime}-${s.endTime}`)
+        );
+
+        // Merge booked + new unique slots
+        availability.slots = [...bookedSlots, ...availability.slots.filter(s => s.isBooked === false && !newSlots.includes(s)), ...newSlots];
+
+        await availability.save();
+      } else {
+        // Create new document
+        await DoctorAvailability.create({
+          doctorId: id,
+          date: new Date(date),
+          slots: formattedSlots,
+        });
+      }
     }
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: "Scheduled availability",
+      message: "Availability saved successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.log("saveAvailability error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// ----------------- Remove doctor unbooked slot ----------------
+export const removeAvailabilitySlot = async (req, res) => {
+  try {
+    const { id } = req.user; // doctor ID
+    const { date, start, end } = req.body;
+
+    if (!date || !start || !end) {
+      return res.status(400).json({
+        success: false,
+        message: "Date, start and end time are required",
+      });
+    }
+
+    const availability = await DoctorAvailability.findOne({
+      doctorId: id,
+      date: new Date(date),
+    });
+
+    if (!availability) {
+      return res.status(404).json({
+        success: false,
+        message: "No availability found for this date",
+      });
+    }
+
+    // Filter out the slot if it exists and is NOT booked
+    const slotIndex = availability.slots.findIndex(
+      (s) => s.startTime === start && s.endTime === end && !s.isBooked
+    );
+
+    if (slotIndex === -1) {
+      return res.status(400).json({
+        success: false,
+        message: "Slot not found or already booked",
+      });
+    }
+
+    availability.slots.splice(slotIndex, 1);
+    await availability.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Slot removed successfully",
+    });
+  } catch (error) {
+    console.log("removeAvailabilitySlot error:", error);
     res.status(500).json({
       success: false,
       message: "Server error",

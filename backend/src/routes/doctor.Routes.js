@@ -17,7 +17,7 @@ import { deleteDocuments } from "../controllers/doctorControllers/documents.cont
 import {getDoctorNotifications} from '../controllers/doctorControllers/notifications.controller.js'
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
-import { getAvailability, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
+import { getAvailability, removeAvailabilitySlot, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
 import { cancelAppointment, getAllAppointments, getDoctorAppointmentById } from "../controllers/doctorControllers/appointments.controller.js";
 import { getDoctorPaymentHistory } from "../controllers/doctorControllers/paymentHistory.controller.js";
 import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient.controller.js";
@@ -71,6 +71,7 @@ router.get('/conversations', getAllConversations)
 
 router.get('/availability',getAvailability)
 router.post('/availability',saveAvailability)
+router.patch('/availability',removeAvailabilitySlot)
 
 //------------ appointments-------------
 router.get('/appointments',getAllAppointments)
