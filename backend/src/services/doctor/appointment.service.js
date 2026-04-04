@@ -6,14 +6,14 @@ import Transaction from "../../models/transaction.model.js";
 import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import mongoose from "mongoose";
+import { createNotification } from "../user/notification.service.js";
 
 // ---------------- Get All Appointments ----------------
 export const getAllAppointmentsService = async (doctorId) => {
   const appointments = await Appointment.find({ doctor: doctorId });
 
   const now = new Date();
-
-  // Find expired appointments
+  //----------- Find expired appointments -----
   const expiredIds = appointments
     .filter((appt) => {
       if (!appt.time) return false;
@@ -31,7 +31,7 @@ export const getAllAppointmentsService = async (doctorId) => {
   if (expiredIds.length > 0) {
     await Appointment.updateMany(
       { _id: { $in: expiredIds } },
-      { $set: { status: "expired" } }
+      { $set: { status: "expired" } },
     );
   }
 
@@ -68,14 +68,15 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  let appointment, doctor, patient, patientId;
   try {
-    const appointment = await Appointment.findById(id);
+    appointment = await Appointment.findById(id);
     if (!appointment) throw new Error("Appointment not found");
 
-    const patientId = appointment.patient;
+    patientId = appointment.patient;
 
-    const patient = await Patient.findById(patientId).select("-password");
-    const doctor = await Doctor.findById(doctorId).select("-password");
+    patient = await Patient.findById(patientId).select("-password");
+    doctor = await Doctor.findById(doctorId).select("-password");
 
     if (!reason || !reason.trim()) {
       throw new Error("Cancellation reason is required");
@@ -108,7 +109,7 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
         "slots.time": appointment.timeSlot,
       },
       { $set: { "slots.$.isBooked": false } },
-      { session }
+      { session },
     );
 
     // Refund
@@ -141,7 +142,7 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
             referenceId: payment._id,
           },
         ],
-        { session }
+        { session },
       );
 
       payment.status = "refunded";
@@ -150,18 +151,32 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
 
     await session.commitTransaction();
     session.endSession();
-
-    return {
-      appointment,
-      patient,
-      doctor,
-      patientId,
-    };
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
     throw error;
   }
+
+  //-------------- Notifications---------------
+  await Promise.all([
+    createNotification({
+      userId: doctor?._id.toString(),
+      role: "doctor",
+      title: "Appointment Cancelled",
+      message: `Appointment with ${patient.name} has been cancelled`,
+    }),
+    createNotification({
+      userId: patient?._id.toString(),
+      role: "patient",
+      title: "Appointment Cancelled",
+      message: `Appointment with ${doctor.name} has been cancelled`,
+    }),
+  ]);
+
+  return {
+    appointment,
+    patient,
+    doctor,
+    patientId,
+  };
 };
-
-

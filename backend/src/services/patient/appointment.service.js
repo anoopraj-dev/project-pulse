@@ -6,8 +6,8 @@ import Payment from "../../models/payments.model.js";
 import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
 import Patient from "../../models/patient.model.js";
-import { Notification } from "../../models/notification.model.js";
 import { createConsultation } from "../consultationService.js";
+import { createNotification } from "../user/notification.service.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfoService = async (doctorId) => {
@@ -56,13 +56,9 @@ export const getBookingInfoService = async (doctorId) => {
 
 //---------------- Book Appointment ----------------
 export const bookAppointmentService = async (data, patientId) => {
-  const {
-    doctorId,
-    date,
-    time,
-    reason,
-    orderId,
-  } = data;
+  let appointment, doctor, patient;
+
+  const { doctorId, date, time, reason, orderId } = data;
 
   if (!doctorId || !date || !time || !reason) {
     throw new Error("Missing required fields");
@@ -72,8 +68,8 @@ export const bookAppointmentService = async (data, patientId) => {
     throw new Error("Invalid doctor ID");
   }
 
-  const doctor = await Doctor.findById(doctorId).select("email name");
-  const patient = await Patient.findById(patientId).select("email name");
+  doctor = await Doctor.findById(doctorId).select("email name");
+  patient = await Patient.findById(patientId).select("email name");
 
   const appointmentDate = new Date(date);
 
@@ -93,22 +89,42 @@ export const bookAppointmentService = async (data, patientId) => {
       "slots.isBooked": false,
     },
     { $set: { "slots.$.isBooked": true } },
-    { new: true }
+    { new: true },
   );
 
   if (!availabilityUpdate) {
     throw new Error("Time slot already booked or unavailable");
   }
 
-  const appointment = await Appointment.findByIdAndUpdate(
+  appointment = await Appointment.findByIdAndUpdate(
     payment.appointment._id,
     { status: "confirmed" },
-    { new: true }
+    { new: true },
   );
 
-  const consultation = await createConsultation({
+  await createConsultation({
     appointmentId: appointment._id,
   });
+
+  //-------------- Notification ------------
+  try {
+    await Promise.all([
+      createNotification({
+        userId: patient._id.toString(),
+        role: "patient",
+        title: "Appointment Confirmed",
+        message: `Your appointment with Dr. ${doctor.name} is confirmed`,
+      }),
+      createNotification({
+        userId: doctor._id.toString(),
+        role: "doctor",
+        title: "New Appointment",
+        message: `New appointment booked by ${patient.name}`,
+      }),
+    ]);
+  } catch (error) {
+    console.log("Notification failed", error);
+  }
 
   return { appointment, doctor, patient };
 };
@@ -144,11 +160,15 @@ export const cancelAppointmentService = async (id, patientId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  let appointment;
+
   try {
-    const appointment = await Appointment.findById(id);
+    appointment = await Appointment.findById(id)
+      .populate("patient", "name")
+      .populate("doctor", "name");
 
     if (!appointment) throw new Error("Appointment not found");
-    if (appointment.patient.toString() !== patientId)
+    if (appointment.patient._id.toString() !== patientId)
       throw new Error("Unauthorized action");
 
     if (appointment.status === "completed")
@@ -182,7 +202,7 @@ export const cancelAppointmentService = async (id, patientId) => {
         "slots.startTime": appointment.timeSlot,
       },
       { $set: { "slots.$.isBooked": false } },
-      { session }
+      { session },
     );
 
     const payment = await Payment.findOne({ appointment: appointment._id });
@@ -217,7 +237,7 @@ export const cancelAppointmentService = async (id, patientId) => {
             referenceId: payment._id,
           },
         ],
-        { session }
+        { session },
       );
 
       payment.status = "refunded";
@@ -226,11 +246,33 @@ export const cancelAppointmentService = async (id, patientId) => {
 
     await session.commitTransaction();
     session.endSession();
-
-    return appointment;
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
     throw err;
   }
+
+  //-------------- Notifications -------------
+  if (appointment?.patient && appointment?.doctor) {
+    try {
+      await Promise.all([
+        createNotification({
+          userId: appointment.patient._id.toString(),
+          role: "patient",
+          title: "Appointment Cancelled",
+          message: `Your appointment with Dr. ${appointment.doctor.name} has been cancelled`,
+        }),
+        createNotification({
+          userId: appointment.doctor._id.toString(),
+          role: "doctor",
+          title: "Appointment Cancelled",
+          message: `Appointment with ${appointment.patient.name} has been cancelled`,
+        }),
+      ]);
+    } catch (error) {
+      console.log("Notification failed", error);
+    }
+  }
+
+  return appointment;
 };

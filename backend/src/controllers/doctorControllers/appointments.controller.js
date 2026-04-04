@@ -1,9 +1,11 @@
-
-import { cancelAppointmentService, getAllAppointmentsService,getDoctorAppointmentByIdService } from "../../services/doctor/appointment.service.js";
+import {
+  cancelAppointmentService,
+  getAllAppointmentsService,
+  getDoctorAppointmentByIdService,
+} from "../../services/doctor/appointment.service.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
 import { sendEmail } from "../../config/nodemailer.js";
-import { getIO } from "../../socket.js";
-import { Notification } from "../../models/notification.model.js";
+import { createNotification } from "../../services/user/notification.service.js";
 
 export const getAllAppointments = async (req, res) => {
   try {
@@ -85,27 +87,6 @@ export const cancelAppointment = async (req, res) => {
       sendEmail(patientMailOptions),
       sendEmail(doctorMailOptions),
     ]);
-
-    // -------- Notifications --------
-    const io = getIO();
-
-    const patientNotification = await Notification.create({
-      title: "Appointment Cancelled",
-      message: `Your appointment with Dr. ${doctor.name} has been cancelled`,
-      recipient: patientId,
-      role: "patient",
-    });
-
-    io.to(patientId.toString()).emit("notification:new", patientNotification);
-
-    const doctorNotification = await Notification.create({
-      title: "Appointment Cancelled",
-      message: `Your appointment with ${patient.name} has been cancelled.`,
-      recipient: doctorId,
-      role: "doctor",
-    });
-
-    io.to(doctorId.toString()).emit("notification:new", doctorNotification);
 
     return res.status(200).json({
       success: true,

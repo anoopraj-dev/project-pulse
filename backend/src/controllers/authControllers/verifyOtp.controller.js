@@ -6,8 +6,8 @@ import {
   resendOtpService,
 } from "../../services/auth/otp.service.js";
 
-import { sendEmail } from "../../config/nodemailer.js";
-import { emailTemplate } from "../../utils/emailTemplate.js";
+import { sendOtpEmailService } from "../../services/user/email.service.js";
+import { EMAIL_TYPES } from "../../constants/email.constants.js";
 
 // ---------------- VERIFY OTP ----------------
 export const verifyOtp = async (req, res) => {
@@ -53,17 +53,11 @@ export const resetPassword = async (req, res) => {
       req.session
     );
 
-    await sendEmail({
-      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-      to: req.body.email,
-      subject: "Reset Password OTP",
-      html: emailTemplate({
-        title: "Reset Password",
-        subtitle: "Set Your New Password",
-        body: `<p>Hello ${user.name || ""},</p>`,
-        highlightText: otpCode,
-        highlightType: "warning",
-      }),
+    await sendOtpEmailService({
+      to:user.email,
+      name:user.name,
+      otp:otpCode,
+      ...EMAIL_TYPES.RESET_PASSWORD
     });
 
     return res.status(200).json({
@@ -110,18 +104,12 @@ export const resendOtp = async (req, res) => {
       req.session
     );
 
-    await sendEmail({
-      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-      to: req.body.email,
-      subject: "Resend OTP",
-      html: emailTemplate({
-        title: "OTP Verification",
-        subtitle: "Your New OTP",
-        body: `<p>Hello ${user?.name || ""},</p>`,
-        highlightText: otpCode,
-        highlightType: "info",
-      }),
-    });
+    await sendOtpEmailService({
+      to:user.email,
+      name:user.name,
+      otp:otpCode,
+      ...EMAIL_TYPES.RESEND_OTP
+    })
 
     return res.status(200).json({
       success: true,

@@ -1,40 +1,14 @@
 
 import { signupService } from "../../services/auth/signup.service.js";
-import { sendEmail } from "../../config/nodemailer.js";
-import { emailTemplate } from "../../utils/emailTemplate.js";
-import { getIO } from "../../socket.js";
 
 export const userSignup = async (req, res) => {
   try {
-    const io = getIO();
-
-    const { user, otpCode, expiryTime, notification } =
+    const { user,expiryTime} =
       await signupService({
         ...req.body,
         registrationId: req.registrationId,
       });
 
-    // -------- Emit notification --------
-    io.to("role:admin").emit("notification:new", notification);
-
-    // -------- Send Email --------
-    const mailOptions = {
-      from: `"PULSE360" <${process.env.GMAIL_USER}>`,
-      to: user.email,
-      subject: "Email Verification – OTP",
-      html: emailTemplate({
-        title: "Email Verification",
-        subtitle: "Verify Your Account",
-        body: `
-          <p>Hello <strong>${user.name}</strong>,</p>
-          <p>Thank you for signing up. Please verify your email with the OTP below:</p>
-        `,
-        highlightText: otpCode,
-        highlightType: "info",
-      }),
-    };
-
-    await sendEmail(mailOptions);
 
     // -------- Session --------
     req.session.OTP = {

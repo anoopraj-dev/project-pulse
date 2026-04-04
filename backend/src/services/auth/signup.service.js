@@ -3,7 +3,9 @@ import Doctor from "../../models/doctor.model.js";
 import bcrypt from "bcryptjs";
 import { generateOtp } from "../../utils/otpGenerator.js";
 import Otp from "../../models/otps.model.js";
-import { Notification } from "../../models/notification.model.js";
+import { createNotification } from "../user/notification.service.js";
+import { sendOtpEmailService } from "../user/email.service.js";
+import { EMAIL_TYPES } from "../../constants/email.constants.js";
 
 export const signupService = async (payload) => {
   const {
@@ -58,17 +60,15 @@ export const signupService = async (payload) => {
     });
   }
 
-  // -------- Notification --------
-  const notification = await Notification.create({
-    title: "New User Joined",
-    message:
-      role === "patient"
-        ? `${user.name} has registered!`
-        : `Dr. ${user.name} has registered!`,
-    recipient: "admin",
-    role: "admin",
-    read: false,
-  });
+  //------------- Notification ----------
+  await createNotification({
+    userId:'admin',
+    role:'admin',
+    title:'New user joined',
+    message: role === 'patient'
+      ?`${user.name} has registered`
+      :`Dr. ${user.name} has registered`
+  }) 
 
   // -------- OTP --------
   const otpCode = generateOtp();
@@ -80,10 +80,16 @@ export const signupService = async (payload) => {
     expiresAt: expiryTime,
   });
 
+  await sendOtpEmailService({
+    to:user.email,
+    name:user.name,
+    otp:otpCode,
+    ...EMAIL_TYPES.VERIFY_EMAIL
+  })
+
   return {
     user,
     otpCode,
     expiryTime,
-    notification,
   };
 };
