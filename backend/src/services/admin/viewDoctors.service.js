@@ -3,56 +3,54 @@ import { Notification } from "../../models/notification.model.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import { getIO } from "../../socket.js";
+import { sendEmailService } from "../user/email.service.js";
+import { EMAIL_TYPES } from "../../constants/email.constants.js";
+import { createNotification } from "../user/notification.service.js";
 
-//---------------- Send Notification & Email -------------
-const notifyDoctor = async (doctorId, title, message, emailData = null) => {
-  const io = getIO();
-  const notification = await Notification.create({
-    title,
-    message,
-    recipient: doctorId,
-    role: "doctor",
-    read: false,
-  });
+// //---------------- Send Notification & Email -------------
+// const notifyDoctor = async (doctorId, title, message, emailData = null) => {
+//   const io = getIO();
+//   const notification = await Notification.create({
+//     title,
+//     message,
+//     recipient: doctorId,
+//     role: "doctor",
+//     read: false,
+//   });
 
-  io.to(doctorId.toString()).emit("notification:new", notification);
+//   io.to(doctorId.toString()).emit("notification:new", notification);
 
-  if (emailData) {
-    try {
-      await sendEmail(emailData);
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  }
-};
+//   if (emailData) {
+//     try {
+//       await sendEmail(emailData);
+//     } catch (error) {
+//       console.error("Error sending email:", error);
+//     }
+//   }
+// };
 
 //---------------- Approve Doctor ------------------------
 export const approveDoctorService = async (doctorId) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
     { status: "approved", resubmissionApproved: false },
-    { new: true }
+    { new: true },
   );
 
   if (!doctor) throw new Error("Doctor not found");
 
-  const mailOptions = {
-    from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+  await sendEmailService({
     to: doctor.email,
-    subject: "Profile Approved – Welcome to Pulse360",
-    html: emailTemplate({
-      title: "Profile Approved",
-      subtitle: "Doctor Profile Review",
-      body: `
-        <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
-        <p>Your profile has been <strong>approved</strong> and is now visible on the platform.</p>
-      `,
-      highlightText: "Your account is now active",
-      highlightType: "success",
-    }),
-  };
+    name: doctor.name,
+    role: "doctor",
+    ...EMAIL_TYPES.DOCTOR_APPROVED,
+  });
 
-  await notifyDoctor(doctor._id, "Profile Approved", "Your profile has been approved by admin", mailOptions);
+  await createNotification({
+    userId: doctorId?.toString(),
+    title: "Profile Approved",
+    message: "Your profile have been approved",
+  });
 
   return doctor;
 };
@@ -61,29 +59,29 @@ export const approveDoctorService = async (doctorId) => {
 export const rejectDoctorService = async (doctorId, reason) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
-    { status: "rejected", rejectionReason: reason, resubmissionRequested: false },
-    { new: true }
+    {
+      status: "rejected",
+      rejectionReason: reason,
+      resubmissionRequested: false,
+    },
+    { new: true },
   );
 
   if (!doctor) throw new Error("Doctor not found");
 
-  const mailOptions = {
-    from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+  await sendEmailService({
     to: doctor.email,
-    subject: "Profile Rejected – Action Required",
-    html: emailTemplate({
-      title: "Profile Rejected",
-      subtitle: "Doctor Profile Review",
-      body: `
-        <p>Hello <strong>Dr. ${doctor.name}</strong>,</p>
-        <p>Your profile has been <strong>rejected</strong>.</p>
-      `,
-      highlightText: reason,
-      highlightType: "error",
-    }),
-  };
+    name: doctor.name,
+    role: "doctor",
+    highlightText: reason,
+    ...EMAIL_TYPES.DOCTOR_REJECTED,
+  });
 
-  await notifyDoctor(doctor._id, "Profile Rejected", "Your profile has been rejected by admin", mailOptions);
+  await createNotification({
+    userId: doctorId.toString(),
+    title: "Profile Rejected",
+    message: "Your profile have been rejected, check your email for details",
+  });
 
   return doctor;
 };
@@ -93,26 +91,24 @@ export const blockDoctorService = async (doctorId, reason) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
     { status: "blocked", isBlocked: true, blockedReason: reason },
-    { new: true }
+    { new: true },
   );
 
   if (!doctor) throw new Error("Doctor not found");
 
-  const mailOptions = {
-    from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+  await sendEmailService({
     to: doctor.email,
-    subject: "Profile Blocked – Action Required",
-    html: emailTemplate({
-      title: "Profile Blocked",
-      subtitle: "Doctor Profile Review",
-      body: `<p>Your profile has been blocked for violating terms and conditions.</p>`,
-      highlightText: reason,
-      highlightType: "error",
-    }),
-  };
+    name: doctor.name,
+    role: "doctor",
+    highlightText: reason,
+    ...EMAIL_TYPES.DOCTOR_BLOCKED,
+  });
 
-  await notifyDoctor(doctor._id, "Profile Blocked", "Your profile has been blocked", mailOptions);
-
+  await createNotification({
+    userId: doctorId?.toString(),
+    title: "Profile Blocked",
+    message: "Your profile has been blocked, Check your mail for more details",
+  });
   return doctor;
 };
 
@@ -121,33 +117,37 @@ export const unblockDoctorService = async (doctorId) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
     { status: "pending", isBlocked: false, blockedReason: "" },
-    { new: true }
+    { new: true },
   );
 
   if (!doctor) throw new Error("Doctor not found");
 
-  const mailOptions = {
-    from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+  await sendEmailService({
     to: doctor.email,
-    subject: "Profile Unblocked",
-    html: emailTemplate({
-      title: "Profile Unblocked",
-      subtitle: "Doctor Profile Review",
-      body: `<p>Your profile has been <strong>unblocked</strong> and is awaiting admin approval.</p>`,
-      highlightText: "Profile unblocked and waiting admin approval",
-      highlightType: "success",
-    }),
-  };
+    name: doctor.name,
+    role: "doctor",
+    ...EMAIL_TYPES.DOCTOR_UNBLOCKED,
+  });
 
-  await notifyDoctor(doctor._id, "Profile Unblocked", "Your profile has been unblocked", mailOptions);
-
+  await createNotification({
+    userId: doctorId.toString(),
+    title: "Profile Unblocked",
+    message: "Your profile has been unblocked",
+  });
   return doctor;
 };
 
 //---------------- Revoke Doctor Status -----------------
 export const revokeDoctorStatusService = async (doctorId, status) => {
-  const allowedStatuses = ["pending", "approved", "rejected", "blocked", "resubmit"];
-  if (!allowedStatuses.includes(status)) throw new Error("Invalid status value");
+  const allowedStatuses = [
+    "pending",
+    "approved",
+    "rejected",
+    "blocked",
+    "resubmit",
+  ];
+  if (!allowedStatuses.includes(status))
+    throw new Error("Invalid status value");
 
   const doctor = await Doctor.findById(doctorId);
   if (!doctor) throw new Error("Doctor not found");
@@ -160,21 +160,19 @@ export const revokeDoctorStatusService = async (doctorId, status) => {
 
   await doctor.save();
 
-  const mailOptions = {
-    from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+  await sendEmailService({
     to: doctor.email,
-    subject: "Profile Status Updated",
-    html: emailTemplate({
-      title: "Profile Status Updated",
-      subtitle: "Doctor Profile Review",
-      body: `<p>Your profile status has been updated to <strong>${status.toUpperCase()}</strong>.</p>`,
-      highlightText: `Current Status: ${status}`,
-      highlightType: status === "approved" ? "success" : "warning",
-    }),
-  };
+    name: doctor.name,
+    role: "doctor",
+    highlightText: `Status:${status}`,
+    ...EMAIL_TYPES.DOCTOR_STATUS_UPDATED,
+  });
 
-  await notifyDoctor(doctor._id, "Profile Status Revoked", "Your profile status has been updated", mailOptions);
-
+  await createNotification({
+    userId: doctorId.toString(),
+    title: "Profile Status Update",
+    message: "Your profile status has been updated, check mail for more info",
+  });
   return doctor;
 };
 

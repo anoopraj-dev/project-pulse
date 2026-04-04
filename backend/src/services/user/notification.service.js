@@ -28,11 +28,16 @@ export const getNotifications = async (userId, role) => {
   return Notification.find({ recipient: userId, role }).sort({ createdAt: -1 });
 };
 
-//------------------- MARK ALL AS READ ----------------
+
 export const markAllRead = async (userId, role) => {
-  const result = await Notification.updateMany(
-    { recipient: userId, role, read: false },
-    { $set: { read: true } }
-  );
+  const filter =
+    role === "admin"
+      ? { role, read: false } // admins use role-based
+      : { recipient: userId, role, read: false }; //  users use personal
+
+  const result = await Notification.updateMany(filter, {
+    $set: { read: true },
+  });
+
   return result.modifiedCount;
 };
