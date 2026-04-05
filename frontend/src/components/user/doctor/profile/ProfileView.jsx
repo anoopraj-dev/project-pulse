@@ -5,8 +5,9 @@ import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
 import AvailabilityPreview from "../availability/AvailabilityPreview";
+import ActionButton from "@/components/shared/components/ActionButton";
 
-// ─── Card shell ───────────────────────────────────────────────────────────────
+//------------- Card Shell --------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}
@@ -45,7 +46,7 @@ const CardHeader = ({
   </div>
 );
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+// ------------ MAIN COMPONENT ------------------
 const ProfileView = ({
   viewer,
   user,
@@ -94,7 +95,7 @@ const ProfileView = ({
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="w-full px-4 py-6 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* ── LEFT COLUMN ─────────────────────────────────────────────────── */}
+          {/* -------------- LEFT COLUMN ---------------*/}
           <div className="lg:col-span-1 space-y-4">
             <Card>
               <div className="p-5 space-y-5">
@@ -155,160 +156,197 @@ const ProfileView = ({
                   </div>
                 </div>
 
-                {/* ── ACTION GRID ── */}
-                <div className="grid grid-cols-3 gap-2">
+                {/*---------- ACTION GRID ----------*/}
+                <div className="flex gap-2">
                   {/* DOCTOR */}
                   {viewer === "doctor" && (
                     <>
-                      <button
-                        onClick={() => handleAction("edit", onEdit)}
-                        disabled={!canEdit}
-                        className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        <Icon icon="mdi:pencil" className="w-4 h-4" />
-                        Edit
-                      </button>
 
-                      <button
+                       <ActionButton
+                        action="edit"
+                        activeAction={activeAction}
+                        icon="mdi:pencil"
+                        text="Edit"
+                        onClick={() => handleAction("edit", onEdit)}
+                        disabled={
+                          !(
+                            user?.status === "approved" ||
+                            user?.status === "resubmit"
+                          )
+                        }
+                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                      />
+
+                      <ActionButton
+                        action="certificate"
+                        activeAction={activeAction}
+                        icon="mdi:document"
+                        text="Docs"
                         onClick={() =>
                           handleAction("certificate", onCerticateUpload)
                         }
-                        disabled={!canEdit}
-                        className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                      >
-                        <Icon
-                          icon="mdi:file-certificate-outline"
-                          className="w-4 h-4"
-                        />
-                        Docs
-                      </button>
+                        disabled={
+                          !(
+                            user?.status === "approved" ||
+                            user?.status === "resubmit"
+                          )
+                        }
+                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                      />
 
-                      <button
+                      <ActionButton
+                        action="availability"
+                        activeAction={activeAction}
+                        icon="mdi:calendar"
+                        text="Slots"
                         onClick={() =>
                           handleAction("availability", onManageAvailability)
                         }
-                        disabled={!canEdit}
-                        className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                      >
-                        <Icon icon="mdi:calendar-clock" className="w-4 h-4" />
-                        Slots
-                      </button>
+                        disabled={
+                          !(
+                            user?.status === "approved" ||
+                            user?.status === "resubmit"
+                          )
+                        }
+                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                      />
 
                       {user?.status === "rejected" && (
-                        <button
+                       
+                         <ActionButton
+                          action="request-resubmit"
+                          activeAction={activeAction}
+                          icon="mdi:document"
+                          text="Re-Submission"
                           onClick={() =>
                             handleAction(
                               "request-resubmit",
                               onResubmissionRequest,
                             )
                           }
-                          className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                        >
-                          <Icon icon="mdi:send-outline" className="w-4 h-4" />
-                          Request Re-Submission
-                        </button>
+                          className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                        />
                       )}
 
                       {user?.status === "resubmit" && (
-                        <button
+                     
+                         <ActionButton
+                          action="resubmit"
+                          activeAction={activeAction}
+                          icon="mdi:document"
+                          text="ReSubmit"
                           onClick={() =>
                             handleAction("resubmit", onResubmission)
                           }
-                          className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                        >
-                          <Icon icon="mdi:refresh" className="w-4 h-4" />
-                          Resubmit Profile
-                        </button>
+                          className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                        />
                       )}
                     </>
                   )}
 
                   {/* PATIENT */}
                   {viewer === "patient" && (
-                    <button
-                      onClick={() =>
-                        handleAction("book", () => onBookAppointment(user?._id))
-                      }
-                      className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                    >
-                      <Icon icon="mdi:calendar-check" className="w-4 h-4" />
-                      Book Appointment
-                    </button>
+                 
+                     <ActionButton
+                        action="book"
+                        activeAction={activeAction}
+                        icon="mdi:calendar-check"
+                        text="Book Appointment"
+                        onClick={() =>
+                          handleAction("book", () =>
+                            onBookAppointment(user?._id),
+                          )
+                        }
+                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                      />
                   )}
 
                   {/* ADMIN */}
                   {viewer === "admin" && (
                     <>
-                      <button
+                     
+                      <ActionButton
+                        action="documents"
+                        activeAction={activeAction}
+                        icon="mdi:file-document"
+                        text="Docs"
                         onClick={() =>
                           handleAction("documents", () => onVerify(user?._id))
                         }
-                        className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                      >
-                        <Icon
-                          icon="mdi:file-document-outline"
-                          className="w-4 h-4"
-                        />
-                        Docs
-                      </button>
+                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                      />
 
                       {user?.status === "pending" &&
                         !user?.isBlocked &&
                         !user?.resubmission && (
                           <>
-                            <button
+  
+                            <ActionButton
+                              action="approve"
+                              activeAction={activeAction}
+                              icon="mdi:check-bold"
+                              text="Approve"
+                              loadingText="Approving..."
                               onClick={() =>
                                 handleAction("approve", () =>
                                   onApprove(user?._id),
                                 )
                               }
-                              className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                            >
-                              <Icon icon="mdi:check-bold" className="w-4 h-4" />
-                              Approve
-                            </button>
+                              className="bg-green-500 hover:bg-green-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                            />
 
-                            <button
+                             <ActionButton
+                              action="reject"
+                              activeAction={activeAction}
+                              icon="mdi:close-bold"
+                              text="Reject"
+                              loadingText="Rejecting..."
                               onClick={() => handleAction("reject", onReject)}
-                              className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                            >
-                              <Icon icon="mdi:close-bold" className="w-4 h-4" />
-                              Reject
-                            </button>
+                              className="bg-red-500 hover:bg-red-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                            />
                           </>
                         )}
 
                       {user?.status === "approved" && !user?.isBlocked && (
-                        <button
+                    
+                         <ActionButton
+                          action="block"
+                          activeAction={activeAction}
+                          icon="mdi:block-helper"
+                          text="Block"
+                          loadingText="Blocking..."
                           onClick={() => handleAction("block", onBlock)}
-                          className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                        >
-                          <Icon icon="mdi:block-helper" className="w-4 h-4" />
-                          Block Doctor
-                        </button>
+                          className="bg-red-500 hover:bg-red-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                        />
                       )}
 
                       {user?.status === "requestedResubmission" &&
                         !user?.isBlocked && (
-                          <button
+                        
+                           <ActionButton
+                            action="revoke"
+                            activeAction={activeAction}
+                            icon="mdi:block-helper"
+                            text="Revoke Status"
+                            loadingText="Revoking..."
                             onClick={() =>
                               handleAction("revoke", onRevokeStatus)
                             }
-                            className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                          >
-                            <Icon icon="mdi:undo" className="w-4 h-4" />
-                            Revoke Status
-                          </button>
+                            className="bg-red-500 hover:bg-red-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                          />
                         )}
 
                       {user?.isBlocked && (
-                        <button
+                     
+                        <ActionButton
+                          action="unblock"
+                          activeAction={activeAction}
+                          icon="mdi:block-helper"
+                          text="Unblock"
+                          loadingText="Unblocking..."
                           onClick={() => handleAction("unblock", onUnblock)}
-                          className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                        >
-                          <Icon icon="mdi:lock-open" className="w-4 h-4" />
-                          Unblock Doctor
-                        </button>
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                        />
                       )}
                     </>
                   )}
@@ -340,7 +378,7 @@ const ProfileView = ({
             </Card>
           </div>
 
-          {/* ── RIGHT COLUMN ────────────────────────────────────────────────── */}
+          {/* ------------- RIGHT COLUMN -------------*/}
           <div className="lg:col-span-2 space-y-4">
             {/* Availability first */}
             {(viewer === "doctor" || viewer === "patient") && (

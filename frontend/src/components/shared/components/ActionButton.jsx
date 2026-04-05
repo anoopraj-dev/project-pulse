@@ -17,7 +17,7 @@ const ActionButton = ({
       onClick={onClick}
       disabled={disabled || isLoading}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-xl transition
+        inline-flex w-fit items-center gap-2 px-4 py-2 rounded-xl transition
         text-white
         disabled:opacity-70 disabled:cursor-not-allowed
         ${className}

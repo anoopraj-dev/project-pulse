@@ -5,8 +5,9 @@ import { useParams } from "react-router-dom";
 import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
 import { useUser } from "@/contexts/UserContext";
+import ActionButton from "@/components/shared/components/ActionButton";
 
-// ─── Shared Card Components (same as doctor) ─────────────────
+// ---------------- Shared Card Components --------------
 const Card = ({ children, className = "" }) => (
   <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}>
     {children}
@@ -59,10 +60,10 @@ const ProfileView = ({
       <div className="w-full px-4 py-6 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* ── LEFT COLUMN ── */}
+          {/* ----------- LEFT COLUMN ----------- */}
           <div className="lg:col-span-1 space-y-4">
 
-            {/* PROFILE CARD */}
+            {/* ----------- PROFILE CARD ----------------*/}
             <Card>
               <div className="p-5 space-y-5">
 
@@ -101,40 +102,48 @@ const ProfileView = ({
                   </div>
                 </div>
 
-                {/* ACTION GRID (same style as doctor) */}
-                <div className="grid grid-cols-3 gap-2">
+                {/*----------- ACTION GRID -------------- */}
+                <div className="flex gap-2">
 
                   {!isProfileReview && !isDoctorViewing && (
                     <>
-                      <button
+                       <ActionButton
+                        action="edit"
                         onClick={onEdit}
-                        className="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                      >
-                        <Icon icon="mdi:pencil" className="w-4 h-4" />
-                        Edit
-                      </button>
-
+                        icon="mdi:pencil"
+                        text="Edit"
+                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                        disabled={user?.status === "blocked"}
+                      />
                     </>
                   )}
 
                   {isDoctorViewing && (
-                    <button
-                      onClick={() => onViewMedicalRecords(user?._id)}
-                      className="col-span-3 flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                    >
-                      <Icon icon="mdi:folder-account" className="w-4 h-4" />
-                      Records
-                    </button>
+
+                    <ActionButton
+                      action="viewMedicalRecords"
+                      onClick={()=>onViewMedicalRecords(user?._id)}
+                      icon="mdi:folder-account"
+                      text="Records"
+                      className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                    />
                   )}
 
                   {!isDoctorViewing && isProfileReview && (
-                    <button
+                
+                     <ActionButton
+                      action={user?.status === "active" ? "block" : "unblock"}
                       onClick={user?.status === "active" ? onBlock : onUnblock}
-                      className="col-span-3 flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-600 text-white text-[11px] hover:bg-blue-700"
-                    >
-                      <Icon icon="mdi:block-helper" className="w-4 h-4" />
-                      {user?.status === "active" ? "Block" : "Unblock"}
-                    </button>
+                      icon="mdi:block-helper"
+                      text={
+                        user?.status === "active" ? "Block" : "Unblock"
+                      }
+                      className={`py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium ${
+                        user?.status === "active"
+                          ? "bg-red-500 hover:bg-red-600 text-white"
+                          : "bg-emerald-500 hover:bg-emerald-600 text-white"
+                      }`}
+                    />
                   )}
                 </div>
               </div>
