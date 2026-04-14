@@ -13,7 +13,6 @@ const ConsultationVideo = ({
   isCameraOff,
   remoteVideoOff,
   remoteMuted,
-  endCallDisabled = false,
   participants,
   mode,
   setMode,
@@ -22,21 +21,32 @@ const ConsultationVideo = ({
 }) => {
   const [callDuration, setCallDuration] = useState(0);
 
-  useEffect(() => {
-    let interval;
+  const startTimeRef = useRef(null);
 
-    if (status === "connected") {
-      interval = setInterval(() => {
-        setCallDuration((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setCallDuration(0);
+  useEffect(() => {
+    if (status !== "connected") return;
+
+    const key = `consultation_start_${participants?.consultationId}`;
+
+    let startTime = sessionStorage.getItem(key);
+
+    //  fallback from backend
+    if (!startTime && participants?.startTime) {
+      startTime = new Date(participants.startTime).getTime();
+      sessionStorage.setItem(key, startTime);
     }
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [status]);
+    if (!startTime) return;
+
+    startTimeRef.current = Number(startTime);
+
+    const interval = setInterval(() => {
+      const diff = Math.floor((Date.now() - startTimeRef.current) / 1000);
+      setCallDuration(diff);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [status, participants?.startTime, participants?.consultationId]);
   const isConnected = status === "connected";
 
   const fileInputRef = useRef(null);
@@ -139,31 +149,30 @@ const ConsultationVideo = ({
       {isConnected && (
         <div className="absolute top-0 left-0 right-0 z-10 p-4 flex items-center justify-between">
           <div
-  className="flex flex-col items-start gap-1 rounded-2xl px-4 py-2.5"
-  style={{
-    background: "rgba(0,0,0,0.45)",
-    backdropFilter: "blur(16px)",
-  }}
->
-  {/* Live status */}
-  <div className="flex items-center gap-2.5">
-    <span className="relative flex h-2 w-2">
-      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-    </span>
-    <span className="text-white/80 text-sm font-light tracking-wide">
-      Live consultation
-    </span>
-  </div>
+            className="flex flex-col items-start gap-1 rounded-2xl px-4 py-2.5"
+            style={{
+              background: "rgba(0,0,0,0.45)",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            {/* Live status */}
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span className="text-white/80 text-sm font-light tracking-wide">
+                Live consultation
+              </span>
+            </div>
 
- 
-  {remoteMuted && !remoteVideoOff && (
-    <div className="flex items-center gap-2 text-xs text-red-400">
-      <Icon icon="mdi:microphone-off" className="text-sm" />
-      <span>Muted</span>
-    </div>
-  )}
-</div>
+            {remoteMuted && !remoteVideoOff && (
+              <div className="flex items-center gap-2 text-xs text-red-400">
+                <Icon icon="mdi:microphone-off" className="text-sm" />
+                <span>Muted</span>
+              </div>
+            )}
+          </div>
           <div
             className="rounded-2xl px-4 py-2.5 text-white/60 text-sm font-mono"
             style={{
@@ -189,16 +198,14 @@ const ConsultationVideo = ({
             {formattedTime(callDuration)}
           </div>
           {/* -------- patient panel button -------- */}
-          {
-            role === 'doctor' && (
-              <button
-            onClick={onTogglePatientPanel}
-            className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm"
-          >
-            View more
-          </button>
-            )
-          }
+          {role === "doctor" && (
+            <button
+              onClick={onTogglePatientPanel}
+              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm"
+            >
+              View more
+            </button>
+          )}
         </div>
       )}
 
@@ -296,16 +303,15 @@ const ConsultationVideo = ({
           </button>
 
           {/* End Call */}
+          {/* End Call */}
           <button
             onClick={onEndCall}
-            disabled={endCallDisabled}
-            className={`flex flex-col items-center gap-1 group ${endCallDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            className="flex flex-col items-center gap-1 group"
           >
-            <div
-              className={`w-14 h-12 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 transition-all duration-150 flex items-center justify-center shadow-lg shadow-red-500/30 ${endCallDisabled ? "hover:bg-red-500" : ""}`}
-            >
+            <div className="w-14 h-12 rounded-xl bg-red-500 hover:bg-red-600 active:scale-95 transition-all duration-150 flex items-center justify-center shadow-lg shadow-red-500/30">
               <Icon icon="mdi:phone-hangup" className="text-white text-xl" />
             </div>
+
             <span className="text-[10px] text-white/40 group-hover:text-red-400 transition-colors tracking-wide">
               End
             </span>

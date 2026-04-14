@@ -7,6 +7,7 @@ import { connectDB } from './db/db.js';
 import './config/redis.js'
 import { initBrowser } from './config/puppeteer.js';
 
+import './cron/appointmentExpiry.js'
 
 const port = process.env.PORT || 5000;
 const server = createServer(app);

@@ -7,7 +7,7 @@ import { useVideoSession } from "@/hooks/useVideoSession";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useCamera } from "@/hooks/useCamera";
 import { useVideoProcessor } from "@/hooks/useVideoProcessor";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { fetchPatientStats, endConsultation, submitPrescription } from "@/api/doctor/doctorApis";
 import toast from "react-hot-toast";
 import { socket } from "@/socket";
@@ -31,8 +31,6 @@ const DoctorConsultationPage = () => {
   const [activeTab, setActiveTab] = useState("records");
 
   // -------- patient info (prefilled) --------
-
- console.log(Array.isArray(participants))
   const patient = participants?.patient;
 
   const patientName = patient?.name || "Unknown";
@@ -53,6 +51,9 @@ const DoctorConsultationPage = () => {
     bgImage
   );
 
+  const finalStream = processedStream ?? rawStream;
+  
+
   const {
     status,
     setStatus,
@@ -68,7 +69,7 @@ const DoctorConsultationPage = () => {
   } = useVideoSession(
     sessionId,
     "doctor",
-    processedStream || rawStream,
+    finalStream,
     user
   );
 
@@ -79,22 +80,10 @@ const DoctorConsultationPage = () => {
     }
   }, [status, navigate]);
 
-  // Cleanup camera when component unmounts or consultation ends
-  useEffect(() => {
-    return () => {
-      if (rawStream) {
-        rawStream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [rawStream]);
-
-  //fetch patient stats 
-
   useEffect(() => {
   const getData = async () => {
     try {
       const res = await fetchPatientStats(sessionId); 
-      console.log('response from fetchPatientStats:', res);
       setPatientData(res.data);
     } catch (err) {
       console.error(err);
@@ -116,13 +105,6 @@ const DoctorConsultationPage = () => {
     }
 
     try {
-      console.log("Final Prescription:", {
-        patientName,
-        reason,
-        appointmentInfo,
-        ...form,
-      });
-
       // ------- end consultation-------------
       await endConsultation(sessionId);
 
@@ -146,11 +128,7 @@ const DoctorConsultationPage = () => {
       navigate(`/doctor/appointments/${appointmentId.toString()}`);
     } catch (error) {
       console.error("Error ending consultation:", error);
-      toast.error("Failed to end consultation. Please try again.");
-      // Still end the call even if API fails
-      endCall();
-      setStatus("ended");
-      navigate("/doctor/appointments");
+      toast.error(error?.response?.data.message);
     }
   };
 
@@ -160,6 +138,8 @@ const DoctorConsultationPage = () => {
       await submitPrescription(sessionId, form);
       toast.success("Prescription submitted successfully!");
       setPrescriptionSubmitted(true);
+
+      console.log('sessionId',sessionId)
 
       socket.emit('prescription:submitted',{
         sessionId

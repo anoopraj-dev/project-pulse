@@ -6,6 +6,7 @@ import Transaction from "../../models/transaction.model.js";
 import Admin from "../../models/admin.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
+import { validateAdvanceBooking } from "../../utils/timeValidation.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -19,6 +20,8 @@ export const createOrderService = async (userId, body) => {
   if (!doctorId || !date || !time || !serviceType || !reason) {
     throw new Error("Missing booking fields");
   }
+
+  validateAdvanceBooking(date, time, 1);
 
   const slot = await DoctorAvailability.findOne({
     doctorId,
@@ -88,7 +91,7 @@ export const verifyPaymentService = async (body) => {
       method: "razorpay",
       notes: `Paid via ${paymentDetails.method}`,
     },
-    { new: true }
+    { new: true },
   );
 
   if (!payment) throw new Error("Payment record not found");
@@ -107,7 +110,10 @@ export const updatePaymentStatusService = async (body) => {
     return { alreadyProcessed: true };
   }
 
-  if (status === "verified" && !["created", "failed"].includes(payment.status)) {
+  if (
+    status === "verified" &&
+    !["created", "failed"].includes(payment.status)
+  ) {
     throw new Error("Invalid state transition");
   }
 
@@ -163,11 +169,22 @@ export const retryPaymentService = async (paymentId) => {
   const appointment = await Appointment.findById(payment.appointment);
 
   const now = new Date();
-  const diffInHours =
-    (now - new Date(payment.createdAt)) / (1000 * 60 * 60);
+  const diffInHours = (now - new Date(payment.createdAt)) / (1000 * 60 * 60);
 
-  if (diffInHours > 24) {
-    throw new Error("Retry window expired (24 hours)");
+  if (diffInHours > 6) {
+    throw new Error("Retry window expired (6 hours)");
+  }
+
+  // Appointment validity check
+  const [hours, minutes] = appointment.timeSlot.split(":").map(Number);
+
+  const appointmentDateTime = new Date(appointment.appointmentDate);
+  appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+  const diff = appointmentDateTime - now;
+
+  if (diff <= 60 * 60 * 1000) {
+    throw new Error("Cannot retry payment for past appointment");
   }
 
   const newOrder = await razorpay.orders.create({
@@ -196,15 +213,9 @@ export const retryPaymentService = async (paymentId) => {
 
 // -------- WALLET PAYMENT ----------
 export const walletPaymentService = async (userId, body) => {
-  const {
-    amount,
-    doctorId,
-    date,
-    time,
-    serviceType,
-    reason,
-    notes,
-  } = body;
+  const { amount, doctorId, date, time, serviceType, reason, notes } = body;
+
+  validateAdvanceBooking(date, time, 0);
 
   const slot = await DoctorAvailability.findOne({
     doctorId,
@@ -288,12 +299,8 @@ export const walletPaymentService = async (userId, body) => {
 
 // -------- VERIFY WALLET TOPUP ----------
 export const verifyWalletTopupService = async (userId, body) => {
-  const {
-    razorpay_payment_id,
-    razorpay_order_id,
-    razorpay_signature,
-    amount,
-  } = body;
+  const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } =
+    body;
 
   const generated_signature = crypto
     .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)

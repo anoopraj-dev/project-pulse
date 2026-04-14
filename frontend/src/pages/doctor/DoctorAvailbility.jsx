@@ -67,11 +67,26 @@ const DoctorAvailability = () => {
     const generated = [];
     let cur = new Date(`1970-01-01T${startTime}:00`);
     const endD = new Date(`1970-01-01T${endTime}:00`);
+
+    const now = new Date();
     while (cur < endD) {
       const next = new Date(cur.getTime() + duration * 60000);
       if (next > endD) break;
       const startStr = cur.toTimeString().slice(0, 5);
       const endStr = next.toTimeString().slice(0, 5);
+
+      const slotDateTime = new Date(selectedDate);
+      const [h, m] = startStr.split(":").map(Number);
+      slotDateTime.setHours(h, m, 0, 0);
+
+      // if (selectedDate === new Date().toISOString().split("T")[0]) {
+      //   const diff = slotDateTime - now;
+      //   if (diff < 60 * 60 * 1000) {
+      //     cur = next;
+      //     continue;
+      //   }
+      // }
+
       const overlap = existingSlots.some(
         (s) => s.start < endStr && s.end > startStr,
       );
@@ -397,24 +412,36 @@ const DoctorAvailability = () => {
                       {existingSlots.map((slot) => {
                         const key = `${slot.start}-${slot.end}`;
                         const isRemoving = removingSlot === key;
+
+                        const now = new Date();
+                        const slotDateTime = new Date(selectedDate);
+                        const [h, m] = slot.start.split(":").map(Number);
+                        slotDateTime.setHours(h, m, 0, 0);
+
+                        const isExpired = !slot.isBooked && slotDateTime < now;
+
                         return (
                           <div key={key} className="relative group">
                             <div
                               className={`w-full py-2.5 px-2 rounded-xl border text-xs font-semibold text-center transition-all
-                                ${
-                                  slot.isBooked
-                                    ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-500 dark:text-rose-400"
-                                    : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
-                                }`}
+    ${
+      slot.isBooked
+        ? "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-500"
+        : isExpired
+          ? "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-400 line-through"
+          : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700"
+    }`}
                             >
                               <span className="block leading-none">
                                 {slot.start}
                               </span>
-                              <span
-                                className={`block text-[9px] mt-0.5 font-normal
-                                ${slot.isBooked ? "text-rose-300 dark:text-rose-600" : "text-emerald-400 dark:text-emerald-600"}`}
-                              >
-                                {slot.isBooked ? "Booked" : `→ ${slot.end}`}
+
+                              <span className="block text-[9px] mt-0.5 font-normal">
+                                {slot.isBooked
+                                  ? "Booked"
+                                  : isExpired
+                                    ? "Expired"
+                                    : `→ ${slot.end}`}
                               </span>
                             </div>
 

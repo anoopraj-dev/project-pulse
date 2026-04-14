@@ -28,15 +28,27 @@ const consultationSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        enum:['scheduled','in-progress','completed','cancelled'],
+        enum:['scheduled','in-progress','completed','cancelled','disconnected'],
         default:'scheduled'
     },
     participants: {
-        patientJoined: {type:Boolean, default:false},
-        doctorJoined: {type:Boolean, default:false}
+        patient:{
+            joinedAt: Date,
+            leftAt: Date,
+            isPresent: Boolean
+        },
+        doctor:{
+            joinedAt:Date,
+            leftAt: Date,
+            isPresent: Boolean
+        },
     },
     startTime: {
         type: Date
+    },
+    duration:{
+        type: Number,
+        default:0
     },
     endTime: {
         type:Date

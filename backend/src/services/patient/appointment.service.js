@@ -95,7 +95,6 @@ export const bookAppointmentService = async (data, patientId) => {
   if (!availabilityUpdate) {
     throw new Error("Time slot already booked or unavailable");
   }
-
   appointment = await Appointment.findByIdAndUpdate(
     payment.appointment._id,
     { status: "confirmed" },

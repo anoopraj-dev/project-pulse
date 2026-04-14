@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Icon } from "@iconify/react";
@@ -70,6 +69,18 @@ const ProfileView = ({
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const isSlotExpired = (date, endTime, isBooked) => {
+    if (isBooked) return false;
+
+    const now = new Date();
+    const slotDateTime = new Date(date);
+
+    const [h, m] = endTime.split(":").map(Number);
+    slotDateTime.setHours(h, m, 0, 0);
+
+    return slotDateTime < now;
+  };
+
   const handleAction = async (action, fn) => {
     try {
       setActiveAction(action);
@@ -80,6 +91,18 @@ const ProfileView = ({
   };
 
   const canEdit = user?.status === "approved" || user?.status === "resubmit";
+
+  const filteredAvailability = availability
+    ?.map((day) => {
+      const validSlots = day.slots.filter(
+        (slot) =>
+          !slot.isBooked &&
+          !isSlotExpired(day.date, slot.endTime, slot.isBooked),
+      );
+
+      return { ...day, slots: validSlots };
+    })
+    .filter((day) => day.slots.length > 0);
 
   if (!user)
     return (
@@ -161,8 +184,7 @@ const ProfileView = ({
                   {/* DOCTOR */}
                   {viewer === "doctor" && (
                     <>
-
-                       <ActionButton
+                      <ActionButton
                         action="edit"
                         activeAction={activeAction}
                         icon="mdi:pencil"
@@ -212,8 +234,7 @@ const ProfileView = ({
                       />
 
                       {user?.status === "rejected" && (
-                       
-                         <ActionButton
+                        <ActionButton
                           action="request-resubmit"
                           activeAction={activeAction}
                           icon="mdi:document"
@@ -229,8 +250,7 @@ const ProfileView = ({
                       )}
 
                       {user?.status === "resubmit" && (
-                     
-                         <ActionButton
+                        <ActionButton
                           action="resubmit"
                           activeAction={activeAction}
                           icon="mdi:document"
@@ -246,25 +266,21 @@ const ProfileView = ({
 
                   {/* PATIENT */}
                   {viewer === "patient" && (
-                 
-                     <ActionButton
-                        action="book"
-                        activeAction={activeAction}
-                        icon="mdi:calendar-check"
-                        text="Book Appointment"
-                        onClick={() =>
-                          handleAction("book", () =>
-                            onBookAppointment(user?._id),
-                          )
-                        }
-                        className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
-                      />
+                    <ActionButton
+                      action="book"
+                      activeAction={activeAction}
+                      icon="mdi:calendar-check"
+                      text="Book Appointment"
+                      onClick={() =>
+                        handleAction("book", () => onBookAppointment(user?._id))
+                      }
+                      className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
+                    />
                   )}
 
                   {/* ADMIN */}
                   {viewer === "admin" && (
                     <>
-                     
                       <ActionButton
                         action="documents"
                         activeAction={activeAction}
@@ -280,7 +296,6 @@ const ProfileView = ({
                         !user?.isBlocked &&
                         !user?.resubmission && (
                           <>
-  
                             <ActionButton
                               action="approve"
                               activeAction={activeAction}
@@ -295,7 +310,7 @@ const ProfileView = ({
                               className="bg-green-500 hover:bg-green-600 text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
                             />
 
-                             <ActionButton
+                            <ActionButton
                               action="reject"
                               activeAction={activeAction}
                               icon="mdi:close-bold"
@@ -308,8 +323,7 @@ const ProfileView = ({
                         )}
 
                       {user?.status === "approved" && !user?.isBlocked && (
-                    
-                         <ActionButton
+                        <ActionButton
                           action="block"
                           activeAction={activeAction}
                           icon="mdi:block-helper"
@@ -322,8 +336,7 @@ const ProfileView = ({
 
                       {user?.status === "requestedResubmission" &&
                         !user?.isBlocked && (
-                        
-                           <ActionButton
+                          <ActionButton
                             action="revoke"
                             activeAction={activeAction}
                             icon="mdi:block-helper"
@@ -337,7 +350,6 @@ const ProfileView = ({
                         )}
 
                       {user?.isBlocked && (
-                     
                         <ActionButton
                           action="unblock"
                           activeAction={activeAction}
@@ -382,7 +394,7 @@ const ProfileView = ({
           <div className="lg:col-span-2 space-y-4">
             {/* Availability first */}
             {(viewer === "doctor" || viewer === "patient") && (
-              <AvailabilityPreview availability={availability} />
+              <AvailabilityPreview availability={filteredAvailability} />
             )}
 
             {/* About */}

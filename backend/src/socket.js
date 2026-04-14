@@ -146,25 +146,29 @@ export const initSocket = (server) => {
 
     //------------ WEBRTC SIGNALING -------------------
     socket.on("consultation:join", async ({ sessionId }) => {
-  if (!sessionId) return;
+      if (!sessionId) return;
 
-  socket.join(sessionId);
-  console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
+      socket.join(sessionId);
+      console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
 
-  const clients = io.sockets.adapter.rooms.get(sessionId);
-  const count = clients ? clients.size : 0;
+      const clients = io.sockets.adapter.rooms.get(sessionId);
+      const count = clients ? clients.size : 0;
 
-  // ---------- INITIAL CONNECT ----------
-  // emit both-joined only when the second user actually joins (prevent repeated events)
-  if (count === 2) {
-    io.to(sessionId).emit("consultation:both-joined");
-  }
+      socket.consultationSessionId = sessionId;
+      socket.consultattionUserId = userId;
 
-  // ---------- notify the other participant ----------
-  socket.to(sessionId).emit("consultation:user-joined", {
-    userId,
-  });
-});
+      // ---------- INITIAL CONNECT ----------
+      // emit both-joined only when the second user actually joins (prevent repeated events)
+      if (count === 2) {
+        io.to(sessionId).emit("consultation:both-joined");
+      }
+
+      // ---------- notify the other participant ----------
+      socket.to(sessionId).emit("consultation:user-joined", {
+        userId,
+      });
+    });
+
 
     //------------ offer (caller to receiver) --------
     socket.on("webrtc:offer", ({ sessionId, offer }) => {
@@ -200,8 +204,25 @@ export const initSocket = (server) => {
     });
 
     //---------- Submit prescription ------------
-    socket.on('prescription:submitted',({sessionId})=>{
-      socket.emit('prescription:submitted',{sessionId})
+    socket.on("prescription:submitted", ({ sessionId }) => {
+      socket.to(sessionId).emit("prescription:submitted", { sessionId });
+    });
+
+    //------------ Consultation disconnect/leave -------------
+    socket.on('consultation:leave', async ({sessionId}) => {
+      if(!sessionId) return ;
+
+      try {
+        await leaveConsultationService (sessionId, userId);
+
+        socket.leave(sessionId);
+
+        socket.to(sessionId).emit('consultation:user-left',{
+          userId
+        })
+      } catch (error) {
+        console.log('Leave consultation error',error)
+      }
     })
     //--------- End consultation ------------------
     socket.on("consultation:end", ({ sessionId }) => {

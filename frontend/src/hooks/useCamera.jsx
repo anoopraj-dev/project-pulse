@@ -1,35 +1,42 @@
-import { useEffect, useState, useRef } from "react";
+
+import { useEffect,useState } from "react";
+
+let globalStreamPromise = null;
+let globalStream = null;
 
 export const useCamera = () => {
-    const [stream, setStream] = useState(null);
-    const streamRef = useRef(null);
+  const [stream, setStream] = useState(globalStream);
 
-    useEffect(() => {
-        const startCamera = async () => {
-            try {
-                const media = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true,
-                    }
-                });
-                streamRef.current = media;
-                setStream(media);
-            } catch (error) {
-                console.log('Camera error:', error);
-            }
-        };
-        startCamera();
+  useEffect(() => {
+    let cancelled = false;
 
-        return () => {
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach((track) => track.stop());
-                streamRef.current = null;
-            }
-        };
-    }, []);
+    const init = async () => {
+      if (globalStream) {
+        setStream(globalStream);
+        return;
+      }
 
-    return stream;
+      if (!globalStreamPromise) {
+        globalStreamPromise = navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        }).then((s) => {
+          globalStream = s;
+          return s;
+        });
+      }
+
+      const s = await globalStreamPromise;
+
+      if (!cancelled) setStream(s);
+    };
+
+    init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return stream;
 };

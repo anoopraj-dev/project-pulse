@@ -6,62 +6,89 @@ export const useVideoSession = (sessionId, role, stream) => {
   const { socket } = useSocket();
 
   const [streamReady, setStreamReady] = useState(false);
-  const [bothJoined, setBothJoined] = useState(false);
   const [status, setStatus] = useState("waiting");
+
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+
   const [remoteVideoOff, setRemoteVideoOff] = useState(false);
   const [remoteMuted, setRemoteMuted] = useState(false);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+
   const pcRef = useRef(null);
   const localStreamRef = useRef(null);
 
-  // To prevent multiple renegotiations
-  const renegotiatingRef = useRef(false);
-  const callStartedRef = useRef(false);
+  const remoteStreamRef = useRef(null);
 
-  //------------ Create Peer Connection ------------
-  const createPeerConnection = () => {
-    if (!localStreamRef.current) {
-      console.log("Stream not ready yet");
-      return null;
+  const callStartedRef = useRef(false);
+  const isReconnectingRef = useRef(false);
+
+  const statusRef = useRef("waiting");
+
+  const setStatusSafe = (s) => {
+    if (statusRef.current !== s) {
+      statusRef.current = s;
+      setStatus(s);
     }
+  };
+
+  // ---------------- CLEAN PEER CONNECTION ----------------
+  const closePC = () => {
+    if (pcRef.current) {
+      pcRef.current.ontrack = null;
+      pcRef.current.onicecandidate = null;
+      pcRef.current.onconnectionstatechange = null;
+      pcRef.current.oniceconnectionstatechange = null;
+
+      pcRef.current.close();
+      pcRef.current = null;
+    }
+  };
+
+  // ---------------- CREATE PEER CONNECTION ----------------
+  const createPeerConnection = () => {
+    if (!localStreamRef.current) return null;
 
     const pc = new RTCPeerConnection({
       iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
 
-    // Add local tracks
+    // Add local tracks once
     localStreamRef.current.getTracks().forEach((track) => {
       pc.addTrack(track, localStreamRef.current);
     });
 
-    // Receive remote stream
     pc.ontrack = (e) => {
+      const [stream] = e.streams;
+      if (!stream) return;
+
+      remoteStreamRef.current = stream;
+
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = e.streams[0];
-        remoteVideoRef.current.autoplay = true;
-        remoteVideoRef.current.volume = 1;
-        remoteVideoRef.current.muted = false;
+        remoteVideoRef.current.srcObject = stream;
       }
     };
 
-    // Connection state
     pc.onconnectionstatechange = () => {
       const state = pc.connectionState;
-      console.log("Connection state:", state);
-      if (state === "connected") setStatusSafe("connected");
-      if (state === "disconnected" || state === "failed") setStatusSafe("reconnecting");
+
+      if (state === "connected") {
+        setStatusSafe("connected");
+      }
+
+      if (state === "disconnected" || state === "failed") {
+        setStatusSafe("reconnecting");
+      }
     };
 
     pc.oniceconnectionstatechange = () => {
       const state = pc.iceConnectionState;
-      console.log("ICE state:", state);
-      if (state === "failed") pc.restartIce();
-      if (state === "connected") setStatusSafe("connected");
-      if (state === "disconnected") setStatusSafe("reconnecting");
+
+      if (state === "failed") {
+        rebuildConnection();
+      }
     };
 
     pc.onicecandidate = (e) => {
@@ -73,199 +100,194 @@ export const useVideoSession = (sessionId, role, stream) => {
       }
     };
 
+    pcRef.current = pc;
     return pc;
   };
 
-  //--------- Replace video track ---------------
-  const replaceOutgoingVideoTrack = (newStream) => {
-    if (!pcRef.current) return;
-    const newVideoTrack = newStream.getVideoTracks()[0];
-    if (!newVideoTrack) return;
+  // ---------------- REBUILD CONNECTION ----------------
+  const rebuildConnection = async () => {
+    if (isReconnectingRef.current) return;
+    isReconnectingRef.current = true;
 
-    const sender = pcRef.current
-      .getSenders()
-      .find((s) => s.track?.kind === "video");
-
-    if (sender) {
-      sender.replaceTrack(newVideoTrack);
-    } else {
-      pcRef.current.addTrack(newVideoTrack, newStream);
+    if (!pcRef.current) {
+  createPeerConnection();
+  return;
+}
+    if (!pc) {
+      isReconnectingRef.current = false;
+      return;
     }
+
+    try {
+      const offer = await pc.createOffer({ iceRestart: true });
+      await pc.setLocalDescription(offer);
+
+      socket.emit("webrtc:offer", { sessionId, offer });
+    } catch (err) {
+      console.error("Rebuild failed:", err);
+    }
+
+    isReconnectingRef.current = false;
   };
 
-  //------------ Setup local stream ------------
+  // ---------------- STREAM SETUP ----------------
   useEffect(() => {
     if (!stream || stream.getTracks().length === 0) return;
 
-    localStreamRef.current = stream;
+   if (localStreamRef.current === stream) return;
+   localStreamRef.current = stream;
 
-    // Apply current mute and camera states to the new stream tracks
-    const audioTrack = stream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !isMuted;
-    }
-    const videoTrack = stream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !isCameraOff;
-    }
+    const audio = stream.getAudioTracks()[0];
+    if (audio) audio.enabled = !isMuted;
+
+    const video = stream.getVideoTracks()[0];
+    if (video) video.enabled = !isCameraOff;
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
-      localVideoRef.current.autoplay = true;
       localVideoRef.current.muted = true;
     }
-
-    if (pcRef.current) replaceOutgoingVideoTrack(stream);
 
     setStreamReady(true);
   }, [stream]);
 
-  //------------ Apply mute/camera states to current stream ------------
-  useEffect(() => {
-    if (!localStreamRef.current) return;
-
-    const audioTrack = localStreamRef.current.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !isMuted;
-    }
-
-    const videoTrack = localStreamRef.current.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !isCameraOff;
-    }
-  }, [isMuted, isCameraOff]);
-
-  //---------------- Toggle Mute ----------------
+  // ---------------- TOGGLES ----------------
   const onToggleMute = () => {
-    const newMuted = !isMuted;
-    setIsMuted(newMuted);
+    const next = !isMuted;
+    setIsMuted(next);
 
-    const audioTrack = localStreamRef.current?.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !newMuted;
-      console.log("Audio track enabled:", audioTrack.enabled, "isMuted:", newMuted);
-    } else {
-      console.log("No audio track found");
-    }
+    const track = localStreamRef.current?.getAudioTracks()[0];
+    if (track) track.enabled = !next;
 
-    socket.emit("consultation:mute-state", { sessionId, isMuted: newMuted });
+    socket.emit("consultation:mute-state", {
+      sessionId,
+      isMuted: next,
+    });
   };
 
-  //----------------- Camera toggle -------------------
   const onToggleCamera = () => {
-    const newCameraOff = !isCameraOff;
-    setIsCameraOff(newCameraOff);
+    const next = !isCameraOff;
+    setIsCameraOff(next);
 
-    const videoTrack = localStreamRef.current?.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !newCameraOff;
-    }
+    const track = localStreamRef.current?.getVideoTracks()[0];
+    if (track) track.enabled = !next;
 
-    socket.emit("consultation:camera-state", { sessionId, isOff: newCameraOff });
+    socket.emit("consultation:camera-state", {
+      sessionId,
+      isOff: next,
+    });
   };
 
-  //---------------- Restart connection (doctor only) -----------------
-  const restartConnection = async () => {
-    if (!localStreamRef.current || !pcRef.current) return;
-
-    if (renegotiatingRef.current) return;
-    renegotiatingRef.current = true;
-
-    try {
-      const offer = await pcRef.current.createOffer({ iceRestart: true });
-      await pcRef.current.setLocalDescription(offer);
-      socket.emit("webrtc:offer", { sessionId, offer });
-    } catch (err) {
-      console.error("Failed to renegotiate:", err);
-    } finally {
-      setTimeout(() => (renegotiatingRef.current = false), 500);
-    }
-  };
-
-  //-------------- End call -------------------------
-  const endCall = () => {
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop());
-    }
-    if (pcRef.current) {
-      pcRef.current.close();
-      pcRef.current = null;
-    }
-    socket.emit("consultation:end", { sessionId });
-    setStatusSafe("ended");
-  };
-
-  const statusRef = useRef("waiting");
-  const setStatusSafe = (newStatus) => {
-    if (statusRef.current !== newStatus) {
-      statusRef.current = newStatus;
-      setStatus(newStatus);
-    }
-  };
-
-  //------------------ Socket listeners -----------------
+  // ---------------- SOCKET ----------------
   useEffect(() => {
     if (!socket || !streamReady) return;
 
-    // Socket reconnect logic
-    socket.on("disconnect", () => setStatusSafe("reconnecting"));
-    socket.on("connect", () => {
-      console.log("Socket reconnected");
-      socket.emit("consultation:join", { sessionId });
-      setStatusSafe("connecting");
+    socket.on("disconnect", () => {
+      setStatusSafe("reconnecting");
     });
 
-    // Call events
+    socket.on("connect", async () => {
+      console.log("reconnected");
+
+      callStartedRef.current = false;
+      closePC();
+
+      socket.emit("consultation:join", { sessionId });
+      setStatusSafe("connecting");
+
+      // doctor restart
+      if (role === "doctor") {
+        const pc = createPeerConnection();
+        if (!pc) return;
+
+        const offer = await pc.createOffer({ iceRestart: true });
+        await pc.setLocalDescription(offer);
+
+        socket.emit("webrtc:offer", { sessionId, offer });
+      }
+    });
+
     socket.on("consultation:both-joined", async () => {
       setStatusSafe("connecting");
 
       if (role === "doctor" && !callStartedRef.current) {
         callStartedRef.current = true;
-        pcRef.current = createPeerConnection();
-        if (!pcRef.current) return;
 
-        const offer = await pcRef.current.createOffer();
-        await pcRef.current.setLocalDescription(offer);
+        const pc = createPeerConnection();
+        if (!pc) return;
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
         socket.emit("webrtc:offer", { sessionId, offer });
       }
     });
 
-    socket.on("consultation:user-joined", () => {
-      if (role === "doctor") restartConnection();
+    socket.on("consultation:user-joined", async () => {
+      if (role !== "doctor") return;
+
+      console.log("user rejoined");
+
+      callStartedRef.current = false;
+      closePC();
+
+      const pc = createPeerConnection();
+      if (!pc) return;
+
+      const offer = await pc.createOffer({ iceRestart: true });
+      await pc.setLocalDescription(offer);
+
+      socket.emit("webrtc:offer", { sessionId, offer });
     });
 
     socket.on("webrtc:offer", async ({ offer }) => {
       if (role !== "patient") return;
 
-      if (pcRef.current) pcRef.current.close();
-      pcRef.current = createPeerConnection();
-      if (!pcRef.current) return;
+      if (!pcRef.current) {
+        createPeerConnection();
+      }
 
-      await pcRef.current.setRemoteDescription(offer);
-      const answer = await pcRef.current.createAnswer();
-      await pcRef.current.setLocalDescription(answer);
+      const pc = pcRef.current;
+      if (!pc) return;
+
+      await pc.setRemoteDescription(offer);
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
 
       socket.emit("webrtc:answer", { sessionId, answer });
     });
 
     socket.on("webrtc:answer", async ({ answer }) => {
-      if (role !== "doctor" || !pcRef.current) return;
+      if (role !== "doctor") return;
+      if (!pcRef.current) return;
+
       await pcRef.current.setRemoteDescription(answer);
     });
 
     socket.on("webrtc:ice-candidate", async ({ candidate }) => {
-      if (pcRef.current && candidate) {
-        try {
+      try {
+        if (pcRef.current && candidate) {
           await pcRef.current.addIceCandidate(candidate);
-        } catch (err) {
-          console.error("Failed to add ICE candidate:", err);
         }
+      } catch (err) {
+        console.error("ICE error:", err);
       }
     });
 
-    socket.on("consultation:ended", endCall);
-    socket.on("consultation:camera-state", ({ isOff }) => setRemoteVideoOff(isOff));
-    socket.on("consultation:mute-state", ({ isMuted }) => setRemoteMuted(isMuted));
+    socket.on("consultation:ended", () => {
+      setStatusSafe("ended");
+      closePC();
+    });
+
+    socket.on("consultation:camera-state", ({ isOff }) =>
+      setRemoteVideoOff(isOff)
+    );
+
+    socket.on("consultation:mute-state", ({ isMuted }) =>
+      setRemoteMuted(isMuted)
+    );
+
     socket.emit("consultation:join", { sessionId });
 
     return () => {
@@ -279,19 +301,19 @@ export const useVideoSession = (sessionId, role, stream) => {
       socket.off("consultation:ended");
       socket.off("consultation:camera-state");
       socket.off("consultation:mute-state");
+
+      closePC();
     };
   }, [socket, sessionId, streamReady, role]);
 
   return {
     status,
-    setStatus,
     localVideoRef,
     remoteVideoRef,
     onToggleMute,
     onToggleCamera,
     isMuted,
     isCameraOff,
-    endCall,
     remoteVideoOff,
     remoteMuted,
   };

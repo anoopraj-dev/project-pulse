@@ -17,7 +17,7 @@ export const createConsultationService = async ({ appointmentId }) => {
   const sessionId = crypto.randomUUID();
   const tokenExpiresAt = new Date(appointment.appointmentDate);
   tokenExpiresAt.setMinutes(
-    tokenExpiresAt.getMinutes() + (appointment.duration || 30) + 10
+    tokenExpiresAt.getMinutes() + (appointment.duration || 30) + 10,
   );
 
   const consultation = await Consultation.create({
@@ -39,43 +39,117 @@ export const createConsultationService = async ({ appointmentId }) => {
 
 export const joinConsultationService = async (consultationId, userId) => {
   const consultation = await Consultation.findById(consultationId)
-    .populate("appointment", "appointmentDate")
+    .populate("appointment", "appointmentDate duration timeSlot")
     .populate("patient", "name profilePicture")
     .populate("doctor", "name profilePicture");
 
   if (!consultation) throw new Error("Consultation not found");
-  if (consultation.status === "cancelled") throw new Error("Consultation cancelled");
-  if (consultation.status === "completed") throw new Error("Consultation already completed");
+  if (consultation.status === "cancelled")
+    throw new Error("Consultation cancelled");
+  if (consultation.status === "completed")
+    throw new Error("Consultation already completed");
 
-  if (![consultation.patient._id.toString(), consultation.doctor._id.toString()].includes(userId)) {
+  if (
+    ![
+      consultation.patient._id.toString(),
+      consultation.doctor._id.toString(),
+    ].includes(userId)
+  ) {
     throw new Error("Unauthorized");
   }
 
   if (!consultation.participants) {
-    consultation.participants = { patientJoined: false, doctorJoined: false };
+    consultation.participants = {
+      patient: { joinedAt: null, isPresent: false },
+      doctor: { joinedAt: null, isPresent: false },
+    };
   }
 
   const isPatient = consultation.patient._id.toString() === userId;
   const isDoctor = consultation.doctor._id.toString() === userId;
 
-  if (isPatient) consultation.participants.patientJoined = true;
-  if (isDoctor) consultation.participants.doctorJoined = true;
+  console.log(consultation.appointment);
 
-  if (consultation.participants.patientJoined && consultation.participants.doctorJoined && consultation.status === "scheduled") {
-    consultation.status = "in-progress";
+  const appointmentDate = new Date(consultation.appointment.appointmentDate);
+  const [hours, minutes] = consultation?.appointment?.timeSlot
+    .split(":")
+    .map(Number);
+  appointmentDate.setHours(hours, minutes, 0, 0);
+  const now = new Date();
+
+  const earlyJoinBuffer = 5; //minutes before
+  const lateJoinBuffer = 5; // minutes after
+
+  //---------- start window -----------
+  const startTime = new Date(appointmentDate);
+  startTime.setMinutes(startTime.getMinutes() - earlyJoinBuffer);
+
+  //-------- Consultation end ------------
+  const consultationEnd = new Date(appointmentDate);
+  consultationEnd.setMinutes(
+    consultationEnd.getMinutes() + (consultation.appointment.duration || 15),
+  );
+  //--------- end window --------------
+  const endTime = new Date(consultationEnd);
+  endTime.setMinutes(endTime.getMinutes() + lateJoinBuffer);
+
+  console.log({ appointmentDate, consultationEnd, endTime });
+
+  if (now < startTime) {
+    throw new Error("Consultation not started yet");
+  }
+
+  if (now > endTime) {
+    throw new Error("Consultation time expired");
+  }
+
+  if (isPatient) {
+    if (!consultation.participants.patient) {
+      consultation.participants.patient = {};
+    }
+    consultation.participants.patient.joinedAt =
+      consultation.participants.patient.joinedAt || now;
+    consultation.participants.patient.isPresent = true;
+  }
+
+  if (isDoctor) {
+    if (!consultation.participants.doctor) {
+      consultation.participants.doctor = {};
+    }
+    consultation.participants.doctor.joinedAt =
+      consultation.participants.doctor.joinedAt || now;
+    consultation.participants.doctor.isPresent = true;
+  }
+
+  const patientReady = consultation.participants.patient?.isPresent;
+  const doctorReady = consultation.participants.doctor?.isPresent;
+
+  // if (patientReady && doctorReady && consultation.status === "scheduled") {
+  //   consultation.status = "in-progress";
+  //   consultation.startTime = new Date();
+  // }
+
+  if (patientReady && doctorReady) {
+  if (!consultation.startTime) {
     consultation.startTime = new Date();
   }
+  consultation.status = "in-progress";
+}
 
   await consultation.save();
 
   // Emit status via socket
   const io = getIO();
-  io.to(consultationId).emit("consultation:status-update", { status: consultation.status });
+  io.to(consultationId).emit("consultation:status-update", {
+    status: consultation.status,
+  });
 
   return {
     consultationId: consultation._id,
     sessionId: consultation.sessionId,
     status: consultation.status,
+    startTime:consultation.startTime,
+    endTime:consultation.endTime,
     participants: {
       patient: consultation.patient,
       doctor: consultation.doctor,
@@ -84,50 +158,119 @@ export const joinConsultationService = async (consultationId, userId) => {
 };
 
 export const endConsultationService = async (consultationId, userId) => {
-  const consultation = await Consultation.findById(consultationId);
+  const consultation =
+    await Consultation.findById(consultationId).populate("appointment");
   if (!consultation) throw new Error("Consultation not found");
 
-  if (consultation.status === "cancelled") throw new Error("Consultation cancelled");
-  if (consultation.status === "completed") throw new Error("Consultation already completed");
-  if (!["in-progress", "scheduled"].includes(consultation.status)) throw new Error("Consultation cannot be ended");
-
-  const prescription = await Prescription.findOne({ consultation: consultationId });
-  if (!prescription) throw new Error("Prescription must be submitted before ending the consultation");
-
-  if (![consultation.patient.toString(), consultation.doctor.toString()].includes(userId)) {
+  if (consultation.status === "cancelled")
+    throw new Error("Consultation cancelled");
+  if (consultation.status === "completed")
+    throw new Error("Consultation already completed");
+  if (consultation.status !== "in-progress")
+    throw new Error("Consultation has not started yet");
+  if (
+    ![consultation.patient.toString(), consultation.doctor.toString()].includes(
+      userId,
+    )
+  ) {
     throw new Error("Unauthorized");
+  }
+
+  const prescription = await Prescription.findOne({
+    consultation: consultationId,
+  });
+  if (!prescription)
+    throw new Error(
+      "Prescription must be submitted before ending the consultation",
+    );
+
+  //--------- Calculate duration -------------
+  const endTime = new Date();
+  const duration = Math.round((endTime - consultation.startTime) / (1000 * 60));
+
+  //------------ Safety check ----------------
+  const appointDuration = consultation.appointment.duration || 30;
+  const minAllowedDuration = appointDuration - 5;
+
+  if (duration < minAllowedDuration) {
+    throw new Error(
+      `Consultation must be atleast ${minAllowedDuration} minutes`,
+    );
   }
 
   consultation.status = "completed";
   consultation.endTime = new Date();
+  consultation.duration = duration;
   await consultation.save();
 
-  await Appointment.findByIdAndUpdate(consultation.appointment, { status: "completed" });
+  await Appointment.findByIdAndUpdate(consultation.appointment, {
+    status: "completed",
+  });
 
   const io = getIO();
   io.to(consultationId).emit("consultation:ended");
-
-  const duration = consultation.startTime ? Math.round((consultation.endTime - consultation.startTime) / (1000 * 60)) : 0;
 
   return { consultationId: consultation._id, duration };
 };
 
 export const getConsultationDetailsService = async (consultationId, userId) => {
   const consultation = await Consultation.findById(consultationId)
-    .populate({ path: "patient", select: "name gender dob medical_history lifestyle_habits" })
-    .populate({ path: "appointment", select: "appointmentDate timeSlot reason" })
-    .populate({ path: "doctor", select: "name" });
+    .populate({
+      path: "patient",
+      select: "name gender dob medical_history lifestyle_habits",
+    })
+    .populate({
+      path: "appointment",
+      select: "appointmentDate timeSlot reason",
+    })
+    .populate({
+      path: "doctor",
+      select: "name",
+    });
 
   if (!consultation) throw new Error("Consultation not found");
 
-  if (![consultation.patient._id.toString(), consultation.doctor._id.toString()].includes(userId)) {
+  if (
+    ![
+      consultation.patient._id.toString(),
+      consultation.doctor._id.toString(),
+    ].includes(userId)
+  ) {
     throw new Error("Unauthorized");
   }
 
-  return consultation;
+  const patientId = consultation.patient._id;
+
+  // Previous prescriptions
+  const prescriptions = await Prescription.find({ patient: patientId })
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .populate("doctor", "name");
+
+  // Past consultations
+  const pastConsultations = await Consultation.find({
+    patient: patientId,
+    _id: { $ne: consultationId },
+    status: "completed",
+  })
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .populate("doctor", "name")
+    .populate("appointment", "appointmentDate reason");
+
+  return {
+    consultation,
+    prescriptions,
+    pastConsultations,
+  };
 };
 
-export const submitPrescriptionService = async (consultationId, doctorId, diagnosis, medicines) => {
+export const submitPrescriptionService = async (
+  consultationId,
+  doctorId,
+  diagnosis,
+  medicines,
+) => {
   if (!medicines || !Array.isArray(medicines) || medicines.length === 0) {
     throw new Error("At least one medicine is required");
   }
@@ -138,7 +281,8 @@ export const submitPrescriptionService = async (consultationId, doctorId, diagno
     .populate("doctor", "name");
 
   if (!consultation) throw new Error("Consultation not found");
-  if (consultation.doctor._id.toString() !== doctorId) throw new Error("Unauthorized");
+  if (consultation.doctor._id.toString() !== doctorId)
+    throw new Error("Unauthorized");
 
   const prescription = await Prescription.create({
     consultation: consultationId,
@@ -148,6 +292,7 @@ export const submitPrescriptionService = async (consultationId, doctorId, diagno
     diagnosis,
     medicines,
   });
+
 
   // Generate PDF
   const browser = getBrowser();
@@ -209,7 +354,7 @@ export const submitPrescriptionService = async (consultationId, doctorId, diagno
                 <div class="info-item"><span class="label">Medicine ${index + 1}:</span> ${med.medicine}</div>
                 <div class="info-item"><span class="label">Dosage:</span> ${med.dosage}</div>
                 <div class="info-item"><span class="label">Timing:</span> ${med.timing === "before" ? "Before meals" : "After meals"}</div>
-              </div>`
+              </div>`,
               )
               .join("")}
           </div>
@@ -245,9 +390,10 @@ export const submitPrescriptionService = async (consultationId, doctorId, diagno
   return prescription;
 };
 
-
-
-export const generateConsultationPDFService = async (consultationId, userId) => {
+export const generateConsultationPDFService = async (
+  consultationId,
+  userId,
+) => {
   // Find consultation with related data
   const consultation = await Consultation.findById(consultationId)
     .populate({
@@ -266,12 +412,19 @@ export const generateConsultationPDFService = async (consultationId, userId) => 
   if (!consultation) throw { status: 404, message: "Consultation not found" };
 
   // Authorization check - only patient or doctor
-  if (![consultation.patient._id.toString(), consultation.doctor._id.toString()].includes(userId)) {
+  if (
+    ![
+      consultation.patient._id.toString(),
+      consultation.doctor._id.toString(),
+    ].includes(userId)
+  ) {
     throw { status: 403, message: "Unauthorized" };
   }
 
   // Find prescription
-  const prescription = await Prescription.findOne({ consultation: consultationId }).populate("doctor", "name");
+  const prescription = await Prescription.findOne({
+    consultation: consultationId,
+  }).populate("doctor", "name");
   if (!prescription) throw { status: 404, message: "Prescription not found" };
 
   // Generate HTML content
@@ -334,13 +487,17 @@ export const generateConsultationPDFService = async (consultationId, userId) => 
         <div class="section">
           <h3>Prescribed Medicines</h3>
           <div class="medicines">
-            ${prescription.medicines.map((med, i) => `
+            ${prescription.medicines
+              .map(
+                (med, i) => `
               <div class="medicine-item">
-                <div class="info-item"><span class="label">Medicine ${i+1}:</span> ${med.medicine}</div>
+                <div class="info-item"><span class="label">Medicine ${i + 1}:</span> ${med.medicine}</div>
                 <div class="info-item"><span class="label">Dosage:</span> ${med.dosage}</div>
                 <div class="info-item"><span class="label">Timing:</span> ${med.timing === "before" ? "Before meals" : "After meals"}</div>
               </div>
-            `).join("")}
+            `,
+              )
+              .join("")}
           </div>
         </div>
 
@@ -353,7 +510,8 @@ export const generateConsultationPDFService = async (consultationId, userId) => 
 
   // Generate PDF buffer using Puppeteer
   const browser = await getBrowser();
-  if (!browser) throw { status: 500, message: "PDF generation service unavailable" };
+  if (!browser)
+    throw { status: 500, message: "PDF generation service unavailable" };
 
   const page = await browser.newPage();
   await page.setContent(htmlContent);

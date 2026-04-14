@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Icon } from "@iconify/react";
 import { useParams } from "react-router-dom";
@@ -9,7 +8,9 @@ import ActionButton from "@/components/shared/components/ActionButton";
 
 // ---------------- Shared Card Components --------------
 const Card = ({ children, className = "" }) => (
-  <div className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}>
+  <div
+    className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}
+  >
     {children}
   </div>
 );
@@ -59,21 +60,19 @@ const ProfileView = ({
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="w-full px-4 py-6 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
           {/* ----------- LEFT COLUMN ----------- */}
           <div className="lg:col-span-1 space-y-4">
-
             {/* ----------- PROFILE CARD ----------------*/}
             <Card>
               <div className="p-5 space-y-5">
-
                 {/* Profile Header */}
                 <div className="flex items-center gap-4">
-
                   {/* Avatar */}
                   <div className="relative w-fit">
                     <img
-                      src={profilePicture || user?.profilePicture || "/profile.png"}
+                      src={
+                        profilePicture || user?.profilePicture || "/profile.png"
+                      }
                       alt={user?.name}
                       onError={(e) => (e.target.src = "/default-avatar.png")}
                       className="w-20 h-20 rounded-2xl object-cover border border-gray-200 dark:border-gray-800"
@@ -104,10 +103,9 @@ const ProfileView = ({
 
                 {/*----------- ACTION GRID -------------- */}
                 <div className="flex gap-2">
-
                   {!isProfileReview && !isDoctorViewing && (
                     <>
-                       <ActionButton
+                      <ActionButton
                         action="edit"
                         onClick={onEdit}
                         icon="mdi:pencil"
@@ -119,10 +117,9 @@ const ProfileView = ({
                   )}
 
                   {isDoctorViewing && (
-
                     <ActionButton
                       action="viewMedicalRecords"
-                      onClick={()=>onViewMedicalRecords(user?._id)}
+                      onClick={() => onViewMedicalRecords(user?._id)}
                       icon="mdi:folder-account"
                       text="Records"
                       className="bg-[#0096C7] hover:bg-[#0077B6] text-white py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium"
@@ -130,14 +127,11 @@ const ProfileView = ({
                   )}
 
                   {!isDoctorViewing && isProfileReview && (
-                
-                     <ActionButton
+                    <ActionButton
                       action={user?.status === "active" ? "block" : "unblock"}
                       onClick={user?.status === "active" ? onBlock : onUnblock}
                       icon="mdi:block-helper"
-                      text={
-                        user?.status === "active" ? "Block" : "Unblock"
-                      }
+                      text={user?.status === "active" ? "Block" : "Unblock"}
                       className={`py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all text-xs sm:text-sm font-medium ${
                         user?.status === "active"
                           ? "bg-red-500 hover:bg-red-600 text-white"
@@ -168,7 +162,6 @@ const ProfileView = ({
 
           {/* ── RIGHT COLUMN ── */}
           <div className="lg:col-span-2 space-y-4">
-
             {/* Appointments */}
             {!isDoctorViewing && !isProfileReview && (
               <Card>
@@ -207,7 +200,6 @@ const ProfileView = ({
               />
             )}
           </div>
-
         </div>
       </div>
     </div>

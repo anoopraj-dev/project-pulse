@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from "react";
-import { SelfieSegmentation } from "@mediapipe/selfie_segmentation";
+import { getSegmentation } from "@/utilis/segmentation";
 
 export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
   const videoRef = useRef(null);
@@ -9,21 +9,33 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
   const segmentationRef = useRef(null);
 
   const rafRef = useRef(null);
+  const stoppedRef = useRef(false);
   const isProcessingRef = useRef(false);
+
   const modeRef = useRef(mode);
   const processedStreamRef = useRef(null);
   const prevMaskRef = useRef(null);
 
   const bgImageRef = useRef(null);
+  const isTabVisibleRef = useRef(true);
 
-  // ---------- KEEP MODE UPDATED ----------
   useEffect(() => {
     modeRef.current = mode;
   }, [mode]);
 
-  // ---------- LOAD BACKGROUND IMAGE ONCE ----------
+  useEffect(() => {
+    const handleVisibility = () => {
+      isTabVisibleRef.current = document.visibilityState === "visible";
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
+
   useEffect(() => {
     if (!bgImageSrc) return;
+
     const img = new Image();
     img.src = bgImageSrc;
     img.onload = () => {
@@ -34,33 +46,32 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
   useEffect(() => {
     if (!inputStream) return;
 
-    // ---------- VIDEO ----------
+    stoppedRef.current = false;
+
+    // VIDEO
     if (!videoRef.current) {
       const video = document.createElement("video");
       video.muted = true;
       video.playsInline = true;
       videoRef.current = video;
     }
+
     const video = videoRef.current;
     video.srcObject = inputStream;
 
-    // ---------- CANVAS ----------
+    // CANVAS
     if (!canvasRef.current) {
       const canvas = document.createElement("canvas");
       canvasRef.current = canvas;
       ctxRef.current = canvas.getContext("2d");
     }
+
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
 
-    // ---------- MEDIAPIPE ----------
+    // ----------- segmentation (media pipe) ---------------
     if (!segmentationRef.current) {
-      const segmentation = new SelfieSegmentation({
-        locateFile: (file) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
-      });
-
-      segmentation.setOptions({ modelSelection: 1 });
+      const segmentation = getSegmentation();
 
       segmentation.onResults((results) => {
         if (!results.image || !canvas.width) return;
@@ -71,41 +82,37 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
         ctx.save();
         ctx.clearRect(0, 0, width, height);
 
-        // ---------- NORMAL ----------
         if (modeRef.current === "none") {
           ctx.drawImage(results.image, 0, 0, width, height);
           ctx.restore();
           return;
         }
 
-        // ---------- BACKGROUND ----------
         if (modeRef.current === "blur") {
           ctx.filter = "blur(16px) brightness(0.9)";
           ctx.drawImage(results.image, 0, 0, width, height);
           ctx.filter = "none";
         } else if (
           modeRef.current === "image" &&
-          bgImageRef.current &&
-          bgImageRef.current.complete
+          bgImageRef.current?.complete
         ) {
           ctx.drawImage(bgImageRef.current, 0, 0, width, height);
         }
 
-        // ---------- CREATE TEMP MASK ----------
         const tempCanvas = document.createElement("canvas");
         tempCanvas.width = width;
         tempCanvas.height = height;
+
         const tempCtx = tempCanvas.getContext("2d");
         tempCtx.drawImage(results.segmentationMask, 0, 0, width, height);
 
-        // ---------- TEMPORAL SMOOTHING ----------
         if (prevMaskRef.current) {
           tempCtx.globalAlpha = 0.6;
           tempCtx.drawImage(prevMaskRef.current, 0, 0, width, height);
         }
+
         prevMaskRef.current = tempCanvas;
 
-        // ---------- CUT OUT PERSON ----------
         ctx.globalCompositeOperation = "destination-out";
         ctx.drawImage(tempCanvas, 0, 0, width, height);
 
@@ -118,58 +125,60 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
       segmentationRef.current = segmentation;
     }
 
-    // ---------- FRAME LOOP ----------
     let lastTime = 0;
     const FPS = 15;
 
-    const processFrame = async (time) => {
+    const processFrame = (time) => {
+      if (stoppedRef.current) return;
+
       rafRef.current = requestAnimationFrame(processFrame);
+
+      if (!isTabVisibleRef.current) return;
       if (time - lastTime < 1000 / FPS) return;
+
       lastTime = time;
 
       if (
         video.readyState >= 3 &&
-        video.videoWidth > 0 &&
-        video.videoHeight > 0
+        video.videoWidth &&
+        video.videoHeight
       ) {
         if (!isProcessingRef.current && segmentationRef.current) {
-          try {
-            isProcessingRef.current = true;
-            await segmentationRef.current.send({ image: video });
-          } catch (e) {
-            console.warn("Segmentation error:", e);
-          } finally {
-            isProcessingRef.current = false;
-          }
+          isProcessingRef.current = true;
+
+          segmentationRef.current
+            .send({ image: video })
+            .catch(() => {})
+            .finally(() => {
+              isProcessingRef.current = false;
+            });
         }
       }
     };
 
-    // ---------- START ----------
     video.onloadeddata = async () => {
       await video.play();
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
       if (!processedStreamRef.current) {
-        const canvasStream = canvas.captureStream(FPS);
-        const finalStream = new MediaStream([
-          canvasStream.getVideoTracks()[0],
+        const stream = canvas.captureStream(FPS);
+
+        processedStreamRef.current = new MediaStream([
+          stream.getVideoTracks()[0],
           ...inputStream.getAudioTracks(),
         ]);
-        processedStreamRef.current = finalStream;
       }
 
       processFrame(0);
     };
 
-    // ---------- CLEANUP ----------
     return () => {
+      stoppedRef.current = true;
+
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (segmentationRef.current) {
-        segmentationRef.current.close();
-        segmentationRef.current = null;
-      }
+
       isProcessingRef.current = false;
     };
   }, [inputStream, bgImageSrc]);

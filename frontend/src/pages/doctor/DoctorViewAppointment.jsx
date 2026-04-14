@@ -149,6 +149,9 @@ const DoctorViewAppointment = () => {
           name: res.data?.consultation?.participants?.doctor?.name,
           profilePicture: res.data?.consultation?.participants?.doctor?.profilePicture,
         },
+        consultationId:res.data?.consultation?._id,
+        startTime:res.data?.consultation?.startTime,
+        endTime: res.data?.consultation?.endTime
       };
 
       navigate(`/doctor/appointments/consultation/${consultationId}`, {
