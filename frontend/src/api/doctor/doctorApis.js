@@ -67,16 +67,19 @@ export const deleteDocuments = (id) => {
   return api.delete(`/api/doctor/delete-documents/${id}`)
 }
 
-//------------------ AVAILABILITY ----------------
-export const getAvailability = () =>{
-  return api.get('/api/doctor/availability')
-}
+// ------------------- AVAILABILITY ----------------
+export const getAvailability = () => {
+  return api.get('/api/doctor/availability');
+};
 
 export const saveAvailability = (payload) => {
-  return api.post('/api/doctor/availability',payload)
-  
-}
+  return api.post('/api/doctor/availability', payload);
+};
 
+// ------------------- Remove Unbooked Slot ----------------
+export const removeAvailabilitySlot = (payload) => {
+  return api.patch('/api/doctor/availability', payload);
+};
 //--------------------- APPOINTMENTS ----------------
 export const fetchAppointments = () =>{
   return api.get('/api/doctor/appointments')
@@ -96,9 +99,9 @@ export const viewPatientProfile = (id) => {
   return api.get(`/api/doctor/appointments/patient-profile/${id}`)
 }
 
-export const getPatientMedicalRecords = () =>{
-  return api.get(`/api/doctor/appointments/patient-records`)
-}
+export const getPatientMedicalRecords = (patientId) => {
+  return api.get(`/api/doctor/appointments/patient-records/${patientId}`);
+};
 
 //------------------- PAYMENTS --------------------
 export const fetchDoctorPayments = () =>{
@@ -106,8 +109,15 @@ export const fetchDoctorPayments = () =>{
 }
 
 
+//-------------- consultation --------------
+export const fetchPatientStats = (id) =>{
+  return api.get(`/api/doctor/appointments/consultation/${id}`,)
+}
 
+export const endConsultation = (id) => {
+  return api.patch(`/api/doctor/appointments/consultation/${id}/end`)
+}
 
-
-
-
+export const submitPrescription = (consultationId, prescriptionData) => {
+  return api.post(`/api/doctor/appointments/consultation/${consultationId}/prescription`, prescriptionData)
+}

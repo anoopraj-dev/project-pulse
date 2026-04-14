@@ -14,11 +14,11 @@ export const signin = async (email,password,role) => {
     return response.data;
 };
 
-//------- admin login -------
-export const adminLogin = async (email,password) => {
-    const response = await api.post('/api/auth/login', { email, password });
-    return response.data;
-};
+// //------- admin login -------
+// export const adminLogin = async (email,password) => {
+//     const response = await api.post('/api/auth/login', { email, password });
+//     return response.data;
+// };
 
 //-------- update clerk user --------
 export const updateClerkUser = async (userData,token,signal) => {

@@ -17,11 +17,13 @@ import { deleteDocuments } from "../controllers/doctorControllers/documents.cont
 import {getDoctorNotifications} from '../controllers/doctorControllers/notifications.controller.js'
 import { getAllConversations, getAllMessages } from "../controllers/userControllers/messages.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
-import { getAvailability, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
+import { getAvailability, removeAvailabilitySlot, saveAvailability } from "../controllers/doctorControllers/availability.controller.js";
 import { cancelAppointment, getAllAppointments, getDoctorAppointmentById } from "../controllers/doctorControllers/appointments.controller.js";
 import { getDoctorPaymentHistory } from "../controllers/doctorControllers/paymentHistory.controller.js";
 import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient.controller.js";
 import { searchController, searchSuggestionsController } from "../controllers/userControllers/search.controller.js";
+import { getConsultationDetails, joinConsultation, endConsultation, submitPrescription, generateConsultationPDF } from "../controllers/userControllers/consultation.controller.js";
+import { getPatientMedicalRecordsForDoctor } from "../controllers/patientControllers/medicalRecords.controller.js";
 
 const router = Router();
 
@@ -69,6 +71,7 @@ router.get('/conversations', getAllConversations)
 
 router.get('/availability',getAvailability)
 router.post('/availability',saveAvailability)
+router.patch('/availability',removeAvailabilitySlot)
 
 //------------ appointments-------------
 router.get('/appointments',getAllAppointments)
@@ -82,5 +85,15 @@ router.get('/payments',getDoctorPaymentHistory)
 //---------------- Search ----------------
 router.get('/search',searchController)
 router.get('/search/suggestions',searchSuggestionsController)
+
+//------------- consultation-----------
+router.post('/appointments/consultation/:id',joinConsultation)
+router.get('/appointments/consultation/:id',getConsultationDetails)
+router.patch('/appointments/consultation/:id/end',endConsultation)
+router.post('/appointments/consultation/:consultationId/prescription',submitPrescription)
+router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
+
+//------------- patient medical records -----------
+router.get('/appointments/patient-records/:patientId', getPatientMedicalRecordsForDoctor)
 
 export default router;

@@ -1,111 +1,75 @@
-import DoctorAvailability from "../../models/availability.model.js";
 
-//----------------- Get doctor availability ----------------
+import {
+  getAvailabilityService,
+  saveAvailabilityService,
+  removeAvailabilitySlotService,
+} from "../../services/doctor/availability.service.js";
+
+// ----------------- Get Availability ----------------
 export const getAvailability = async (req, res) => {
   try {
-    const { id } = req.user;
-    const availability = await DoctorAvailability.find({ doctorId: id }).sort({
-      date: 1,
-    });
+    const doctorId = req.user.id;
 
-    const formattedAvailability = availability.map((day) => ({
-      date: day.date.toISOString().split("T")[0],
-      slots: day.slots.map((slot) => ({
-        startTime: slot.startTime.trim(),
-        endTime: slot.endTime.trim(),
-        isBooked: slot.isBooked ?? false, // preserve isBooked
-      })),
-    }));
+    const data = await getAvailabilityService(doctorId);
 
-    console.log(formattedAvailability)
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: formattedAvailability,
+      data,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.log("getAvailability error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
-//----------------- Save doctor availability ----------------
+// ----------------- Save Availability ----------------
 export const saveAvailability = async (req, res) => {
   try {
-    const { id } = req.user;
-    const payload = req.body;
+    const doctorId = req.user.id;
 
-    if (!payload || payload.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No availability provided",
-      });
-    }
+    await saveAvailabilityService(doctorId, req.body);
 
-    //----------------- filter empty slot dates -----------------
-    const filtered = payload.filter((day) => day.slots && day.slots.length > 0);
-
-    //----------------- remove all existing availability (weekly snapshot logic) -----------------
-    await DoctorAvailability.deleteMany({ doctorId: id });
-
-    //----------------- prepare new documents -----------------
-    const documents = filtered.map((day) => {
-      const dateObj = new Date(day.date);
-
-      // Calculate Monday of that week
-      const dayOfWeek = dateObj.getDay(); // 0 = Sunday
-      const diffToMonday = (dayOfWeek + 6) % 7;
-
-      const weekStart = new Date(dateObj);
-      weekStart.setDate(dateObj.getDate() - diffToMonday);
-      weekStart.setHours(0, 0, 0, 0);
-
-      // Saturday of that week
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 5);
-      weekEnd.setHours(23, 59, 59, 999);
-
-      const slots = day.slots.map((slot) => {
-        let startTime, endTime;
-
-        if (typeof slot === "string") {
-          [startTime, endTime] = slot.split("-").map((s) => s.trim());
-        } else if (typeof slot === "object" && slot.time) {
-          [startTime, endTime] = slot.time.split("-").map((s) => s.trim());
-        } else {
-          throw new Error("Invalid slot format");
-        }
-
-        return {
-          startTime,
-          endTime,
-          isBooked: slot.isBooked ?? false,
-        };
-      });
-
-      return {
-        doctorId: id,
-        date: dateObj,
-        weekStart,
-        weekEnd,
-        slots,
-      };
-    });
-
-    //----------------- insert fresh availability -----------------
-    if (documents.length > 0) {
-      await DoctorAvailability.insertMany(documents);
-    }
-
-    res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: "Scheduled availability",
+      message: "Availability saved successfully",
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
+    console.log("saveAvailability error:", error);
+
+    return res.status(400).json({
       success: false,
-      message: "Server error",
+      message: error.message || "Server error",
+    });
+  }
+};
+
+// ----------------- Remove Slot ----------------
+export const removeAvailabilitySlot = async (req, res) => {
+  try {
+    const doctorId = req.user.id;
+    const { date, start, end } = req.body;
+
+    await removeAvailabilitySlotService(
+      doctorId,
+      date,
+      start,
+      end
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Slot removed successfully",
+    });
+  } catch (error) {
+    console.log("removeAvailabilitySlot error:", error);
+
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Server error",
     });
   }
 };

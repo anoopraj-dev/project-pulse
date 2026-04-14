@@ -76,3 +76,15 @@ export const getReceipt = async (id,role) =>{
     responseType:'blob'
   })
 }
+
+//--------------- View consultation PDF --------------
+export const getConsultationPDF = async (id, role) => {
+  return api.get(`/api/${role}/appointments/consultation/${id}/pdf`, {
+    responseType: 'blob'
+  })
+}
+
+//--------------- Join Consultation ---------------
+export const joinConsultation = async (consultationId,role) =>{
+  return api.post(`/api/${role}/appointments/consultation/${consultationId}`)
+}

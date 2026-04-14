@@ -38,15 +38,10 @@ const PatientDoctors = () => {
     fetchDoctorsAction.executeAsyncFn(async () => {
       try {
         const res = await getAllDoctors();
-
-        if (!res?.data?.success) {
-          return toast.error(res?.data?.message || "Failed to load doctors");
-        }
-
-        setDoctors(res?.data?.users || []);
+        if(res?.data?.success) setDoctors(res?.data?.users || []);
       } catch (error) {
         console.error(error);
-        toast.error("Something went wrong");
+        toast.error(error?.response?.data?.message);
       }
     });
   };

@@ -80,7 +80,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
 
     return day.slots.filter((slot) => {
       const slotDateTime = new Date(`${formData.date}T${slot.startTime}`);
-      return slotDateTime.getTime() - now.getTime() >= 60 * 60 * 1000;
+      return slotDateTime.getTime() - now.getTime() >= 5 * 60 * 1000;
     });
   };
 

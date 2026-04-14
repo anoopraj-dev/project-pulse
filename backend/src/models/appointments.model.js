@@ -25,6 +25,16 @@ const appointmentSchema = new mongoose.Schema(
       required: true,
     },
 
+    duration:{
+      type:Number,
+      default:30
+    },
+
+    buffer:{
+      type:Number,
+      default:5
+    },
+
     reason: {
       type: String,
       required: true,
@@ -43,7 +53,7 @@ const appointmentSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [ "pending","confirmed", "completed","cancelled"],
+      enum: [ "pending","confirmed","ongoing","completed","cancelled","expired"],
       default: "confirmed",
     },
 
@@ -61,7 +71,14 @@ const appointmentSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    consultation:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Consultation',
+      default:null
+    }
   },
+  
   { timestamps: true },
 );
 

@@ -48,7 +48,7 @@ const SearchInput = ({
 
           {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full max-h-72 rounded-2xl bg-gray-100  shadow-lg ring-1 ring-slate-200 overflow-hidden">
+            <div className="absolute z-20 mt-1 w-full max-h-72 rounded-2xl bg-gray-100  shadow-lg ring-1 ring-slate-200 overflow-hidden">
               {suggestions.map((item) => (
                 <div
                   key={item._id}

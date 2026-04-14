@@ -7,7 +7,7 @@ const DoctorSearchSection = ({
   handleSelectSuggestion,
 }) => {
   return (
-    <div className="pb-4">
+    <div className="pb-4 z-20">
       <SearchInput
         value={query}
         onChange={(e) => setQuery(e.target.value)}

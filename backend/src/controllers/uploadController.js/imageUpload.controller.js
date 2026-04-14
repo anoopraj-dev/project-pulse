@@ -1,12 +1,6 @@
-import Patient from "../../models/patient.model.js";
-import Doctor from "../../models/doctor.model.js";
-import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
-// ----------- Helper (resolve upload type)-------------
-const resolveUploadType = (role, type) =>
-  `${role}${type.charAt(0).toUpperCase()}${type.slice(1)}`;
+import { handleImageUpload } from "../../services/uploads/imageUpload.service.js";
 
-//----------------------- UPLOAD IMAGE CONTROLLER -------------------
 export const uploadImage = async (req, res) => {
   try {
     const files = req.files || [];
@@ -26,83 +20,11 @@ export const uploadImage = async (req, res) => {
       });
     }
 
-    const role = req.user.role;
-    const uploadType = resolveUploadType(role, type);
-    const normalizedFiles = Array.isArray(files) ? files : [files];
-    const uploaded = [];
-
-    for (const file of normalizedFiles) {
-      const result = await uploadToCloudinary(file);
-      uploaded.push(result);
-    }
-
-    const urls = uploaded.map((r) => r.secure_url);
-    let updatedDoc;
-
-    console.log(uploadType);
-    switch (uploadType) {
-      // ---------- SINGLE ----------
-      case "patientProfilePicture":
-        updatedDoc = await Patient.findByIdAndUpdate(
-          req.user.id,
-          { $set:{profilePicture: urls[0]}},
-          { new: true }
-        );
-        break;
-
-      case "doctorProfilePicture":
-        updatedDoc = await Doctor.findByIdAndUpdate(
-          req.user.id,
-          { $set:{profilePicture: urls[0]}},
-          { new: true }
-        );
-        break;
-
-      // ---------- MULTIPLE ----------
-      case "doctorProofDocument":
-        updatedDoc = await Doctor.findByIdAndUpdate(
-          req.user.id,
-          {
-            $push: {
-              "professionalInfo.medicalLicense.proofDocument": {
-                $each: urls,
-              },
-            },
-          },
-          { new: true }
-        );
-        break;
-
-      case "doctorExperienceCertificate":
-        updatedDoc = await Doctor.findByIdAndUpdate(
-          req.user.id,
-          {
-            $set: {
-              "professionalInfo.experience.experienceCertificate": urls[0], // take the first URL
-            },
-          },
-          { new: true }
-        );
-        break;
-
-      case "doctorEducationCertificate":
-        updatedDoc = await Doctor.findByIdAndUpdate(
-          req.user.id,
-          {
-            $set: {
-              "professionalInfo.education.3.educationCertificate": urls[0],
-            },
-          },
-          { new: true }
-        );
-        break;
-
-      default:
-        return res.status(400).json({
-          success: false,
-          message: "Invalid upload type",
-        });
-    }
+    const { urls, updatedDoc } = await handleImageUpload({
+      files,
+      type,
+      user: req.user,
+    });
 
     return res.status(200).json({
       success: true,
@@ -113,9 +35,10 @@ export const uploadImage = async (req, res) => {
     });
   } catch (error) {
     console.error("UPLOAD ERROR:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Server error during file upload",
+      message: error.message || "Server error during file upload",
     });
   }
 };

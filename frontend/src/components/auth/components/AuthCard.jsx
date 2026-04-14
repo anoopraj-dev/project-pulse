@@ -18,7 +18,6 @@ import { fadeIn } from "@/utilis/animations";
 import {
   signup,
   signin,
-  adminLogin,
   updateClerkUser,
 } from "../../../api/auth/authService";
 
@@ -127,7 +126,7 @@ const AuthCard = ({ role: initialRole }) => {
 
         // ---------- ADMIN LOGIN ----------
         if (isAdmin) {
-          const response = await adminLogin(data.email, data.password);
+          const response = await signin(data.email, data.password,'admin');
 
           if (response.success) {
             dispatch({ type: "SET_USER", payload: response.admin });
@@ -175,12 +174,7 @@ const AuthCard = ({ role: initialRole }) => {
   useEffect(() => {
     if (!isLoaded || !user || !isSignedIn) return;
 
-    if (!user.emailAddresses[0].verified) {
-      toast.error("Please verify your email befor continuing");
-      signOut({ redirectUrl: "/signin" });
-      dispatch({ type: "CLEAR_USER" });
-      return;
-    }
+    // Clerk users are already authenticated and verified, no additional email verification needed
     setOauthProgress(true);
     const controller = new AbortController();
     const signal = controller.signal;

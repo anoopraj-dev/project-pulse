@@ -183,7 +183,7 @@ const filteredSearchResult = results?.filter((payment) => {
               <SearchInput
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search payments"
+                placeholder="Search payments - doctor, paid date, doctor specialization"
                 fetchSuggestions={fetchSuggestions}
                 onSelectSuggestion={handleSelectSuggestion}
                 role="patient"

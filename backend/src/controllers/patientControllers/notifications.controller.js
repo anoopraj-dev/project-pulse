@@ -26,7 +26,7 @@ export const getPatientNotifications = async (req, res) => {
 //------------------- MARK ALL READ ---------------------
 export const setMarkAllRead = async (req, res) => {
   try {
-    const role = req.user.role;
+    const role = req.user.role; 
     const result = await Notification.updateMany(
       { role, read: false },
       { $set: { read: true } }

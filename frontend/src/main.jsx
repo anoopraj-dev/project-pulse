@@ -20,7 +20,7 @@ createRoot(document.getElementById("root")).render(
       <UserProvider>
         <NotificationProvider>
           <SocketProvider>
-            <App />
+            <App />       
           </SocketProvider>
         </NotificationProvider>
       </UserProvider>

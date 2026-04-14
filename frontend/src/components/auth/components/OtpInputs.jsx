@@ -31,7 +31,6 @@ const OtpInputs = () => {
     document.getElementById("otp-0")?.focus();
   }, []);
 
-
   // ---------------- OTP INPUT HANDLER ----------------
   const handleInputs = (e, index) => {
     const value = e.target.value;
@@ -92,24 +91,24 @@ const OtpInputs = () => {
   // }, [secondsLeft]);
 
   useEffect(() => {
-  const interval = setInterval(() => {
-    const session = JSON.parse(sessionStorage.getItem("otpSession") || "{}");
+    const interval = setInterval(() => {
+      const session = JSON.parse(sessionStorage.getItem("otpSession") || "{}");
 
-    if (!session.expiryTime) {
-      setSecondsLeft(0);
-      return;
-    }
+      if (!session.expiryTime) {
+        setSecondsLeft(0);
+        return;
+      }
 
-    const remaining = Math.max(
-      Math.floor((session.expiryTime - Date.now()) / 1000),
-      0
-    );
+      const remaining = Math.max(
+        Math.floor((session.expiryTime - Date.now()) / 1000),
+        0,
+      );
 
-    setSecondsLeft(remaining);
-  }, 1000);
+      setSecondsLeft(remaining);
+    }, 1000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
   // ---------------- SUBMIT OTP ----------------
   const handleSubmit = async (e) => {
@@ -155,7 +154,7 @@ const OtpInputs = () => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData("Text").trim();
 
-    if (!/^\d{6}$/.test(pasteData)) return; 
+    if (!/^\d{6}$/.test(pasteData)) return;
 
     const otpArray = pasteData.split("");
     setOtp(otpArray);
@@ -194,16 +193,16 @@ const OtpInputs = () => {
         Didn’t receive the OTP?{" "}
         {!loading ? (
           <button
-  disabled={secondsLeft > 0}
-  onClick={handleResendOtp}
-  className={`${
-    secondsLeft > 0
-      ? "text-gray-400 cursor-not-allowed"
-      : "text-blue-500 cursor-pointer"
-  }`}
->
-  {secondsLeft === 0 ? "Resend OTP" : time}
-</button>
+            disabled={secondsLeft > 0}
+            onClick={handleResendOtp}
+            className={`${
+              secondsLeft > 0
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-blue-500 cursor-pointer"
+            }`}
+          >
+            {secondsLeft === 0 ? "Resend OTP" : time}
+          </button>
         ) : (
           <Icon icon="line-md:loading-twotone-loop" className="w-5 h-5" />
         )}

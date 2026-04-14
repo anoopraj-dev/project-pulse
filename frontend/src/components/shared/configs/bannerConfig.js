@@ -84,6 +84,76 @@ export const pageBannerConfig = {
     loadingText: "Loading messages...",
   },
 
+   //--------------- Patient Records ----------------
+
+   patientRecords: {
+    icon: "mdi:file-outline",
+
+    roleLabel: "Patient",
+    pageLabel: "Records",
+
+    title: "Medical Records",
+
+    description:
+      "View and manage medical records and prescriptions",
+
+    activeTabLabel: "medical reports",
+
+    loadingText: "Loading reports...",
+  },
+
+  //------------------ Admin Banner Configs ----------------
+  adminDashboard: {
+    icon: "mdi:view-dashboard-outline",
+    roleLabel: "Admin",
+    pageLabel: "Dashboard",
+    title: "Admin Dashboard",
+    description:
+      "Overview of doctors, patients, appointments, and system health metrics.",
+    activeTabLabel: "Panel",
+    loadingText: "Loading dashboard...",
+  },
+  adminDoctors: {
+    icon: "mdi:doctor",
+    roleLabel: "Admin",
+    pageLabel: "Doctors",
+    title: "Manage Doctors",
+    description:
+      "Review, approve, and monitor doctors in the system.",
+    activeTabLabel: "Section",
+    loadingText: "Loading doctors...",
+  },
+  adminPatients: {
+    icon: "mdi:account-heart",
+    roleLabel: "Admin",
+    pageLabel: "Patients",
+    title: "Manage Patients",
+    description:
+      "Track patient accounts, profile status, and activity.",
+    activeTabLabel: "Section",
+    loadingText: "Loading patients...",
+  },
+  adminAppointments: {
+    icon: "mdi:calendar-check",
+    roleLabel: "Admin",
+    pageLabel: "Appointments",
+    title: "Manage Appointments",
+    description:
+      "Monitor and manage all appointment data and statuses.",
+    activeTabLabel: "Tab",
+    loadingText: "Loading appointments...",
+  },
+  adminDocuments: {
+    icon: "mdi:file-document-box",
+    roleLabel: "Admin",
+    pageLabel: "Documents",
+    title: "Doctor Documents",
+    description:
+      "Review uploaded doctor documents and certification status.",
+    activeTabLabel: "Section",
+    loadingText: "Loading documents...",
+  },
+
   //------------- Patient Dashboard -----------
    patientDashboard: {
     icon: "mdi:view-dashboard-outline",
@@ -170,6 +240,17 @@ export const pageBannerConfig = {
     activeTabLabel: "Active tab",
 
     loadingText: "Loading appointments...",
+  },
+
+  doctorPatientRecords: {
+    icon: "mdi:file-outline",
+    roleLabel: "Doctor",
+    pageLabel: "Patient Records",
+    title: "Patient Medical Records",
+    description:
+      "View all medical records, test results, and consultation documents uploaded by your patient.",
+    activeTabLabel: "Active tab",
+    loadingText: "Loading records...",
   },
 
 

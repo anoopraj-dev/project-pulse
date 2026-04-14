@@ -25,6 +25,8 @@ const ChatContainer = () => {
   const [messages, setMessages] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [messagingDisabled, setMessagingDisabled] = useState(false);
+  const [disabledMessage, setDisabledMessage] = useState("");
 
   // ---------------- Fetch Sidebar Conversations ----------------
   useEffect(() => {
@@ -33,6 +35,40 @@ const ChatContainer = () => {
       setConversations(res.data.conversations);
     };
     loadConversations();
+  }, [role]);
+
+  // ---------------- Check for active consultations ----------------
+  useEffect(() => {
+    const checkActiveConsultations = async () => {
+      try {
+        let appointments = [];
+        if (role === "patient") {
+          const { fetchAppointments } = await import("../../../api/patient/patientApis");
+          const res = await fetchAppointments();
+          appointments = res.data.appointments;
+        } else if (role === "doctor") {
+          const { fetchAppointments } = await import("../../../api/doctor/doctorApis");
+          const res = await fetchAppointments();
+          appointments = res.data.appointments;
+        }
+
+        const activeConsultation = appointments.find(
+          (appointment) => appointment.status === "in-progress"
+        );
+
+        if (activeConsultation) {
+          setMessagingDisabled(true);
+          setDisabledMessage("Messaging is disabled during active consultations. Please complete your consultation first.");
+        } else {
+          setMessagingDisabled(false);
+          setDisabledMessage("");
+        }
+      } catch (error) {
+        console.error("Error checking active consultations:", error);
+      }
+    };
+
+    checkActiveConsultations();
   }, [role]);
 
   // ---------------- Fetch Messages ----------------
@@ -346,7 +382,8 @@ const ChatContainer = () => {
           />
           <MessageInput
             onSend={handleSendMessage}
-            disabled={!isConnected || isUploading}
+            disabled={!isConnected || isUploading || messagingDisabled}
+            disabledMessage={messagingDisabled ? disabledMessage : ""}
           />
         </>
       ) : (

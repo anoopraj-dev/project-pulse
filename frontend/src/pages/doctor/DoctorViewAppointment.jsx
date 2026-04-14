@@ -1,13 +1,12 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Icon } from "@iconify/react";
-import {
-  viewAppointmentDetails,
-  cancelAppointment,
-} from "@/api/doctor/doctorApis";
-
-import { refundToWallet } from "@/api/patient/patientApis";
+import { viewAppointmentDetails, cancelAppointment } from "@/api/doctor/doctorApis";
+import { joinConsultation, getConsultationPDF } from "@/api/user/userApis";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const statusConfig = {
   confirmed: {
@@ -42,10 +41,10 @@ const InfoRow = ({ label, value }) => (
 const DoctorViewAppointment = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [cancelReason, setCancelReason] = useState("");
 
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cancelReason, setCancelReason] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
@@ -64,21 +63,33 @@ const DoctorViewAppointment = () => {
         setLoading(false);
       }
     };
-
     fetchAppointment();
   }, [id]);
 
-  //-------------- View Patient Profile -------------
+  // --------------- View Patient Profile ---------------
   const viewPatientProfile = (patientId) => {
     navigate(`/doctor/appointments/patient-profile/${patientId}`);
   };
 
-  //------------- Send Messages -------------------
+  // --------------- Send Messages -------------------
   const handleMessages = (patientId) => {
     navigate(`/doctor/messages/${patientId}`);
   };
 
-  //-------------- Handle Cancellation ---------------
+  // --------------- View Consultation PDF -------------------
+  const handleViewPDF = async () => {
+    try {
+      const consultationId = appointment.consultation?._id || appointment.consultation;
+      const res = await getConsultationPDF(consultationId, "doctor");
+      const url = window.URL.createObjectURL(res.data);
+      window.open(url); // Opens PDF in new tab, same as DoctorPayments
+    } catch (error) {
+      console.error("Error loading PDF:", error);
+      toast.error("Failed to load PDF");
+    }
+  };
+
+  // --------------- Handle Cancellation ----------------
   const handleCancel = async () => {
     if (!cancelReason.trim()) {
       toast.error("Please provide a cancellation reason");
@@ -95,12 +106,8 @@ const DoctorViewAppointment = () => {
         return;
       }
 
-      //------ Backend handles refund -------------
-      toast.success(
-        "Appointment cancelled and refund processed to patient's wallet",
-      );
+      toast.success("Appointment cancelled and refund processed to patient's wallet");
 
-      // Update frontend state
       setAppointment((prev) => ({
         ...prev,
         status: "cancelled",
@@ -117,6 +124,44 @@ const DoctorViewAppointment = () => {
     }
   };
 
+  // --------------- Join Consultation ----------------
+  const handleJoinConsultation = async () => {
+    try {
+      const consultationId = appointment?.consultation;
+      if (!consultationId) {
+        return toast.error("Consultation not available yet");
+      }
+
+      const res = await joinConsultation(consultationId, "doctor");
+
+      if (!res.data?.success) {
+        return toast.error("Unable to join the call");
+      }
+
+      const { sessionId } = res.data?.consultation;
+
+      const participants = {
+        patient: {
+          name: res.data?.consultation?.participants?.patient?.name,
+          profilePicture: res.data?.consultation?.participants?.patient?.profilePicture,
+        },
+        doctor: {
+          name: res.data?.consultation?.participants?.doctor?.name,
+          profilePicture: res.data?.consultation?.participants?.doctor?.profilePicture,
+        },
+        consultationId:res.data?.consultation?._id,
+        startTime:res.data?.consultation?.startTime,
+        endTime: res.data?.consultation?.endTime
+      };
+
+      navigate(`/doctor/appointments/consultation/${consultationId}`, {
+        state: { sessionId, participants },
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Failed to join consultation");
+    }
+  };
 
   if (loading)
     return (
@@ -131,36 +176,18 @@ const DoctorViewAppointment = () => {
   if (!appointment)
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-50 via-white to-cyan-100">
-        <p className="text-sm font-medium text-red-500">
-          Appointment not found.
-        </p>
+        <p className="text-sm font-medium text-red-500">Appointment not found.</p>
       </div>
     );
 
   const status = appointment.status?.toLowerCase() ?? "confirmed";
   const sc = statusConfig[status] ?? statusConfig.confirmed;
-
   const patient = appointment.patient ?? {};
   const patientId = patient?._id;
 
   return (
     <div className="min-h-screen px-20">
-      {/* Header */}
-      <div className="my-2 bg-gradient-to-br from-sky-50 via-white to-cyan-100 rounded-xl">
-        <div className="px-4 pb-6 pt-20">
-          <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-              Doctor · Appointment
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Appointment Details
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-slate-600">
-              Review patient details and consultation information.
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageBanner config={pageBannerConfig.doctorAppointments} activeTab={appointment.status?.toLowerCase() || "N/A"} count={1} />
 
       <div className="mx-auto px-2 pb-16">
         <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
@@ -209,15 +236,12 @@ const DoctorViewAppointment = () => {
                   year: "numeric",
                   month: "short",
                   day: "numeric",
-                },
+                }
               )}
             />
             <InfoRow label="Time" value={appointment.timeSlot} />
             <InfoRow label="Service" value={appointment.serviceType} />
-            <InfoRow
-              label="Appointment ID"
-              value={`#${id.slice(-6).toUpperCase()}`}
-            />
+            <InfoRow label="Appointment ID" value={`#${id.slice(-6).toUpperCase()}`} />
           </div>
 
           {/* Consultation Details */}
@@ -225,7 +249,6 @@ const DoctorViewAppointment = () => {
             <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
               Consultation Details
             </p>
-
             <div>
               <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
                 Reason
@@ -241,52 +264,56 @@ const DoctorViewAppointment = () => {
             <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
               Consultation Link
             </p>
-            {appointment.consultationLink ? (
-              <div className="flex flex-col gap-3 rounded-xl bg-sky-50 px-5 py-4 ring-1 ring-sky-100">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    icon="mdi:link-variant"
-                    className="h-4 w-4 shrink-0 text-sky-500"
-                  />
-                  <a
-                    href={appointment.consultationLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="truncate text-sm font-medium text-sky-600 underline underline-offset-2 hover:text-sky-800"
-                  >
-                    {appointment.consultationLink}
-                  </a>
-                </div>
+            <div className="flex flex-col gap-3 rounded-xl bg-sky-50 px-5 py-4 ring-1 ring-sky-100">
+              <div className="flex items-center gap-2">
+                <Icon icon="mdi:link-variant" className="h-4 w-4 shrink-0 text-sky-500" />
                 <a
                   href={appointment.consultationLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-fit items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700"
+                  className="truncate text-sm font-medium text-sky-600 underline underline-offset-2 hover:text-sky-800"
                 >
-                  <Icon icon="mdi:video-outline" className="h-4 w-4" />
-                  Talk to Doctor
+                  {appointment.consultationLink}
                 </a>
               </div>
-            ) : (
-              <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-5 py-4 ring-1 ring-slate-100">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200">
-                  <Icon
-                    icon="mdi:video-off-outline"
-                    className="h-4 w-4 text-slate-400"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700">
-                    Consultation link not available yet
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    The doctor will share a link closer to your appointment
-                    time.
-                  </p>
-                </div>
-              </div>
-            )}
+              <button
+                onClick={handleJoinConsultation}
+                disabled={appointment.status === "cancelled" || appointment.status === "completed"}
+                className={`flex w-fit items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  appointment.status === "cancelled" || appointment.status === "completed"
+                    ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    : "bg-sky-600 text-white hover:bg-sky-700"
+                }`}
+              >
+                <Icon icon="mdi:video-outline" className="h-4 w-4" />
+                {appointment.status === "completed" ? "Consultation Completed" : "Talk to Doctor"}
+              </button>
+            </div>
           </div>
+
+          {/* Consultation PDF */}
+          {appointment.status === "completed" && (
+            <div className="border-t border-slate-100 px-6 py-6">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Consultation Report
+              </p>
+              <div className="flex flex-col gap-3 rounded-xl bg-green-50 px-5 py-4 ring-1 ring-green-100">
+                <div className="flex items-center gap-2">
+                  <Icon icon="mdi:file-pdf-box" className="h-4 w-4 shrink-0 text-green-500" />
+                  <span className="text-sm font-medium text-green-700">
+                    Consultation Report PDF
+                  </span>
+                </div>
+                <button
+                  onClick={handleViewPDF} // <-- Uses same logic as DoctorPayments
+                  className="flex w-fit items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700"
+                >
+                  <Icon icon="mdi:eye-outline" className="h-4 w-4" />
+                  View Report
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* View Patient Profile */}
           <div className="border-t border-slate-100 px-6 py-6">
@@ -295,11 +322,8 @@ const DoctorViewAppointment = () => {
                 <p className="text-sm font-medium text-slate-700">
                   Need to know more about the patient?
                 </p>
-                <p className="text-xs text-slate-400">
-                  View thier medical history and more.
-                </p>
+                <p className="text-xs text-slate-400">View their medical history and more.</p>
               </div>
-
               <button
                 onClick={() => viewPatientProfile(patientId)}
                 className="flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-semibold text-sky-600 transition hover:bg-sky-50 hover:border-sky-300"
@@ -314,14 +338,9 @@ const DoctorViewAppointment = () => {
           <div className="border-t border-slate-100 px-6 py-6">
             <div className="flex items-center justify-between rounded-xl bg-slate-50 px-5 py-4 ring-1 ring-slate-100">
               <div>
-                <p className="text-sm font-medium text-slate-700">
-                  Need to communicate with the patient?
-                </p>
-                <p className="text-xs text-slate-400">
-                  Send a message directly to the patient.
-                </p>
+                <p className="text-sm font-medium text-slate-700">Need to communicate with the patient?</p>
+                <p className="text-xs text-slate-400">Send a message directly to the patient.</p>
               </div>
-
               <button
                 onClick={() => handleMessages(patientId)}
                 className="flex items-center gap-2 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-semibold text-sky-600 transition hover:bg-sky-50 hover:border-sky-300"
@@ -333,18 +352,17 @@ const DoctorViewAppointment = () => {
           </div>
 
           {/* Cancel button area */}
-
           <div className="border-t border-slate-100 px-6 py-5">
             {!showConfirm ? (
               <button
                 onClick={() => setShowConfirm(true)}
                 disabled={appointment.status === "cancelled"}
                 className={`ml-auto flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition
-    ${
-      appointment.status === "cancelled"
-        ? "bg-red-50 border-red-200 text-red-300 cursor-not-allowed"
-        : "bg-red-50 border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300"
-    }`}
+                ${
+                  appointment.status === "cancelled"
+                    ? "bg-red-50 border-red-200 text-red-300 cursor-not-allowed"
+                    : "bg-red-50 border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300"
+                }`}
               >
                 Cancel Appointment
               </button>
@@ -353,8 +371,6 @@ const DoctorViewAppointment = () => {
                 <p className="text-sm font-medium text-slate-700">
                   Please specify the reason for cancellation.
                 </p>
-
-                {/* Cancellation Reason Input */}
                 <textarea
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
@@ -362,7 +378,6 @@ const DoctorViewAppointment = () => {
                   rows={3}
                   className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-red-300"
                 />
-
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleCancel}
@@ -374,7 +389,6 @@ const DoctorViewAppointment = () => {
                     )}
                     {cancelling ? "Cancelling…" : "Confirm Cancel"}
                   </button>
-
                   <button
                     onClick={() => {
                       setShowConfirm(false);
@@ -387,7 +401,6 @@ const DoctorViewAppointment = () => {
                 </div>
               </div>
             )}
-         
           </div>
         </div>
       </div>

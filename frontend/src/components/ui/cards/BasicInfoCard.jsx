@@ -1,3 +1,4 @@
+
 import { Icon } from "@iconify/react";
 import React from "react";
 
@@ -12,10 +13,21 @@ const BasicInfoCard = ({ field, val }) => {
     work: "mdi:briefcase-variant",
   };
 
+  const labels = {
+    email: "Email",
+    dob: "Date of Birth",
+    gender: "Gender",
+    location: "Location",
+    education: "Qualifications",
+    specialization: "Specialization",
+    work: "Work",
+  };
+
   const formattedValue = (() => {
-    if (!val) return "—";
+    if (!val) return null;
+    if (Array.isArray(val)) return val;
     const date = new Date(val);
-    return !isNaN(date)
+    return !isNaN(date) && typeof val === "string" && val.includes("-")
       ? date.toLocaleDateString("en-IN", {
           year: "numeric",
           month: "short",
@@ -24,42 +36,41 @@ const BasicInfoCard = ({ field, val }) => {
       : val;
   })();
 
-  return (
-    <div className="group relative overflow-hidden">
-      {/* Icon Container */}
-      <div className="flex items-center gap-3 py-3">
-        <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-[#0096C7]/10 flex items-center justify-center 
-                        group-hover:bg-[#0096C7] transition-colors duration-300">
-          <Icon
-            icon={icons[field] || "mingcute:info"}
-            className="text-2xl text-[#0096C7] group-hover:text-white transition-colors duration-300"
-          />
-        </div>
+  if (!formattedValue || (Array.isArray(formattedValue) && formattedValue.length === 0))
+    return null;
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          {Array.isArray(val) && val.length > 0 ? (
-            <div className="space-y-0.5">
-              {val.map((item, index) => (
-                <p
-                  key={index}
-                  className="text-sm text-gray-700 font-medium leading-snug truncate"
-                >
-                  {String(item)}
-                </p>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-800 font-medium leading-snug truncate">
-              {formattedValue}
-            </p>
-          )}
-        </div>
+  return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-50 dark:border-gray-800/60 last:border-0">
+      {/* Icon chip */}
+      <div className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <Icon
+          icon={icons[field] || "mingcute:info-line"}
+          className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500"
+        />
       </div>
 
-      {/* Bottom Border Accent */}
-      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#0096C7] 
-                      group-hover:w-full transition-all duration-300 ease-out" />
+      {/* Content */}
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">
+          {labels[field] || field}
+        </p>
+        {Array.isArray(formattedValue) ? (
+          <div className="flex flex-wrap gap-1.5 mt-1">
+            {formattedValue.map((item, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900"
+              >
+                {String(item)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs font-medium text-gray-700 dark:text-gray-300 break-words leading-relaxed">
+            {formattedValue}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
@@ -69,8 +80,6 @@ export default BasicInfoCard;
 export const DetailsDisplayCard = ({ label, value }) => {
   const formatValue = (val) => {
     if (val == null || val === "") return "—";
-    
-    // Check if it's a date
     const date = new Date(val);
     if (!isNaN(date) && typeof val === "string" && val.includes("-")) {
       return date.toLocaleDateString("en-IN", {
@@ -79,24 +88,21 @@ export const DetailsDisplayCard = ({ label, value }) => {
         day: "numeric",
       });
     }
-    
     return String(val);
   };
 
+  if (value == null || value === "") return null;
+
   return (
-    <div className="group py-3">
-      {/* Label */}
-      <p className="text-xs font-medium text-gray-500 mb-1.5">
-        {label}
-      </p>
-      
-      {/* Value */}
-      <p className="text-sm font-semibold text-gray-900">
-        {formatValue(value)}
-      </p>
-      
-      {/* Bottom Border */}
-      <div className="mt-3 h-px bg-gray-100 group-hover:bg-[#0096C7]/30 transition-colors duration-200" />
+    <div className="flex items-start gap-3 py-2.5 border-b border-gray-50 dark:border-gray-800/60 last:border-0">
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">
+          {label}
+        </p>
+        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 break-words leading-relaxed">
+          {formatValue(value)}
+        </p>
+      </div>
     </div>
   );
 };
