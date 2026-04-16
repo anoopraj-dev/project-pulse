@@ -129,5 +129,5 @@ export const endConsultation = (id) => {
 };
 
 export const submitReview = (id,data) =>{
-  return api.post(`/review/${id}`,data)
+  return api.post(`/api/patient/review/${id}`,data)
 }
