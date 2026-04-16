@@ -68,8 +68,6 @@ export const joinConsultationService = async (consultationId, userId) => {
   const isPatient = consultation.patient._id.toString() === userId;
   const isDoctor = consultation.doctor._id.toString() === userId;
 
-  console.log(consultation.appointment);
-
   const appointmentDate = new Date(consultation.appointment.appointmentDate);
   const [hours, minutes] = consultation?.appointment?.timeSlot
     .split(":")
@@ -78,7 +76,6 @@ export const joinConsultationService = async (consultationId, userId) => {
   const now = new Date();
 
   const earlyJoinBuffer = 5; //minutes before
-  const lateJoinBuffer = 5; // minutes after
 
   //---------- start window -----------
   const startTime = new Date(appointmentDate);
@@ -91,7 +88,7 @@ export const joinConsultationService = async (consultationId, userId) => {
   );
   //--------- end window --------------
   const endTime = new Date(consultationEnd);
-  endTime.setMinutes(endTime.getMinutes() + lateJoinBuffer);
+  endTime.setMinutes(endTime.getMinutes());
 
   console.log({ appointmentDate, consultationEnd, endTime });
 
@@ -129,12 +126,21 @@ export const joinConsultationService = async (consultationId, userId) => {
   //   consultation.startTime = new Date();
   // }
 
-  if (patientReady && doctorReady) {
-  if (!consultation.startTime) {
-    consultation.startTime = new Date();
+  //   if (patientReady && doctorReady) {
+  //   if (!consultation.startTime) {
+  //     consultation.startTime = new Date();
+  //   }
+  //   consultation.status = "in-progress";
+  // }
+
+  if (consultation.status === "completed") {
+    return consultation;
   }
-  consultation.status = "in-progress";
-}
+
+  if (consultation.status === "scheduled" && patientReady && doctorReady) {
+    consultation.status = "in-progress";
+    consultation.startTime = consultation.startTime || new Date();
+  }
 
   await consultation.save();
 
@@ -148,8 +154,8 @@ export const joinConsultationService = async (consultationId, userId) => {
     consultationId: consultation._id,
     sessionId: consultation.sessionId,
     status: consultation.status,
-    startTime:consultation.startTime,
-    endTime:consultation.endTime,
+    startTime: consultation.startTime,
+    endTime: consultation.endTime,
     participants: {
       patient: consultation.patient,
       doctor: consultation.doctor,
@@ -158,16 +164,18 @@ export const joinConsultationService = async (consultationId, userId) => {
 };
 
 export const endConsultationService = async (consultationId, userId) => {
+  const io = getIO();
   const consultation =
     await Consultation.findById(consultationId).populate("appointment");
+
+  console.log("consultation", consultation);
   if (!consultation) throw new Error("Consultation not found");
 
+  const role = consultation.doctor.toString() === userId ? "doctor" : "patient";
   if (consultation.status === "cancelled")
     throw new Error("Consultation cancelled");
   if (consultation.status === "completed")
     throw new Error("Consultation already completed");
-  if (consultation.status !== "in-progress")
-    throw new Error("Consultation has not started yet");
   if (
     ![consultation.patient.toString(), consultation.doctor.toString()].includes(
       userId,
@@ -184,33 +192,45 @@ export const endConsultationService = async (consultationId, userId) => {
       "Prescription must be submitted before ending the consultation",
     );
 
-  //--------- Calculate duration -------------
-  const endTime = new Date();
-  const duration = Math.round((endTime - consultation.startTime) / (1000 * 60));
+  //----------- Doctor initiates End -------------
+  if (role === "doctor") {
+    consultation.status = "pending-confirmation";
+    await consultation.save();
 
-  //------------ Safety check ----------------
-  const appointDuration = consultation.appointment.duration || 30;
-  const minAllowedDuration = appointDuration - 5;
+    io.to(consultationId).emit("consultation:end-requested", {
+      consultationId,
+    });
 
-  if (duration < minAllowedDuration) {
-    throw new Error(
-      `Consultation must be atleast ${minAllowedDuration} minutes`,
-    );
+    return {
+      consultationId,
+      status: consultation.status,
+      message: "Waiting for patient confirmation",
+    };
   }
+  if (role === "patient") {
+    const now = new Date();
+    consultation.endTime = now;
+    consultation.status = "completed";
 
-  consultation.status = "completed";
-  consultation.endTime = new Date();
-  consultation.duration = duration;
-  await consultation.save();
+    consultation.duration = consultation.startTime
+      ? Math.round((now - consultation.startTime) / (1000 * 60))
+      : null;
 
-  await Appointment.findByIdAndUpdate(consultation.appointment, {
-    status: "completed",
-  });
+    await consultation.save();
 
-  const io = getIO();
-  io.to(consultationId).emit("consultation:ended");
+    await Appointment.findByIdAndUpdate(consultation.appointment._id, {
+      status: "completed",
+    });
 
-  return { consultationId: consultation._id, duration };
+    io.to(consultationId).emit("consultation:ended", {
+      consultationId,
+    });
+    return {
+      consultationId,
+      status: consultation.status,
+      duration: consultation.duration,
+    };
+  }
 };
 
 export const getConsultationDetailsService = async (consultationId, userId) => {
@@ -284,6 +304,14 @@ export const submitPrescriptionService = async (
   if (consultation.doctor._id.toString() !== doctorId)
     throw new Error("Unauthorized");
 
+  if(consultation.isPrescribed){
+    throw new Error('Already submitted prescription')
+  }
+
+  consultation.isPrescribed = true;
+  
+  await consultation.save();
+
   const prescription = await Prescription.create({
     consultation: consultationId,
     appointment: consultation.appointment._id,
@@ -293,6 +321,7 @@ export const submitPrescriptionService = async (
     medicines,
   });
 
+  
 
   // Generate PDF
   const browser = getBrowser();

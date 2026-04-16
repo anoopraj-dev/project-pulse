@@ -6,8 +6,9 @@ import Payment from "../../models/payments.model.js";
 import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
 import Patient from "../../models/patient.model.js";
-import { createConsultation } from "../consultationService.js";
+// import { createConsultation } from "../consultationService.js";
 import { createNotification } from "../user/notification.service.js";
+import {createConsultationService} from '../user/consultation.service.js'
 
 //-------------- Get booking info ----------------
 export const getBookingInfoService = async (doctorId) => {
@@ -101,7 +102,7 @@ export const bookAppointmentService = async (data, patientId) => {
     { new: true },
   );
 
-  await createConsultation({
+  await createConsultationService({
     appointmentId: appointment._id,
   });
 

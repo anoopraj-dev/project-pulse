@@ -28,7 +28,7 @@ const consultationSchema = new mongoose.Schema({
     },
     status:{
         type:String,
-        enum:['scheduled','in-progress','completed','cancelled','disconnected'],
+        enum:['scheduled','in-progress','completed','cancelled','disconnected','pending-confirmation'],
         default:'scheduled'
     },
     participants: {
@@ -61,6 +61,10 @@ const consultationSchema = new mongoose.Schema({
         type:String,
         default:''
     },
+    isPrescribed:{
+        type:Boolean,
+        default:false
+    }
 
 },{timestamps:true})
 

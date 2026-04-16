@@ -5,6 +5,7 @@ import {
 } from "./controllers/userControllers/messages.controller.js";
 import redis from "./config/redis.js";
 
+
 let io;
 const onlineUsers = new Map();
 
@@ -207,6 +208,12 @@ export const initSocket = (server) => {
     socket.on("prescription:submitted", ({ sessionId }) => {
       socket.to(sessionId).emit("prescription:submitted", { sessionId });
     });
+    
+    //--------- End consultation ------------------
+    socket.on("consultation:end", ({ sessionId }) => {
+      if (!sessionId) return;
+      io.to(sessionId).emit("consultation:ended"); 
+    });
 
     //------------ Consultation disconnect/leave -------------
     socket.on('consultation:leave', async ({sessionId}) => {
@@ -224,12 +231,6 @@ export const initSocket = (server) => {
         console.log('Leave consultation error',error)
       }
     })
-    //--------- End consultation ------------------
-    socket.on("consultation:end", ({ sessionId }) => {
-      if (!sessionId) return;
-
-      io.to(sessionId).emit("consultation:ended");
-    });
 
     //--------- Mute state sync ------------------
     socket.on("consultation:mute-state", ({ sessionId, isMuted }) => {
@@ -237,6 +238,14 @@ export const initSocket = (server) => {
 
       socket.to(sessionId).emit("consultation:mute-state", { isMuted });
     });
+
+    // socket.on('consultation:patient-end', async({sessionId,userId})=>{
+    //   try {
+    //     await completeConsultationService(sessionId,userId);
+    //   } catch (error) {
+    //     console.log('error ending consultation',error)
+    //   }
+    // })
 
     // ---------------- DISCONNECT ----------------
     socket.on("disconnect", async () => {

@@ -53,6 +53,7 @@ import {
   verifyWalletPayment,
 } from "../controllers/patientControllers/wallet.controller.js";
 import { joinConsultation, endConsultation } from "../controllers/userControllers/consultation.controller.js";
+import { submitReviewController } from "../controllers/userControllers/review.controller.js";
 
 const router = Router();
 
@@ -114,5 +115,8 @@ router.delete("/medical-records/:id", deletePatientMedicalRecord);
 router.post('/appointments/consultation/:id',joinConsultation)
 router.patch('/appointments/consultation/:id/end',endConsultation)
 router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
+
+//---------- Review and rating -------------
+router.post('/review/:id',submitReviewController)
 
 export default router;

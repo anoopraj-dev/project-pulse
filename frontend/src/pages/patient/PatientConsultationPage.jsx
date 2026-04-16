@@ -8,6 +8,8 @@ import { useState,useEffect } from "react";
 import { endConsultation } from "@/api/patient/patientApis";
 import { socket } from "@/socket";
 import toast from "react-hot-toast";
+import { useModal } from "@/contexts/ModalContext";
+import EndConsultationModal from "@/components/ui/modals/ModalInputs";
 
 const PatientConsultationPage = () => {
   const { id: sessionId } = useParams();
@@ -15,6 +17,8 @@ const PatientConsultationPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { participants } = state;
+
+  const{openModal,closeModal} = useModal();
 
   const [mode, setMode] = useState("none");
   const [bgImage, setBgImage] = useState("/healthcare1.jpg");
@@ -38,6 +42,26 @@ const PatientConsultationPage = () => {
     remoteVideoOff,
     remoteMuted,
   } = useVideoSession(sessionId, "patient", finalStream, user);
+
+  //-------- listen for end requests ----------
+  useEffect(()=>{
+    const handler = ({consultationId}) =>{
+      console.log('handler consultationId',consultationId);
+      console.log('session id inside handler', sessionId)
+      openModal(
+        '',
+        EndConsultationModal,
+        {consultationId}
+
+      )
+    }
+
+    socket.on('consultation:end-requested', handler);
+
+    return () => {
+      socket.off('consultation:end-requested',handler)
+    }
+  },[openModal])
 
   // ----------Navigate when consultation ends ---------------
   useEffect(() => {
@@ -78,18 +102,28 @@ const PatientConsultationPage = () => {
   }, []);
 
   const handleEndCall = async () => {
+
+    console.log('sessionId',typeof sessionId)
+
     if (!isPrescriptionSubmitted) {
       toast.error("Waiting for doctor to submit prescription");
       return;
     }
 
     try {
-      await endConsultation(sessionId);
-      socket.emit("consultation:leave", { sessionId });
 
-      endCall();
-      setStatus("ended");
-      navigate("/patient/appointments");
+      openModal(
+        '',
+        EndConsultationModal,
+        {consultationId: sessionId}
+      )
+      // await endConsultation(sessionId);
+      
+      
+
+      // endCall();
+      // setStatus("ended");
+      // navigate("/patient/appointments");
     } catch (error) {
       console.error(error);
       toast.error(

@@ -1,14 +1,16 @@
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 let globalStreamPromise = null;
 let globalStream = null;
+let refCount = 0;
 
 export const useCamera = () => {
   const [stream, setStream] = useState(globalStream);
 
   useEffect(() => {
     let cancelled = false;
+    refCount++;
 
     const init = async () => {
       if (globalStream) {
@@ -35,6 +37,14 @@ export const useCamera = () => {
 
     return () => {
       cancelled = true;
+      refCount--;
+
+      //---- stop only when no users ----------
+      if (refCount === 0 && globalStream) {
+        globalStream.getTracks().forEach((track) => track.stop());
+        globalStream = null;
+        globalStreamPromise = null;
+      }
     };
   }, []);
 

@@ -63,39 +63,49 @@ const DoctorAvailability = () => {
   }, [selectedDate]);
 
   const generateSlots = () => {
-    if (!startTime || !endTime || duration <= 0) return;
-    const generated = [];
-    let cur = new Date(`1970-01-01T${startTime}:00`);
-    const endD = new Date(`1970-01-01T${endTime}:00`);
+  if (!startTime || !endTime || duration <= 0) return;
 
-    const now = new Date();
-    while (cur < endD) {
-      const next = new Date(cur.getTime() + duration * 60000);
-      if (next > endD) break;
-      const startStr = cur.toTimeString().slice(0, 5);
-      const endStr = next.toTimeString().slice(0, 5);
+  const generated = [];
+  let cur = new Date(`1970-01-01T${startTime}:00`);
+  const endD = new Date(`1970-01-01T${endTime}:00`);
 
-      const slotDateTime = new Date(selectedDate);
-      const [h, m] = startStr.split(":").map(Number);
-      slotDateTime.setHours(h, m, 0, 0);
+  const now = new Date();
+  const isToday =
+    selectedDate === new Date().toISOString().split("T")[0];
 
-      // if (selectedDate === new Date().toISOString().split("T")[0]) {
-      //   const diff = slotDateTime - now;
-      //   if (diff < 60 * 60 * 1000) {
-      //     cur = next;
-      //     continue;
-      //   }
-      // }
+  while (cur < endD) {
+    const next = new Date(cur.getTime() + duration * 60000);
+    if (next > endD) break;
 
-      const overlap = existingSlots.some(
-        (s) => s.start < endStr && s.end > startStr,
-      );
-      if (!overlap) generated.push({ start: startStr, end: endStr });
+    const startStr = cur.toTimeString().slice(0, 5);
+    const endStr = next.toTimeString().slice(0, 5);
+
+    // Build actual datetime for comparison
+    const slotDateTime = new Date(selectedDate);
+    const [h, m] = startStr.split(":").map(Number);
+    slotDateTime.setHours(h, m, 0, 0);
+
+    // Skip past slots ONLY for today
+    if (isToday && slotDateTime < now) {
       cur = next;
+      continue;
     }
-    setNewSlots(generated);
-    setSelectedSlots([]);
-  };
+
+    // overlap check with existing slots
+    const overlap = existingSlots.some(
+      (s) => s.start < endStr && s.end > startStr
+    );
+
+    if (!overlap) {
+      generated.push({ start: startStr, end: endStr });
+    }
+
+    cur = next;
+  }
+
+  setNewSlots(generated);
+  setSelectedSlots([]);
+};
 
   useEffect(() => {
     if (selectedDate) generateSlots();

@@ -16,7 +16,7 @@ import {
   submitDoctorPersonalInfo,
   submitDoctorProfessionalInfo,
 } from "../../../api/doctor/doctorApis";
-import { submitPatientPersonalInfo } from "../../../api/patient/patientApis";
+import { endConsultation, submitPatientPersonalInfo } from "../../../api/patient/patientApis";
 import { useUser } from "../../../contexts/UserContext";
 import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 import { Icon } from "@iconify/react";
@@ -548,3 +548,315 @@ export const AppointmentsActionModal = ({
   );
 };
 
+
+
+
+
+// const EndConsultationModal = ({ consultationId, closeModal }) => {
+  
+//   console.log('modal consultationid',consultationId)
+//   const [step, setStep] = useState("confirm"); 
+//   // confirm | review
+//   const [rating, setRating] = useState(0);
+//   const [review, setReview] = useState("");
+//   const [loading, setLoading] = useState(false);
+
+//   // ----------------  USER SAYS "NO REVIEW NEEDED" ----------------
+//   const handleYesContinue = () => {
+//     closeModal(); // stay in call
+//   };
+
+//   // ---------------- USER CHOOSES TO END ----------------
+//   const handleNoProceed = () => {
+//     setStep("review");
+//   };
+
+//   // ---------------- FINAL SUBMIT ----------------
+//   const handleSubmit = async (skip = false) => {
+//     try {
+//       setLoading(true);
+
+//       // submit review if provided
+//       if (!skip) {
+//         if (rating === 0) {
+//           toast.error("Please provide a rating or skip");
+//           setLoading(false);
+//           return;
+//         }
+
+
+//       }
+
+//       const res  = await endConsultation(consultationId);
+
+//       if(res.data.success){
+
+        
+//         socket.emit('consultation:end',{sessionId:consultationId})
+        
+//         toast.success("Consultation ended");
+//         closeModal();
+        
+//       }
+//     } catch (err) {
+//       toast.error(err?.response?.data?.message || "Something went wrong");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="flex flex-col gap-4">
+
+//       {/* ---------------- STEP 1 ---------------- */}
+//       {step === "confirm" && (
+//         <>
+//           <div className="text-center">
+//             <h2 className="text-lg font-semibold">
+//               End Consultation
+//             </h2>
+
+//             <p className="text-sm text-gray-600 mt-2">
+//               Is there anything else you’d like to discuss before we wrap up today?
+//             </p>
+//           </div>
+
+//           <div className="flex justify-end gap-3 mt-4">
+
+//             <PrimaryButton
+//               text="Yes"
+//               onClick={handleYesContinue}
+//               className="bg-green-600"
+//             />
+
+//             <button
+//               onClick={handleNoProceed}
+//               className="px-4 py-2 border rounded-md text-sm"
+//             >
+//               No
+//             </button>
+//           </div>
+//         </>
+//       )}
+
+//       {/* ---------------- STEP 2 ---------------- */}
+//       {step === "review" && (
+//         <>
+//           <div className="text-center">
+//             <h2 className="text-lg font-semibold">
+//               Rate your experience
+//             </h2>
+//             <p className="text-sm text-gray-500">
+//               Your feedback helps improve care quality
+//             </p>
+//           </div>
+
+//           {/* Rating */}
+//           <div className="flex justify-center gap-2 text-2xl">
+//             {[1,2,3,4,5].map((star) => (
+//               <button
+//                 key={star}
+//                 onClick={() => setRating(star)}
+//                 className={`${
+//                   star <= rating ? "text-yellow-500" : "text-gray-300"
+//                 }`}
+//               >
+//                 ★
+//               </button>
+//             ))}
+//           </div>
+
+//           {/* Review */}
+//           <textarea
+//             value={review}
+//             onChange={(e) => setReview(e.target.value)}
+//             placeholder="Write optional feedback..."
+//             className="border rounded-md p-2 text-sm w-full"
+//             rows={3}
+//           />
+
+//           {/* Actions */}
+//           <div className="flex justify-end gap-2 mt-2">
+
+//             <button
+//               onClick={() => handleSubmit(true)}
+//               className="px-4 py-2 border rounded-md text-sm"
+//               disabled={loading}
+//             >
+//               Skip
+//             </button>
+
+//             <PrimaryButton
+//               onClick={() => handleSubmit(false)}
+//               text={loading ? "Submitting..." : "Submit & End"}
+//             />
+//           </div>
+//         </>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default EndConsultationModal;
+
+
+import { socket } from "@/socket";
+import { submitReview } from "../../../api/patient/patientApis";
+import PrimaryButton from "@/components/shared/components/PrimaryButton";
+
+const EndConsultationModal = ({ consultationId, closeModal }) => {
+  const [step, setStep] = useState("confirm");
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [review, setReview] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (skip = false) => {
+  try {
+    setLoading(true);
+
+    let reviewError = false;
+
+    // --------- Submit review (non-blocking) ----------
+    if (!skip) {
+      if (rating === 0) {
+        toast.error("Please provide a rating or skip");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await submitReview(consultationId, {
+          rating,
+          review,
+        });
+
+        if (!res?.data?.success) {
+          reviewError = true;
+        }
+      } catch (err) {
+        reviewError = true;
+        console.error("Review failed:", err);
+      }
+    }
+
+    // --------- Always end consultation ----------
+    const res = await endConsultation(consultationId);
+
+    if (res?.data?.success) {
+      socket.emit("consultation:end", {
+        sessionId: consultationId,
+      });
+
+      if (reviewError) {
+        toast("Consultation ended (review not saved)", {
+          icon: "",
+        });
+      } else {
+        toast.success("Consultation ended");
+      }
+
+      closeModal();
+    }
+  } catch (err) {
+    toast.error(err?.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  return (
+    <div className="w-full">
+
+      {/* STEP 1 */}
+      {step === "confirm" && (
+        <>
+          <div className="text-center space-y-2">
+            <h2 className="text-xl font-semibold text-gray-800">
+              End Consultation?
+            </h2>
+            <p className="text-sm text-gray-500">
+              Do you want to wrap up now, or continue the session?
+            </p>
+          </div>
+
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => setStep("review")}
+              className="flex-1 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition"
+            >
+              End Now
+            </button>
+
+            <PrimaryButton
+              text="Continue"
+              onClick={closeModal}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            />
+          </div>
+        </>
+      )}
+
+      {/* STEP 2 */}
+      {step === "review" && (
+        <>
+          <div className="text-center space-y-1">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Rate Your Experience
+            </h2>
+            <p className="text-sm text-gray-500">
+              Your feedback helps us improve
+            </p>
+          </div>
+
+          {/* ---------- Rating -------- */}
+          <div className="flex justify-center gap-2 text-3xl mt-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHover(star)}
+                onMouseLeave={() => setHover(0)}
+                className={`transition transform hover:scale-125 ${
+                  star <= (hover || rating)
+                    ? "text-yellow-400"
+                    : "text-gray-300"
+                }`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+
+          {/* Review Box */}
+          <textarea
+            value={review}
+            onChange={(e) => setReview(e.target.value)}
+            placeholder="Write your feedback (optional)..."
+            className="w-full mt-3 p-3 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            rows={3}
+          />
+
+          {/* Actions */}
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => handleSubmit(true)}
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-lg border border-gray-300 hover:bg-gray-50 transition text-sm"
+            >
+              Skip
+            </button>
+
+            <PrimaryButton
+              onClick={() => handleSubmit(false)}
+              text={loading ? "Submitting..." : "Submit & End"}
+              className="flex-1"
+            />
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default EndConsultationModal;
