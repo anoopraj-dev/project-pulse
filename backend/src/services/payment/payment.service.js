@@ -13,6 +13,16 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+//-------- calculate slot duration --------------
+const calculateDuration = (startTime, endTime = null, fallback = 30) => {
+  if (!endTime) return fallback;
+
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+
+  return eh * 60 + em - (sh * 60 + sm);
+};
+
 // -------- CREATE ORDER ----------
 export const createOrderService = async (userId, body) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = body;
@@ -23,16 +33,21 @@ export const createOrderService = async (userId, body) => {
 
   validateAdvanceBooking(date, time, 1);
 
-  const slot = await DoctorAvailability.findOne({
+  const availability = await DoctorAvailability.findOne({
     doctorId,
     date: new Date(date),
-    "slots.startTime": time,
-    "slots.isBooked": false,
   });
+
+  const slot = availability.slots?.find(
+    (s) => s.startTime === time && !s.isBooked,
+  );
 
   if (!slot) {
     throw new Error("Selected slot not available");
   }
+
+  const duration =
+    slot?.duration || calculateDuration(slot.startTime, slot.endTime);
 
   const order = await razorpay.orders.create({
     amount: amount * 100,
@@ -48,6 +63,7 @@ export const createOrderService = async (userId, body) => {
     reason,
     notes,
     serviceType,
+    duration,
     status: "pending",
     isActive: false,
   });
@@ -217,14 +233,20 @@ export const walletPaymentService = async (userId, body) => {
 
   validateAdvanceBooking(date, time, 0);
 
-  const slot = await DoctorAvailability.findOne({
+  const availability = await DoctorAvailability.findOne({
     doctorId,
     date: new Date(date),
-    "slots.startTime": time,
-    "slots.isBooked": false,
   });
 
+  const slot = availability?.slots?.find(
+    (s) => s.startTime === time && !s.isBooked,
+  );
+
   if (!slot) throw new Error("Selected slot is not available");
+
+  const duration =
+    slot?.duration || calculateDuration(slot.startTime, slot.endTime);
+
 
   const wallet = await Wallet.findOne({
     userId,
@@ -246,6 +268,7 @@ export const walletPaymentService = async (userId, body) => {
     reason,
     notes,
     serviceType,
+    duration,
     status: "pending",
     isActive: false,
   });

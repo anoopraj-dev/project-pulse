@@ -23,30 +23,23 @@ const ConsultationVideo = ({
 
   const startTimeRef = useRef(null);
 
+  //-------- Call duration -------------
   useEffect(() => {
-    if (status !== "connected") return;
+  if (status !== "connected") return;
 
-    const key = `consultation_start_${participants?.consultationId}`;
+  if (!participants?.startTime) return;
 
-    let startTime = sessionStorage.getItem(key);
+  const startTime = new Date(participants.startTime).getTime();
+  startTimeRef.current = startTime;
 
-    //  fallback from backend
-    if (!startTime && participants?.startTime) {
-      startTime = new Date(participants.startTime).getTime();
-      sessionStorage.setItem(key, startTime);
-    }
+  const interval = setInterval(() => {
+    const diff = Math.floor((Date.now() - startTime) / 1000);
+    setCallDuration(diff);
+  }, 1000);
 
-    if (!startTime) return;
+  return () => clearInterval(interval);
+}, [status, participants?.startTime]);
 
-    startTimeRef.current = Number(startTime);
-
-    const interval = setInterval(() => {
-      const diff = Math.floor((Date.now() - startTimeRef.current) / 1000);
-      setCallDuration(diff);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [status, participants?.startTime, participants?.consultationId]);
   const isConnected = status === "connected";
 
   const fileInputRef = useRef(null);
@@ -302,7 +295,6 @@ const ConsultationVideo = ({
             </span>
           </button>
 
-          {/* End Call */}
           {/* End Call */}
           <button
             onClick={onEndCall}

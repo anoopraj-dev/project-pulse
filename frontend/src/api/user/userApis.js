@@ -88,3 +88,4 @@ export const getConsultationPDF = async (id, role) => {
 export const joinConsultation = async (consultationId,role) =>{
   return api.post(`/api/${role}/appointments/consultation/${consultationId}`)
 }
+

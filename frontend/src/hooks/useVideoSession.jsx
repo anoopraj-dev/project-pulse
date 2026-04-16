@@ -1,4 +1,3 @@
-
 import { useSocket } from "@/contexts/SocketContext";
 import { useEffect, useRef, useState } from "react";
 
@@ -109,10 +108,12 @@ export const useVideoSession = (sessionId, role, stream) => {
     if (isReconnectingRef.current) return;
     isReconnectingRef.current = true;
 
-    if (!pcRef.current) {
-  createPeerConnection();
-  return;
-}
+    let pc = pcRef.current;
+
+    if (!pc) {
+      pc = createPeerConnection();
+    }
+
     if (!pc) {
       isReconnectingRef.current = false;
       return;
@@ -129,13 +130,12 @@ export const useVideoSession = (sessionId, role, stream) => {
 
     isReconnectingRef.current = false;
   };
-
   // ---------------- STREAM SETUP ----------------
   useEffect(() => {
     if (!stream || stream.getTracks().length === 0) return;
 
-   if (localStreamRef.current === stream) return;
-   localStreamRef.current = stream;
+    if (localStreamRef.current === stream) return;
+    localStreamRef.current = stream;
 
     const audio = stream.getAudioTracks()[0];
     if (audio) audio.enabled = !isMuted;
@@ -176,6 +176,60 @@ export const useVideoSession = (sessionId, role, stream) => {
       sessionId,
       isOff: next,
     });
+  };
+
+  const endCall = () => {
+    try {
+      //---------- stop all media --------
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => {
+          track.stop();
+        });
+        localStreamRef.current = null;
+      }
+
+      if (localVideoRef.current) {
+        localVideoRef.current.pause();
+        localVideoRef.current.srcObject = null;
+        localVideoRef.current.load();
+      }
+
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.pause();
+        remoteVideoRef.current.srcObject = null;
+        remoteVideoRef.current.load();
+      }
+
+      //------------ clear tracks ----------
+      if (pcRef.current) {
+        pcRef.current.getSenders().forEach((sender) => {
+          if (sender.track) {
+            sender.track.stop();
+          }
+        });
+      }
+
+      //------------ clear remote feed ------------
+      if (remoteVideoRef.current?.srcObject) {
+        remoteVideoRef.current.srcObject
+          .getTracks()
+          .forEach((track) => track.stop());
+      }
+
+      //-------- close peer connection -----------
+      closePC();
+
+      setStatusSafe("ended");
+      setIsMuted(false);
+      setIsCameraOff(false);
+      setRemoteMuted(false);
+      setRemoteVideoOff(false);
+
+      callStartedRef.current = false;
+      isReconnectingRef.current = false;
+    } catch (error) {
+      console.log("Error ending call:", error);
+    }
   };
 
   // ---------------- SOCKET ----------------
@@ -276,16 +330,15 @@ export const useVideoSession = (sessionId, role, stream) => {
     });
 
     socket.on("consultation:ended", () => {
-      setStatusSafe("ended");
-      closePC();
+      endCall();
     });
 
     socket.on("consultation:camera-state", ({ isOff }) =>
-      setRemoteVideoOff(isOff)
+      setRemoteVideoOff(isOff),
     );
 
     socket.on("consultation:mute-state", ({ isMuted }) =>
-      setRemoteMuted(isMuted)
+      setRemoteMuted(isMuted),
     );
 
     socket.emit("consultation:join", { sessionId });
@@ -308,6 +361,7 @@ export const useVideoSession = (sessionId, role, stream) => {
 
   return {
     status,
+    setStatus,
     localVideoRef,
     remoteVideoRef,
     onToggleMute,
@@ -316,5 +370,6 @@ export const useVideoSession = (sessionId, role, stream) => {
     isCameraOff,
     remoteVideoOff,
     remoteMuted,
+    endCall,
   };
 };

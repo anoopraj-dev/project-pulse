@@ -105,32 +105,32 @@ const DoctorConsultationPage = () => {
     }
 
     try {
-      // ------- end consultation-------------
-      await endConsultation(sessionId);
+      const res = await endConsultation(sessionId);
 
-      // Fetch consultation details to get appointment ID
-      let appointmentId = null;
-      try {
-        const consultationDetails = await fetchPatientStats(sessionId);
-        appointmentId = consultationDetails.data.consultation.appointment._id;
-      } catch (error){
-        console.error("Error fetching consultation details:", error);
-        toast.error("Consultation ended, but failed to load appointment details");
-        navigate("/doctor/appointments");
-        return;
+      if(res.data.status === 'pending-confirmation'){
+        toast('Waiting for patients confirmation');
+        return ;
       }
-
-      // End the video call
-      endCall();
-      setStatus("ended");
-
-      // Navigate to appointment details page
-      navigate(`/doctor/appointments/${appointmentId.toString()}`);
     } catch (error) {
-      console.error("Error ending consultation:", error);
-      toast.error(error?.response?.data.message);
+      console.log(error);
     }
+     
   };
+
+
+  useEffect(() => {
+  const handler = () => {
+    endCall();
+    setStatus("ended");
+    navigate("/doctor/appointments");
+  };
+
+  socket.on("consultation:ended", handler);
+
+  return () => {
+    socket.off("consultation:ended", handler);
+  };
+}, []);
 
   const handleSubmitPrescription = async (e) => {
     e.preventDefault();

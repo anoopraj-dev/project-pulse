@@ -124,5 +124,10 @@ export const verifyWalletPayment = (payload) => {
 
 //-------------- consultation --------------
 export const endConsultation = (id) => {
+  console.log('consultaitonid',id)
   return api.patch(`/api/patient/appointments/consultation/${id}/end`)
 };
+
+export const submitReview = (id,data) =>{
+  return api.post(`/review/${id}`,data)
+}
