@@ -124,10 +124,31 @@ export const verifyWalletPayment = (payload) => {
 
 //-------------- consultation --------------
 export const endConsultation = (id) => {
-  console.log('consultaitonid',id)
   return api.patch(`/api/patient/appointments/consultation/${id}/end`)
 };
 
 export const submitReview = (id,data) =>{
   return api.post(`/api/patient/review/${id}`,data)
+}
+
+
+//--------------- dashboard ----------
+export const fetchDashboardStats = () =>{
+  return api.get('/api/patient/dashboard/stats')
+}
+
+export const fetchUpcomingAppointments = () =>{
+  return api.get('/api/patient/dashboard/upcoming-appointments')
+}
+
+export const fetchDashboardChart = () =>{
+  return api.get('/api/patient/dashboard/chart')
+}
+
+export const fetchPatientPrescriptions = () =>{
+  return api.get('/api/patient/dashboard/prescriptions')
+}
+
+export const fetchPatientVitals = () =>{
+  return api.get('/api/patient/dashboard/vitals')
 }

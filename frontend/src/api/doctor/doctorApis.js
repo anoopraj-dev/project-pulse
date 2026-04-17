@@ -121,3 +121,24 @@ export const endConsultation = (id) => {
 export const submitPrescription = (consultationId, prescriptionData) => {
   return api.post(`/api/doctor/appointments/consultation/${consultationId}/prescription`, prescriptionData)
 }
+
+//------------ dashboard ------------
+
+export const fetchDoctorStats =() =>{
+  return api.get(`/api/doctor/dashboard/stats`)
+}
+export const fetchDoctorRevenue = (rangeLabel) =>{
+  return api.get(`/api/doctor/dashboard/revenue? range=${rangeLabel}`)
+}
+
+export const fetchUpcomingAppointments = async () =>{
+  return api.get('/api/doctor/dashboard/upcoming-appointments');
+}
+
+export const fetchRecentPatients = async()=>{
+  return api.get('/api/doctor/dashboard/recent-patients')
+}
+
+export const fetchPatientReviews = async() =>{
+  return api.get('/api/doctor/dashboard/reviews')
+}

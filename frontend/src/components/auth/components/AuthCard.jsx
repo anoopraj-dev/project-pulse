@@ -157,7 +157,7 @@ const AuthCard = ({ role: initialRole }) => {
             ? role === "doctor"
               ? "/doctor/personal-info"
               : "/patient/personal-info"
-            : `/${role}/profile`;
+            : `/${role}/dashboard`;
 
           // refreshUser().catch(() => {});
           navigate(target, { replace: true });

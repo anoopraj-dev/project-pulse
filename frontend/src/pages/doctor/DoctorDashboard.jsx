@@ -4,6 +4,7 @@ import React from "react";
 import { useUser } from "@/contexts/UserContext";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import DoctorStatusBanner from "@/components/user/doctor/profile/DoctorStatusBanner";
+import Dashboard from "@/components/user/doctor/dashboard/dashboard";
 
 const DoctorDashboard = () => {
   const { user } = useUser();
@@ -22,6 +23,7 @@ const DoctorDashboard = () => {
       ) : (
         <>
           <PageBanner config={pageBannerConfig.doctorDashboard} />
+          <Dashboard/>
         </>
       )}
     </div>

@@ -20,8 +20,8 @@ const PublicRoute = ({ children }) => {
 
   if (isAuthenticated === true && isPublicPage) {
     const redirectMap = {
-      doctor: "/doctor/profile",
-      patient: "/patient/profile",
+      doctor: "/doctor/dashboard",
+      patient: "/patient/dashboard",
       admin: "/admin/dashboard",
     };
     return <Navigate to={redirectMap[role]} replace />;

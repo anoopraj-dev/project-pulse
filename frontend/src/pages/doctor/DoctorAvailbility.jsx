@@ -11,6 +11,14 @@ import {
 } from "@/api/doctor/doctorApis";
 import toast from "react-hot-toast";
 
+//-------- local date helper --------
+const getLocalDate = () => {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  const local = new Date(now.getTime() - offset * 60000);
+  return local.toISOString().split("T")[0];
+};
+
 const DoctorAvailability = () => {
   const { user } = useUser();
   const [selectedDate, setSelectedDate] = useState(null);
@@ -23,33 +31,61 @@ const DoctorAvailability = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [removingSlot, setRemovingSlot] = useState(null);
 
+  // -------------------------------
+  // FIX: consistent local date helper (NO UTC SHIFT)
+  // -------------------------------
+  const getLocalDate = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    return new Date(now.getTime() - offset * 60000)
+      .toISOString()
+      .split("T")[0];
+  };
+
+  // -------------------------------
+  // FIX: next 7 days must be LOCAL safe
+  // -------------------------------
   const getNext7Days = () => {
     const days = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
+
+      const offset = date.getTimezoneOffset();
+      const localDate = new Date(date.getTime() - offset * 60000)
+        .toISOString()
+        .split("T")[0];
+
       days.push({
         label: date.toLocaleDateString("en-US", { weekday: "short" }),
         day: date.getDate(),
         month: date.toLocaleDateString("en-US", { month: "short" }),
-        value: date.toISOString().split("T")[0],
+        value: localDate,
       });
     }
     return days;
   };
+
   const days = getNext7Days();
 
+  // -------------------------------
+  // FIX: initialize with LOCAL date
+  // -------------------------------
   useEffect(() => {
-    setSelectedDate(new Date().toISOString().split("T")[0]);
+    setSelectedDate(getLocalDate());
   }, []);
 
   const fetchAvailability = async () => {
     if (!selectedDate) return;
     try {
       const res = await getAvailability();
+
       if (res?.data?.success) {
         const allData = res.data.data;
+
+        // (unchanged logic, but now selectedDate is correct local date)
         const dayData = allData.find((d) => d.date === selectedDate);
+
         setExistingSlots(dayData ? dayData.slots : []);
         setSelectedSlots([]);
       }
@@ -62,50 +98,51 @@ const DoctorAvailability = () => {
     if (selectedDate) fetchAvailability();
   }, [selectedDate]);
 
+  // -------------------------------
+  // FIX: correct today comparison
+  // -------------------------------
   const generateSlots = () => {
-  if (!startTime || !endTime || duration <= 0) return;
+    if (!startTime || !endTime || duration <= 0) return;
 
-  const generated = [];
-  let cur = new Date(`1970-01-01T${startTime}:00`);
-  const endD = new Date(`1970-01-01T${endTime}:00`);
+    const generated = [];
+    let cur = new Date(`1970-01-01T${startTime}:00`);
+    const endD = new Date(`1970-01-01T${endTime}:00`);
 
-  const now = new Date();
-  const isToday =
-    selectedDate === new Date().toISOString().split("T")[0];
+    const now = new Date();
 
-  while (cur < endD) {
-    const next = new Date(cur.getTime() + duration * 60000);
-    if (next > endD) break;
+    // FIX: use local date instead of UTC
+    const isToday = selectedDate === getLocalDate();
 
-    const startStr = cur.toTimeString().slice(0, 5);
-    const endStr = next.toTimeString().slice(0, 5);
+    while (cur < endD) {
+      const next = new Date(cur.getTime() + duration * 60000);
+      if (next > endD) break;
 
-    // Build actual datetime for comparison
-    const slotDateTime = new Date(selectedDate);
-    const [h, m] = startStr.split(":").map(Number);
-    slotDateTime.setHours(h, m, 0, 0);
+      const startStr = cur.toTimeString().slice(0, 5);
+      const endStr = next.toTimeString().slice(0, 5);
 
-    // Skip past slots ONLY for today
-    if (isToday && slotDateTime < now) {
+      // FIX: correct slot datetime in LOCAL context
+      const slotDateTime = new Date(`${selectedDate}T${startStr}:00`);
+
+      // Skip past slots ONLY for today
+      if (isToday && slotDateTime < now) {
+        cur = next;
+        continue;
+      }
+
+      const overlap = existingSlots.some(
+        (s) => s.start < endStr && s.end > startStr,
+      );
+
+      if (!overlap) {
+        generated.push({ start: startStr, end: endStr });
+      }
+
       cur = next;
-      continue;
     }
 
-    // overlap check with existing slots
-    const overlap = existingSlots.some(
-      (s) => s.start < endStr && s.end > startStr
-    );
-
-    if (!overlap) {
-      generated.push({ start: startStr, end: endStr });
-    }
-
-    cur = next;
-  }
-
-  setNewSlots(generated);
-  setSelectedSlots([]);
-};
+    setNewSlots(generated);
+    setSelectedSlots([]);
+  };
 
   useEffect(() => {
     if (selectedDate) generateSlots();
@@ -128,23 +165,29 @@ const DoctorAvailability = () => {
       toast.error("Select a date and slots to save");
       return;
     }
+
     try {
       setIsSaving(true);
+
       let payload = selectedSlots.map((slot) => {
         const [start, end] = slot.split("-");
         return { date: selectedDate, start, end };
       });
+
       payload = payload.filter(
         (slot) =>
           !existingSlots.some(
             (e) => e.start === slot.start && e.end === slot.end,
           ),
       );
+
       if (payload.length === 0) {
         toast.error("No new slots to save. Duplicates ignored.");
         return;
       }
+
       const res = await saveAvailability(payload);
+
       if (res?.data?.success) {
         toast.success("Slots saved successfully");
         fetchAvailability();
@@ -161,13 +204,16 @@ const DoctorAvailability = () => {
 
   const handleRemoveSlot = async (slot) => {
     if (!selectedDate) return;
+
     try {
       setRemovingSlot(`${slot.start}-${slot.end}`);
+
       const res = await removeAvailabilitySlot({
         date: selectedDate,
         start: slot.start,
         end: slot.end,
       });
+
       if (res?.data?.success) {
         toast.success("Slot removed");
         fetchAvailability();
@@ -183,10 +229,189 @@ const DoctorAvailability = () => {
   };
 
   const isInvalidTime = startTime >= endTime;
+
   const bookedCount = existingSlots.filter((s) => s.isBooked).length;
   const savedCount = existingSlots.filter((s) => !s.isBooked).length;
+
   const allNewSelected =
     selectedSlots.length === newSlots.length && newSlots.length > 0;
+
+//   const { user } = useUser();
+//   const [selectedDate, setSelectedDate] = useState(null);
+//   const [startTime, setStartTime] = useState("09:00");
+//   const [endTime, setEndTime] = useState("17:00");
+//   const [duration, setDuration] = useState(30);
+//   const [existingSlots, setExistingSlots] = useState([]);
+//   const [newSlots, setNewSlots] = useState([]);
+//   const [selectedSlots, setSelectedSlots] = useState([]);
+//   const [isSaving, setIsSaving] = useState(false);
+//   const [removingSlot, setRemovingSlot] = useState(null);
+
+//   const getNext7Days = () => {
+//     const days = [];
+//     for (let i = 0; i < 7; i++) {
+//       const date = new Date();
+//       date.setDate(date.getDate() + i);
+//       days.push({
+//         label: date.toLocaleDateString("en-US", { weekday: "short" }),
+//         day: date.getDate(),
+//         month: date.toLocaleDateString("en-US", { month: "short" }),
+//         value: date.toISOString().split("T")[0],
+//       });
+//     }
+//     return days;
+//   };
+//   const days = getNext7Days();
+
+//   useEffect(() => {
+//     setSelectedDate(getLocalDate());
+//   }, []);
+
+//   const fetchAvailability = async () => {
+//     if (!selectedDate) return;
+//     try {
+//       const res = await getAvailability();
+
+//       console.log(res)
+//       if (res?.data?.success) {
+//         const allData = res.data.data;
+//         const dayData = allData.find((d) => d.date === selectedDate);
+//         setExistingSlots(dayData ? dayData.slots : []);
+//         setSelectedSlots([]);
+//       }
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (selectedDate) fetchAvailability();
+//   }, [selectedDate]);
+
+//   const generateSlots = () => {
+//   if (!startTime || !endTime || duration <= 0) return;
+
+//   const generated = [];
+//   let cur = new Date(`1970-01-01T${startTime}:00`);
+//   const endD = new Date(`1970-01-01T${endTime}:00`);
+
+//   const now = new Date();
+//   const isToday = selectedDate === getLocalDate();
+
+//   while (cur < endD) {
+//     const next = new Date(cur.getTime() + duration * 60000);
+//     if (next > endD) break;
+
+//     const startStr = cur.toTimeString().slice(0, 5);
+//     const endStr = next.toTimeString().slice(0, 5);
+
+//     // Build actual datetime for comparison
+//     const slotDateTime = new Date(selectedDate);
+//     const [h, m] = startStr.split(":").map(Number);
+//     slotDateTime.setHours(h, m, 0, 0);
+
+//     // Skip past slots ONLY for today
+//     if (isToday && slotDateTime < now) {
+//       cur = next;
+//       continue;
+//     }
+
+//     // overlap check with existing slots
+//     const overlap = existingSlots.some(
+//       (s) => s.start < endStr && s.end > startStr
+//     );
+
+//     if (!overlap) {
+//       generated.push({ start: startStr, end: endStr });
+//     }
+
+//     cur = next;
+//   }
+
+//   setNewSlots(generated);
+//   setSelectedSlots([]);
+// };
+
+//   useEffect(() => {
+//     if (selectedDate) generateSlots();
+//   }, [startTime, endTime, duration, existingSlots]);
+
+//   const toggleSlot = (slot) => {
+//     const key = `${slot.start}-${slot.end}`;
+//     setSelectedSlots((prev) =>
+//       prev.includes(key) ? prev.filter((s) => s !== key) : [...prev, key],
+//     );
+//   };
+
+//   const toggleSelectAll = () => {
+//     const allKeys = newSlots.map((s) => `${s.start}-${s.end}`);
+//     setSelectedSlots(selectedSlots.length === allKeys.length ? [] : allKeys);
+//   };
+
+//   const handleSaveAvailability = async () => {
+//     if (!selectedDate || selectedSlots.length === 0) {
+//       toast.error("Select a date and slots to save");
+//       return;
+//     }
+//     try {
+//       setIsSaving(true);
+//       let payload = selectedSlots.map((slot) => {
+//         const [start, end] = slot.split("-");
+//         return { date: selectedDate, start, end };
+//       });
+//       payload = payload.filter(
+//         (slot) =>
+//           !existingSlots.some(
+//             (e) => e.start === slot.start && e.end === slot.end,
+//           ),
+//       );
+//       if (payload.length === 0) {
+//         toast.error("No new slots to save. Duplicates ignored.");
+//         return;
+//       }
+//       const res = await saveAvailability(payload);
+//       if (res?.data?.success) {
+//         toast.success("Slots saved successfully");
+//         fetchAvailability();
+//       } else {
+//         toast.error(res?.data?.error || "Failed to save slots");
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Error saving slots");
+//     } finally {
+//       setIsSaving(false);
+//     }
+//   };
+
+//   const handleRemoveSlot = async (slot) => {
+//     if (!selectedDate) return;
+//     try {
+//       setRemovingSlot(`${slot.start}-${slot.end}`);
+//       const res = await removeAvailabilitySlot({
+//         date: selectedDate,
+//         start: slot.start,
+//         end: slot.end,
+//       });
+//       if (res?.data?.success) {
+//         toast.success("Slot removed");
+//         fetchAvailability();
+//       } else {
+//         toast.error(res?.data?.message || "Failed to remove slot");
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Error removing slot");
+//     } finally {
+//       setRemovingSlot(null);
+//     }
+//   };
+
+//   const isInvalidTime = startTime >= endTime;
+//   const bookedCount = existingSlots.filter((s) => s.isBooked).length;
+//   const savedCount = existingSlots.filter((s) => !s.isBooked).length;
+//   const allNewSelected =
+//     selectedSlots.length === newSlots.length && newSlots.length > 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 pb-16">

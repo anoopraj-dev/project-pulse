@@ -33,8 +33,8 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   // Role protection
   if (allowedRoles && !allowedRoles.includes(role)) {
     const redirectMap = {
-      doctor: "/doctor/profile",
-      patient: "/patient/profile",
+      doctor: "/doctor/dashboard",
+      patient: "/patient/dashboard",
       admin: "/admin/dashboard",
     };
 

@@ -24,6 +24,7 @@ import { viewPatientProfile } from "../controllers/doctorControllers/viewPatient
 import { searchController, searchSuggestionsController } from "../controllers/userControllers/search.controller.js";
 import { getConsultationDetails, joinConsultation, endConsultation, submitPrescription, generateConsultationPDF } from "../controllers/userControllers/consultation.controller.js";
 import { getPatientMedicalRecordsForDoctor } from "../controllers/patientControllers/medicalRecords.controller.js";
+import { doctorDashboardStats, doctorRevenue, patientFeedbacks, recentPatients, upcomingAppointments } from "../controllers/doctorControllers/dashboard.controller.js";
 
 const router = Router();
 
@@ -31,6 +32,13 @@ const router = Router();
 router.use(authenticateUser, authorizeRoles("doctor"));
 
 //------------- ROUTES---------------
+//----- Dashboard -------
+router.get('/dashboard/revenue',doctorRevenue);
+router.get('/dashboard/upcoming-appointments',upcomingAppointments);
+router.get('/dashboard/stats',doctorDashboardStats);
+router.get('/dashboard/recent-patients',recentPatients);
+router.get('/dashboard/reviews',patientFeedbacks)
+
 router.get("/profile", getDoctorProfile);
 
 router.post(

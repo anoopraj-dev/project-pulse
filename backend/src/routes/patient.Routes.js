@@ -54,6 +54,7 @@ import {
 } from "../controllers/patientControllers/wallet.controller.js";
 import { joinConsultation, endConsultation } from "../controllers/userControllers/consultation.controller.js";
 import { submitReviewController } from "../controllers/userControllers/review.controller.js";
+import { dashboardStats, patientDashboardChart, patientPrescriptions, patientUpcomingAppointments, patientVitals } from "../controllers/patientControllers/dashboard.controller.js";
 
 const router = Router();
 
@@ -61,6 +62,13 @@ const router = Router();
 router.use(authenticateUser, authorizeRoles("patient"));
 
 //------------- ROUTES----------------
+//------- Dashboard -------------
+router.get('/dashboard/stats',dashboardStats)
+router.get('/dashboard/upcoming-appointments',patientUpcomingAppointments);
+router.get('/dashboard/chart',patientDashboardChart);
+router.get('/dashboard/prescriptions',patientPrescriptions);
+router.get('/dashboard/vitals',patientVitals);
+
 router.get("/profile", getPatientProfile);
 router.post(
   "/personal-info",
