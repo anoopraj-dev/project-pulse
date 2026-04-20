@@ -6,6 +6,20 @@ export const fetchDashboardStats = async () => {
   return response.data;
 };
 
+export const fetchRevenueOverview = async () => {
+  const response = await api.get('/api/admin/dashboard/revenue');
+  return response.data
+}
+
+export const fetchDashboardCounts = async() =>{
+  const response = await api.get('/api/admin/dashboard/stats');
+  return response.data
+}
+
+export const fetchUserGrowth = async () => {
+  const response = await api.get('/api/admin/dashboard/user-growth');
+  return response.data
+}
 
 
 // --------Get doctor for review ------------

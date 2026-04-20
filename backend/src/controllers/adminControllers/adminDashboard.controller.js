@@ -4,6 +4,9 @@ import {
   getPendingDoctorProfileService,
   getDoctorDocumentsService,
   getAdminNotificationsService,
+  dashboardCountsService,
+  revenueOverviewService,
+  userGrowthService,
 } from "../../services/admin/dashboard.service.js";
 
 //------------- GET ADMIN DASHBOARD -------------
@@ -48,3 +51,60 @@ export const getAdminNotifications = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
 };
+
+
+
+export const dashboardCounts = async (req, res) => {
+  try {
+    const counts = await dashboardCountsService(); 
+
+    return res.status(200).json({
+      success: true,
+      data: counts,
+    });
+  } catch (error) {
+    console.error("Counts controller error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard counts",
+    });
+  }
+};
+
+//------------- Dashboard revenue -----------
+export const revenueDashboardOverview = async (req,res) => {
+  try {
+    const data = await revenueOverviewService();
+  res.status(200).json({
+    success:true,
+    message:'Fetched revenue over view',
+    data
+  })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success:false,
+      message:error
+    })
+  }
+}
+
+//------------- Dashboard user growth -------------
+export const dashboardUserGrowth = async(req , res) =>{
+  try {
+    const data = await userGrowthService();
+
+    res.status(200).json({
+      success:true,
+      data,
+    })
+  } catch (error) {
+    console.log('Controller error:',error);
+
+    return status(500).json({
+      success:false,
+      message:'Failed to fetch user growth'
+    })
+  }
+}

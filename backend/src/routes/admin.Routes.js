@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateUser} from "../middlewares/authenticateUser.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
-import { getAdminDashboard, getDoctorDocuments, getPendingDoctorProfile,getAdminNotifications } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { getAdminDashboard, getDoctorDocuments, getPendingDoctorProfile,getAdminNotifications, dashboardCounts, revenueDashboardOverview, dashboardUserGrowth } from "../controllers/adminControllers/adminDashboard.controller.js";
 import { approveDoctorsRequest,rejectDoctorsRequest,blockDoctorProfile,unblockDoctorProfile,revokeDoctorStatus,getAllDoctors } from "../controllers/adminControllers/adminViewDoctors.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 import { searchSuggestionsController,searchController } from "../controllers/userControllers/search.controller.js";
@@ -12,8 +12,15 @@ const router = Router();
 //-------------MIDDLEWARES -----------
 router.use(authenticateUser,authorizeRoles('admin'))
 
+
+
 //--------------ROUTES-------------
 router.get('/dashboard',getAdminDashboard)
+
+router.get('/dashboard/stats',dashboardCounts)
+router.get('/dashboard/revenue',revenueDashboardOverview)
+router.get('/dashboard/user-growth',dashboardUserGrowth)
+
 router.get('/doctor/:id',getPendingDoctorProfile)
 router.get('/doctor/:id/documents', getDoctorDocuments)
 
