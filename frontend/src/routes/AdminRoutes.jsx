@@ -10,6 +10,7 @@ import ViewPatients from "../pages/admin/ViewPatients";
 import PatientProfileView from "../pages/admin/PatientProfileView";
 import ViewAppointments from "@/pages/admin/ViewAppointments";
 import NotFound from "@/pages/NotFound";
+import SupportCenter from "@/pages/admin/SupportCenter";
 
 const AdminRoutes = () => {
   return useRoutes([
@@ -27,6 +28,7 @@ const AdminRoutes = () => {
         { path: "patients", element: <ViewPatients /> },
         { path: "patient/:id", element: <PatientProfileView /> },
         { path: "appointments", element: <ViewAppointments /> },
+        { path: "support-center", element: <SupportCenter/> },
       ],
     },
 

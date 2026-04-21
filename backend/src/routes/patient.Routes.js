@@ -55,6 +55,8 @@ import {
 import { joinConsultation, endConsultation } from "../controllers/userControllers/consultation.controller.js";
 import { submitReviewController } from "../controllers/userControllers/review.controller.js";
 import { dashboardStats, patientDashboardChart, patientPrescriptions, patientUpcomingAppointments, patientVitals } from "../controllers/patientControllers/dashboard.controller.js";
+import { changePassword, createSupportTicket, supportTickets } from "../controllers/userControllers/support.controller.js";
+import { getExportStatus, requestPatientExport } from "../controllers/patientControllers/export.controller.js";
 
 const router = Router();
 
@@ -126,5 +128,12 @@ router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
 
 //---------- Review and rating -------------
 router.post('/review/:id',submitReviewController)
+
+//---------- Support and Settings -----------
+router.post('/support/ticket',createSupportTicket);
+router.get('/support/tickets',supportTickets);
+router.patch('/support/change-password',changePassword);
+router.post('/support/accountInfo',requestPatientExport);
+router.get('/support/export-status/:id',getExportStatus)
 
 export default router;

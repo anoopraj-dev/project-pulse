@@ -152,3 +152,25 @@ export const fetchPatientPrescriptions = () =>{
 export const fetchPatientVitals = () =>{
   return api.get('/api/patient/dashboard/vitals')
 }
+
+//-------------- Support and Settings -------------
+
+export const createSupportTicket = (data) =>{
+  return api.post('/api/patient/support/ticket',data)
+}
+
+export const fetchSupportTickets = () =>{
+  return api.get('/api/patient/support/tickets')
+}
+
+export const changePassword = (data) =>{
+  return api.patch('/api/patient/support/change-password',data)
+}
+
+export const requestExportAccountInfo = () =>{
+  return api.post('/api/patient/support/accountInfo')
+}
+
+export const getExportStatus = (id) =>{
+  return api.get(`/api/patient/support/export-status/${id}`)
+}

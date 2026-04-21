@@ -22,6 +22,7 @@ app.use(cookieParser())
 app.use(express.json())
 
 app.use(express.static("public"));
+app.use('/exports',express.static(path.join(process.cwd(),'exports')))
 
 
 app.use(
@@ -66,11 +67,6 @@ app.use('/api',userRoutes)
 //------ webhook routes ------------
 app.use('/webhooks',webhookRoutes)
 
-// router.post(
-//   'api/webhook/razorpay',
-//   express.raw({ type: 'application/json' }), // ---------- for signature verification
-//   handleRazorpayWebhook
-// );
 
 
 

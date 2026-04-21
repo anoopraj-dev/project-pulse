@@ -42,9 +42,9 @@ export const patientSidebarMenu = [
     path: "/patient/wallet",
   },
   {
-    label: "Settings",
+    label: "Support Center",
     icon: "mdi:settings",
-    path: "/patient/settings",
+    path: "/patient/support-center",
   },
 ];
 
@@ -86,9 +86,9 @@ export const doctorSidebarMenu = [
     path: "/doctor/wallet",
   },
   {
-    label: "Settings",
+    label: "Support Center",
     icon: "mdi:cog",
-    path: "/doctor/settings",
+    path: "/doctor/support-center",
   },
 ];
 
@@ -128,8 +128,8 @@ export const adminSidebarMenu = [
   //   path: "/admin/payments",
   // },
   {
-    label: "Settings",
+    label: "Support Center",
     icon: "mdi:cog",
-    path: "/admin/settings",
+    path: "/admin/support-center",
   },
 ];
