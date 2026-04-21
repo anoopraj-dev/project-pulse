@@ -1,44 +1,38 @@
 import Export from "../../models/export.model.js";
 import { exportQueue } from "../../queues/export.queue.js";
 
-export const requestPatientExport = async (req, res) => {
-  try {
-    console.log("Incoming export request");
+// --------- REQUEST DOCTOR EXPORT ----------
 
-    const patientId = req.user?.id;
-    console.log("Patient ID:", patientId);
+export const requestDoctorExport = async (req, res) => {
+  try {
+    const doctorId = req.user?.id;
 
     const job = await Export.create({
-      patient: patientId,
-      role: "patient",
+      doctor: doctorId,
+      role: "doctor",
       status: "queued",
+      reportType: "doctor_full",
     });
-
-    console.log("DB job created:", job._id);
 
     await exportQueue.add("export", {
       exportId: job._id,
-      reportType: "patient_full",
-      entityId: patientId,
+      reportType: "doctor_full",
+      entityId: doctorId,
+      filters: {},
     });
-
-    console.log("Job added to queue");
 
     return res.status(202).json({
       success: true,
       exportId: job._id,
     });
   } catch (err) {
-    console.error("EXPORT ERROR:", err);
-
     return res.status(500).json({
       error: err.message,
-      stack: err.stack,
     });
   }
 };
-
-export const getExportStatus = async (req, res) => {
+//-------------- GET EXPORT STATUS -------------
+export const getDoctorExportStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -51,8 +45,8 @@ export const getExportStatus = async (req, res) => {
       });
     }
 
-    // -------- security check ------------
-    if (job.patient.toString() !== req.user.id) {
+    // -------------- Security Check --------------
+    if (!job.doctor || job.doctor.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
         message: "Unauthorized",
@@ -61,7 +55,7 @@ export const getExportStatus = async (req, res) => {
 
     return res.json({
       success: true,
-      status: job.status, // queued | processing | completed | failed
+      status: job.status,
       fileUrl: job.fileUrl || null,
     });
   } catch (err) {

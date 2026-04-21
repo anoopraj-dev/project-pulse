@@ -3,6 +3,9 @@ import SystemAlert from "../../models/systemAlert.model.js";
 import Escalation from "../../models/escalation.model.js";
 import bcrypt from "bcryptjs";
 import Patient from "../../models/patient.model.js";
+import Doctor from '../../models/doctor.model.js'
+import Admin from '../../models/admin.model.js'
+
 
 //--------- SUPPORT TICKETS -------------
 
@@ -63,21 +66,40 @@ export const resolveEscalationService = async (id) => {
   );
 };
 
+//----------- Helper (identify role) ---------
+const getModelByRole = (role) => {
+  switch (role) {
+    case "patient":
+      return Patient;
+    case "doctor":
+      return Doctor;
+    case "admin":
+      return Admin;
+    default:
+      throw new Error("Invalid role");
+  }
+};
+
 
 //------------- Change Password -------------
 export const changePasswordService = async (
-  patientId,
+  role,
+  userId,
   currentPassword,
   newPassword
 ) => {
-  const patient = await Patient.findById(patientId);
 
-  if (!patient) {
-    throw new Error("Patient not found");
+  console.log('role in service',role)
+  const Model = getModelByRole(role);
+
+  const user = await Model.findById(userId);
+
+  if (!user) {
+    throw new Error(`${role} not found`);
   }
 
   // check current password
-  const isMatch = await bcrypt.compare(currentPassword, patient.password);
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
 
   if (!isMatch) {
     const error = new Error("Current password is incorrect");
@@ -85,7 +107,7 @@ export const changePasswordService = async (
     throw error;
   }
 
-  // ---------------- password strength check ----------------
+  // password strength
   const isValid =
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/.test(
       newPassword
@@ -99,25 +121,18 @@ export const changePasswordService = async (
     throw error;
   }
 
-  // prevent same password reuse
-  const isSamePassword = await bcrypt.compare(
-    newPassword,
-    patient.password
-  );
+  // prevent reuse
+  const isSame = await bcrypt.compare(newPassword, user.password);
 
-  if (isSamePassword) {
-    const error = new Error(
-      "New password cannot be same as current password"
-    );
+  if (isSame) {
+    const error = new Error("New password cannot be same as current password");
     error.statusCode = 400;
     throw error;
   }
 
-  // hash & save
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-  patient.password = hashedPassword;
-
-  await patient.save();
+  // hash + save
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
 
   return true;
 };

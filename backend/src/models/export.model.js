@@ -26,6 +26,12 @@ const exportSchema = new mongoose.Schema(
       default: "queued",
     },
 
+    fileType: { 
+      type: String,
+       enum: ["pdf", "csv"],
+        default: "pdf"
+       },
+
     fileUrl: {
       type: String,
       default: null,
@@ -33,7 +39,7 @@ const exportSchema = new mongoose.Schema(
 
     error: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Export", exportSchema);

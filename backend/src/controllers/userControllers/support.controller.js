@@ -180,12 +180,14 @@ export const resolveEscalation = async (req, res, next) => {
   }
 };
 
+//------------ Change Password ------------
 export const changePassword = async ( req , res) =>{
    try {
      const patientId = req.user.id;
 
-    const {currentPassword,newPassword} = req.body;
-    await changePasswordService(patientId,currentPassword,newPassword);
+    const {currentPassword,newPassword,role} = req.body;
+    console.log('role',role)
+    await changePasswordService(role,patientId,currentPassword,newPassword);
 
     return res.status(200).json({
         success:true,

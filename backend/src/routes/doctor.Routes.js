@@ -25,6 +25,8 @@ import { searchController, searchSuggestionsController } from "../controllers/us
 import { getConsultationDetails, joinConsultation, endConsultation, submitPrescription, generateConsultationPDF } from "../controllers/userControllers/consultation.controller.js";
 import { getPatientMedicalRecordsForDoctor } from "../controllers/patientControllers/medicalRecords.controller.js";
 import { doctorDashboardStats, doctorRevenue, patientFeedbacks, recentPatients, upcomingAppointments } from "../controllers/doctorControllers/dashboard.controller.js";
+import { changePassword, createSupportTicket, supportTickets } from "../controllers/userControllers/support.controller.js";
+import { getDoctorExportStatus, requestDoctorExport } from "../controllers/doctorControllers/export.controller.js";
 
 const router = Router();
 
@@ -103,5 +105,12 @@ router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
 
 //------------- patient medical records -----------
 router.get('/appointments/patient-records/:patientId', getPatientMedicalRecordsForDoctor)
+
+//------------- Support and Setting ------------
+router.patch('/support/change-password',changePassword);
+router.post('/support/ticket',createSupportTicket);
+router.get('/support/tickets',supportTickets);
+router.post('/support/accountInfo',requestDoctorExport)
+router.get('/support/export-status/:id',getDoctorExportStatus)
 
 export default router;

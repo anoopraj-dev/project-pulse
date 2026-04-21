@@ -142,3 +142,25 @@ export const fetchRecentPatients = async()=>{
 export const fetchPatientReviews = async() =>{
   return api.get('/api/doctor/dashboard/reviews')
 }
+
+//---------- Support and Settings ------------
+
+export const fetchSupportTickets = async() =>{
+  return api.get(`/api/doctor/support/tickets`)
+}
+
+export const createSupportTicket = async(data) =>{
+  return api.post('/api/doctor/support/ticket',data)
+}
+
+export const changePassword =async (data)=>{
+  return api.patch('/api/doctor/support/change-password',data);
+}
+
+export const requestExportAccountInfo = ()=>{
+  return api.post('/api/doctor/support/accountInfo')
+}
+
+export const getExportStatus = (id) =>{
+  return api.get(`/api/doctor/support/export-status/${id}`)
+}
