@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser'
 import session from 'express-session'
 import path from 'path'
 import { fileURLToPath } from 'url';
+import { monitorMiddleware } from './middlewares/monitor.js';
 
 const app = express();
 
@@ -37,6 +38,8 @@ app.use(
     })
 )
 
+app.use(monitorMiddleware)
+
 app.use(cors({
   origin: 'http://localhost:5173',  // Vite default port
   credentials: true,
@@ -46,8 +49,6 @@ app.use(cors({
 
 
 app.options('/api/doctor/file-upload', cors());  // Handle preflight
-
-// app.use(express.static(path.join(__dirname, "public")));
 
 //----------- auth routes-----------------
 app.use('/api/auth',authRoutes);

@@ -136,7 +136,13 @@ const PatientSupportPage = () => {
         return toast.error("Please fill all fields");
       }
 
-      const res = await changePassword(passwordData);
+      const role = 'patient'
+      const data = {
+        ...passwordData,
+        role
+      }
+
+      const res = await changePassword(data);
 
       if (res?.data?.success) {
         toast.success("Password updated successfully");

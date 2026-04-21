@@ -1,45 +1,14 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-
-// ---------------- MOCK DATA ----------------
-const mockTickets = [
-  {
-    id: 1,
-    title: "Cannot book appointment",
-    message: "I am unable to confirm booking after payment",
-    priority: "high",
-    status: "open",
-  },
-  {
-    id: 2,
-    title: "Refund request",
-    message: "Payment deducted but appointment failed",
-    priority: "medium",
-    status: "in-progress",
-  },
-  {
-    id: 3,
-    title: "App slow issue",
-    message: "Doctor search takes too long to load",
-    priority: "low",
-    status: "open",
-  },
-];
-
-const mockAlerts = [
-  {
-    id: 1,
-    title: "Payment failure spike detected",
-    desc: "12 failed transactions in last 1 hour",
-    severity: "high",
-  },
-  {
-    id: 2,
-    title: "Doctor verification backlog",
-    desc: "8 doctors pending > 7 days",
-    severity: "medium",
-  },
-];
+import { toast } from "react-hot-toast";
+import {
+  changePassword,
+  fetchSupportTickets,
+  fetchSystemAlerts,
+  updateAlertStatus,
+  updateTicketStatus,
+} from "@/api/admin/adminApis";
 
 // ---------------- UI COMPONENTS ----------------
 const Card = ({ children }) => (
@@ -48,19 +17,15 @@ const Card = ({ children }) => (
   </div>
 );
 
-const CardHeader = ({ icon, title, subtitle, right, iconBg, iconColor }) => (
+const CardHeader = ({ icon, title, subtitle, right }) => (
   <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
     <div className="flex items-center gap-3">
-      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${iconBg}`}>
-        <Icon icon={icon} className={`w-4 h-4 ${iconColor}`} />
-      </div>
+      <Icon icon={icon} className="w-4 h-4 text-gray-600 dark:text-gray-300" />
       <div>
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
           {title}
         </h2>
-        {subtitle && (
-          <p className="text-[11px] text-gray-400">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-[11px] text-gray-400">{subtitle}</p>}
       </div>
     </div>
     {right}
@@ -71,33 +36,161 @@ const CardHeader = ({ icon, title, subtitle, right, iconBg, iconColor }) => (
 const SupportCenter = () => {
   const [tab, setTab] = useState("operations");
 
+  const [tickets, setTickets] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+
+  const [ticketTab, setTicketTab] = useState("active");
+  const [alertTab, setAlertTab] = useState("active");
+
+  const [loadingId, setLoadingId] = useState(null);
+
+  // ---------------- PASSWORD STATE ----------------
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+  });
+
+  useEffect(() => {
+    const getData = async () => {
+      const [tRes, aRes] = await Promise.allSettled([
+        fetchSupportTickets(),
+        fetchSystemAlerts(),
+      ]);
+
+      setTickets(
+        tRes.status === "fulfilled" ? tRes.value.data?.data || [] : []
+      );
+
+      setAlerts(
+        aRes.status === "fulfilled" ? aRes.value.data?.data || [] : []
+      );
+    };
+
+    getData();
+  }, []);
+
+  // ---------------- STATUS HANDLERS ----------------
+  const handleUpdateTicketStatus = async (id, status) => {
+    try {
+      setLoadingId(id);
+
+      const res = await updateTicketStatus(id, status);
+
+      if (res.data?.success) {
+        toast.success("Ticket status updated");
+
+        setTickets((prev) =>
+          prev.map((t) => (t._id === id ? { ...t, status } : t))
+        );
+      } else {
+        toast.error("Failed to update ticket");
+      }
+    } catch (err) {
+      toast.error("Failed to update ticket");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleUpdateAlertStatus = async (id, status) => {
+    try {
+      setLoadingId(id);
+
+      const res = await updateAlertStatus(id, status);
+
+      if (res.data?.success) {
+        toast.success("Alert status updated");
+
+        setAlerts((prev) =>
+          prev.map((a) => (a._id === id ? { ...a, status } : a))
+        );
+      } else {
+        toast.error("Failed to update alert");
+      }
+    } catch (err) {
+      toast.error("Failed to update alert");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  // ---------------- PASSWORD HANDLER ----------------
+  const handleChangePassword = async () => {
+    const { currentPassword, newPassword } = passwords;
+
+    if (!currentPassword || !newPassword) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      toast.error("New password must be different");
+      return;
+    }
+
+    const payload = {
+      currentPassword,
+      newPassword,
+      role: "admin",
+    };
+
+    try {
+      const res = await changePassword(payload);
+
+      if (res.data?.success) {
+        toast.success("Password updated successfully");
+
+        setPasswords({
+          currentPassword: "",
+          newPassword: "",
+        });
+      } else {
+        toast.error("Failed to update password");
+      }
+    } catch (err) {
+      toast.error("Failed to update password");
+    }
+  };
+
+  // ---------------- FILTERS ----------------
+  const filteredTickets = tickets.filter((t) => {
+    if (ticketTab === "active")
+      return t.status !== "closed" && t.status !== "resolved";
+    if (ticketTab === "resolved") return t.status === "resolved";
+    return t.status === "closed";
+  });
+
+  const filteredAlerts = alerts.filter((a) => {
+    if (alertTab === "active") return a.status !== "resolved";
+    return a.status === "resolved";
+  });
+
+  // ---------------- STATS ----------------
+  const openTickets = tickets.filter((t) => t.status !== "closed").length;
+  const activeAlerts = alerts.filter((a) => a.status !== "resolved").length;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
-      <div className="w-full max-w-7xl mx-auto px-4 py-6 pb-16">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-4 py-6">
 
         {/* HEADER */}
-        <div className="mb-5">
-          <h1 className="text-lg font-semibold text-gray-800 dark:text-white">
-            Support Center
-          </h1>
-          <p className="text-xs text-gray-400">
-            Operations, alerts, and system control
-          </p>
-        </div>
+        <h1 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          Support Center
+        </h1>
 
-        {/* TABS */}
+        {/* MAIN TABS */}
         <div className="flex gap-2 mb-4">
           {["operations", "settings"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-3 py-1.5 text-xs rounded-lg border transition ${
+              className={`px-3 py-1.5 text-xs rounded-lg border ${
                 tab === t
-                  ? "bg-blue-50 border-blue-200 text-blue-600 dark:bg-blue-950 dark:border-blue-900"
-                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-500"
+                  ? "bg-blue-50 border-blue-200 text-blue-600"
+                  : "bg-white border-gray-200 text-gray-500"
               }`}
             >
-              {t === "operations" ? "Operations" : "System Config"}
+              {t === "operations" ? "Operations" : "Settings"}
             </button>
           ))}
         </div>
@@ -105,152 +198,188 @@ const SupportCenter = () => {
         {/* ---------------- OPERATIONS ---------------- */}
         {tab === "operations" && (
           <>
-            {/* TOP STATS */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-
+            {/* STATS */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <Card>
                 <CardHeader
                   icon="mdi:email-outline"
-                  iconBg="bg-blue-50 dark:bg-blue-950"
-                  iconColor="text-blue-600"
                   title="User Queries"
-                  subtitle="Open support tickets"
-                  right={<span className="text-xs font-semibold">3 open</span>}
+                  subtitle="Open tickets"
+                  right={<span>{openTickets}</span>}
                 />
-                <div className="p-4 text-sm text-gray-500">
-                  Handle user complaints & requests
-                </div>
               </Card>
 
-              <Card>
-                <CardHeader
-                  icon="mdi:alert-circle"
-                  iconBg="bg-red-50 dark:bg-red-950"
-                  iconColor="text-red-600"
-                  title="System Alerts"
-                  subtitle="Critical system issues"
-                  right={<span className="text-xs font-semibold">2 active</span>}
-                />
-                <div className="p-4 text-sm text-gray-500">
-                  Monitor backend & payment health
-                </div>
-              </Card>
-
-              <Card>
-                <CardHeader
-                  icon="mdi:clock-outline"
-                  iconBg="bg-purple-50 dark:bg-purple-950"
-                  iconColor="text-purple-600"
-                  title="Escalations"
-                  subtitle="High priority issues"
-                  right={<span className="text-xs font-semibold">1 urgent</span>}
-                />
-                <div className="p-4 text-sm text-gray-500">
-                  Requires immediate admin action
-                </div>
-              </Card>
-
-            </div>
-
-            {/* MAIN GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-              {/* TICKETS */}
-              <Card>
-                <CardHeader
-                  icon="mdi:inbox"
-                  iconBg="bg-blue-50 dark:bg-blue-950"
-                  iconColor="text-blue-600"
-                  title="Support Inbox"
-                  subtitle="User submitted queries"
-                />
-
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockTickets.map((t) => (
-                    <div key={t.id} className="px-4 py-3 flex justify-between">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-800 dark:text-white">
-                          {t.title}
-                        </p>
-                        <p className="text-[11px] text-gray-400">
-                          {t.message}
-                        </p>
-                      </div>
-
-                      <span className={`text-[10px] font-semibold ${
-                        t.priority === "high"
-                          ? "text-red-500"
-                          : t.priority === "medium"
-                          ? "text-orange-500"
-                          : "text-green-500"
-                      }`}>
-                        {t.priority.toUpperCase()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* ALERTS */}
               <Card>
                 <CardHeader
                   icon="mdi:alert"
-                  iconBg="bg-red-50 dark:bg-red-950"
-                  iconColor="text-red-600"
                   title="System Alerts"
-                  subtitle="Live system issues"
+                  subtitle="Active issues"
+                  right={<span>{activeAlerts}</span>}
+                />
+              </Card>
+            </div>
+
+            {/* MAIN GRID */}
+            <div className="grid lg:grid-cols-2 gap-4">
+
+              {/* ---------------- TICKETS ---------------- */}
+              <Card>
+                <CardHeader
+                  icon="mdi:inbox"
+                  title="Support Inbox"
+                  subtitle="Manage tickets"
                 />
 
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockAlerts.map((a) => (
-                    <div key={a.id} className="px-4 py-3 flex justify-between">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-800 dark:text-white">
-                          {a.title}
-                        </p>
-                        <p className="text-[11px] text-gray-400">
-                          {a.desc}
-                        </p>
-                      </div>
+                {/* Ticket Tabs */}
+                <div className="flex gap-2 p-3">
+                  {["active", "resolved", "closed"].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTicketTab(t)}
+                      className={`px-2 py-1 text-xs rounded ${
+                        ticketTab === t
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
 
-                      <span className={`text-[10px] font-semibold ${
-                        a.severity === "high"
-                          ? "text-red-500"
-                          : "text-orange-500"
-                      }`}>
-                        {a.severity.toUpperCase()}
-                      </span>
+                <div className="divide-y">
+                  {filteredTickets.map((t) => (
+                    <div key={t._id} className="p-4">
+                      <p className="text-xs font-semibold">{t.title}</p>
+                      <p className="text-[11px] text-gray-400">{t.message}</p>
+
+                      <div className="flex gap-2 mt-2">
+                        {t.status !== "resolved" && (
+                          <button
+                            disabled={loadingId === t._id}
+                            onClick={() =>
+                              handleUpdateTicketStatus(t._id, "resolved")
+                            }
+                            className="text-[10px] px-2 py-1 bg-green-100 text-green-600 rounded"
+                          >
+                            Resolve
+                          </button>
+                        )}
+
+                        {t.status !== "closed" && (
+                          <button
+                            disabled={loadingId === t._id}
+                            onClick={() =>
+                              handleUpdateTicketStatus(t._id, "closed")
+                            }
+                            className="text-[10px] px-2 py-1 bg-gray-200 rounded"
+                          >
+                            Close
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               </Card>
 
+              {/* ---------------- ALERTS ---------------- */}
+              <Card>
+                <CardHeader
+                  icon="mdi:alert"
+                  title="System Alerts"
+                  subtitle="Manage alerts"
+                />
+
+                {/* Alert Tabs */}
+                <div className="flex gap-2 p-3">
+                  {["active", "resolved"].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setAlertTab(t)}
+                      className={`px-2 py-1 text-xs rounded ${
+                        alertTab === t
+                          ? "bg-red-100 text-red-600"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="divide-y">
+                  {filteredAlerts.map((a) => (
+                    <div key={a._id} className="p-4">
+                      <p className="text-xs font-semibold">{a.title}</p>
+                      <p className="text-[11px] text-gray-400">{a.desc}</p>
+
+                      {a.status !== "resolved" && (
+                        <button
+                          disabled={loadingId === a._id}
+                          onClick={() =>
+                            handleUpdateAlertStatus(a._id, "resolved")
+                          }
+                          className="mt-2 text-[10px] px-2 py-1 bg-green-100 text-green-600 rounded"
+                        >
+                          Mark Resolved
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </div>
           </>
         )}
 
-        {/* ---------------- SETTINGS PLACEHOLDER ---------------- */}
+        {/* ---------------- SETTINGS ---------------- */}
         {tab === "settings" && (
           <Card>
             <CardHeader
               icon="mdi:cog"
-              iconBg="bg-gray-100 dark:bg-gray-800"
-              iconColor="text-gray-600"
-              title="System Configuration"
-              subtitle="Platform settings & feature toggles"
+              title="Settings"
+              subtitle="Change password"
             />
-            <div className="p-6 text-sm text-gray-500">
-              This section will include:
-              <ul className="mt-2 list-disc ml-5 space-y-1">
-                <li>Feature toggles</li>
-                <li>Admin settings</li>
-                <li>Branding & theme</li>
-                <li>Security controls</li>
-              </ul>
+
+            <div className="p-4 space-y-3 max-w-sm">
+
+              <input
+                type="password"
+                placeholder="Current password"
+                className="w-full border px-2 py-1 text-xs rounded"
+                value={passwords.currentPassword}
+                onChange={(e) =>
+                  setPasswords({
+                    ...passwords,
+                    currentPassword: e.target.value,
+                  })
+                }
+              />
+
+              <input
+                type="password"
+                placeholder="New password"
+                className="w-full border px-2 py-1 text-xs rounded"
+                value={passwords.newPassword}
+                onChange={(e) =>
+                  setPasswords({
+                    ...passwords,
+                    newPassword: e.target.value,
+                  })
+                }
+              />
+
+              <button
+                onClick={handleChangePassword}
+                className="w-full bg-blue-600 text-white py-1 text-xs rounded"
+              >
+                Update Password
+              </button>
+
             </div>
           </Card>
         )}
-
       </div>
     </div>
   );

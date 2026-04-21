@@ -7,6 +7,7 @@ import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientP
 import { searchSuggestionsController,searchController } from "../controllers/userControllers/search.controller.js";
 import { setMarkAllRead } from "../controllers/userControllers/notifications.controller.js";
 import { getAllAppointments, setAdminAppointmentStatus } from "../controllers/adminControllers/adminAppoiintments.controller.js";
+import { changePassword, supportTickets, systemAlerts, updateAlertStatus, updateTicketStatus } from "../controllers/userControllers/support.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------
@@ -45,5 +46,11 @@ router.patch('/notifications/mark-all-read', setMarkAllRead)
 
 router.get('/appointments',getAllAppointments)
 router.patch('/appointments/:id',setAdminAppointmentStatus)
+
+router.get('/support/tickets',supportTickets)
+router.get('/support/alerts',systemAlerts);
+router.patch('/support/update-ticket/:id', updateTicketStatus)
+router.patch('/support/update-alert/:id', updateAlertStatus)
+router.patch('/support/change-password',changePassword);
 
 export default router;

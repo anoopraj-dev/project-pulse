@@ -77,4 +77,26 @@ export const fetchAppointments = () =>{
 }
 
 
+//--------- Support center and settings ---------
+export const fetchSupportTickets = () =>{
+  return api.get('/api/admin/support/tickets')
+}
+
+export const fetchSystemAlerts = () =>{
+  return api.get('/api/admin/support/alerts')
+}
+
+export const updateTicketStatus = (id,status) => {
+  return api.patch(`/api/admin/support/update-ticket/${id}`,{ status})
+}
+
+export const updateAlertStatus = (id,status) =>{
+  return api.patch(`/api/admin/support/update-alert/${id}`,{status})
+}
+
+export const changePassword = (data) =>{
+  return api.patch(`/api/admin/support/change-password`,data)
+}
+
+
 

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import Patient from "../../models/patient.model.js";
 import Doctor from '../../models/doctor.model.js'
 import Admin from '../../models/admin.model.js'
-
+import Alert from "../../models/alert.model.js";
 
 //--------- SUPPORT TICKETS -------------
 
@@ -23,11 +23,11 @@ export const getTicketsService = async () => {
 export const updateTicketStatusService = async (
   id,
   status,
-  resolutionNotes,
 ) => {
+  console.log('status in update ticket service',status)
   return await SupportTicket.findByIdAndUpdate(
     id,
-    { status, resolutionNotes },
+    {status},
     { new: true },
   );
 };
@@ -39,31 +39,12 @@ export const createAlertService = async (data) => {
 
 //-------- get Alerts --------
 export const getSystemAlersService = async (data) => {
-  return await SystemAlert.find().sort({ createdAt: -1 }).lean();
+  return await Alert.find().sort({createdAt:-1}).lean();
 };
 
 //--------- update alert status ---------
 export const updateAlertStatusService = async (id, status) => {
-  return await SystemAlert.findByIdAndUpdate(id, { status }, { new: true });
-};
-
-//------------- ESCALATIONS ----------
-export const createEscalationService = async (data) => {
-  return await Escalation.create(data);
-};
-
-//------- get Escalations ------------
-export const getEscalationsService = async () => {
-  return await Escalation.find().sort({ createdAt: -1 }).lean();
-};
-
-//----------- Resolve Escaltion --------
-export const resolveEscalationService = async (id) => {
-  return await Escalation.findByIdAndUpdate(
-    id,
-    { status: "resolved" },
-    { new: true },
-  );
+  return await Alert.findByIdAndUpdate(id, { status }, { new: true });
 };
 
 //----------- Helper (identify role) ---------
