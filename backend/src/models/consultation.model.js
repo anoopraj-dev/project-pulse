@@ -64,6 +64,10 @@ const consultationSchema = new mongoose.Schema({
     isPrescribed:{
         type:Boolean,
         default:false
+    },
+    isSettled:{
+        type:Boolean,
+        default:false
     }
 
 },{timestamps:true})

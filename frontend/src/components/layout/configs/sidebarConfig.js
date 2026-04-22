@@ -117,11 +117,11 @@ export const adminSidebarMenu = [
     icon: "mdi:calendar-clock",
     path: "/admin/appointments",
   },
-  // {
-  //   label: "Revenue",
-  //   icon: "mdi:chart-line",
-  //   path: "/admin/revenue",
-  // },
+  {
+    label: "Revenue",
+    icon: "mdi:chart-line",
+    path: "/admin/revenue",
+  },
   // {
   //   label: "Payments",
   //   icon: "mdi:credit-card-outline",

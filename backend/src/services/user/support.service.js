@@ -1,5 +1,4 @@
 import SupportTicket from "../../models/supportTicket.model.js";
-import SystemAlert from "../../models/systemAlert.model.js";
 import Escalation from "../../models/escalation.model.js";
 import bcrypt from "bcryptjs";
 import Patient from "../../models/patient.model.js";
@@ -32,10 +31,7 @@ export const updateTicketStatusService = async (
   );
 };
 
-//--------- SYSTEM ALERTS ------------
-export const createAlertService = async (data) => {
-  return await SystemAlert.create(data);
-};
+//--------- SYSTEM ALERTS -----------
 
 //-------- get Alerts --------
 export const getSystemAlersService = async (data) => {
@@ -46,6 +42,7 @@ export const getSystemAlersService = async (data) => {
 export const updateAlertStatusService = async (id, status) => {
   return await Alert.findByIdAndUpdate(id, { status }, { new: true });
 };
+
 
 //----------- Helper (identify role) ---------
 const getModelByRole = (role) => {

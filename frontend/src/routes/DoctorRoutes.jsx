@@ -18,6 +18,7 @@ import NotFound from "@/pages/NotFound";
 import DoctorDashboard from "@/pages/doctor/DoctorDashboard";
 import DoctorConsultationPage from "@/pages/doctor/DoctorConsultationPage";
 import DoctorSupportPage from "@/pages/doctor/DoctorSupport";
+import DoctorWallet from "@/pages/doctor/DoctorWallet";
 
 const DoctorRoutes = () => {
   return useRoutes([
@@ -41,6 +42,7 @@ const DoctorRoutes = () => {
         { path: "appointments/patient/records/:patientId", element: <DoctorPatientRecords /> },
         { path: "payments", element: <DoctorPayments /> },
         { path: "support-center", element: <DoctorSupportPage/> },
+        { path: "wallet", element: <DoctorWallet/> },
       ],
     },
     { path: "*", element: <NotFound /> },

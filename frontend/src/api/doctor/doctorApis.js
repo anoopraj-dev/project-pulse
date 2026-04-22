@@ -108,6 +108,11 @@ export const fetchDoctorPayments = () =>{
   return api.get('/api/doctor/payments')
 }
 
+//-------------- Wallet ----------
+export const fetchDoctorWallet = () =>{
+  return api.get('/api/doctor/wallet')
+}
+
 
 //-------------- consultation --------------
 export const fetchPatientStats = (id) =>{
@@ -130,15 +135,12 @@ export const fetchDoctorStats =() =>{
 export const fetchDoctorRevenue = (rangeLabel) =>{
   return api.get(`/api/doctor/dashboard/revenue? range=${rangeLabel}`)
 }
-
 export const fetchUpcomingAppointments = async () =>{
   return api.get('/api/doctor/dashboard/upcoming-appointments');
 }
-
 export const fetchRecentPatients = async()=>{
   return api.get('/api/doctor/dashboard/recent-patients')
 }
-
 export const fetchPatientReviews = async() =>{
   return api.get('/api/doctor/dashboard/reviews')
 }
@@ -148,19 +150,15 @@ export const fetchPatientReviews = async() =>{
 export const fetchSupportTickets = async() =>{
   return api.get(`/api/doctor/support/tickets`)
 }
-
 export const createSupportTicket = async(data) =>{
   return api.post('/api/doctor/support/ticket',data)
 }
-
 export const changePassword =async (data)=>{
   return api.patch('/api/doctor/support/change-password',data);
 }
-
 export const requestExportAccountInfo = ()=>{
   return api.post('/api/doctor/support/accountInfo')
 }
-
 export const getExportStatus = (id) =>{
   return api.get(`/api/doctor/support/export-status/${id}`)
 }

@@ -153,6 +153,22 @@ export const pageBannerConfig = {
     activeTabLabel: "Section",
     loadingText: "Loading documents...",
   },
+  //------------------ Admin Revenue ---------------
+adminRevenue: {
+  icon: "mdi:chart-line",
+
+  roleLabel: "Admin",
+  pageLabel: "Revenue",
+
+  title: "Revenue Analytics",
+
+  description:
+    "Track platform earnings from consultations and appointments, monitor doctor payouts, platform fees, refunds, and overall financial performance.",
+
+  activeTabLabel: "Revenue view",
+
+  loadingText: "Loading revenue analytics...",
+},
 
   //------------- Patient Dashboard -----------
    patientDashboard: {
@@ -345,5 +361,20 @@ export const pageBannerConfig = {
     description:
       "Select dates till Saturday and assign time slots. Save once.",
   },
+
+  //-------------- wallet ----------
+  doctorWallet: {
+  icon: "mdi:wallet-outline",
+
+  roleLabel: "Doctor",
+  pageLabel: "Wallet",
+
+  title: "Earnings Wallet",
+
+  description:
+    "View your earned income from consultations, platform deductions, and payout history. Stay updated on all credited and pending earnings.",
+
+  loadingText: "Loading wallet details...",
+},
 
 };

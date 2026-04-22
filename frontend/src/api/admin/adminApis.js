@@ -98,5 +98,10 @@ export const changePassword = (data) =>{
   return api.patch(`/api/admin/support/change-password`,data)
 }
 
+//-------------- Revenue -----------
+export const fetchRevenueSummary = (range) =>{
+  return api.get(`/api/admin/revenue/summary?range=${range}`);
+}
+
 
 

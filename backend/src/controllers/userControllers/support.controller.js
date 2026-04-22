@@ -2,7 +2,6 @@ import {
   createTicketService,
   getTicketsService,
   updateTicketStatusService,
-  createAlertService,
   getSystemAlersService,
   updateAlertStatusService,
   changePasswordService
@@ -72,20 +71,6 @@ export const updateTicketStatus = async (req, res, next) => {
 
 
 //------------------ ALERTS ------------------//
-
-export const createAlert = async (req, res, next) => {
-  try {
-    const alert = await createAlertService(req.body);
-
-    res.status(201).json({
-      success: true,
-      message: 'Alert created successfully',
-      data: alert
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 export const systemAlerts= async (req, res, next) => {
   try {
