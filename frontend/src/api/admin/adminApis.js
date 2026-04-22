@@ -103,5 +103,12 @@ export const fetchRevenueSummary = (range) =>{
   return api.get(`/api/admin/revenue/summary?range=${range}`);
 }
 
+export const requestRevenueExport = () =>{
+  return api.post('/api/admin/revenue/report')
+}
+
+export const getRevenueExportStatus = (id) =>{
+  return api.get(`/api/admin/revenue/export-status/${id}`)
+}
 
 

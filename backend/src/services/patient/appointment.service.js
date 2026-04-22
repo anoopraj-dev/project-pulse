@@ -8,7 +8,7 @@ import Transaction from "../../models/transaction.model.js";
 import Patient from "../../models/patient.model.js";
 // import { createConsultation } from "../consultationService.js";
 import { createNotification } from "../user/notification.service.js";
-import {createConsultationService} from '../user/consultation.service.js'
+import { createConsultationService } from "../user/consultation.service.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfoService = async (doctorId) => {
@@ -242,6 +242,16 @@ export const cancelAppointmentService = async (id, patientId) => {
 
       payment.status = "refunded";
       await payment.save({ session });
+
+      //----------- Update consultation status ------------
+      await Consultation.findOneAndUpdate(
+        { appointment: appointment._id },
+        {
+          status: "cancelled",
+          endedAt: new Date(),
+        },
+        { session },
+      );
     }
 
     await session.commitTransaction();

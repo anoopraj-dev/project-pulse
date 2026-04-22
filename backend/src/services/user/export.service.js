@@ -11,6 +11,8 @@ export const createExportRequestService = async ({
   filters,
 }) => {
 
+  console.log(reportType,targetId,userId,userRole)
+
   // ---------------- Authorization ---------------
   if (reportType === "patient_full" && userId !== targetId) {
     throw new Error("Unauthorized");
@@ -24,7 +26,7 @@ export const createExportRequestService = async ({
     throw new Error("Unauthorized");
   }
 
-  if (reportType.startsWith("admin_") && userRole !== "admin") {
+  if (reportType ==="admin_revenue_full" && userRole !== "admin") {
     throw new Error("Admin only");
   }
 
@@ -33,6 +35,7 @@ export const createExportRequestService = async ({
     reportType,
     patient: reportType.includes("patient") ? targetId : null,
     doctor: reportType.includes("doctor") ? targetId : null,
+    admin:reportType.includes('admin') ? targetId: null,
     status: "queued",
     filters: filters || {},
   });

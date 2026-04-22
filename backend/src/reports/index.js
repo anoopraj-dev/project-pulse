@@ -1,10 +1,10 @@
 import { buildPatientExport } from "../services/patient/export.service.js";
 import { buildDoctorExport } from "../services/doctor/export.service.js";
-import { buildAdminExport } from "../services/admin/export.service.js";
+import { buildAdminRevenueExport } from "../services/admin/export.service.js";
 
 import { patientTemplate } from "./templates/patient.template.js";
 import { doctorTemplate } from "./templates/doctor.template.js";
-import { revenueTemplate } from "./templates/admin.template.js";
+import { adminTemplate } from "./templates/admin.template.js";
 
 export const REPORTS = {
   patient_full: {
@@ -17,8 +17,8 @@ export const REPORTS = {
     template: doctorTemplate,
   },
 
-  admin_revenue: {
-    builder: buildAdminExport,
-    template: revenueTemplate,
+  admin_revenue_full: {
+    builder: buildAdminRevenueExport,
+    template: adminTemplate,
   },
 };

@@ -1,202 +1,269 @@
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-import { fetchRevenueSummary } from "@/api/admin/adminApis";
+import {
+  fetchRevenueSummary,
+  requestRevenueExport,
+  getRevenueExportStatus,
+} from "@/api/admin/adminApis";
+import toast from "react-hot-toast";
 
-// ---------------- UI COMPONENTS ----------------
-const Card = ({ children }) => (
-  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden">
+// ---------------- UI ----------------
+const Card = ({ children, className = "" }) => (
+  <div
+    className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}
+  >
     {children}
   </div>
 );
 
-const CardHeader = ({ icon, title, subtitle, right }) => (
-  <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+const CardHeader = ({ icon, iconBg, iconColor, title, subtitle, right }) => (
+  <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
     <div className="flex items-center gap-3">
-      <Icon icon={icon} className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+      <div
+        className={`w-8 h-8 rounded-xl ${iconBg} flex items-center justify-center`}
+      >
+        <Icon icon={icon} className={`w-4 h-4 ${iconColor}`} />
+      </div>
       <div>
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
           {title}
         </h2>
-        {subtitle && <p className="text-[11px] text-gray-400">{subtitle}</p>}
+        {subtitle && (
+          <p className="text-[11px] text-gray-400 dark:text-gray-500">
+            {subtitle}
+          </p>
+        )}
       </div>
     </div>
     {right}
   </div>
 );
 
-// ---------------- MAIN PAGE ----------------
+// ---------------- PAGE ----------------
 const RevenuePage = () => {
   const [range, setRange] = useState("month");
-  const [revenueSummary, setRevenueSummary] = useState(null);
+  const [data, setData] = useState(null);
+  const [downloadUrl, setDownloadUrl] = useState(null);
 
-  // ---------------- API CALL ----------------
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const res = await fetchRevenueSummary(range);
-
-        if (res.data?.success) {
-          setRevenueSummary(res.data.data);
-        }
-      } catch (err) {
-        console.error("Revenue fetch failed", err);
-      }
+    const load = async () => {
+      const res = await fetchRevenueSummary(range);
+      if (res.data?.success) setData(res.data.data);
     };
-
-    getData();
+    load();
   }, [range]);
 
-  // safe fallback (prevents crash before API loads)
-  const data = revenueSummary || {
-    totalRevenue: 0,
-    netRevenue: 0,
+  const revenue = data || {
+    grossVolume: 0,
+    platformProfit: 0,
+    penalty: 0,
     refunds: 0,
+    doctorPayouts: 0,
     totalTransactions: 0,
     consultations: 0,
   };
 
+  const handleExport = async () => {
+    try {
+      const toastId = toast.loading("Preparing revenue report...");
+
+      const res = await requestRevenueExport();
+      const exportId = res?.data?.exportId;
+
+      if (!exportId) {
+        toast.error("Export failed to start");
+        return;
+      }
+
+      let attempts = 0;
+      const maxAttempts = 20;
+
+      const interval = setInterval(async () => {
+        try {
+          attempts++;
+
+          const statusRes = await getRevenueExportStatus(exportId);
+          const status = statusRes?.data?.status;
+
+          if (status === "completed") {
+            clearInterval(interval);
+            toast.dismiss(toastId);
+            toast.success("Revenue report ready!");
+
+            setDownloadUrl(`http://localhost:3000${statusRes.data.fileUrl}`);
+          }
+
+          if (status === "failed") {
+            clearInterval(interval);
+            toast.dismiss(toastId);
+            toast.error("Export failed");
+          }
+
+          if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            toast.dismiss(toastId);
+            toast.error("Export timed out");
+          }
+        } catch (err) {
+          clearInterval(interval);
+          toast.dismiss(toastId);
+          toast.error("Error checking export status");
+        }
+      }, 3000);
+    } catch (err) {
+      toast.error("Error generating report");
+    }
+  };
+
+  // ---------------- CONVERSION ----------------
+  const gross = revenue.grossVolume / 100;
+  const platform = revenue.platformProfit / 100;
+  const penalty = revenue.penalty / 100;
+  const refunds = revenue.refunds / 100;
+  const payouts = revenue.doctorPayouts / 100;
+
+  const totalProfit = platform + penalty;
+
+  const refundRate = gross ? ((refunds / gross) * 100).toFixed(1) : 0;
+  const payoutRate = gross ? ((payouts / gross) * 100).toFixed(1) : 0;
+  const profitMargin = gross ? ((totalProfit / gross) * 100).toFixed(1) : 0;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 py-6">
-
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-5">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-lg font-semibold text-gray-800 dark:text-white">
               Revenue Dashboard
             </h1>
             <p className="text-xs text-gray-400">
-              Consultation & appointment earnings overview
+              Financial overview of platform earnings
             </p>
           </div>
 
-          <button className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg">
-            Export Report
-          </button>
+          <div className="flex gap-2">
+            {["day", "week", "month", "year"].map((r) => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={`px-3 py-1 text-xs rounded-lg border ${
+                  range === r
+                    ? "bg-blue-50 border-blue-200 text-blue-600"
+                    : "bg-white border-gray-200 text-gray-500"
+                }`}
+              >
+                {r.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* FILTER */}
-        <div className="flex gap-2 mb-4">
-          {["day", "week", "month", "year"].map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`px-3 py-1 text-xs rounded-lg border ${
-                range === r
-                  ? "bg-blue-50 border-blue-200 text-blue-600"
-                  : "bg-white border-gray-200 text-gray-500"
-              }`}
-            >
-              {r.toUpperCase()}
-            </button>
-          ))}
-        </div>
+        {/* ----------- GROUPED KPI CARDS ------------*/}
 
-        {/* KPI CARDS (UPDATED) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+          {/* REVENUE CORE */}
           <Card>
             <CardHeader
               icon="mdi:cash"
-              title="Total Revenue"
-              right={<span className="text-xs">₹{data.totalRevenue}</span>}
+              iconBg="bg-amber-50 dark:bg-amber-950"
+              iconColor="text-amber-600"
+              title="Revenue"
+              subtitle="Total inflow & earnings"
+              right={<span className="text-xs">₹{gross.toFixed(0)}</span>}
             />
+            <div className="p-4 text-xs space-y-1 text-gray-600 dark:text-gray-300">
+              <div>Platform Profit: ₹{platform.toFixed(0)}</div>
+              <div>Penalty Income: ₹{penalty.toFixed(0)}</div>
+              <div className="font-semibold text-gray-900 dark:text-white pt-1">
+                Total Profit: ₹{totalProfit.toFixed(0)}
+              </div>
+            </div>
           </Card>
 
+          {/* COSTS */}
           <Card>
             <CardHeader
-              icon="mdi:bank"
-              title="Net Revenue"
-              right={<span className="text-xs">₹{data.netRevenue}</span>}
-            />
-          </Card>
-
-          <Card>
-            <CardHeader
-              icon="mdi:cash-refund"
-              title="Refunds"
-              right={<span className="text-xs">₹{data.refunds}</span>}
-            />
-          </Card>
-
-          <Card>
-            <CardHeader
-              icon="mdi:swap-horizontal"
-              title="Transactions"
-              right={<span className="text-xs">{data.totalTransactions}</span>}
-            />
-          </Card>
-
-        </div>
-
-        {/* SECOND ROW STATS */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
-
-          <Card>
-            <CardHeader
-              icon="mdi:stethoscope"
-              title="Consultations"
-              right={<span className="text-xs">{data.consultations}</span>}
-            />
-          </Card>
-
-          <Card>
-            <CardHeader
-              icon="mdi:chart-line"
-              title="Avg Revenue / Transaction"
+              icon="mdi:cash-minus"
+              iconBg="bg-red-50 dark:bg-red-950"
+              iconColor="text-red-600"
+              title="Outflows"
+              subtitle="Refunds & payouts"
               right={
                 <span className="text-xs">
-                  ₹
-                  {data.totalTransactions
-                    ? Math.round(data.totalRevenue / data.totalTransactions)
-                    : 0}
+                  ₹{(refunds + payouts).toFixed(0)}
                 </span>
               }
             />
+            <div className="p-4 text-xs space-y-1 text-gray-600 dark:text-gray-300">
+              <div>
+                Refunds: ₹{refunds.toFixed(0)} ({refundRate}%)
+              </div>
+              <div>
+                Doctor Payouts: ₹{payouts.toFixed(0)} ({payoutRate}%)
+              </div>
+            </div>
           </Card>
 
+          {/* -------- ACTIVITY -----*/}
+          <Card>
+            <CardHeader
+              icon="mdi:swap-horizontal"
+              iconBg="bg-blue-50 dark:bg-blue-950"
+              iconColor="text-blue-600"
+              title="Activity"
+              subtitle="System usage metrics"
+              right={
+                <span className="text-xs">{revenue.totalTransactions}</span>
+              }
+            />
+            <div className="p-4 text-xs space-y-1 text-gray-600 dark:text-gray-300">
+              <div>Transactions: {revenue.totalTransactions}</div>
+              <div>Consultations: {revenue.consultations}</div>
+              <div className="font-semibold text-gray-900 dark:text-white pt-1">
+                Profit Margin: {profitMargin}%
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* PLACEHOLDER SECTIONS (UNCHANGED FOR NOW) */}
-        <div className="grid lg:grid-cols-3 gap-4 mb-5">
+        {/* -------INSIGHTS --------- */}
+        <Card>
+          <CardHeader
+            icon="mdi:lightbulb"
+            iconBg="bg-yellow-50 dark:bg-yellow-950"
+            iconColor="text-yellow-600"
+            title="Insights"
+            subtitle="Auto-generated analytics"
+          />
 
-          <Card>
-            <CardHeader
-              icon="mdi:chart-line"
-              title="Revenue Trend"
-              subtitle="Last 30 days"
-            />
-            <div className="p-6 text-xs text-gray-400">
-              [ Revenue Chart Placeholder ]
-            </div>
-          </Card>
+          <div className="p-4 text-xs grid grid-cols-2 gap-2 text-gray-600 dark:text-gray-300">
+            <div>Gross Revenue: ₹{gross.toFixed(0)}</div>
+            <div>Total Profit: ₹{totalProfit.toFixed(0)}</div>
+            <div>Refund Rate: {refundRate}%</div>
+            <div>Payout Ratio: {payoutRate}%</div>
+          </div>
+        </Card>
 
-          <Card>
-            <CardHeader
-              icon="mdi:chart-pie"
-              title="Revenue Breakdown"
-            />
-            <div className="p-4 text-xs space-y-2 text-gray-600 dark:text-gray-300">
-              <div>Consultations</div>
-              <div>Appointments</div>
-              <div>Refund Impact</div>
-            </div>
-          </Card>
+        {/* EXPORT */}
+        <div className="flex justify-end mt-5 gap-3">
+          {downloadUrl && (
+            <a
+              href={downloadUrl}
+              target="_blank"
+              className="px-4 py-2 text-xs bg-emerald-600 text-white rounded-lg"
+            >
+              Download Report
+            </a>
+          )}
 
-          <Card>
-            <CardHeader
-              icon="mdi:lightbulb"
-              title="Insights"
-            />
-            <div className="p-4 text-xs space-y-2 text-gray-600 dark:text-gray-300">
-              <div>Highest revenue day: Monday</div>
-              <div>Top payment method: Razorpay</div>
-              <div>Refund rate: {(data.refunds / (data.totalRevenue || 1) * 100).toFixed(1)}%</div>
-            </div>
-          </Card>
-
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Export Report
+          </button>
         </div>
-
       </div>
     </div>
   );

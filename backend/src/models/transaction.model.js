@@ -23,6 +23,7 @@ const transactionSchema = new mongoose.Schema(
     },
     referenceId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref:'Payment',
       required: true,
     },
     notes: String,

@@ -9,6 +9,7 @@ import { setMarkAllRead } from "../controllers/userControllers/notifications.con
 import { getAllAppointments, setAdminAppointmentStatus } from "../controllers/adminControllers/adminAppoiintments.controller.js";
 import { changePassword, supportTickets, systemAlerts, updateAlertStatus, updateTicketStatus } from "../controllers/userControllers/support.controller.js";
 import { revenueSummary } from "../controllers/adminControllers/adminRevenue.controller.js";
+import { getRevenueExportStatus, requestRevenueExport } from "../controllers/adminControllers/export.controller.js";
 const router = Router();
 
 //-------------MIDDLEWARES -----------
@@ -54,6 +55,12 @@ router.patch('/support/update-ticket/:id', updateTicketStatus)
 router.patch('/support/update-alert/:id', updateAlertStatus)
 router.patch('/support/change-password',changePassword);
 
-router.get('/revenue/summary',revenueSummary)
+router.get('/revenue/summary',revenueSummary);
+
+router.post('/revenue/report',(req,res,next)=>{
+    console.log('route hit');
+    next();
+},requestRevenueExport)
+router.get('/revenue/export-status/:id',getRevenueExportStatus)
 
 export default router;
