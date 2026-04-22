@@ -28,6 +28,7 @@ import { doctorDashboardStats, doctorRevenue, patientFeedbacks, recentPatients, 
 import { changePassword, createSupportTicket, supportTickets } from "../controllers/userControllers/support.controller.js";
 import { getDoctorExportStatus, requestDoctorExport } from "../controllers/doctorControllers/export.controller.js";
 import { doctorWallet } from "../controllers/doctorControllers/wallet.controller.js";
+import { requestWithdrawal } from "../controllers/doctorControllers/withdrawal.controller.js";
 
 const router = Router();
 
@@ -116,5 +117,6 @@ router.get('/support/export-status/:id',getDoctorExportStatus)
 
 //-------------- Wallet --------------
 router.get('/wallet',doctorWallet)
+router.post('/wallet/withdraw',requestWithdrawal)
 
 export default router;

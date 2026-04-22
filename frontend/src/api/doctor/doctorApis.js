@@ -162,3 +162,8 @@ export const requestExportAccountInfo = ()=>{
 export const getExportStatus = (id) =>{
   return api.get(`/api/doctor/support/export-status/${id}`)
 }
+
+//---------------- Wallet withdraw ---------
+export const walletWithdrawal = ({amount,bankDetails}) =>{
+  return api.post ('/api/doctor/wallet/withdraw',{amount,bankDetails})
+}

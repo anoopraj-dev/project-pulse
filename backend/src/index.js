@@ -9,6 +9,7 @@ import { initBrowser } from './config/puppeteer.js';
 
 import './cron/appointmentExpiry.js'
 import './cron/settlement.cron.js'
+import './cron/withdrawal.cron.js'
 
 const port = process.env.PORT || 5000;
 const server = createServer(app);

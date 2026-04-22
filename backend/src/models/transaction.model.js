@@ -18,7 +18,7 @@ const transactionSchema = new mongoose.Schema(
     },
     referenceType: {
       type: String,
-      enum: ["payment", "refund", "transfer", "topup",'settlement'],
+      enum: ["payment", "refund", "transfer", "topup",'settlement','withdrawal'],
       required: true,
     },
     referenceId: {
