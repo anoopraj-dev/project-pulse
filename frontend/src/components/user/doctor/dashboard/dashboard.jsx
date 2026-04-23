@@ -110,42 +110,42 @@ const StarRating = ({ rating, size = "sm" }) => {
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 shadow-sm">
-        {/* X-axis label */}
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1">
-          {label}
-        </p>
+  if (!active || !payload || !payload.length) return null;
 
-        {/* Daily */}
-        {payload.find((p) => p.dataKey === "daily") && (
-          <p className="text-xs text-gray-700 dark:text-gray-300">
-            <span className="font-semibold text-[#0096C7]">Daily:</span> ₹
-            {payload.find((p) => p.dataKey === "daily").value.toLocaleString()}
-          </p>
-        )}
+  const getValue = (key) =>
+    payload.find((p) => p.dataKey === key)?.value ?? 0;
 
-        {/* Cumulative */}
-        {payload.find((p) => p.dataKey === "cumulative") && (
-          <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
-            <span className="font-semibold text-green-500">Cumulative:</span> ₹
-            {(
-              payload.find((p) => p.dataKey === "cumulative").value / 100
-            ).toLocaleString()}
-          </p>
-        )}
-      </div>
-    );
-  }
+  const payouts = getValue("payouts");
+  const platformFee = getValue("platformFee");
+  const cumulative = getValue("cumulative");
 
-  return null;
+  return (
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-3 py-2 shadow-sm">
+      <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1">
+        {label}
+      </p>
+
+      <p className="text-xs text-gray-700 dark:text-gray-300">
+        <span className="font-semibold text-emerald-500">Payouts:</span> ₹
+        {Number(payouts).toLocaleString()}
+      </p>
+
+      <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+        <span className="font-semibold text-red-500">Platform Fee:</span> ₹
+        {Number(platformFee).toLocaleString()}
+      </p>
+
+      <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+        <span className="font-semibold text-[#0096C7]">Cumulative:</span> ₹
+        {Number(cumulative).toLocaleString()}
+      </p>
+    </div>
+  );
 };
-
 //-------------Main Dashboad ------------------
 
 const Dashboard = () => {
-  const [rangeLabel, setRangeLabel] = useState("7 days");
+  const [rangeLabel, setRangeLabel] = useState("week");
   //------------- revenue ------------------
   const [revenueData, setRevenueData] = useState([]);
   const [revenueSummary, setRevenueSummary] = useState(null);
@@ -160,22 +160,6 @@ const Dashboard = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [reviewSummary, setReviewSummary] = useState(null);
 
-  const now = new Date();
-
-  const greeting =
-    now.getHours() < 12
-      ? "Good morning"
-      : now.getHours() < 18
-        ? "Good afternoon"
-        : "Good evening";
-
-  const formattedDate = now.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
   //--------- api calls--------
   //------- revenue -------------
   useEffect(() => {
@@ -185,12 +169,15 @@ const Dashboard = () => {
 
         const res = await fetchDoctorRevenue(rangeLabel);
 
-        console.log(res);
+        console.log("revenue", res);
+
+        console.log("RANGE:", rangeLabel);
+console.log("CHART:", res?.data?.data?.chart);
 
         if (!res.data.success) toast.error("revenue fetch failed");
 
-        setRevenueData(res?.data?.data?.chart);
-        setRevenueSummary(res?.data?.data?.totalRevenue);
+        setRevenueData(res?.data?.data?.chart || []);
+        setRevenueSummary(res?.data?.data?.totalRevenue || 0);
       } catch (error) {
         console.log("Revenue fetch failed", error);
       } finally {
@@ -319,7 +306,7 @@ const Dashboard = () => {
   const getEarningsChange = () => {
     if (!stats) return "";
 
-    const diff = stats.weeklyEarnings - stats.lastWeekEarnings;
+    const diff = stats.thisWeekEarnings - stats.lastWeekEarnings;
 
     if (diff > 0) return `₹${diff.toLocaleString()} vs last week`;
     if (diff < 0) return `₹${Math.abs(diff).toLocaleString()} drop`;
@@ -340,7 +327,6 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen dark:bg-gray-950 font-sans">
       <div className="w-full mx-auto px-4 py-6 pb-16">
-
         {/* -------- Stat Cards ------ */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <StatCard
@@ -388,11 +374,11 @@ const Dashboard = () => {
           />
 
           <StatCard
-            label="This week's earnings"
+            label="Overall earnings"
             value={
               loadingStats
                 ? "..."
-                : `₹${(stats?.weeklyEarnings ?? 0).toLocaleString()}`
+                : `₹${(stats?.earnings ?? 0).toLocaleString()}`
             }
             change={stats ? getEarningsChange() : ""}
             changeType={
@@ -421,21 +407,21 @@ const Dashboard = () => {
               title="Revenue"
               subtitle={`Last ${rangeLabel}`}
               right={
-                <div className="flex items-center gap-1">
-                  {["7 days", "30 days"].map((r) => (
-                    <button
-                      key={r}
-                      onClick={() => setRangeLabel(r)}
-                      className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg transition ${
-                        rangeLabel === r
-                          ? "bg-blue-600 text-white"
-                          : "text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </div>
+               <div className=" p-2 flex gap-2 mb-3">
+              {["day", "week", "month", "year"].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setRangeLabel(item)}
+                  className={`text-[11px] px-3 py-1 rounded-full border ${
+                    rangeLabel === item
+                      ? "bg-amber-500 text-white"
+                      : "bg-white dark:bg-gray-900 text-gray-500"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
               }
             />
             <div className="px-5 pt-4 pb-3">
@@ -449,72 +435,61 @@ const Dashboard = () => {
                 </span>
               </div>
 
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={180}>
                 <LineChart
                   data={revenueData}
-                  margin={{ top: 0, right: 10, left: -10, bottom: 0 }}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
                 >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="rgba(0,0,0,0.05)"
-                    vertical={false}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
 
                   <XAxis
                     dataKey="label"
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
+                    tick={{ fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
                   />
 
                   <YAxis
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
+                    tick={{ fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(v) => `₹${v / 1000}k`}
+                    tickFormatter={(v) => `₹${v} `}
                   />
 
-                  <Tooltip
-                    content={<CustomTooltip />}
-                    cursor={{
-                      stroke: "#0096C7",
-                      strokeWidth: 1,
-                      strokeDasharray: "4 4",
-                    }}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
 
-                  {/* Legend */}
-                  <Legend
-                    verticalAlign="top"
-                    align="right"
-                    iconType="circle"
-                    wrapperStyle={{
-                      fontSize: "10px",
-                      color: "#6b7280",
-                      paddingBottom: 8,
-                    }}
-                  />
+                  <Legend />
 
-                  {/* Daily */}
+                  {/* Doctor earnings */}
                   <Line
                     type="monotone"
-                    dataKey="daily"
-                    name="Daily Revenue"
-                    stroke="#0096C7"
+                    dataKey="payouts"
+                    name="Payouts"
+                    stroke="#10b981"
                     strokeWidth={2}
-                    dot={{ r: 3, fill: "#0096C7" }}
+                    dot={{ r: 3 }}
                     activeDot={{ r: 5 }}
                   />
 
-                  {/* Cumulative */}
+                  {/* Platform earnings */}
+                  <Line
+                    type="monotone"
+                    dataKey="platformFee"
+                    name="Platform Fee"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                  />
+
+                  {/* Running total */}
                   <Line
                     type="monotone"
                     dataKey="cumulative"
-                    name="Cumulative Revenue"
-                    stroke="#22c55e"
-                    strokeWidth={2}
-                    dot={{ r: 2, fill: "#22c55e" }}
-                    activeDot={{ r: 5 }}
+                    name="Cumulative Earnings"
+                    stroke="#0096C7"
+                    strokeWidth={3}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 6 }}
                   />
                 </LineChart>
               </ResponsiveContainer>

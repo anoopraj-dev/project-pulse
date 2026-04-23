@@ -133,7 +133,7 @@ export const fetchDoctorStats =() =>{
   return api.get(`/api/doctor/dashboard/stats`)
 }
 export const fetchDoctorRevenue = (rangeLabel) =>{
-  return api.get(`/api/doctor/dashboard/revenue? range=${rangeLabel}`)
+  return api.get(`/api/doctor/dashboard/revenue?range=${rangeLabel}`)
 }
 export const fetchUpcomingAppointments = async () =>{
   return api.get('/api/doctor/dashboard/upcoming-appointments');

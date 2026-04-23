@@ -12,7 +12,7 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
-  Legend
+  Legend,
 } from "recharts";
 
 import {
@@ -119,7 +119,7 @@ const Dashboard = () => {
   const [loadingCounts, setLoadingCounts] = useState(true);
   const [revenueData, setRevenueData] = useState([]);
   const [userGrowthData, setUserGrowthData] = useState([]);
-  const [alerts,setAlerts] = useState([])
+  const [alerts, setAlerts] = useState([]);
   const [range, setRange] = useState("week");
 
   const navigate = useNavigate();
@@ -180,7 +180,7 @@ const Dashboard = () => {
     const loadRevenue = async () => {
       try {
         const res = await fetchRevenueOverview(range);
-        console.log(res)
+        console.log(res);
         if (res.success) {
           setRevenueData(res.data);
         }
@@ -208,33 +208,32 @@ const Dashboard = () => {
   }, []);
 
   //--------------- FETCH ALERTS -------------
-useEffect(() => {
-  const loadAlerts = async () => {
-    try {
-      const res = await fetchDashboardAlerts();
+  useEffect(() => {
+    const loadAlerts = async () => {
+      try {
+        const res = await fetchDashboardAlerts();
 
-      console.log("alerts", res);
+        console.log("alerts", res);
 
-      if (res.data.success) {
-        setAlerts([
-          ...(res.data.data.alerts || []),
-          ...(res.data.data.tickets || []),
-        ]);
+        if (res.data.success) {
+          setAlerts([
+            ...(res.data.data.alerts || []),
+            ...(res.data.data.tickets || []),
+          ]);
+        }
+      } catch (error) {
+        console.log(error);
       }
+    };
 
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  loadAlerts();
-}, []);
+    loadAlerts();
+  }, []);
 
   return (
     <div className="min-h-screen  dark:bg-gray-950 font-sans">
       <div className="w-full mx-auto px-4 py-6 pb-16">
         {/* Header */}
-      <PageBanner config={pageBannerConfig.adminDashboard}/>
+        <PageBanner config={pageBannerConfig.adminDashboard} />
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <StatCard
@@ -286,145 +285,140 @@ useEffect(() => {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
           {/* Revenue Chart */}
 
-<Card className="lg:col-span-3">
-  <CardHeader
-    icon="mdi:finance"
-    iconBg="bg-amber-50 dark:bg-amber-950"
-    iconColor="text-amber-600 dark:text-amber-400"
-    title="Revenue Overview"
-    subtitle="Cashflow (Last 7 days)"
-    right={
-      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide">
-        Multi-metric
-      </span>
-    }
-  />
+          <Card className="lg:col-span-3">
+            <CardHeader
+              icon="mdi:finance"
+              iconBg="bg-amber-50 dark:bg-amber-950"
+              iconColor="text-amber-600 dark:text-amber-400"
+              title="Revenue Overview"
+              subtitle="Cashflow (Last 7 days)"
+              right={
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide">
+                  Multi-metric
+                </span>
+              }
+            />
 
+            <div className=" p-2 flex gap-2 mb-3">
+              {["day", "week", "month", "year"].map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setRange(item)}
+                  className={`text-[11px] px-3 py-1 rounded-full border ${
+                    range === item
+                      ? "bg-amber-500 text-white"
+                      : "bg-white dark:bg-gray-900 text-gray-500"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
 
-<div className=" p-2 flex gap-2 mb-3">
-  {["day", "week", "month", "year"].map((item) => (
-    <button
-      key={item}
-      onClick={() => setRange(item)}
-      className={`text-[11px] px-3 py-1 rounded-full border ${
-        range === item
-          ? "bg-amber-500 text-white"
-          : "bg-white dark:bg-gray-900 text-gray-500"
-      }`}
-    >
-      {item}
-    </button>
-  ))}
-</div>
+            <div className="px-5 pt-4 pb-3">
+              {/* ---------------- TOTAL PROFIT SUMMARY ---------------- */}
+              <div className="flex items-baseline gap-2 mb-4">
+                <span className="text-2xl font-semibold text-gray-900 dark:text-white">
+                  ₹
+                  {revenueData
+                    .reduce((sum, item) => sum + (item.profit || 0), 0)
+                    .toLocaleString()}
+                </span>
 
-  <div className="px-5 pt-4 pb-3">
+                <span className="text-xs text-gray-500">
+                  total profit (7 days)
+                </span>
+              </div>
 
-    {/* ---------------- TOTAL PROFIT SUMMARY ---------------- */}
-    <div className="flex items-baseline gap-2 mb-4">
-      <span className="text-2xl font-semibold text-gray-900 dark:text-white">
-        ₹
-        {revenueData.reduce(
-          (sum, item) => sum + (item.profit || 0),
-          0
-        ).toLocaleString()}
-      </span>
+              {/* ---------------- CHART ---------------- */}
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={revenueData}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
 
-      <span className="text-xs text-gray-500">
-        total profit (7 days)
-      </span>
-    </div>
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
 
-    {/* ---------------- CHART ---------------- */}
-    <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={revenueData}>
+                  <YAxis
+                    tick={{ fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `₹${v}`}
+                  />
 
-        <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid #e5e7eb",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value, name) => [
+                      `₹${value.toLocaleString()}`,
+                      name,
+                    ]}
+                  />
 
-        <XAxis
-          dataKey="label"
-          tick={{ fontSize: 10 }}
-          axisLine={false}
-          tickLine={false}
-        />
+                  {/* ---------------- LEGEND ---------------- */}
+                  <Legend wrapperStyle={{ fontSize: "11px" }} />
 
-        <YAxis
-          tick={{ fontSize: 10 }}
-          axisLine={false}
-          tickLine={false}
-          tickFormatter={(v) => `₹${v}`}
-        />
+                  {/* ---------------- INFLOW ---------------- */}
+                  <Line
+                    type="monotone"
+                    dataKey="gross"
+                    stroke="#3b82f6" // blue
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                    name="Cash Inflow"
+                  />
 
-        <Tooltip
-          contentStyle={{
-            borderRadius: "12px",
-            border: "1px solid #e5e7eb",
-            fontSize: "12px",
-          }}
-          formatter={(value, name) => [
-            `₹${value.toLocaleString()}`,
-            name,
-          ]}
-        />
+                  {/* ---------------- PROFIT ---------------- */}
+                  <Line
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#10b981" // green
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                    name="Total Profit"
+                  />
 
-        {/* ---------------- LEGEND ---------------- */}
-        <Legend wrapperStyle={{ fontSize: "11px" }} />
+                  {/* ---------------- PLATFORM FEE ---------------- */}
+                  <Line
+                    type="monotone"
+                    dataKey="platformFee"
+                    stroke="#22c55e"
+                    strokeDasharray="5 5"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Platform Fee"
+                  />
 
-        {/* ---------------- INFLOW ---------------- */}
-        <Line
-          type="monotone"
-          dataKey="gross"
-          stroke="#3b82f6" // blue
-          strokeWidth={2}
-          dot={{ r: 2 }}
-          name="Cash Inflow"
-        />
+                  {/* ---------------- OUTFLOW ---------------- */}
+                  <Line
+                    type="monotone"
+                    dataKey="payouts"
+                    stroke="#ef4444" // red
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    dot={{ r: 2 }}
+                    name="Doctor Payouts"
+                  />
 
-        {/* ---------------- PROFIT ---------------- */}
-        <Line
-          type="monotone"
-          dataKey="profit"
-          stroke="#10b981" // green
-          strokeWidth={2}
-          dot={{ r: 2 }}
-          name="Total Profit"
-        />
-
-        {/* ---------------- PLATFORM FEE ---------------- */}
-        <Line
-          type="monotone"
-          dataKey="platformFee"
-          stroke="#22c55e"
-          strokeDasharray="5 5"
-          strokeWidth={2}
-          dot={false}
-          name="Platform Fee"
-        />
-
-        {/* ---------------- OUTFLOW ---------------- */}
-        <Line
-          type="monotone"
-          dataKey="payouts"
-          stroke="#ef4444" // red
-          strokeWidth={2}
-          strokeDasharray="4 4"
-          dot={{ r: 2 }}
-          name="Doctor Payouts"
-        />
-
-        <Line
-          type="monotone"
-          dataKey="refunds"
-          stroke="#f59e0b" // amber
-          strokeWidth={2}
-          strokeDasharray="4 4"
-          dot={{ r: 2 }}
-          name="Refunds"
-        />
-
-      </LineChart>
-    </ResponsiveContainer>
-  </div>
-</Card>
+                  <Line
+                    type="monotone"
+                    dataKey="refunds"
+                    stroke="#f59e0b" // amber
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    dot={{ r: 2 }}
+                    name="Refunds"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
 
           {/* Pending Approvals */}
           <Card className="lg:col-span-2">
@@ -527,110 +521,106 @@ useEffect(() => {
           </Card>
 
           {/* Recent Activity */}
-       <Card>
-  <CardHeader
-    icon="mdi:lifebuoy"
-    iconBg="bg-red-50 dark:bg-red-950"
-    iconColor="text-red-600 dark:text-red-400"
-    title="Support Center"
-    subtitle="Alerts & user queries"
-    right={
-      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide">
-        {alerts?.length || 0} new
-      </span>
-    }
-  />
+          <Card>
+            <CardHeader
+              icon="mdi:lifebuoy"
+              iconBg="bg-red-50 dark:bg-red-950"
+              iconColor="text-red-600 dark:text-red-400"
+              title="Support Center"
+              subtitle="Alerts & user queries"
+              right={
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide">
+                  {alerts?.length || 0} new
+                </span>
+              }
+            />
 
-  <div className="divide-y divide-gray-50 dark:divide-gray-800">
-
-    {!alerts || alerts.length === 0 ? (
-      <div className="px-4 py-6 text-xs text-gray-400">
-        No alerts available
-      </div>
-    ) : (
-      alerts.map((item, index) => (
-        <div key={item._id || index} className="px-4 py-3 space-y-2">
-
-          {/* ---------------- TYPE ---------------- */}
-          <p className={`text-[10px] font-semibold uppercase tracking-wide
+            <div className="divide-y divide-gray-50 dark:divide-gray-800">
+              {!alerts || alerts.length === 0 ? (
+                <div className="px-4 py-6 text-xs text-gray-400">
+                  No alerts available
+                </div>
+              ) : (
+                alerts.map((item, index) => (
+                  <div key={item._id || index} className="px-4 py-3 space-y-2">
+                    {/* ---------------- TYPE ---------------- */}
+                    <p
+                      className={`text-[10px] font-semibold uppercase tracking-wide
             ${
               item.type === "system"
                 ? "text-red-500"
                 : item.type === "payment"
-                ? "text-orange-500"
-                : item.type === "refund"
-                ? "text-purple-500"
-                : "text-blue-500"
+                  ? "text-orange-500"
+                  : item.type === "refund"
+                    ? "text-purple-500"
+                    : "text-blue-500"
             }
-          `}>
-            {item.type}
-          </p>
+          `}
+                    >
+                      {item.type}
+                    </p>
 
-          <div className="flex items-center gap-3">
-
-            {/* ---------------- PRIORITY DOT ---------------- */}
-            <span
-              className={`w-1.5 h-1.5 rounded-full flex-shrink-0
+                    <div className="flex items-center gap-3">
+                      {/* ---------------- PRIORITY DOT ---------------- */}
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0
                 ${
                   item.priority === "urgent" || item.priority === "high"
                     ? "bg-red-400"
                     : item.priority === "medium"
-                    ? "bg-orange-400"
-                    : "bg-blue-400"
+                      ? "bg-orange-400"
+                      : "bg-blue-400"
                 }
               `}
-            />
+                      />
 
-            {/* ---------------- CONTENT ---------------- */}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
-                {item.title}
-              </p>
-              <p className="text-[10px] text-gray-400 truncate">
-                {item.message}
-              </p>
-              <p className="text-[10px] text-gray-400 truncate">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </p>
+                      {/* ---------------- CONTENT ---------------- */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
+                          {item.title}
+                        </p>
+                        <p className="text-[10px] text-gray-400 truncate">
+                          {item.message}
+                        </p>
+                        <p className="text-[10px] text-gray-400 truncate">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      {/* ---------------- PRIORITY LABEL ---------------- */}
+                      {item.priority && (
+                        <span
+                          className={`text-[10px] font-semibold ${
+                            item.priority === "urgent" ||
+                            item.priority === "high"
+                              ? "text-red-500"
+                              : item.priority === "medium"
+                                ? "text-orange-500"
+                                : "text-gray-500"
+                          }`}
+                        >
+                          {item.priority}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-
-            {/* ---------------- PRIORITY LABEL ---------------- */}
-            {item.priority && (
-              <span
-                className={`text-[10px] font-semibold ${
-                  item.priority === "urgent" || item.priority === "high"
-                    ? "text-red-500"
-                    : item.priority === "medium"
-                    ? "text-orange-500"
-                    : "text-gray-500"
-                }`}
-              >
-                {item.priority}
-              </span>
-            )}
-
-          </div>
-        </div>
-      ))
-    )}
-
-  </div>
-</Card>
+          </Card>
         </div>
         <StatCard
-  label="Dashboard Traffic"
-  value={mockTraffic.todayVisits}
-  change="Today visits"
-  changeType="neutral"
-  icon="mdi:chart-line"
-  iconBg="bg-indigo-50 dark:bg-indigo-950"
-  iconColor="text-indigo-600 dark:text-indigo-400"
-/>
+          label="Dashboard Traffic"
+          value={mockTraffic.todayVisits}
+          change="Today visits"
+          changeType="neutral"
+          icon="mdi:chart-line"
+          iconBg="bg-indigo-50 dark:bg-indigo-950"
+          iconColor="text-indigo-600 dark:text-indigo-400"
+        />
       </div>
     </div>
   );
 };
-
-
 
 export default Dashboard;
