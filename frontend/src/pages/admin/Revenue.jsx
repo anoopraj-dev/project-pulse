@@ -6,6 +6,8 @@ import {
   getRevenueExportStatus,
 } from "@/api/admin/adminApis";
 import toast from "react-hot-toast";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 // ---------------- UI ----------------
 const Card = ({ children, className = "" }) => (
@@ -129,35 +131,10 @@ const RevenuePage = () => {
   const profitMargin = gross ? ((totalProfit / gross) * 100).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="min-h-screen  dark:bg-gray-950">
+      <div className=" mx-auto px-4 py-6">
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Revenue Dashboard
-            </h1>
-            <p className="text-xs text-gray-400">
-              Financial overview of platform earnings
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            {["day", "week", "month", "year"].map((r) => (
-              <button
-                key={r}
-                onClick={() => setRange(r)}
-                className={`px-3 py-1 text-xs rounded-lg border ${
-                  range === r
-                    ? "bg-blue-50 border-blue-200 text-blue-600"
-                    : "bg-white border-gray-200 text-gray-500"
-                }`}
-              >
-                {r.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
+        <PageBanner config={pageBannerConfig.adminRevenue}/>
 
         {/* ----------- GROUPED KPI CARDS ------------*/}
 

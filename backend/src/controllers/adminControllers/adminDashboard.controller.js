@@ -7,6 +7,7 @@ import {
   dashboardCountsService,
   revenueOverviewService,
   userGrowthService,
+  getDashboardSupportDataService
 } from "../../services/admin/dashboard.service.js";
 
 //------------- GET ADMIN DASHBOARD -------------
@@ -75,7 +76,9 @@ export const dashboardCounts = async (req, res) => {
 //------------- Dashboard revenue -----------
 export const revenueDashboardOverview = async (req,res) => {
   try {
-    const data = await revenueOverviewService();
+    const {range} = req.query
+    console.log(range)
+    const data = await revenueOverviewService(range);
   res.status(200).json({
     success:true,
     message:'Fetched revenue over view',
@@ -108,3 +111,23 @@ export const dashboardUserGrowth = async(req , res) =>{
     })
   }
 }
+
+//------- Support system data ------------
+
+export const dashboardSupportData = async (req, res) => {
+  try {
+    const data = await getDashboardSupportDataService();
+
+    return res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error("Dashboard Support Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard support data",
+    });
+  }
+};

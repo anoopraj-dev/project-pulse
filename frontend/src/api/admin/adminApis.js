@@ -6,8 +6,8 @@ export const fetchDashboardStats = async () => {
   return response.data;
 };
 
-export const fetchRevenueOverview = async () => {
-  const response = await api.get('/api/admin/dashboard/revenue');
+export const fetchRevenueOverview = async (range) => {
+  const response = await api.get(`/api/admin/dashboard/revenue?range=${range}`);
   return response.data
 }
 
@@ -111,4 +111,8 @@ export const getRevenueExportStatus = (id) =>{
   return api.get(`/api/admin/revenue/export-status/${id}`)
 }
 
+
+export const fetchDashboardAlerts = () =>{
+  return api.get(`/api/admin/dashboard/alerts`)
+}
 

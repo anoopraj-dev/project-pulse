@@ -12,15 +12,19 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
+  Legend
 } from "recharts";
 
 import {
+  fetchDashboardAlerts,
   fetchDashboardCounts,
   fetchDashboardStats,
   fetchDoctorById,
   fetchRevenueOverview,
   fetchUserGrowth,
 } from "../../api/admin/adminApis";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 // ---------------- Reusable Components ------------------
 
@@ -115,6 +119,9 @@ const Dashboard = () => {
   const [loadingCounts, setLoadingCounts] = useState(true);
   const [revenueData, setRevenueData] = useState([]);
   const [userGrowthData, setUserGrowthData] = useState([]);
+  const [alerts,setAlerts] = useState([])
+  const [range, setRange] = useState("week");
+
   const navigate = useNavigate();
 
   //------------ REVIEW PENDING APPROVAL ---------------
@@ -134,7 +141,7 @@ const Dashboard = () => {
   //------------ FETCH DATA -----------------
   const fetchStats = async () => {
     try {
-      const stats = await fetchDashboardStats();
+      const stats = await fetchDashboardStats(range);
       setData(stats);
     } catch (error) {
       toast.error("Failed to load dashboard data");
@@ -172,7 +179,8 @@ const Dashboard = () => {
   useEffect(() => {
     const loadRevenue = async () => {
       try {
-        const res = await fetchRevenueOverview();
+        const res = await fetchRevenueOverview(range);
+        console.log(res)
         if (res.success) {
           setRevenueData(res.data);
         }
@@ -181,7 +189,7 @@ const Dashboard = () => {
       }
     };
     loadRevenue();
-  }, []);
+  }, [range]);
 
   //------------- FETCH USER GROWTH -------------
   useEffect(() => {
@@ -199,34 +207,34 @@ const Dashboard = () => {
     loadGrowth();
   }, []);
 
-  const now = new Date();
-  const greeting =
-    now.getHours() < 12
-      ? "Good morning"
-      : now.getHours() < 18
-        ? "Good afternoon"
-        : "Good evening";
+  //--------------- FETCH ALERTS -------------
+useEffect(() => {
+  const loadAlerts = async () => {
+    try {
+      const res = await fetchDashboardAlerts();
 
-  const formattedDate = now.toLocaleDateString("en-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+      console.log("alerts", res);
+
+      if (res.data.success) {
+        setAlerts([
+          ...(res.data.data.alerts || []),
+          ...(res.data.data.tickets || []),
+        ]);
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  loadAlerts();
+}, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
-      <div className="w-full max-w-7xl mx-auto px-4 py-6 pb-16">
+    <div className="min-h-screen  dark:bg-gray-950 font-sans">
+      <div className="w-full mx-auto px-4 py-6 pb-16">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-lg font-semibold text-gray-500 dark:text-white">
-            {greeting}
-          </h1>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 border border-gray-400 rounded-lg p-2">
-            {formattedDate}
-          </p>
-        </div>
-
+      <PageBanner config={pageBannerConfig.adminDashboard}/>
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <StatCard
@@ -277,77 +285,146 @@ const Dashboard = () => {
         {/* Row 2 — Charts + Pending Approvals */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
           {/* Revenue Chart */}
-          <Card className="lg:col-span-3">
-            <CardHeader
-              icon="mdi:finance"
-              iconBg="bg-amber-50 dark:bg-amber-950"
-              iconColor="text-amber-600 dark:text-amber-400"
-              title="Revenue Overview"
-              subtitle="Last 7 days"
-              right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide">
-                  This week
-                </span>
-              }
-            />
-            <div className="px-5 pt-4 pb-3">
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  ₹
-                  {revenueData.reduce(
-                    (sum, item) => sum + (item.revenue || 0),
-                    0,
-                  )}
-                </span>
-                <span className="text-xs text-emerald-500 flex items-center gap-0.5">
-                  <Icon icon="mdi:trending-up" className="w-3.5 h-3.5" /> +12.4%
-                  vs last week
-                </span>
-              </div>
-              <ResponsiveContainer width="100%" height={160}>
-                <LineChart
-                  data={revenueData}
-                  margin={{ top: 0, right: 10, left: -10, bottom: 0 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="rgba(0,0,0,0.05)"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) => `₹${v / 1000}k`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: "white",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                    }}
-                    formatter={(v) => [`₹${v.toLocaleString()}`, "Revenue"]}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    name="Revenue"
-                    stroke="#f59e0b"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#f59e0b" }}
-                    activeDot={{ r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </Card>
+
+<Card className="lg:col-span-3">
+  <CardHeader
+    icon="mdi:finance"
+    iconBg="bg-amber-50 dark:bg-amber-950"
+    iconColor="text-amber-600 dark:text-amber-400"
+    title="Revenue Overview"
+    subtitle="Cashflow (Last 7 days)"
+    right={
+      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide">
+        Multi-metric
+      </span>
+    }
+  />
+
+
+<div className=" p-2 flex gap-2 mb-3">
+  {["day", "week", "month", "year"].map((item) => (
+    <button
+      key={item}
+      onClick={() => setRange(item)}
+      className={`text-[11px] px-3 py-1 rounded-full border ${
+        range === item
+          ? "bg-amber-500 text-white"
+          : "bg-white dark:bg-gray-900 text-gray-500"
+      }`}
+    >
+      {item}
+    </button>
+  ))}
+</div>
+
+  <div className="px-5 pt-4 pb-3">
+
+    {/* ---------------- TOTAL PROFIT SUMMARY ---------------- */}
+    <div className="flex items-baseline gap-2 mb-4">
+      <span className="text-2xl font-semibold text-gray-900 dark:text-white">
+        ₹
+        {revenueData.reduce(
+          (sum, item) => sum + (item.profit || 0),
+          0
+        ).toLocaleString()}
+      </span>
+
+      <span className="text-xs text-gray-500">
+        total profit (7 days)
+      </span>
+    </div>
+
+    {/* ---------------- CHART ---------------- */}
+    <ResponsiveContainer width="100%" height={220}>
+      <LineChart data={revenueData}>
+
+        <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+
+        <XAxis
+          dataKey="label"
+          tick={{ fontSize: 10 }}
+          axisLine={false}
+          tickLine={false}
+        />
+
+        <YAxis
+          tick={{ fontSize: 10 }}
+          axisLine={false}
+          tickLine={false}
+          tickFormatter={(v) => `₹${v}`}
+        />
+
+        <Tooltip
+          contentStyle={{
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            fontSize: "12px",
+          }}
+          formatter={(value, name) => [
+            `₹${value.toLocaleString()}`,
+            name,
+          ]}
+        />
+
+        {/* ---------------- LEGEND ---------------- */}
+        <Legend wrapperStyle={{ fontSize: "11px" }} />
+
+        {/* ---------------- INFLOW ---------------- */}
+        <Line
+          type="monotone"
+          dataKey="gross"
+          stroke="#3b82f6" // blue
+          strokeWidth={2}
+          dot={{ r: 2 }}
+          name="Cash Inflow"
+        />
+
+        {/* ---------------- PROFIT ---------------- */}
+        <Line
+          type="monotone"
+          dataKey="profit"
+          stroke="#10b981" // green
+          strokeWidth={2}
+          dot={{ r: 2 }}
+          name="Total Profit"
+        />
+
+        {/* ---------------- PLATFORM FEE ---------------- */}
+        <Line
+          type="monotone"
+          dataKey="platformFee"
+          stroke="#22c55e"
+          strokeDasharray="5 5"
+          strokeWidth={2}
+          dot={false}
+          name="Platform Fee"
+        />
+
+        {/* ---------------- OUTFLOW ---------------- */}
+        <Line
+          type="monotone"
+          dataKey="payouts"
+          stroke="#ef4444" // red
+          strokeWidth={2}
+          strokeDasharray="4 4"
+          dot={{ r: 2 }}
+          name="Doctor Payouts"
+        />
+
+        <Line
+          type="monotone"
+          dataKey="refunds"
+          stroke="#f59e0b" // amber
+          strokeWidth={2}
+          strokeDasharray="4 4"
+          dot={{ r: 2 }}
+          name="Refunds"
+        />
+
+      </LineChart>
+    </ResponsiveContainer>
+  </div>
+</Card>
 
           {/* Pending Approvals */}
           <Card className="lg:col-span-2">
@@ -450,7 +527,7 @@ const Dashboard = () => {
           </Card>
 
           {/* Recent Activity */}
-          <Card>
+       <Card>
   <CardHeader
     icon="mdi:lifebuoy"
     iconBg="bg-red-50 dark:bg-red-950"
@@ -459,101 +536,83 @@ const Dashboard = () => {
     subtitle="Alerts & user queries"
     right={
       <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide">
-        5 new
+        {alerts?.length || 0} new
       </span>
     }
   />
 
   <div className="divide-y divide-gray-50 dark:divide-gray-800">
 
-    {/* ---------------- SYSTEM ALERT ---------------- */}
-    <div className="px-4 py-3 space-y-2">
-      <p className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">
-        System Alerts
-      </p>
-
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-            Payment failure spike detected
-          </p>
-          <p className="text-[10px] text-gray-400">
-            12 failed transactions in last 1 hour
-          </p>
-        </div>
-        <span className="text-[10px] text-red-500 font-semibold">
-          High
-        </span>
+    {!alerts || alerts.length === 0 ? (
+      <div className="px-4 py-6 text-xs text-gray-400">
+        No alerts available
       </div>
+    ) : (
+      alerts.map((item, index) => (
+        <div key={item._id || index} className="px-4 py-3 space-y-2">
 
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-            Doctor verification backlog
+          {/* ---------------- TYPE ---------------- */}
+          <p className={`text-[10px] font-semibold uppercase tracking-wide
+            ${
+              item.type === "system"
+                ? "text-red-500"
+                : item.type === "payment"
+                ? "text-orange-500"
+                : item.type === "refund"
+                ? "text-purple-500"
+                : "text-blue-500"
+            }
+          `}>
+            {item.type}
           </p>
-          <p className="text-[10px] text-gray-400">
-            8 doctors pending for more than 7 days
-          </p>
+
+          <div className="flex items-center gap-3">
+
+            {/* ---------------- PRIORITY DOT ---------------- */}
+            <span
+              className={`w-1.5 h-1.5 rounded-full flex-shrink-0
+                ${
+                  item.priority === "urgent" || item.priority === "high"
+                    ? "bg-red-400"
+                    : item.priority === "medium"
+                    ? "bg-orange-400"
+                    : "bg-blue-400"
+                }
+              `}
+            />
+
+            {/* ---------------- CONTENT ---------------- */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
+                {item.title}
+              </p>
+              <p className="text-[10px] text-gray-400 truncate">
+                {item.message}
+              </p>
+              <p className="text-[10px] text-gray-400 truncate">
+                {new Date(item.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* ---------------- PRIORITY LABEL ---------------- */}
+            {item.priority && (
+              <span
+                className={`text-[10px] font-semibold ${
+                  item.priority === "urgent" || item.priority === "high"
+                    ? "text-red-500"
+                    : item.priority === "medium"
+                    ? "text-orange-500"
+                    : "text-gray-500"
+                }`}
+              >
+                {item.priority}
+              </span>
+            )}
+
+          </div>
         </div>
-        <span className="text-[10px] text-orange-500 font-semibold">
-          Medium
-        </span>
-      </div>
-    </div>
-
-    {/* ---------------- USER QUERIES ---------------- */}
-    <div className="px-4 py-3 space-y-2">
-      <p className="text-[10px] font-semibold text-blue-500 uppercase tracking-wide">
-        User Queries
-      </p>
-
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-            Cannot book appointment
-          </p>
-          <p className="text-[10px] text-gray-400">
-            “I’m unable to confirm my booking”
-          </p>
-        </div>
-        <button className="text-[10px] text-blue-600 font-semibold">
-          View
-        </button>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-            Refund request
-          </p>
-          <p className="text-[10px] text-gray-400">
-            “Payment deducted but appointment failed”
-          </p>
-        </div>
-        <button className="text-[10px] text-blue-600 font-semibold">
-          View
-        </button>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-            App performance issue
-          </p>
-          <p className="text-[10px] text-gray-400">
-            “App is slow during doctor search”
-          </p>
-        </div>
-        <button className="text-[10px] text-blue-600 font-semibold">
-          View
-        </button>
-      </div>
-    </div>
+      ))
+    )}
 
   </div>
 </Card>

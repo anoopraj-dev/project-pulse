@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import SearchInput from "../../components/shared/components/SearchInput";
 import { useSearch } from "../../hooks/useSearch";
 import { fetchSearchSuggestions } from "../../api/user/userApis";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const ViewPatients = () => {
   const [activeTab, setActiveTab] = useState("active");
@@ -79,62 +81,19 @@ const ViewPatients = () => {
   return (
     <div className="min-h-screen ">
       {/* Header band */}
-      <div className="my-2 ">
-        <div className="my-2 rounded-xl mx-auto max-w-7xl px-4 pb-6 pt-20 sm:px-6 lg:px-8 w-full bg-gradient-to-br from-sky-50 via-white to-cyan-100 pt-20 pb-3 ">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            {/* Title + subtitle */}
-            <div>
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-                <Icon icon="mdi:shield-account-outline" />
-                Admin · Patients
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
-                Manage Patients
-              </h1>
-              <p className="mt-2 max-w-xl text-sm text-slate-600">
-                View and manage patient accounts by status with a clean, tabbed
-                table view.
-              </p>
-            </div>
-
-            {/* Status meta + loading */}
-            <div className="flex flex-col items-start gap-2 sm:items-end">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm ring-1 ring-slate-200">
-                <Icon
-                  icon="mdi:circle"
-                  className="text-[10px] text-emerald-500"
-                />
-                <span>
-                  Active tab:{" "}
-                  <span className="capitalize font-semibold text-slate-900">
-                    {activeTab}
-                  </span>
-                </span>
-              </div>
-
-              {isLoading && (
-                <span className="inline-flex items-center gap-2 text-[11px] text-slate-500">
-                  <Icon
-                    icon="mdi:loading"
-                    className="animate-spin text-sky-500"
-                  />
-                  Loading patients...
-                </span>
-              )}
-            </div>
-          </div>
+      <div className=" ">
+          <PageBanner config={pageBannerConfig.adminPatients}/>
 
           {/* Tabs */}
-          <div className="mt-5">
+          <div className="">
             <PatientStatusTabs
               activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
           </div>
-        </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto sm:px-6">
         <SearchInput
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -153,7 +112,7 @@ const ViewPatients = () => {
       </div>
 
       {/* Content section */}
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+      <div className="mx-auto pb-12 pt-2 sm:px-6">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

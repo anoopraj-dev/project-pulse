@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticateUser} from "../middlewares/authenticateUser.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
-import { getAdminDashboard, getDoctorDocuments, getPendingDoctorProfile,getAdminNotifications, dashboardCounts, revenueDashboardOverview, dashboardUserGrowth } from "../controllers/adminControllers/adminDashboard.controller.js";
+import { getAdminDashboard, getDoctorDocuments, getPendingDoctorProfile,getAdminNotifications, dashboardCounts, revenueDashboardOverview, dashboardUserGrowth, dashboardSupportData } from "../controllers/adminControllers/adminDashboard.controller.js";
 import { approveDoctorsRequest,rejectDoctorsRequest,blockDoctorProfile,unblockDoctorProfile,revokeDoctorStatus,getAllDoctors } from "../controllers/adminControllers/adminViewDoctors.controller.js";
 import { blockPatientProfile, getAllPatients, getPatientProfile, unblockPatientProfile } from "../controllers/adminControllers/adminViewPatients.controller.js";
 import { searchSuggestionsController,searchController } from "../controllers/userControllers/search.controller.js";
@@ -57,10 +57,9 @@ router.patch('/support/change-password',changePassword);
 
 router.get('/revenue/summary',revenueSummary);
 
-router.post('/revenue/report',(req,res,next)=>{
-    console.log('route hit');
-    next();
-},requestRevenueExport)
+router.post('/revenue/report',requestRevenueExport)
 router.get('/revenue/export-status/:id',getRevenueExportStatus)
+
+router.get('/dashboard/alerts',dashboardSupportData)
 
 export default router;
