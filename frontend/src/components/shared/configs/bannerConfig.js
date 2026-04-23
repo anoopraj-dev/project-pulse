@@ -238,6 +238,24 @@ adminRevenue: {
     description: " View and manage appointment specifics"
   },
 
+    //--------------- Patient Support Center ----------------
+
+  patientSupportCenter: {
+    icon: "mdi:lifebuoy",
+
+    roleLabel: "Patient",
+    pageLabel: "Support Center",
+
+    title: "Help & Support Center",
+
+    description:
+      "Find answers to common questions, raise support tickets, and get help with appointments, payments, and account issues.",
+
+    activeTabLabel: "Section",
+
+    loadingText: "Loading support center...",
+  },
+
 
   //---------------- DOCTOR BANNER CONFIGS ----------------
 
@@ -330,7 +348,7 @@ adminRevenue: {
     title: "Your Practice Overview",
 
     description:
-      "Monitor appointments, track earnings, and stay updated with your patient activity all in one place.",
+      "Monitor appointments, track earnings, and stay updated with your activities.",
 
     loadingText: "Loading dashboard data...",
   },
@@ -375,6 +393,21 @@ adminRevenue: {
     "View your earned income from consultations, platform deductions, and payout history. Stay updated on all credited and pending earnings.",
 
   loadingText: "Loading wallet details...",
+},
+doctorSupportCenter: {
+  icon: "mdi:lifebuoy",
+
+  roleLabel: "Doctor",
+  pageLabel: "Support Center",
+
+  title: "Help & Support Center",
+
+  description:
+    "Get assistance with appointments, payments, settlements, platform usage, and technical issues. Raise support tickets and track responses from the admin team.",
+
+  activeTabLabel: "Section",
+
+  loadingText: "Loading support center...",
 },
 
 };

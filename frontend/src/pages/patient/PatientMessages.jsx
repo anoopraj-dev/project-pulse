@@ -9,7 +9,7 @@ const PatientMessages = () => {
   const { user } = useUser();
 
   return (
-    <div className="min-h-screen">
+    <div>
       <PatientStatusBanner
         status={user?.status}
         blockedReason={user?.blockedReason}

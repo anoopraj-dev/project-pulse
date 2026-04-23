@@ -2,10 +2,8 @@ import { Icon } from "@iconify/react";
 
 const PageBanner = ({
   config,
-  activeTab,
   isLoading,
   tabsComponent,
-  count
 }) => {
   return (
     <div className=" z-40 w-full overflow-hidden ">
@@ -18,7 +16,7 @@ const PageBanner = ({
               {config.roleLabel} · {config.pageLabel}
             </p>
 
-            <h1 className="mt-2 text-xl text-slate-700 sm:text-2xl  font-medium">
+            <h1 className="mt-2 text-md text-slate-700 sm:text-lg  font-medium">
               {config.title}
             </h1>
 
@@ -28,19 +26,6 @@ const PageBanner = ({
           </div>
 
           <div className="flex flex-col items-start gap-2 sm:items-end">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm ring-1 ring-slate-200">
-              <Icon icon="mdi:circle" className="text-[10px] text-emerald-500" />
-              <span className="capitalize font-semibold text-slate-900">
-                    {count}
-                </span>
-              <span>
-                {config.activeTabLabel}:{" "}
-                
-                <span className="capitalize font-semibold text-slate-900">
-                  {activeTab}
-                </span>
-              </span>
-            </div>
 
             {isLoading && (
               <span className="inline-flex items-center gap-2 text-[11px] text-slate-500">

@@ -29,6 +29,7 @@ import { changePassword, createSupportTicket, supportTickets } from "../controll
 import { getDoctorExportStatus, requestDoctorExport } from "../controllers/doctorControllers/export.controller.js";
 import { doctorWallet } from "../controllers/doctorControllers/wallet.controller.js";
 import { requestWithdrawal } from "../controllers/doctorControllers/withdrawal.controller.js";
+import { viewReceipt } from "../controllers/userControllers/receipt.controller.js";
 
 const router = Router();
 
@@ -93,6 +94,7 @@ router.get('/appointments/patient-profile/:id',viewPatientProfile)
 
 //----------------- payments ----------------
 router.get('/payments',getDoctorPaymentHistory)
+router.get('/payments/:id',viewReceipt)
 
 //---------------- Search ----------------
 router.get('/search',searchController)

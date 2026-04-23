@@ -1,3 +1,4 @@
+
 import Conversation from "../../models/conversation.model.js";
 import Message from "../../models/message.model.js";
 import Doctor from "../../models/doctor.model.js";
@@ -8,13 +9,13 @@ const modelMap = {
   Patient,
 };
 
-//--------------------- GET ALL MESSAGES SERVICE ---------------------
-export const getAllMessagesService = async (userId1, userId2, userRole) => {
+// ---------------- GET ALL MESSAGES ----------------
+export const getAllMessagesService = async (userId1, userId2, role) => {
   let userModel2;
 
-  if (userRole === "patient") userModel2 = "Doctor";
-  else if (userRole === "doctor") userModel2 = "Patient";
-  else throw { status: 400, message: "Invalid user role" };
+  if (role === "patient") userModel2 = "Doctor";
+  else if (role === "doctor") userModel2 = "Patient";
+  else throw { status: 400, message: "Invalid role" };
 
   const ParticipantModel = modelMap[userModel2];
 
@@ -41,14 +42,12 @@ export const getAllMessagesService = async (userId1, userId2, userRole) => {
     };
   }
 
-  //--------------------- GET MESSAGES ---------------------
   const messages = await Message.find({
     conversationId: conversation._id,
   })
     .sort({ createdAt: 1 })
     .lean();
 
-  //--------------------- FORMAT MESSAGES ---------------------
   const formattedMessages = messages.map((msg) => ({
     ...msg,
     files:
@@ -61,7 +60,6 @@ export const getAllMessagesService = async (userId1, userId2, userRole) => {
       })) || [],
   }));
 
-  //--------------------- MARK AS READ ---------------------
   await Message.updateMany(
     {
       conversationId: conversation._id,
@@ -78,7 +76,7 @@ export const getAllMessagesService = async (userId1, userId2, userRole) => {
   };
 };
 
-//--------------------- GET ALL CONVERSATIONS SERVICE ---------------------
+// ---------------- GET ALL CONVERSATIONS ----------------
 export const getAllConversationsService = async (userId) => {
   const conversations = await Conversation.find({
     "participants.userId": userId,
@@ -87,14 +85,15 @@ export const getAllConversationsService = async (userId) => {
   const result = [];
 
   for (const convo of conversations) {
-    const other = convo.participants.find((p) => p.userId.toString() !== userId);
+    const other = convo.participants.find(
+      (p) => p.userId.toString() !== userId
+    );
 
     const ParticipantModel = modelMap[other.userModel];
     const participant = await ParticipantModel.findById(other.userId).select(
       "name profilePicture"
     );
 
-    //--------------------- UNREAD COUNT ---------------------
     const unreadCount = await Message.countDocuments({
       conversationId: convo._id,
       receiverId: userId,
@@ -113,21 +112,28 @@ export const getAllConversationsService = async (userId) => {
   return result;
 };
 
-//--------------------- SEND MESSAGE SERVICE ---------------------
-export const sendMessageService = async ({
-  conversationId,
-  senderId,
-  senderModel,
-  receiverId,
-  receiverModel,
-  text,
-  files = [],
-}) => {
+// ---------------- SEND MESSAGE ----------------
+export const sendMessageService = async (payload = {}) => {
+  const {
+    conversationId,
+    senderId,
+    senderModel,
+    receiverId,
+    receiverModel,
+    text = "",
+    files = [],
+  } = payload;
+
+  if (!senderId || !receiverId) {
+    throw new Error("Missing senderId or receiverId");
+  }
+
   let conversation = null;
   let isNewConversation = false;
 
-  //--------------------- FIND OR CREATE CONVERSATION ---------------------
-  if (conversationId) conversation = await Conversation.findById(conversationId);
+  if (conversationId) {
+    conversation = await Conversation.findById(conversationId);
+  }
 
   if (!conversation) {
     conversation = await Conversation.findOne({
@@ -150,8 +156,7 @@ export const sendMessageService = async ({
     }
   }
 
-  //--------------------- NORMALIZE FILES ---------------------
-  const normalizedFiles = files.map((f) => ({
+  const normalizedFiles = (files || []).map((f) => ({
     url: f.url,
     name: f.name,
     size: f.size,
@@ -159,7 +164,6 @@ export const sendMessageService = async ({
     format: f.format,
   }));
 
-  //--------------------- CREATE MESSAGE ---------------------
   const message = await Message.create({
     conversationId: conversation._id,
     senderId,
@@ -170,7 +174,6 @@ export const sendMessageService = async ({
     files: normalizedFiles,
   });
 
-  //--------------------- UPDATE CONVERSATION ---------------------
   conversation.lastMessage = {
     text: message.text,
     senderId: message.senderId,
@@ -178,42 +181,40 @@ export const sendMessageService = async ({
     type: message.files?.length ? "media" : "text",
     createdAt: message.createdAt,
   };
+
   conversation.updatedAt = message.createdAt;
   await conversation.save();
 
-  //--------------------- POPULATE PARTICIPANTS ---------------------
-  const populatedConversation = await Conversation.findById(conversation._id).populate(
+  const populated = await Conversation.findById(conversation._id).populate(
     "participants.userId",
     "name profilePicture"
   );
 
-  const getOtherParticipant = (conversation, viewerId) =>
-    conversation.participants.find((p) => p.userId._id.toString() !== viewerId.toString())
-      .userId;
-
-  const senderParticipant = getOtherParticipant(populatedConversation, senderId);
-  const receiverParticipant = getOtherParticipant(populatedConversation, receiverId);
+  const getOther = (viewerId) =>
+    populated.participants.find(
+      (p) => p.userId._id.toString() !== viewerId.toString()
+    ).userId;
 
   return {
-    conversationId: populatedConversation._id,
+    conversationId: populated._id,
     message,
     isNewConversation,
     senderConversation: {
-      _id: populatedConversation._id,
-      participant: senderParticipant,
-      lastMessage: populatedConversation.lastMessage,
-      updatedAt: populatedConversation.updatedAt,
+      _id: populated._id,
+      participant: getOther(senderId),
+      lastMessage: populated.lastMessage,
+      updatedAt: populated.updatedAt,
     },
     receiverConversation: {
-      _id: populatedConversation._id,
-      participant: receiverParticipant,
-      lastMessage: populatedConversation.lastMessage,
-      updatedAt: populatedConversation.updatedAt,
+      _id: populated._id,
+      participant: getOther(receiverId),
+      lastMessage: populated.lastMessage,
+      updatedAt: populated.updatedAt,
     },
   };
 };
 
-//--------------------- MARK CONVERSATION AS READ SERVICE ---------------------
+// ---------------- MARK READ ----------------
 export const markConversationAsReadService = async (conversationId) => {
   if (!conversationId) return 0;
 

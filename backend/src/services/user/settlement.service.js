@@ -22,7 +22,7 @@ export const runSettlementService = async () => {
       //----------- Get payment ------------
       const payment = await Payment.findOne({
         appointment: consultation.appointment,
-        status: "verified",
+        status: { $in: ["verified", "refunded"] },
       });
 
       if (!payment) {

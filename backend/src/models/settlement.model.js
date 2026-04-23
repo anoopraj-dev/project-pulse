@@ -25,7 +25,7 @@ const settlementSchema = new mongoose.Schema(
         },
         type: {
             type:String,
-            enum:['completed','expired','cancelled'],
+            enum:['completed','expired','cancelled','doctor_only_present','patient_only_present','no_show'],
             required:true,
         },
         platformFee:{

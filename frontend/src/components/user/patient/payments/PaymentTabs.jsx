@@ -10,7 +10,7 @@ const PatientPaymentTabs = ({ activeTab, setActiveTab, counts = {} }) => {
 
   return (
     <div className="mb-4">
-      <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 rounded-xl w-full lg:justify-center">
+      <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 rounded-xl w-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
 

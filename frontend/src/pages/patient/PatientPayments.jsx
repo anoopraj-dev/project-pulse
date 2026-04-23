@@ -177,7 +177,7 @@ const filteredSearchResult = results?.filter((payment) => {
 
           {/* Search Section */}
           {activeTab !== "book" && (
-        <div className="mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 pb-2 pt-2 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
               <SearchInput

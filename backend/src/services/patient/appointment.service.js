@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Doctor from "../../models/doctor.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
+import Consultation from '../../models/consultation.model.js'
 import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
 import Wallet from "../../models/wallet.model.js";

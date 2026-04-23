@@ -256,18 +256,8 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans">
-      <div className="w-full max-w-7xl mx-auto px-4 py-6 pb-16">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-lg font-semibold text-gray-500 dark:text-white">
-            {greeting}
-          </h1>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 border border-gray-400 rounded-lg p-2">
-            {formattedDate}
-          </p>
-        </div>
-
+    <div className="min-h-screen font-sans">
+      <div className="w-full mx-auto px-4 py-6 pb-16">
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
           <StatCard

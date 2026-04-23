@@ -9,8 +9,8 @@ const DataTable = ({
     <div className="w-full px-1 py-1">
       {data.length > 0 ? (
         <>
-          {/* ================= DESKTOP VIEW ================= */}
-          <div className="hidden md:block overflow-auto max-h-[70vh]">
+          {/* ------------- DESKTOP VIEW -------------*/}
+          <div className="hidden lg:block overflow-auto max-h-[70vh]">
             <div className="flex flex-col gap-2 min-w-[600px]">
               
               {/* Column Labels */}
@@ -106,8 +106,8 @@ const DataTable = ({
             </div>
           </div>
 
-          {/* ================= MOBILE VIEW ================= */}
-          <div className="md:hidden flex flex-col gap-3">
+          {/* ------------ MOBILE VIEW ----------------*/}
+          <div className="lg:hidden flex flex-col gap-3">
             {data.map((row, index) => (
               <div
                 key={row._id || index}

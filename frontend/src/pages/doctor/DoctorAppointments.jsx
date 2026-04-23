@@ -66,16 +66,6 @@ const DoctorAppointments = () => {
     setQuery(item.name);
   };
 
-  //------------- View Appointments -----------------
-  // const handleView = (id) => {
-  //   const appointment = displayedAppointments.find((a) => a._id === id);
-  //   openModal("Choose Appointment Status", AppointmentsActionModal, {
-  //     appointment,
-  //     id: appointment._id,
-  //     role: "doctor",
-  //   });
-  // };
-
   const handleView = (id) => {
     navigate(`/doctor/appointments/${id}`);
   };

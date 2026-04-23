@@ -1,21 +1,22 @@
 
 import { viewReceiptService } from "../../services/user/receipt.service.js";
 
-//--------------------- VIEW RECEIPT CONTROLLER ---------------------
 export const viewReceipt = async (req, res) => {
   try {
     const { id } = req.params;
+    const role = req.params.role || req.query.role || req.user?.role; 
+
     const hostUrl = `${req.protocol}://${req.get("host")}`;
 
-    const pdfBuffer = await viewReceiptService(id, hostUrl);
+    const pdfBuffer = await viewReceiptService(id, hostUrl, role);
 
-    //--------------------- SEND PDF ---------------------
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "inline");
-    res.send(pdfBuffer);
+    res.setHeader("Content-Disposition", "inline; filename=receipt.pdf");
+
+    return res.send(pdfBuffer);
   } catch (error) {
     console.error(error);
-    res.status(error.status || 500).json({
+    return res.status(error.status || 500).json({
       success: false,
       message: error.message || "Failed to generate receipt",
     });
