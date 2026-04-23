@@ -82,8 +82,10 @@ export const fetchSupportTickets = () =>{
   return api.get('/api/admin/support/tickets')
 }
 
-export const fetchSystemAlerts = () =>{
-  return api.get('/api/admin/support/alerts')
+export const fetchSystemAlerts = (page,limit) =>{
+  return api.get('/api/admin/support/alerts',{
+    params:{page,limit}
+  })
 }
 
 export const updateTicketStatus = (id,status) => {

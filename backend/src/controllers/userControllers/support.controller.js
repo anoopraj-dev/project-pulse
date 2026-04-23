@@ -2,7 +2,7 @@ import {
   createTicketService,
   getTicketsService,
   updateTicketStatusService,
-  getSystemAlersService,
+  getSystemAlertsService,
   updateAlertStatusService,
   changePasswordService
 } from '../../services/user/support.service.js';
@@ -74,7 +74,8 @@ export const updateTicketStatus = async (req, res, next) => {
 
 export const systemAlerts= async (req, res, next) => {
   try {
-    const alerts = await getSystemAlersService();
+    const {page=1,limit=10,status} = req.query;
+    const alerts = await getSystemAlertsService({page,limit});
 
     res.status(200).json({
       success: true,

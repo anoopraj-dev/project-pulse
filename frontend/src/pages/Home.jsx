@@ -262,9 +262,9 @@ const Home = () => {
             <Heart />
 
             {/* Pulse overlay */}
-            <div className="hidden lg:block absolute left-1 translate-x-1/2">
+            {/* <div className="hidden lg:block absolute left-1 translate-x-1/2">
               <HeartbeatPulse />
-            </div>
+            </div> */}
           </motion.div>
         </div>
 

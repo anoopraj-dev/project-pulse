@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { toast } from "react-hot-toast";
@@ -9,6 +8,7 @@ import {
   updateAlertStatus,
   updateTicketStatus,
 } from "@/api/admin/adminApis";
+import Pagination from "@/components/shared/components/Pagination";
 
 // ---------------- UI COMPONENTS ----------------
 const Card = ({ children }) => (
@@ -43,6 +43,8 @@ const SupportCenter = () => {
   const [alertTab, setAlertTab] = useState("active");
 
   const [loadingId, setLoadingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // ---------------- PASSWORD STATE ----------------
   const [passwords, setPasswords] = useState({
@@ -53,21 +55,25 @@ const SupportCenter = () => {
   useEffect(() => {
     const getData = async () => {
       const [tRes, aRes] = await Promise.allSettled([
-        fetchSupportTickets(),
-        fetchSystemAlerts(),
+        fetchSupportTickets(page, 5),
+        fetchSystemAlerts(page, 5),
       ]);
 
       setTickets(
-        tRes.status === "fulfilled" ? tRes.value.data?.data || [] : []
+        tRes.status === "fulfilled" ? tRes.value.data?.data || [] : [],
       );
 
-      setAlerts(
-        aRes.status === "fulfilled" ? aRes.value.data?.data || [] : []
+      setAlerts(aRes.value?.data?.data?.data || []);
+
+      console.log("aRes alert", aRes);
+
+      setTotalPages(
+         aRes.value?.data?.data?.pagination?.totalPages || 1
       );
     };
 
     getData();
-  }, []);
+  }, [page]);
 
   // ---------------- STATUS HANDLERS ----------------
   const handleUpdateTicketStatus = async (id, status) => {
@@ -80,7 +86,7 @@ const SupportCenter = () => {
         toast.success("Ticket status updated");
 
         setTickets((prev) =>
-          prev.map((t) => (t._id === id ? { ...t, status } : t))
+          prev.map((t) => (t._id === id ? { ...t, status } : t)),
         );
       } else {
         toast.error("Failed to update ticket");
@@ -102,7 +108,7 @@ const SupportCenter = () => {
         toast.success("Alert status updated");
 
         setAlerts((prev) =>
-          prev.map((a) => (a._id === id ? { ...a, status } : a))
+          prev.map((a) => (a._id === id ? { ...a, status } : a)),
         );
       } else {
         toast.error("Failed to update alert");
@@ -172,7 +178,6 @@ const SupportCenter = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 py-6">
-
         {/* HEADER */}
         <h1 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
           Support Center
@@ -221,7 +226,6 @@ const SupportCenter = () => {
 
             {/* MAIN GRID */}
             <div className="grid lg:grid-cols-2 gap-4">
-
               {/* ---------------- TICKETS ---------------- */}
               <Card>
                 <CardHeader
@@ -313,6 +317,7 @@ const SupportCenter = () => {
                     <div key={a._id} className="p-4">
                       <p className="text-xs font-semibold">{a.title}</p>
                       <p className="text-[11px] text-gray-400">{a.desc}</p>
+                      <p className="text-[11px] text-gray-400">{new Date(a.createdAt).toDateString()}</p>
 
                       {a.status !== "resolved" && (
                         <button
@@ -327,6 +332,13 @@ const SupportCenter = () => {
                       )}
                     </div>
                   ))}
+                </div>
+                <div className="p-4 border-t">
+                  <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
                 </div>
               </Card>
             </div>
@@ -343,7 +355,6 @@ const SupportCenter = () => {
             />
 
             <div className="p-4 space-y-3 max-w-sm">
-
               <input
                 type="password"
                 placeholder="Current password"
@@ -376,7 +387,6 @@ const SupportCenter = () => {
               >
                 Update Password
               </button>
-
             </div>
           </Card>
         )}

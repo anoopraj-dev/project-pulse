@@ -42,7 +42,7 @@ const DataTable = ({
                 ))}
 
                 {onView && (
-                  <span className="text-[10px] font-bold uppercase text-right text-slate-400">
+                  <span className="text-[10px] font-bold uppercase text-right text-slate-400 cursor-pointer">
                     Action
                   </span>
                 )}
@@ -86,14 +86,14 @@ const DataTable = ({
                         {row.status === "failed" ? (
                           <button
                             onClick={() => onView(row._id, "retry")}
-                            className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-500 rounded-lg"
+                            className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-500 rounded-lg cursor-pointer"
                           >
                             Retry
                           </button>
                         ) : (
                           <button
                             onClick={() => onView(row._id, "view")}
-                            className="px-3 py-1.5 text-xs font-bold bg-slate-50 text-slate-600 rounded-lg"
+                            className="px-3 py-1.5 text-xs font-bold bg-slate-50 text-slate-600 rounded-lg cursor-pointer"
                           >
                             View
                           </button>
@@ -138,14 +138,14 @@ const DataTable = ({
                     {row.status === "failed" ? (
                       <button
                         onClick={() => onView(row._id, "retry")}
-                        className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-500 rounded-lg"
+                        className="px-3 py-1.5 text-xs font-bold bg-red-50 text-red-500 rounded-lg cursor-pointer"
                       >
                         Retry
                       </button>
                     ) : (
                       <button
                         onClick={() => onView(row._id, "view")}
-                        className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-lg"
+                        className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-lg cursor-pointer"
                       >
                         View
                       </button>

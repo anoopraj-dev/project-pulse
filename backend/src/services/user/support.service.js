@@ -5,6 +5,7 @@ import Patient from "../../models/patient.model.js";
 import Doctor from '../../models/doctor.model.js'
 import Admin from '../../models/admin.model.js'
 import Alert from "../../models/alert.model.js";
+import paginate from "../../utils/paginate.js";
 
 //--------- SUPPORT TICKETS -------------
 
@@ -34,8 +35,17 @@ export const updateTicketStatusService = async (
 //--------- SYSTEM ALERTS -----------
 
 //-------- get Alerts --------
-export const getSystemAlersService = async (data) => {
-  return await Alert.find().sort({createdAt:-1}).lean();
+// export const getSystemAlersService = async (data) => {
+//   return await Alert.find().sort({createdAt:-1}).lean();
+// };
+
+export const getSystemAlertsService = async ({ page = 1, limit = 10 }) => {
+  return await paginate({
+    model: Alert,
+    page,
+    limit,
+    sort: { createdAt: -1 },
+  });
 };
 
 //--------- update alert status ---------
