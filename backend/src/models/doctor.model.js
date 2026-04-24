@@ -1,0 +1,107 @@
+
+import mongoose, { Schema } from "mongoose";
+
+const DoctorSchema = new Schema(
+  {
+    // --- Basic Info (unchanged) ---
+    name: { type: String, required: true },
+    doctorId: { type: String, unique: true, required: true },
+    gender: { type: String, enum: ["male", "female", "other"] },
+    dob: { type: Date },
+    profilePicture: { type: String },
+    email: { type: String, unique: true, required: true },
+    phone: { type: String },
+    location: { type: String },
+    about:{type:String},
+
+    // --- Authentication & Role  ---
+    password: { type: String, required: true },
+    role: { type: String, required: true },
+    isVerified: { type: Boolean, default: false },
+    firstLogin: { type: Boolean, default: true },
+
+
+    // --- Ratings & Status  ---
+    rating: { type: Number, default: 0 },
+    status: { type: String, enum: ["approved", "pending", "rejected","blocked", "resubmit","resubmitted",'requestedResubmission'], default: "pending" },
+    rejectionReason: { type: String, default:''},
+    isBlocked: { type: Boolean, default:false},
+    blockedReason:{type: String, default:''},
+    resubmissionApproved: { type: Boolean, default : false},
+    submissionCount: {type:Number,default:0},
+    lastSubmitted:{type:Date},
+
+    // --- Professional Info  ---
+    professionalInfo: {
+      qualifications: { type: [String], default: [] },
+      specializations: { type: [String], default: [] },
+      experience: [{
+        years: { type: Number },
+        hospitalName: { type: String },
+        location: { type: String },
+        experienceCertificate: { type:String }
+      }],
+      education: [{
+        degree: { type: String },
+        college: { type: String },
+        completionYear: { type: Number },
+        educationCertificate: { type: String }
+      }],
+
+      medicalLicense: {
+        registrationNumber: {
+          type: String,
+          required: [true, "Registration number required"],
+          match: [/^[A-Z]{2,4}\d{4,6}$/i, "Must be KMC12345 format"],
+          default:'KSMC1234'
+    
+        },
+        stateCouncil: {
+          type: String,
+          required: [true, "State council required"],
+          enum: [
+            "Andhra Pradesh Medical Council (APMC)",
+            "Delhi Medical Council (DMC)",
+            "Karnataka Medical Council (KMC)",
+            "Kerala State Medical Council (KSMC)",
+            "Maharashtra Medical Council (MMC)",
+            "Tamil Nadu Medical Council (TNMC)",
+            "Telangana State Medical Council (TSMC)",
+          ],
+          default:"Kerala State Medical Council (KSMC)"
+    
+        },
+        yearOfRegistration: {
+          type: Number,
+          required: [true, "Year of registration required"],
+          min: 1950,
+          max: 2026, 
+          default:2000
+        
+        },
+        proofDocument:{
+          type:[String],
+          default:[]
+        },
+      },
+    },
+
+    services: [{
+      serviceType: { type: String, required: true },
+      fees: { type: Number, required: true, min: 0 },
+      availableDates: [{
+        date: { type: Date, required: true },
+        timeSlots: [{
+          start: { type: String, required: true },
+          end: { type: String, required: true },
+        }],
+      }],
+    }],
+
+    department: { type: Schema.Types.ObjectId, ref: "Department" },
+  },
+  { collection: "doctors", timestamps: true }
+);
+
+const Doctor = mongoose.model("Doctor", DoctorSchema);
+export default Doctor;

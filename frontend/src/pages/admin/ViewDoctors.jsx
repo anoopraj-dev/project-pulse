@@ -1,0 +1,158 @@
+import { useEffect, useState } from "react";
+import { Icon } from "@iconify/react";
+import DoctorStatusTabs from "../../components/user/admin/doctors/DoctorStatusTabs";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { getAllDoctors } from "../../api/admin/adminApis";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import DataTable from "../../components/shared/components/DataTable";
+import { doctorColumns } from "../../components/shared/configs/TableConfigs";
+import SearchInput from "../../components/shared/components/SearchInput";
+import { useSearch } from "../../hooks/useSearch";
+import { fetchSearchSuggestions } from "../../api/user/userApis";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+
+const ViewDoctors = () => {
+  const [activeTab, setActiveTab] = useState("approved");
+  const [doctors, setDoctors] = useState([]);
+  const fetchAllDoctorsAction = useAsyncAction();
+  const navigate = useNavigate();
+  const { query, setQuery, results } = useSearch({
+    role: "admin",
+    type: "doctors",
+  });
+
+  //------------- Get All Doctors -------------
+  const fetchAllDoctors = () => {
+    fetchAllDoctorsAction.executeAsyncFn(async () => {
+      try {
+        const response = await getAllDoctors();
+
+        if (!response?.success) {
+          toast.error(response?.message || "Failed to load data");
+          return;
+        }
+
+        setDoctors(response.users || []);
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong");
+      }
+    });
+  };
+
+  useEffect(() => {
+    fetchAllDoctors();
+  }, []);
+
+  //------------- Search Suggestions ---------------
+  const fetchSuggestions = (query) =>{
+    return fetchSearchSuggestions ({
+      role: 'admin',
+      query,
+      type: 'doctors',
+  
+    })
+  }
+
+  const handleSelectSuggestions  = (item) => {
+    setQuery(item.name)
+  }
+  // ------------- View Doctors ------------
+  const handleView = (id) => {
+    navigate(`/admin/doctor/${id}`);
+  };
+
+  const filteredDoctors = doctors?.filter((doc) => doc.status === activeTab);
+
+  const searchedDoctors = results?.filter((doc) => doc.status === activeTab);
+
+  const displayedDoctors = query.trim() ? searchedDoctors : filteredDoctors;
+  const isLoading = fetchAllDoctorsAction.loading;
+
+  return (
+    <div className="min-h-screen">
+      {/* ---------- Header band ---------- */}
+      <div className="my-2">
+      <PageBanner config={pageBannerConfig.adminDoctors}/>
+          {/* Tabs */}
+          <div className="mt-5">
+            <DoctorStatusTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+        </div>
+        <div className="mx-auto  sm:px-6 lg:px-8">
+          <SearchInput
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search doctors - name/ specilizaitions"
+            fetchSuggestions={fetchSuggestions}
+            onSelectSuggestion={handleSelectSuggestions}
+            role= 'admin'
+            entity='doctors'
+          />
+        </div>
+      </div>
+
+      {/* ---------- Content ---------- */}
+      <div className="mx-auto  pb-12 pt-2 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+          {/* Table header */}
+          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                <Icon icon="mdi:doctor" className="h-4 w-4 text-sky-600" />
+                {activeTab === "approved"
+                  ? "Approved doctors"
+                  : activeTab === "pending"
+                  ? "Pending approval"
+                  : "Rejected doctors"}
+              </h2>
+
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
+                <Icon icon="mdi:counter" className="h-4 w-4 text-slate-500" />
+                <span className="font-semibold text-slate-900">
+                  {filteredDoctors.length}
+                </span>
+                records
+              </div>
+            </div>
+          </div>
+
+          {/* Table / empty state */}
+          <div className="px-2 py-3 sm:px-4">
+            {filteredDoctors.length > 0 ? (
+              <DataTable
+                data={displayedDoctors}
+                columns={doctorColumns}
+                onView={handleView}
+
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+                  <Icon
+                    icon="mdi:clipboard-text-outline"
+                    className="h-6 w-6 text-slate-400"
+                  />
+                </div>
+
+                <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                  No doctors in this state
+                </h3>
+
+                <p className="mt-1 max-w-sm text-xs text-slate-500">
+                  Switch tabs to review doctors in other approval states.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ViewDoctors;

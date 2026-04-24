@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -10,6 +11,32 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "express": "^5.1.0"
+    "@clerk/backend": "^2.24.0",
+    "@clerk/clerk-sdk-node": "^4.13.23",
+    "@clerk/express": "^1.7.53",
+    "bcryptjs": "^3.0.2",
+    "bullmq": "^5.75.2",
+    "cloudinary": "^2.7.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "ioredis": "^5.9.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.0",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.6",
+    "puppeteer": "^24.37.4",
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
+    "streamifier": "^0.1.1",
+    "svix": "^1.81.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
