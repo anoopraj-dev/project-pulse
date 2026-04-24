@@ -87,7 +87,7 @@ export const handleRazorpayPayment = async ({
           onSuccess(response);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error("Something went wrong during payment");
       }
     },
@@ -122,7 +122,7 @@ export const handleRazorpayPayment = async ({
         onFailure();
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to update payment Status");
     }
   });

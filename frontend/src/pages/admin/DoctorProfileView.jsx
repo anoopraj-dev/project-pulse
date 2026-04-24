@@ -27,11 +27,10 @@ const DoctorProfileView = () => {
     try {
       await fetchDoctorAction.executeAsyncFn(async () => {
         const response = await fetchDoctorById(id); 
-        console.log(response?.user)
         setUser(response?.user);
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -45,7 +44,7 @@ const DoctorProfileView = () => {
           }
         });
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast("Failed to load documents");
       }
     };
@@ -62,7 +61,7 @@ const DoctorProfileView = () => {
         }
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Request Approval failed");
     }
   };
@@ -97,7 +96,7 @@ const DoctorProfileView = () => {
         }
       })
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error('Unblock operation failed')
     }
   }
@@ -107,7 +106,7 @@ const DoctorProfileView = () => {
     try {
       openModal('Revoke doctor profile Status',RevokeStatusModal,{id: user._id,onSubmit:(updatedUser)=> setUser(updatedUser)})
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

@@ -81,6 +81,8 @@ const RevenuePage = () => {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [exporting, setExporting] = useState(false);
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -143,7 +145,7 @@ const RevenuePage = () => {
             clearInterval(interval);
             toast.dismiss(toastId);
             toast.success("Revenue report ready!");
-            setDownloadUrl(`http://localhost:3000${statusRes.data.fileUrl}`);
+            setDownloadUrl(`${API_BASE_URL}${statusRes.data.fileUrl}`);
             setExporting(false);
           }
           if (status === "failed" || attempts >= maxAttempts) {

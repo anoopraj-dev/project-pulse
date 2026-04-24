@@ -183,8 +183,6 @@ const ChatContainer = () => {
         createdAt: new Date().toISOString(),
       };
 
-      console.log("tempFiles", tempMessage?.files);
-
       setMessages((prev) => [...prev, tempMessage]);
 
       //-------------------  upload to cloudinary ----------------------

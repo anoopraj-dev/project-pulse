@@ -16,9 +16,6 @@ const ViewDocuments = () => {
   fetchDoctorAction.executeAsyncFn(async () => {
     try {
       const res = await fetchDoctorById(id);
-
-      console.log("res from view docs", res);
-
       if (!res.success) {
         throw new Error("Failed to fetch documents");
       }

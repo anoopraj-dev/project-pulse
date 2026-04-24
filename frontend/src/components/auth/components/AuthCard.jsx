@@ -164,7 +164,7 @@ const AuthCard = ({ role: initialRole }) => {
         }
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error?.response?.data?.message || "Something went wrong");
     }
   };

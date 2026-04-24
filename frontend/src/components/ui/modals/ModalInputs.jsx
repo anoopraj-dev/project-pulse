@@ -318,7 +318,7 @@ export const SendCommentModal = ({ id, onSubmit, closeModal, apiCall }) => {
         }
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -439,7 +439,7 @@ export const AppointmentsActionModal = ({
         }
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to update appointment status");
     }
   };

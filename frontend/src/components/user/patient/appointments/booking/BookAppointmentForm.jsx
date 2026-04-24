@@ -103,7 +103,6 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
 
 
       let payload;
-      console.log(res?.data?.payment?.doctor)
       if (res.data?.success) {
         payload = {
           ...formData,
@@ -115,7 +114,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
         handleBooking(payload);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error.response?.data?.message || "Something went wrong");
     }
   };
@@ -133,7 +132,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
         toast.error("Failed to book appointment");
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Something went wrong");
     }
   };

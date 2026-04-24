@@ -29,7 +29,7 @@ const PatientProfileView = () => {
           );
         setUser(res?.data?.user);
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error(error.res.data.message);
       }
     });
@@ -55,7 +55,6 @@ const PatientProfileView = () => {
         );
       }
 
-      console.log("API response:", res.data.user);
       setUser(res.data.user);
       toast.success(res.data.message || "User unblocked successfully!");
     } catch (error) {

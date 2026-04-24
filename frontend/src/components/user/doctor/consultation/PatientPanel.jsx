@@ -26,7 +26,6 @@ const PatientPanel = React.memo(
 
     const prescriptions = patientData?.consultation?.prescriptions || [];
     const pastConsultations = patientData?.consultation?.pastConsultations || [];
-    console.log(prescriptions,pastConsultations)
 
     return (
       <>

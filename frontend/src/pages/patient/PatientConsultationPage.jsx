@@ -46,8 +46,6 @@ const PatientConsultationPage = () => {
   //-------- listen for end requests ----------
   useEffect(()=>{
     const handler = ({consultationId}) =>{
-      console.log('handler consultationId',consultationId);
-      console.log('session id inside handler', sessionId)
       openModal(
         '',
         EndConsultationModal,
@@ -102,9 +100,6 @@ const PatientConsultationPage = () => {
   }, []);
 
   const handleEndCall = async () => {
-
-    console.log('sessionId',typeof sessionId)
-
     if (!isPrescriptionSubmitted) {
       toast.error("Waiting for doctor to submit prescription");
       return;

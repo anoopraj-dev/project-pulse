@@ -92,25 +92,15 @@ const PatientViewAppointment = () => {
 
   const handleJoinConsultation = async () => {
     try {
-      console.log("appointment", appointment);
       const consultationId = appointment?.consultation?._id;
-
       if (!consultationId) {
         return toast.error("Consultation not available yet");
       }
-
-      console.log("consultationId", consultationId);
-
       const res = await joinConsultation(consultationId, "patient");
-
       if (!res.data?.success) {
         return toast.error("Unable to join the call");
       }
-
       const { sessionId } = res.data.consultation;
-
-      console.log("sessionId", sessionId);
-
       const participants = {
         patient: {
           name: res.data?.consultation?.participants?.patient?.name,

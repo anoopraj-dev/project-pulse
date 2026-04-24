@@ -228,7 +228,7 @@ export const useVideoSession = (sessionId, role, stream) => {
       callStartedRef.current = false;
       isReconnectingRef.current = false;
     } catch (error) {
-      console.log("Error ending call:", error);
+      console.error("Error ending call:", error);
     }
   };
 
@@ -241,8 +241,6 @@ export const useVideoSession = (sessionId, role, stream) => {
     });
 
     socket.on("connect", async () => {
-      console.log("reconnected");
-
       callStartedRef.current = false;
       closePC();
 
@@ -279,9 +277,6 @@ export const useVideoSession = (sessionId, role, stream) => {
 
     socket.on("consultation:user-joined", async () => {
       if (role !== "doctor") return;
-
-      console.log("user rejoined");
-
       callStartedRef.current = false;
       closePC();
 

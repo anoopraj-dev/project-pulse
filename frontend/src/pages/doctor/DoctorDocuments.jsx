@@ -29,7 +29,6 @@ const DoctorDocuments = () => {
         disabled: deleteCertificateAction.loading,
         onClick: async () => {
           try {
-            console.log("triggered deletion");
             await deleteCertificateAction.executeAsyncFn(async () => {
               const response = await deleteDocuments(id);
 
@@ -41,7 +40,7 @@ const DoctorDocuments = () => {
               }
             });
           } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error("Certificate deletion failed");
           }
 
@@ -49,7 +48,7 @@ const DoctorDocuments = () => {
         },
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Something went wrong");
     }
   };

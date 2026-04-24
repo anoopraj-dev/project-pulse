@@ -2,7 +2,6 @@
 import { Icon } from "@iconify/react";
 
 const AvailabilityPreview = ({ availability = [], loading = false }) => {
-  console.log(availability)
   const hasData = availability.some(
     (day) => day.slots?.some((s) => !s.isBooked)
   );

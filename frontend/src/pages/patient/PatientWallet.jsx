@@ -49,7 +49,7 @@ const PatientWallet = () => {
       setWallet(res.data.wallet);
       setTransactions(res.data.transactions || []);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -76,9 +76,6 @@ const PatientWallet = () => {
       });
 
       const order = orderRes?.data?.order;
-
-      console.log("order", order);
-
       handleRazorpayPayment({
         order: order,
         role: "patient",
@@ -90,7 +87,7 @@ const PatientWallet = () => {
         },
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to create wallet order");
     }
   };

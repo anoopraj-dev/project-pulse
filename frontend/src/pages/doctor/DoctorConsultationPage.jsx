@@ -112,7 +112,7 @@ const DoctorConsultationPage = () => {
         return ;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
      
   };
@@ -138,9 +138,6 @@ const DoctorConsultationPage = () => {
       await submitPrescription(sessionId, form);
       toast.success("Prescription submitted successfully!");
       setPrescriptionSubmitted(true);
-
-      console.log('sessionId',sessionId)
-
       socket.emit('prescription:submitted',{
         sessionId
       })

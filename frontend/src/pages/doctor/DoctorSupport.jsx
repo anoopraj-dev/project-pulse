@@ -56,6 +56,8 @@ const DoctorSupportPage = () => {
   const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "" });
   const [downloadUrl, setDownloadUrl] = useState(null);
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   // ---------------- FAQ ----------------
   const faqs = {
     payout: [
@@ -156,7 +158,7 @@ const DoctorSupportPage = () => {
           clearInterval(interval);
           toast.dismiss(toastId);
           toast.success("Report ready!");
-          setDownloadUrl(`http://localhost:3000${statusRes.data.fileUrl}`);
+          setDownloadUrl(`${${statusRes.data.fileUrl}`);
         }
         if (status === "failed") {
           clearInterval(interval);

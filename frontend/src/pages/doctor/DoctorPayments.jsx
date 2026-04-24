@@ -46,9 +46,6 @@ const DoctorPayments = () => {
   // ---------------- VIEW RECEIPT ----------------
   const handleView = async (id) => {
     try {
-        console.log("🧾 Receipt Clicked ID:", id);
-  console.log("👤 Role:", role);
-
       const res = await getReceipt(id, role);
       const url = window.URL.createObjectURL(res.data);
       window.open(url);

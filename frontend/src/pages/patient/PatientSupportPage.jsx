@@ -59,15 +59,16 @@ const PatientSupportPage = () => {
   const [exportStatus, setExportStatus] = useState(null);
   const [exportId, setExportId] = useState(null);
 
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL||'';
+
   // ---------------- FETCH TICKETS ----------------
   useEffect(() => {
     const loadSupportTickets = async () => {
       try {
         const res = await fetchSupportTickets();
-        console.log("available tickets", res);
         setTickets(res?.data?.data || []);
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error("Failed to load tickets");
       }
     };
@@ -97,7 +98,7 @@ const PatientSupportPage = () => {
         setShowForm(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to submit ticket");
     }
   };
@@ -124,7 +125,7 @@ const PatientSupportPage = () => {
         setPasswordData({ currentPassword: "", newPassword: "" });
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to change the password");
     }
   };
@@ -144,12 +145,12 @@ const PatientSupportPage = () => {
           toast.dismiss(toastId);
           toast.success("Report ready!");
           setExportStatus("completed");
-          setDownloadUrl(`http://localhost:3000${statusRes.data.fileUrl}`);
+          setDownloadUrl(`${API_BASE_URL}${statusRes.data.fileUrl}`);
         }
         if (status === "failed") { clearInterval(interval); toast.error("Export failed"); }
       }, 3000);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Something went wrong");
     }
   };

@@ -25,7 +25,7 @@ const DoctorEditProfile = () => {
 
       setUser(normalizeDoctorData(doctor));
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Error fetching doctor profile");
     }
   };
@@ -38,18 +38,13 @@ const DoctorEditProfile = () => {
       if (data.specializations) data.specializations = JSON.stringify(data.specializations);
 
       const formData = buildFormData(data);
-
-      formData.forEach((key,val)=>{
-        console.log(val,key)
-      })
-
       const response = await updateDoctorProfile(formData);
       if (!response.data.success) return toast.error("Error updating profile");
 
       toast.success("Profile updated successfully");
       navigate("/doctor/profile");
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error.response?.data?.message || error.message || "Something went wrong");
     }
   };

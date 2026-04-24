@@ -126,10 +126,9 @@ const Dashboard = () => {
           return;
         }
 
-        console.log("stats", res);
         setStats(res?.data?.data);
       } catch (err) {
-        console.log("Stats fetch error:", err);
+        console.error("Stats fetch error:", err);
         toast.error("Could not load stats");
       } finally {
         setLoadingStats(false);
@@ -149,12 +148,9 @@ const Dashboard = () => {
         const res = await fetchUpcomingAppointments();
 
         if (!res?.data?.success) return;
-
-        console.log("appointments", res);
-
         setAppointments(Array.isArray(res.data.data) ? res.data.data : []);
       } catch (err) {
-        console.log("Upcoming error:", err);
+        console.error("Upcoming error:", err);
         setAppointments([]);
       } finally {
         setLoadingAppointments(false);
@@ -179,7 +175,7 @@ const Dashboard = () => {
         }));
         setChartData(normalized);
       } catch (err) {
-        console.log("Chart error:", err);
+        console.error("Chart error:", err);
         setChartData([]);
       }
     };
@@ -199,7 +195,7 @@ const Dashboard = () => {
 
         setPrescriptions(res?.data?.data || []);
       } catch (err) {
-        console.log("Prescription error:", err);
+        console.error("Prescription error:", err);
         setPrescriptions([]);
       } finally {
         setLoadingPrescriptions(false);
@@ -218,9 +214,6 @@ const Dashboard = () => {
       const res = await fetchPatientVitals();
 
       if (!res?.data?.success) return;
-
-      console.log("vitals", res);
-
       const data = res.data.data || {};
 
       setVitals({
@@ -230,7 +223,7 @@ const Dashboard = () => {
         cholesterol: data?.cholesterol || "--",
       });
     } catch (err) {
-      console.log("Vitals error:", err);
+      console.error("Vitals error:", err);
       setVitals(null);
     } finally {
       setLoadingVitals(false);

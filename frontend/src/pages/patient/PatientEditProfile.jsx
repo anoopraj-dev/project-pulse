@@ -24,7 +24,7 @@ const PatientEditProfile = () => {
       if(!user) return 
       setUser(user);
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   };
 
@@ -36,7 +36,7 @@ const PatientEditProfile = () => {
       navigate('/patient/profile');
       
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

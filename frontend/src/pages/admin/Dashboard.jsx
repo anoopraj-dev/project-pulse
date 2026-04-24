@@ -158,10 +158,9 @@ const Dashboard = () => {
           toast.error("Failed to load stats");
           return;
         }
-        console.log("stats", res);
         setCounts(res.data);
       } catch (error) {
-        console.log("Counts error:", error);
+        console.error("Counts error:", error);
         toast.error("Failed to load stats");
       } finally {
         setLoadingCounts(false);
@@ -180,7 +179,6 @@ const Dashboard = () => {
     const loadRevenue = async () => {
       try {
         const res = await fetchRevenueOverview(range);
-        console.log(res);
         if (res.success) {
           setRevenueData(res.data);
         }
@@ -200,7 +198,7 @@ const Dashboard = () => {
           setUserGrowthData(res.data);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error("Failed to load user growth");
       }
     };
@@ -212,9 +210,6 @@ const Dashboard = () => {
     const loadAlerts = async () => {
       try {
         const res = await fetchDashboardAlerts();
-
-        console.log("alerts", res);
-
         if (res.data.success) {
           setAlerts([
             ...(res.data.data.alerts || []),
@@ -222,7 +217,7 @@ const Dashboard = () => {
           ]);
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
 

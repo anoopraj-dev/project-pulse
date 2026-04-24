@@ -105,7 +105,7 @@ const PatientPayments = () => {
               toast.success("Appointment booked successfully");
               fetchAllPayments(); // refresh table
             } catch (error) {
-              console.log(error);
+              console.error(error);
               toast.error("Appointment booking failed");
             }
           },

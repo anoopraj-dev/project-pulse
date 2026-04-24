@@ -169,17 +169,14 @@ const Dashboard = () => {
 
         const res = await fetchDoctorRevenue(rangeLabel);
 
-        console.log("revenue", res);
 
-        console.log("RANGE:", rangeLabel);
-console.log("CHART:", res?.data?.data?.chart);
 
         if (!res.data.success) toast.error("revenue fetch failed");
 
         setRevenueData(res?.data?.data?.chart || []);
         setRevenueSummary(res?.data?.data?.totalRevenue || 0);
       } catch (error) {
-        console.log("Revenue fetch failed", error);
+        console.error("Revenue fetch failed", error);
       } finally {
         setLoading(false);
       }
@@ -195,9 +192,6 @@ console.log("CHART:", res?.data?.data?.chart);
         setLoadingAppointments(true);
 
         const res = await fetchUpcomingAppointments();
-
-        console.log("appointments", res);
-
         if (!res.data.success) {
           toast.error("Failed to load appointments");
           return;
@@ -205,7 +199,7 @@ console.log("CHART:", res?.data?.data?.chart);
 
         setAppointments(res?.data?.data || []);
       } catch (error) {
-        console.log("Appointments fetch error:", error);
+        console.error("Appointments fetch error:", error);
         toast.error("Could not load appointments");
       } finally {
         setLoadingAppointments(false);
@@ -230,7 +224,7 @@ console.log("CHART:", res?.data?.data?.chart);
 
         setStats(res.data.data);
       } catch (err) {
-        console.log("Stats fetch error:", err);
+        console.error("Stats fetch error:", err);
         toast.error("Could not load stats");
       } finally {
         setLoadingStats(false);
@@ -255,7 +249,7 @@ console.log("CHART:", res?.data?.data?.chart);
 
         setRecentPatients(res.data.data);
       } catch (err) {
-        console.log("Recent patients error:", err);
+        console.error("Recent patients error:", err);
         toast.error("Could not load recent patients");
       } finally {
         setLoadingPatients(false);
@@ -278,12 +272,11 @@ console.log("CHART:", res?.data?.data?.chart);
           return;
         }
 
-        console.log("reviews", res);
 
         setReviews(res.data.data.data || res.data.data || []);
         setReviewSummary(res?.data?.data?.summary);
       } catch (err) {
-        console.log("Reviews fetch error:", err);
+        console.error("Reviews fetch error:", err);
         toast.error("Could not load reviews");
       } finally {
         setLoadingReviews(false);

@@ -109,8 +109,10 @@ export const fetchDoctorPayments = () =>{
 }
 
 //-------------- Wallet ----------
-export const fetchDoctorWallet = () =>{
-  return api.get('/api/doctor/wallet')
+export const fetchDoctorWallet = (page,limit) =>{
+  return api.get('/api/doctor/wallet',{
+    params:{page,limit}
+  })
 }
 
 

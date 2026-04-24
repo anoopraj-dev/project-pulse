@@ -40,7 +40,7 @@ const DoctorProfile = () => {
         setAvailability(response?.data?.availability)
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -75,7 +75,7 @@ const DoctorProfile = () => {
         return toast.success("Resubmission request successful");
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error?.response?.data?.message);
     } 
   };
@@ -102,7 +102,7 @@ const DoctorProfile = () => {
                 toast.success("Profile submitted successfully");
               });
             } catch (err) {
-              console.log(err);
+              console.error(err);
               toast.error(
                 err?.response?.data?.message || "Something went wrong"
               );
@@ -111,7 +111,7 @@ const DoctorProfile = () => {
         }
       );
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error?.response?.data?.message);
     }
   };

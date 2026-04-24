@@ -48,7 +48,7 @@ const DoctorLanding = () => {
         const res = await getApprovedDoctors();
         setDoctors(res.data?.users || []);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         setLoading(false);
       }
