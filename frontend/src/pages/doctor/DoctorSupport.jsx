@@ -158,7 +158,7 @@ const DoctorSupportPage = () => {
           clearInterval(interval);
           toast.dismiss(toastId);
           toast.success("Report ready!");
-          setDownloadUrl(`${${statusRes.data.fileUrl}`);
+          setDownloadUrl(statusRes.data.fileUrl);
         }
         if (status === "failed") {
           clearInterval(interval);
