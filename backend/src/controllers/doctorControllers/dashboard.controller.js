@@ -5,8 +5,6 @@ export const doctorRevenue = async (req , res) =>{
         const doctorId = req.user.id;
         const {range} = req.query;
 
-        console.log(range)
-
         const data = await doctorRevenueService(doctorId,range);
 
         return res.status(200).json({

@@ -10,6 +10,7 @@ import Patient from "../../models/patient.model.js";
 // import { createConsultation } from "../consultationService.js";
 import { createNotification } from "../user/notification.service.js";
 import { createConsultationService } from "../user/consultation.service.js";
+import paginate from "../../utils/paginate.js";
 
 //-------------- Get booking info ----------------
 export const getBookingInfoService = async (doctorId) => {
@@ -131,10 +132,35 @@ export const bookAppointmentService = async (data, patientId) => {
 };
 
 //---------------- Get all appointments ----------------
-export const getAllAppointmentsService = async (patientId) => {
-  return await Appointment.find({ patient: patientId })
-    .sort({ createdAt: -1 })
-    .populate("doctor", "name profilePicture professionalInfo.specializations");
+export const getAllAppointmentsService = async (
+  patientId,
+  { page = 1, limit = 5, status }
+) => {
+  const query = { patient: patientId };
+
+  if (status && status !== "all") {
+    const statusMap = {
+      confirmed: "confirmed",
+      history: "completed",
+      cancelled: "cancelled",
+    };
+
+    if (statusMap[status]) {
+      query.status = statusMap[status];
+    }
+  }
+
+  return await paginate({
+    model: Appointment,
+    query,
+    page,
+    limit,
+    sort: { createdAt: -1 },
+    populate: {
+      path: "doctor",
+      select: "name profilePicture professionalInfo.specializations",
+    },
+  });
 };
 
 //---------------- Get appointment by ID ----------------

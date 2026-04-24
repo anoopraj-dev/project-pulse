@@ -20,12 +20,15 @@ import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
+import Pagination from "@/components/shared/components/Pagination";
 
 const PatientPayments = () => {
   const [payments, setPayments] = useState(null);
   const fetchPaymentsAction = useAsyncAction();
   const [activeTab, setActiveTab] = useState("all");
   const { role, user } = useUser();
+  const[page,setPage] = useState(1);
+  const [totalPages,setTotalPages] = useState(1)
   const navigate = useNavigate();
  
 
@@ -43,13 +46,14 @@ const PatientPayments = () => {
   const fetchAllPayments = () => {
     fetchPaymentsAction.executeAsyncFn(async () => {
       try {
-        const response = await fetchPatientPayments();
+        const response = await fetchPatientPayments(page,5,activeTab);
 
         if (!response.data.success) {
           return toast.error("Failed to load payments");
         }
 
-        setPayments(response?.data?.payments);
+        setPayments(response?.data?.data?.data);;
+        setTotalPages(response?.data?.data?.pagination?.totalPages)
       } catch (error) {
         console.error(error);
         toast.error("Something went wrong");
@@ -59,7 +63,7 @@ const PatientPayments = () => {
 
   useEffect(() => {
     fetchAllPayments();
-  }, []);
+  }, [page,activeTab]);
 
   //---------------- Search Suggestions ---------
   const fetchSuggestions = (query) => {
@@ -253,6 +257,9 @@ const filteredSearchResult = results?.filter((payment) => {
                     </p>
                   </div>
                 )}
+                <div className="p-2">
+                  <Pagination page={page} totalPages={totalPages} onPageChange={setPage}/>
+                </div>
               </div>
             </div>
           </div>

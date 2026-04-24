@@ -122,11 +122,7 @@ export const adminSidebarMenu = [
     icon: "mdi:chart-line",
     path: "/admin/revenue",
   },
-  // {
-  //   label: "Payments",
-  //   icon: "mdi:credit-card-outline",
-  //   path: "/admin/payments",
-  // },
+
   {
     label: "Support Center",
     icon: "mdi:cog",

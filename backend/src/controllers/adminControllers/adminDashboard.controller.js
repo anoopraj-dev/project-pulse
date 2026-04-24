@@ -77,7 +77,6 @@ export const dashboardCounts = async (req, res) => {
 export const revenueDashboardOverview = async (req,res) => {
   try {
     const {range} = req.query
-    console.log(range)
     const data = await revenueOverviewService(range);
   res.status(200).json({
     success:true,

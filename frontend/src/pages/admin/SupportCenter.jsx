@@ -65,8 +65,6 @@ const SupportCenter = () => {
 
       setAlerts(aRes.value?.data?.data?.data || []);
 
-      console.log("aRes alert", aRes);
-
       setTotalPages(
          aRes.value?.data?.data?.pagination?.totalPages || 1
       );

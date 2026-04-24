@@ -7,8 +7,6 @@ export const requestRevenueExport = async (req, res) => {
     const userId = req.user?.id;
     const role = req.user?.role;
 
-    console.log(userId,role)
-
     // --------- Authorization ----------
     if (role !== "admin") {
       return res.status(403).json({
@@ -33,7 +31,6 @@ export const requestRevenueExport = async (req, res) => {
       entityId: userId,
       filters: req.body?.filters || {},
     });
-    console.log('export que',exportQueue)
 
     return res.status(202).json({
       success: true,

@@ -16,7 +16,6 @@ const generateRandomPassword = (length = 16) => {
 //---------------- UPDATE CLERK USER CONTROLLER ----------------
 
 export const updateClerKUser = async (req, res) => {
-  console.log('update clerk route hit')
   try {
     const { name, email, id, role } = req.body;
     const authHeader = req.headers.authorization;
@@ -139,7 +138,6 @@ delete responseUser.password; // remove password
       user: responseUser,
       accessToken,
     });
-    console.log('response send from updateclerk')
   } catch (error) {
     console.error("updateClerKUser error:", error);
     let status = 500;

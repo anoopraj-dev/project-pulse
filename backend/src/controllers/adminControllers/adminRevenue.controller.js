@@ -12,7 +12,6 @@ export const revenueSummary = async (req , res) => {
             data,
         })
     } catch (error) {
-        console.log('Revenue summary error',error);
 
         return res.status(500).json({
             success:false,

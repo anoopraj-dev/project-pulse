@@ -16,6 +16,7 @@ import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 import { useUser } from "@/contexts/UserContext";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import PatientStatusBanner from "@/components/user/patient/profile/PatientStatusBanner";
+import Pagination from "@/components/shared/components/Pagination";
 
 const PatientAppointments = () => {
   const [appointments, setAppointments] = useState(null);
@@ -23,6 +24,8 @@ const PatientAppointments = () => {
   const fetchAppointmentsAction = useAsyncAction();
   const navigate = useNavigate();
   const { user } = useUser();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const {
     query,
@@ -44,13 +47,13 @@ const PatientAppointments = () => {
   const fetchAllAppointments = () => {
     fetchAppointmentsAction.executeAsyncFn(async () => {
       try {
-        const response = await fetchAppointments();
-
+        const response = await fetchAppointments(page, 5, activeTab);
         if (!response.data.success) {
           return toast.error("Failed to load appointments");
         }
 
-        setAppointments(response?.data?.appointments);
+        setAppointments(response?.data?.data?.data);
+        setTotalPages(response?.data?.data?.pagination.totalPages);
       } catch (error) {
         console.error(error);
         toast.error("Something went wrong");
@@ -60,7 +63,7 @@ const PatientAppointments = () => {
 
   useEffect(() => {
     fetchAllAppointments();
-  }, [activeTab]);
+  }, [activeTab, page]);
 
   //---------------- Search Suggestions ---------
   const fetchSuggestions = (query) => {
@@ -91,16 +94,16 @@ const PatientAppointments = () => {
     return true;
   });
 
- const filteredSearchResult = results?.filter((appointment) => {
-  if (activeTab === "confirmed") {
-    return appointment?.status === "confirmed";
-  } else if (activeTab === "history") {
-    return appointment?.status === "completed";
-  } else if (activeTab === "cancelled") {
-    return appointment?.status === "cancelled";
-  }
-  return true;
-});
+  const filteredSearchResult = results?.filter((appointment) => {
+    if (activeTab === "confirmed") {
+      return appointment?.status === "confirmed";
+    } else if (activeTab === "history") {
+      return appointment?.status === "completed";
+    } else if (activeTab === "cancelled") {
+      return appointment?.status === "cancelled";
+    }
+    return true;
+  });
 
   //------------------- Fetch selected doc info (prefill form) -----------
   useEffect(() => {
@@ -189,9 +192,9 @@ const PatientAppointments = () => {
                       ? "Upcoming Appointments"
                       : activeTab === "history"
                         ? "Past Appointments"
-                      :activeTab === 'cancelled'
-                      ?'Cancelled Appointments'
-                        : "Book New Appointment"}
+                        : activeTab === "cancelled"
+                          ? "Cancelled Appointments"
+                          : "Book New Appointment"}
                   </h2>
 
                   <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
@@ -233,6 +236,15 @@ const PatientAppointments = () => {
                         ? "You have no upcoming appointments. Book one to get started!"
                         : "You have no past appointments yet."}
                     </p>
+                  </div>
+                )}
+                {activeTab !== "book" && (
+                  <div className="border border-t-slate-50 p-2">
+                    <Pagination
+                      page={page}
+                      totalPages={totalPages}
+                      onPageChange={setPage}
+                    />
                   </div>
                 )}
               </div>

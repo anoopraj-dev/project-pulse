@@ -32,16 +32,33 @@ export const bookAppointment = async (req, res) => {
 };
 
 //---------------- Get all appointments ----------------
-export const getAllAppointments = async (req, res) => {
+export const getAllAppointments = async (req, res, next) => {
   try {
-    const appointments = await getAllAppointmentsService(req.user.id);
+    const { page, limit, status } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(20, Math.max(1, parseInt(limit) || 5));
+
+    const appointments = await getAllAppointmentsService(
+      req.user.id,
+      {
+        page: pageNum,
+        limit: limitNum,
+        status,
+      }
+    );
 
     res.status(200).json({
       success: true,
-      appointments,
+      data: appointments,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    logger.error("Get appointments failed", {
+      userId: req.user?.id,
+      error: err.message,
+    });
+
+    next(err); 
   }
 };
 

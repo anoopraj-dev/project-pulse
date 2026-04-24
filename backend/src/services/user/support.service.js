@@ -34,10 +34,6 @@ export const updateTicketStatusService = async (
 
 //--------- SYSTEM ALERTS -----------
 
-//-------- get Alerts --------
-// export const getSystemAlersService = async (data) => {
-//   return await Alert.find().sort({createdAt:-1}).lean();
-// };
 
 export const getSystemAlertsService = async ({ page = 1, limit = 10 }) => {
   return await paginate({

@@ -61,8 +61,10 @@ export const bookAppointment = (payload) => {
 };
 
 //--------------------- Fetch All appointments --------------
-export const fetchAppointments = () => {
-  return api.get("/api/patient/appointments");
+export const fetchAppointments = (page,limit,status) => {
+  return api.get("/api/patient/appointments",{
+    params:{page,limit,status}
+  });
 };
 
 export const viewAppointmentDetails = (id) => {
@@ -74,8 +76,10 @@ export const cancelAppointment = (id) => {
 };
 
 //--------------- Fetch Payments ---------------------
-export const fetchPatientPayments = () => {
-  return api.get("/api/patient/payments");
+export const fetchPatientPayments = (page,limit,status) => {
+  return api.get("/api/patient/payments",{
+    params:{page,limit,status}
+  });
 };
 
 export const updatePaymentStatus = (data) => {

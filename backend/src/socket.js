@@ -21,7 +21,6 @@ export const initSocket = (server) => {
   io.on("connection", async (socket) => {
     const { userId, role } = socket.handshake.auth;
 
-    console.log(`Socket connected: ${socket.id}`);
     if (!userId) return;
 
     // ---------------- BASIC ROOMS ----------------
@@ -48,7 +47,6 @@ export const initSocket = (server) => {
     socket.on("chat:join", ({ conversationId }) => {
       if (conversationId) {
         socket.join(conversationId.toString());
-        console.log(`Socket ${socket.id} joined room ${conversationId}`);
       }
     });
 
@@ -130,7 +128,6 @@ export const initSocket = (server) => {
         io.to(roomId).emit("message:receive", formattedMessage);
 
         const socketsInRoom = await io.in(roomId).allSockets();
-        console.log(`Sockets in room ${roomId}:`, socketsInRoom);
       } catch (error) {
         console.error("message:send error", error);
       }
@@ -150,7 +147,6 @@ export const initSocket = (server) => {
       if (!sessionId) return;
 
       socket.join(sessionId);
-      console.log(`Socket ${socket.id} joined consultation ${sessionId}`);
 
       const clients = io.sockets.adapter.rooms.get(sessionId);
       const count = clients ? clients.size : 0;
@@ -197,7 +193,6 @@ export const initSocket = (server) => {
 
     //--------- Camera state sync ------------------
     socket.on("consultation:camera-state", ({ sessionId, isOff }) => {
-      console.log("Camera state", isOff);
 
       if (!sessionId) return;
 
@@ -239,17 +234,8 @@ export const initSocket = (server) => {
       socket.to(sessionId).emit("consultation:mute-state", { isMuted });
     });
 
-    // socket.on('consultation:patient-end', async({sessionId,userId})=>{
-    //   try {
-    //     await completeConsultationService(sessionId,userId);
-    //   } catch (error) {
-    //     console.log('error ending consultation',error)
-    //   }
-    // })
-
     // ---------------- DISCONNECT ----------------
     socket.on("disconnect", async () => {
-      console.log(`Socket disconnected: ${socket.id}`);
 
       const userSockets = onlineUsers.get(userId);
       if (!userSockets) return;

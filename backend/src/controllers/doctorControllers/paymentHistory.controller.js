@@ -6,7 +6,6 @@ export const getDoctorPaymentHistory = async (req, res) => {
     const doctorId = req.user.id;
 
     const payments = await getDoctorPaymentHistoryService(doctorId);
-    console.log(payments)
 
     res.status(200).json({
       success: true,

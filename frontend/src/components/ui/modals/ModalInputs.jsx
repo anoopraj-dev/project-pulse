@@ -144,7 +144,6 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
         userType: role,
       });
 
-      console.log(response);
 
       if (!response?.success) {
         toast.error(response?.message || "Upload failed");

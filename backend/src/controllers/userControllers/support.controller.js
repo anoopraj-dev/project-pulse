@@ -118,7 +118,6 @@ export const changePassword = async ( req , res) =>{
      const id = req.user.id;
 
     const {currentPassword,newPassword,role} = req.body;
-    console.log('role',role)
     await changePasswordService(role,id,currentPassword,newPassword);
 
     return res.status(200).json({

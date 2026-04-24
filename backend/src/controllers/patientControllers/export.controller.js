@@ -3,10 +3,8 @@ import { exportQueue } from "../../queues/export.queue.js";
 
 export const requestPatientExport = async (req, res) => {
   try {
-    console.log("Incoming export request");
 
     const patientId = req.user?.id;
-    console.log("Patient ID:", patientId);
 
     const job = await Export.create({
       patient: patientId,
@@ -14,15 +12,11 @@ export const requestPatientExport = async (req, res) => {
       status: "queued",
     });
 
-    console.log("DB job created:", job._id);
-
     await exportQueue.add("export", {
       exportId: job._id,
       reportType: "patient_full",
       entityId: patientId,
     });
-
-    console.log("Job added to queue");
 
     return res.status(202).json({
       success: true,

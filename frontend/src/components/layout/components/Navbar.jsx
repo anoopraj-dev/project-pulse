@@ -10,6 +10,7 @@ import { logoutUser } from "../../../api/auth/authService.js";
 import NotificationBell from "../../shared/components/NotificationBell.jsx";
 import NotificationPanel from "../../shared/components/NotificationPanel.jsx";
 import { socket } from "../../../socket.js";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const { email, role, name, dispatch, isLoading, profilePicture,id } = useUser();
@@ -58,7 +59,7 @@ const Navbar = () => {
       const res = await logoutUser();
       dispatch({ type: "CLEAR_USER" });
       setProfileMenuOpen(false);
-      if (!res.success) console.log("Logout failed");
+      if (!res.success) toast.error('Logout failed')
       navigate(role === "admin" ? "/admin/login" : "/signin");
     } catch (error) {
       console.error(error);

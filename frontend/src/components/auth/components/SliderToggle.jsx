@@ -1,7 +1,6 @@
 const SliderToggle = ({ isChecked, onToggle }) => {
   const handleChange = (e) => {
     onToggle(e.target.checked);
-    console.log(e.target.value)
   };
 
   return (

@@ -180,7 +180,6 @@ export const sendMessage = async ({
 
   //------------------- Find or Create conversation --------------------
 
-  console.log("files recieved in send message", files);
   if (conversationId) {
     conversation = await Conversation.findById(conversationId);
   }

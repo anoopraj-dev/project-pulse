@@ -141,13 +141,11 @@ const AuthCard = ({ role: initialRole }) => {
 
         // ---------- DOCTOR / PATIENT LOGIN ----------
         const response = await signin(data.email, data.password, role);
-        console.log(response);
         if (!response.user.isVerified) {
           return toast.error("Verify your email");
         }
         if (response.success) {
           const fetchedUser = response.user;
-          console.log("fetchedUser", fetchedUser);
           dispatch({ type: "SET_USER", payload: fetchedUser });
           toast.success(response.message);
 
