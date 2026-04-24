@@ -84,7 +84,7 @@ export const revenueDashboardOverview = async (req,res) => {
     data
   })
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success:false,
       message:error
@@ -102,7 +102,7 @@ export const dashboardUserGrowth = async(req , res) =>{
       data,
     })
   } catch (error) {
-    console.log('Controller error:',error);
+    console.error('Controller error:',error);
 
     return status(500).json({
       success:false,

@@ -16,8 +16,6 @@ export const runSettlementService = async () => {
       status: { $in: ["completed", "cancelled", "disconnected"] },
     });
 
-    console.log("Consultations found:", consultations.length);
-
     for (const consultation of consultations) {
       //----------- Get payment ------------
       const payment = await Payment.findOne({
@@ -26,7 +24,6 @@ export const runSettlementService = async () => {
       });
 
       if (!payment) {
-        console.log("No payment found for:", consultation._id);
         continue;
       }
 
@@ -36,7 +33,6 @@ export const runSettlementService = async () => {
       });
 
       if (alreadySettled) {
-        console.log("Already settled:", consultation._id);
         continue;
       }
 
@@ -44,7 +40,6 @@ export const runSettlementService = async () => {
       const settlementResult = calculateSettlement(consultation, payment);
 
       if (!settlementResult) {
-        console.log("No settlement result for:", consultation._id);
         continue;
       }
 

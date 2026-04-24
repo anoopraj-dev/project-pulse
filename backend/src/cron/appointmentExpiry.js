@@ -5,6 +5,6 @@ cron.schedule("*/10 * * * *", async () => {
         await expireAppointments();
         console.log('Expired appoinments check completed');
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 })

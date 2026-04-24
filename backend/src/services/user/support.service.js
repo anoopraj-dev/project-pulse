@@ -24,7 +24,6 @@ export const updateTicketStatusService = async (
   id,
   status,
 ) => {
-  console.log('status in update ticket service',status)
   return await SupportTicket.findByIdAndUpdate(
     id,
     {status},
@@ -73,7 +72,6 @@ export const changePasswordService = async (
   newPassword
 ) => {
 
-  console.log('role in service',role)
   const Model = getModelByRole(role);
 
   const user = await Model.findById(userId);

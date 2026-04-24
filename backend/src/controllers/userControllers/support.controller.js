@@ -60,7 +60,7 @@ export const updateTicketStatus = async (req, res, next) => {
       data: updatedTicket
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       success:false,
       message:'Something went wrong'

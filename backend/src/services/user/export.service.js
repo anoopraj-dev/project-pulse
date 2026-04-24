@@ -11,8 +11,6 @@ export const createExportRequestService = async ({
   filters,
 }) => {
 
-  console.log(reportType,targetId,userId,userRole)
-
   // ---------------- Authorization ---------------
   if (reportType === "patient_full" && userId !== targetId) {
     throw new Error("Unauthorized");

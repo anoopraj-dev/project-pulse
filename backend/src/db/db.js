@@ -22,7 +22,7 @@ export const connectDB = async () => {
 export const disconnectDB = async () => {
   try {
     await mongoose.connection.close();
-    console.log('MongoDB disconnected');
+    console.error('MongoDB disconnected');
   } catch (error) {
     console.error('Error disconnecting MongoDB:', error);
   }

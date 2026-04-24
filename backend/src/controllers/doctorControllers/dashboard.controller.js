@@ -12,7 +12,7 @@ export const doctorRevenue = async (req , res) =>{
             data,
         })
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({
             success:false,
             message:'Failed to fech revenue'
@@ -43,7 +43,7 @@ export const upcomingAppointments = async (req , res) =>{
             data,
         })
     } catch (error) {
-        console.log('appointments fetch error:',error);
+        console.error('appointments fetch error:',error);
 
         return res.status(500).json({
             success:false,

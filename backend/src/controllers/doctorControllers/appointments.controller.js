@@ -47,7 +47,7 @@ export const getDoctorAppointmentById = async (req, res) => {
       appointment,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return res.status(400).json({
       success: false,

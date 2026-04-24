@@ -14,7 +14,7 @@ export const getPatientNotifications = async (req, res) => {
       notifications,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Failed to load notifications",
@@ -37,7 +37,7 @@ export const setMarkAllRead = async (req, res) => {
       modifiedCount: result.modifiedCount,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Failed to mark notifications as read",

@@ -9,9 +9,6 @@ export const submitReviewService = async({
     review
 }) => {
     const consultation = await Consultation.findById(consultationId);
-
-    console.log('consultation in review service', consultation)
-    
     if(!consultation){
         throw new Error('Consultation not found');
     }

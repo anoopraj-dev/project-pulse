@@ -4,8 +4,6 @@ import { AlertRules } from "../utils/alertRules.js";
 export const monitorMiddleware = (req,res,next) =>{
     const start = Date.now();
 
-    console.log('Monitoring System performance..')
-
     res.on('finish', async()=>{
         const duration = Date.now() - start;
 
@@ -16,7 +14,7 @@ export const monitorMiddleware = (req,res,next) =>{
                 await createAlert(rule);
             }
         } catch (error) {
-            console.log('Alert middleware error',error)
+            console.error('Alert middleware error',error)
         }
     });
 

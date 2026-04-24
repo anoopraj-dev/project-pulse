@@ -223,7 +223,7 @@ export const initSocket = (server) => {
           userId
         })
       } catch (error) {
-        console.log('Leave consultation error',error)
+        console.error('Leave consultation error',error)
       }
     })
 

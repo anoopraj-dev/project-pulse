@@ -145,8 +145,6 @@ export const upcomingAppointmentService = async (doctorId, limit = 10) => {
     },
   ]);
 
-  console.log(doctorId);
-
   return appointments;
 };
 

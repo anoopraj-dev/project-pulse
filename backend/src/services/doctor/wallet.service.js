@@ -1,9 +1,10 @@
 import Wallet from "../../models/wallet.model.js";
 import Transaction from "../../models/transaction.model.js";
 import mongoose from "mongoose";
+import paginate from "../../utils/paginate.js";
 
 // ---------------- GET DOCTOR WALLET ----------------
-export const getDoctorWalletService = async (doctorId) => {
+export const getDoctorWalletService = async (doctorId,{page=1,limit=5}) => {
   let wallet = await Wallet.findOne({
     userId: doctorId,
     role: "doctor",
@@ -17,9 +18,13 @@ export const getDoctorWalletService = async (doctorId) => {
     });
   }
 
-  const transactions = await Transaction.find({
-    wallet: wallet._id,
-  }).sort({ createdAt: -1 });
+  const transactions = await paginate({
+    model:Transaction,
+    query:{wallet:wallet._id},
+    page,
+    limit,
+    sort:{createdAt: -1}
+  }) 
 
   return { wallet, transactions };
 };

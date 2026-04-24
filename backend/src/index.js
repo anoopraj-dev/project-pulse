@@ -12,6 +12,10 @@ import './cron/settlement.cron.js'
 import './cron/withdrawal.cron.js'
 
 const port = process.env.PORT || 5000;
+const baseURL = process.env.NODE_ENV === 'production'
+  ?process.env.CLIENT_URL
+  :`http://localhost:${port}`
+
 const server = createServer(app);
 
 const startServer = async () => {
@@ -22,7 +26,7 @@ const startServer = async () => {
     await initBrowser();
 
     server.listen(port, () => {
-      console.log(`Server started on http://localhost:${port}`);
+      console.log(`Server started on ${baseURL}`);
     });
 
     server.on('error', (err) => {

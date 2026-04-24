@@ -4,10 +4,10 @@ import { runSettlementService } from "../services/user/settlement.service.js";
 
   cron.schedule("*/1 * * * *", async () => {
     try {
-      console.log("Running settlement cron...");
+      console.log("Running settlement check...");
       await runSettlementService();
-      console.log("Settlement cron completed");
+      console.log("Settlement check completed");
     } catch (error) {
-      console.log("Settlement cron failed", error);
+      console.error("Settlement check failed", error);
     }
   });

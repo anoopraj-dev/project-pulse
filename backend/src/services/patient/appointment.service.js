@@ -125,7 +125,7 @@ export const bookAppointmentService = async (data, patientId) => {
       }),
     ]);
   } catch (error) {
-    console.log("Notification failed", error);
+    console.error("Notification failed", error);
   }
 
   return { appointment, doctor, patient };
@@ -307,7 +307,7 @@ export const cancelAppointmentService = async (id, patientId) => {
         }),
       ]);
     } catch (error) {
-      console.log("Notification failed", error);
+      console.error("Notification failed", error);
     }
   }
 

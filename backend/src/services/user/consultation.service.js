@@ -90,8 +90,6 @@ export const joinConsultationService = async (consultationId, userId) => {
   const endTime = new Date(consultationEnd);
   endTime.setMinutes(endTime.getMinutes());
 
-  console.log({ appointmentDate, consultationEnd, endTime });
-
   if (now < startTime) {
     throw new Error("Consultation not started yet");
   }
@@ -168,7 +166,6 @@ export const endConsultationService = async (consultationId, userId) => {
   const consultation =
     await Consultation.findById(consultationId).populate("appointment");
 
-  console.log("consultation", consultation);
   if (!consultation) throw new Error("Consultation not found");
 
   const role = consultation.doctor.toString() === userId ? "doctor" : "patient";

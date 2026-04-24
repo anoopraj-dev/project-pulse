@@ -19,7 +19,7 @@ export const requestWithdrawal = async (req , res) =>{
             data:withdrawal,
         })
     } catch (error) {
-        console.log('Withdrawal request error:',error);
+        console.error('Withdrawal request error:',error);
 
         return res.status(400).json({
             success:false,

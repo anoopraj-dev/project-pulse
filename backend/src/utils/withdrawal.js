@@ -3,14 +3,13 @@ import { processWithdrawalService } from "../services/doctor/withdrawal.service.
 
 export const runWithdrawalCron = async () => {
   try {
-    console.log("Withdrawal cron started...");
+    console.log("Withdrawal job started...");
 
     //----------- Get pending withdrawals ------------
     const withdrawals = await Withdrawal.find({
       status: "pending",
     }).limit(10);
 
-    console.log("Pending withdrawals:", withdrawals.length);
 
     for (const withdrawal of withdrawals) {
       try {
@@ -31,7 +30,7 @@ export const runWithdrawalCron = async () => {
       }
     }
 
-    console.log("Withdrawal cron completed");
+    console.log("Withdrawal job completed");
   } catch (error) {
     console.error("Withdrawal cron error:", error);
   }

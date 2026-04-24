@@ -341,7 +341,7 @@ export const userGrowthService = async () => {
 
     return result;
   } catch (error) {
-    console.log("User growth service error:", error);
+    console.error("User growth service error:", error);
     throw new Error(error.message);
   }
 };

@@ -21,7 +21,7 @@ export const sendOtpEmailService = async ({ to, name, otp, subject, title, subti
   try {
     await sendEmail(mailOptions);
   } catch (error) {
-    console.log("Email failed", error);
+    console.error("Email failed", error);
   }
 };
 
@@ -58,7 +58,7 @@ export const sendEmailService = async ({
   try {
     await sendEmail(mailOptions);
   } catch (error) {
-    console.log("Email failed", error);
+    console.error("Email failed", error);
     throw new Error("Failed to send email");
   }
 };

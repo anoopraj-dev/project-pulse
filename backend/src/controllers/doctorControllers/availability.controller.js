@@ -17,7 +17,7 @@ export const getAvailability = async (req, res) => {
       data,
     });
   } catch (error) {
-    console.log("getAvailability error:", error);
+    console.error("getAvailability error:", error);
 
     return res.status(500).json({
       success: false,
@@ -38,7 +38,7 @@ export const saveAvailability = async (req, res) => {
       message: "Availability saved successfully",
     });
   } catch (error) {
-    console.log("saveAvailability error:", error);
+    console.error("saveAvailability error:", error);
 
     return res.status(400).json({
       success: false,
@@ -65,7 +65,7 @@ export const removeAvailabilitySlot = async (req, res) => {
       message: "Slot removed successfully",
     });
   } catch (error) {
-    console.log("removeAvailabilitySlot error:", error);
+    console.error("removeAvailabilitySlot error:", error);
 
     return res.status(400).json({
       success: false,

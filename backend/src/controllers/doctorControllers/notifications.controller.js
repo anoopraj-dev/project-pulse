@@ -13,7 +13,7 @@ export const getDoctorNotifications = async (req, res) => {
       notifications,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Failed to load notifications",

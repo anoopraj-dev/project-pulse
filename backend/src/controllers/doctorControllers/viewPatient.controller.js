@@ -18,6 +18,6 @@ export const viewPatientProfile = async(req,res) =>{
             user:patient
         })
     } catch (error) {
-        console.log(error)
+        console.error(error)
     }
 }
