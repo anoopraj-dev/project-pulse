@@ -7,27 +7,6 @@ import { sendEmailService } from "../user/email.service.js";
 import { EMAIL_TYPES } from "../../constants/email.constants.js";
 import { createNotification } from "../user/notification.service.js";
 
-// //---------------- Send Notification & Email -------------
-// const notifyDoctor = async (doctorId, title, message, emailData = null) => {
-//   const io = getIO();
-//   const notification = await Notification.create({
-//     title,
-//     message,
-//     recipient: doctorId,
-//     role: "doctor",
-//     read: false,
-//   });
-
-//   io.to(doctorId.toString()).emit("notification:new", notification);
-
-//   if (emailData) {
-//     try {
-//       await sendEmail(emailData);
-//     } catch (error) {
-//       console.error("Error sending email:", error);
-//     }
-//   }
-// };
 
 //---------------- Approve Doctor ------------------------
 export const approveDoctorService = async (doctorId) => {

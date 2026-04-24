@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import Footer from "../components/layout/components/Footer";
 import { aboutUs, whyChooseUs, welcomeText } from "../constants/homePageData";
 import GlobalStyles from "@/components/shared/components/GlobalStyles";
+import { useNavigate } from "react-router-dom";
 
 import {
   scaleIn,
@@ -19,7 +20,7 @@ import {
   slideInRight,
 } from "../utilis/animations";
 import Heart from "@/components/ui/3D/Heart";
-import HeartbeatPulse from "@/components/ui/3D/Heartbeatpulse";
+import { fetchHomepageStats } from "@/api/user/userApis";
 
 //----------------- Primary Button -------------------
 const ArrowRight = ({ size = 15 }) => (
@@ -54,64 +55,85 @@ const PrimaryBtn = ({ children, onClick }) => (
   </motion.button>
 );
 
-//---------------- Stats Data ---------------------------
-const statsData = [
-  {
-    label: "Happy Patients",
-    value: "50000",
-    display: "50K+",
-    icon: "mdi:account-heart-outline",
-  },
-  {
-    label: "Expert Doctors",
-    value: "2500",
-    display: "2.5K+",
-    icon: "mdi:stethoscope",
-  },
-  {
-    label: "Appointments",
-    value: "1200000",
-    display: "1.2M+",
-    icon: "mdi:calendar-check",
-  },
-  {
-    label: "Clinics",
-    value: "150",
-    display: "150+",
-    icon: "mdi:hospital-building",
-  },
-];
-
 //----------------- Home Page -------------------------
 const Home = () => {
-  const [stats, setStats] = useState(statsData.map(() => 0));
+  const [stats, setStats] = useState([]);
+  const [statsData, setStatsData] = useState([]);
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setTimeout(() => setIsVisible(true), 500);
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const res = await fetchHomepageStats();
+        if (res.data?.success) {
+          const data = res.data.data;
+
+          const formatted = [
+            {
+              label: "Happy Patients",
+              value: data.patients,
+              icon: "mdi:account-heart-outline",
+            },
+            {
+              label: "Expert Doctors",
+              value: data.doctors,
+              icon: "mdi:stethoscope",
+            },
+            {
+              label: "Appointments",
+              value: data.appointments,
+              icon: "mdi:calendar-check",
+            },
+          ].slice(0, 3);
+
+          setStatsData(formatted);
+          setStats(formatted.map(() => 0));
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    loadStats();
+  }, []);
   //-------------- Stats Animation -------------------
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || statsData.length === 0) return;
+
     let startTime;
+
     const animate = (time) => {
       if (!startTime) startTime = time;
+
       const progress = Math.min((time - startTime) / 2000, 1);
-      setStats(statsData.map((s) => Math.floor(parseInt(s.value) * progress)));
+
+      setStats(statsData.map((s) => Math.floor(s.value * progress)));
+
       if (progress < 1) requestAnimationFrame(animate);
     };
-    requestAnimationFrame(animate);
-  }, [isVisible]);
 
-  const formatStat = (val, idx) => {
-    const raw = parseInt(statsData[idx].value);
-    if (val >= raw) return statsData[idx].display;
-    if (raw >= 1_000_000) return `${(val / 1_000_000).toFixed(1)}M+`;
-    if (raw >= 1_000) return `${(val / 1_000).toFixed(0)}K+`;
-    return `${val}+`;
-  };
+    requestAnimationFrame(animate);
+  }, [isVisible, statsData]);
+
+ const formatStat = (val = 0, idx) => {
+  const raw = statsData[idx]?.value || 0;
+
+  if (val >= raw) {
+    if (raw >= 1_000_000) return (raw / 1_000_000).toFixed(1) + "M+";
+    if (raw >= 1_000) return Math.floor(raw / 1000) + "K+";
+    return raw + "+";
+  }
+
+  if (raw >= 1_000_000) return (val / 1_000_000).toFixed(1) + "M+";
+  if (raw >= 1_000) return Math.floor(val / 1000) + "K+";
+  return val + "+";
+};
 
   return (
     <div className="h-root min-h-screen bg-slate-50 font-[Georgia,serif]">
@@ -181,7 +203,8 @@ const Home = () => {
             </motion.div>
 
             <motion.h1
-              variants={staggerChild}{...simpleHover}
+              variants={staggerChild}
+              {...simpleHover}
               className="font-[Georgia] text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.09] "
             >
               Care that fits
@@ -193,7 +216,8 @@ const Home = () => {
             </motion.h1>
 
             <motion.p
-              variants={staggerChild}{...simpleHover}
+              variants={staggerChild}
+              {...simpleHover}
               className="text-[1.05rem] leading-relaxed max-w-[480px]"
               style={{ color: "rgba(255,255,255,.55)" }}
             >
@@ -201,10 +225,11 @@ const Home = () => {
             </motion.p>
 
             <motion.div
-              variants={staggerChild}{...simpleHover}
+              variants={staggerChild}
+              {...simpleHover}
               className="flex flex-wrap gap-3"
             >
-              <PrimaryBtn>
+              <PrimaryBtn onClick={() => navigate("/signin")}>
                 Find your doctor <ArrowRight />
               </PrimaryBtn>
               <motion.button
@@ -219,6 +244,7 @@ const Home = () => {
                 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.2 }}
+                onClick={() => navigate("/about-us")}
               >
                 How it works
               </motion.button>
@@ -226,26 +252,23 @@ const Home = () => {
 
             <motion.div
               variants={staggerChild}
-              className="flex gap-10 pt-6 border-t"
+              className="flex justify-center gap-10 pt-6 border-t"
               style={{ borderColor: "rgba(255,255,255,.1)" }}
             >
-              {[
-                ["50K+", "Happy Patients"],
-                ["2.5K+", "Expert Doctors"],
-                ["150+", "Partner Clinics"],
-              ].map(([v, l]) => (
-                <div key={l}>
-                  <div className="h-serif text-2xl font-bold text-white">
-                    {v}
+              {statsData.length > 0 &&
+                statsData.map((stat, i) => (
+                  <div key={stat.label}>
+                    <div className="h-serif text-2xl font-bold text-white">
+                      {formatStat(stats[i], i)}
+                    </div>
+                    <div
+                      className="text-[10px] uppercase tracking-widest mt-0.5"
+                      style={{ color: "rgba(255,255,255,.38)" }}
+                    >
+                      {stat.label}
+                    </div>
                   </div>
-                  <div
-                    className="text-[10px] uppercase tracking-widest mt-0.5"
-                    style={{ color: "rgba(255,255,255,.38)" }}
-                  >
-                    {l}
-                  </div>
-                </div>
-              ))}
+                ))}
             </motion.div>
           </motion.div>
 
@@ -260,11 +283,6 @@ const Home = () => {
           >
             {/* Heart */}
             <Heart />
-
-            {/* Pulse overlay */}
-            {/* <div className="hidden lg:block absolute left-1 translate-x-1/2">
-              <HeartbeatPulse />
-            </div> */}
           </motion.div>
         </div>
 
@@ -316,7 +334,7 @@ const Home = () => {
               {welcomeText}
             </motion.p>
             <motion.div variants={staggerChild}>
-              <PrimaryBtn>
+              <PrimaryBtn onClick={() => navigate("/signup")}>
                 Find your doctor <ArrowRight />
               </PrimaryBtn>
             </motion.div>
@@ -382,17 +400,17 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-5"
+            className="grid grid-cols-3 gap-5"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
           >
-            {statsData.map((stat, i) => (
+            {statsData.length > 0 && stats.length === statsData.length && statsData.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 variants={staggerChild}
-                {...hoverLift}
+               
                 className="bg-white rounded-2xl p-6 text-center border border-slate-100 cursor-default"
                 style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}
               >
@@ -588,7 +606,7 @@ const Home = () => {
                 ))}
               </motion.div>
               <motion.div variants={staggerChild}>
-                <PrimaryBtn>
+                <PrimaryBtn onClick={() => navigate("about-us")}>
                   Learn more <ArrowRight />
                 </PrimaryBtn>
               </motion.div>
@@ -638,6 +656,7 @@ const Home = () => {
             whileHover={{ y: -2, boxShadow: "0 8px 28px rgba(0,0,0,.18)" }}
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.2 }}
+            onClick={() => navigate("/signup")}
           >
             Get Started Now <ArrowRight />
           </motion.button>

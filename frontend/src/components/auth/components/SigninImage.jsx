@@ -1,6 +1,4 @@
 
-// export default AuthImage;
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "@iconify/react";
 import { ImageModal } from "../components/ui/modals/ModalInputs";
 
 const ImageModalContext = createContext(null);

@@ -66,8 +66,6 @@ const ProfileView = ({
 }) => {
   const [viewMore, setViewmore] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
-  const { id } = useParams();
-  const navigate = useNavigate();
 
   const isSlotExpired = (date, endTime, isBooked) => {
     if (isBooked) return false;

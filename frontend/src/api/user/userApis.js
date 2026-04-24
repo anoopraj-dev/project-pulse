@@ -6,6 +6,10 @@ export const getApprovedDoctors = () => {
   return api.get('/api/doctors/approved')
 }
 
+export const fetchHomepageStats = () =>{
+  return api.get('/api/home/stats')
+}
+
 // -------------- Generic Search Api ---------------------
 export const searchApi = ({ role,query, type, page = 1, limit = 10 ,filters ={}}) => {
   return api.get(`/api/${role}/search`, {

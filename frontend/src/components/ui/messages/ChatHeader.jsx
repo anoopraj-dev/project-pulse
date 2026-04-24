@@ -1,6 +1,5 @@
 
 import { Icon } from "@iconify/react";
-import toast from "react-hot-toast";
 
 const ChatHeader = ({ name, online, profilePicture }) => {
   return (
