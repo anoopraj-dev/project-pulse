@@ -26,10 +26,16 @@ app.use(express.json())
 app.use(express.static("public"));
 app.use('/exports',express.static(path.join(process.cwd(),'exports')))
 
+const logDir = path.join(process.cwd(), "logs");
+
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
 const logStream = fs.createWriteStream(
-    path.join('logs','aceess.log'),
-    {flags:'a'}
-)
+  path.join(logDir, "access.log"),
+  { flags: "a" }
+);
 
 if(process.env.NODE_ENV === 'production'){
     app.use(morgan('combined'))
