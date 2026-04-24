@@ -42,18 +42,20 @@ if(process.env.NODE_ENV === 'production'){
 }else{
     app.use(morgan('dev'))
 }
-
 app.use(
-    session({
-        secret:'SECRET_KEY',
-        resave: false,
-        saveUninitialized: false,
-        cookie:{
-            httpOnly: true,
-            maxAge: 10*60*1000,
-        }
-    })
-)
+  session({
+    secret: 'SECRET_KEY',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      maxAge: 10 * 60 * 1000,
+
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    }
+  })
+);
 
 app.use(monitorMiddleware)
 
