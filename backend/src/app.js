@@ -51,7 +51,7 @@ app.use(
       httpOnly: true,
       maxAge: 10 * 60 * 1000,
 
-      secure: process.env.NODE_ENV === "production", 
+      secure: false,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
     }
   })
