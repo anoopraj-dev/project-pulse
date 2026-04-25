@@ -42,6 +42,9 @@ if(process.env.NODE_ENV === 'production'){
 }else{
     app.use(morgan('dev'))
 }
+
+app.set("trust proxy", 1); 
+
 app.use(
   session({
     secret: 'SECRET_KEY',
@@ -50,9 +53,8 @@ app.use(
     cookie: {
       httpOnly: true,
       maxAge: 10 * 60 * 1000,
-
-      secure: false,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+      secure: true,                
+      sameSite: "none"            
     }
   })
 );
@@ -60,7 +62,7 @@ app.use(
 app.use(monitorMiddleware)
 
 app.use(cors({
-  origin: process.env.CLIENT_URL,  // Vite default port
+  origin: process.env.CLIENT_URL,  
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
