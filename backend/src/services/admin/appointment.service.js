@@ -12,26 +12,25 @@ export const getAllAppointmentsService = async (filters) => {
   if (patientId) query.patient = patientId;
 
   if (fromDate || toDate) {
-    query.appointmentDate = {};
-    if (fromDate) query.appointmentDate.$gte = new Date(fromDate);
-    if (toDate) query.appointmentDate.$lte = new Date(toDate);
+    query.appointmentDateTime = {};
+    if (fromDate) query.appointmentDateTime.$gte = new Date(fromDate);
+    if (toDate) query.appointmentDateTime.$lte = new Date(toDate);
   }
 
   const appointments = await Appointment.find(query)
     .populate("patient", "name profilePicture work")
     .populate("doctor", "name professionalInfo.specializations profilePicture")
-    .sort({ appointmentDate: 1, timeSlot: 1 });
+
+    .sort({ appointmentDateTime: 1 });
 
   //-------------- Auto-mark expired appointments ------------
   const now = new Date();
 
   for (const appt of appointments) {
     if (appt.status === "pending" || appt.status === "confirmed") {
-      const appointmentDateTime = new Date(
-        `${appt.appointmentDate.toISOString().split("T")[0]}T${appt.timeSlot}`
-      );
+      const appointmentDateTime = new Date(appt.appointmentDateTime);
 
-      if (appointmentDateTime.getTime() < now.getTime()) {
+      if (!isNaN(appointmentDateTime) && appointmentDateTime < now) {
         appt.status = "expired";
         await appt.save();
       }
@@ -47,7 +46,6 @@ export const setAdminAppointmentStatusService = async ({
   appointmentId,
   status,
 }) => {
-
   const mapAppointmentActionToStatus = (action) => {
     const actionMap = {
       confirm: "confirmed",

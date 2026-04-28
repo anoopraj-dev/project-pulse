@@ -55,10 +55,12 @@ export const createOrderService = async (userId, body) => {
     receipt: `receipt_${Date.now()}`,
   });
 
+  const appointmentDateTime = new Date(`${date}T${time}:00`);
+
   const appointment = await Appointment.create({
     patient: userId,
     doctor: doctorId,
-    appointmentDate: date,
+    appointmentDateTime,
     timeSlot: time,
     reason,
     notes,
@@ -246,7 +248,6 @@ export const walletPaymentService = async (userId, body) => {
 
   const duration =
     slot?.duration || calculateDuration(slot.startTime, slot.endTime);
-
 
   const wallet = await Wallet.findOne({
     userId,
