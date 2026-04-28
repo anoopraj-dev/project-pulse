@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Doctor from "../../models/doctor.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
-import Consultation from '../../models/consultation.model.js'
+import Consultation from "../../models/consultation.model.js";
 import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
 import Wallet from "../../models/wallet.model.js";
@@ -74,6 +74,7 @@ export const bookAppointmentService = async (data, patientId) => {
   doctor = await Doctor.findById(doctorId).select("email name");
   patient = await Patient.findById(patientId).select("email name");
 
+  const appointmentDateTime = new Date(`${date}T${time}:00`);
   const appointmentDate = new Date(date);
 
   const payment = await Payment.findOne({
@@ -100,7 +101,7 @@ export const bookAppointmentService = async (data, patientId) => {
   }
   appointment = await Appointment.findByIdAndUpdate(
     payment.appointment._id,
-    { status: "confirmed" },
+    { status: "confirmed", appointmentDateTime },
     { new: true },
   );
 
@@ -134,7 +135,7 @@ export const bookAppointmentService = async (data, patientId) => {
 //---------------- Get all appointments ----------------
 export const getAllAppointmentsService = async (
   patientId,
-  { page = 1, limit = 5, status }
+  { page = 1, limit = 5, status },
 ) => {
   const query = { patient: patientId };
 
@@ -204,9 +205,7 @@ export const cancelAppointmentService = async (id, patientId) => {
     if (appointment.status === "cancelled")
       throw new Error("Appointment already cancelled");
 
-    const appointmentDateTime = new Date(appointment.appointmentDate);
-    const [hours, minutes] = appointment.timeSlot.split(":");
-    appointmentDateTime.setHours(hours, minutes, 0, 0);
+    const appointmentDateTime = new Date(appointment.appointmentDateTime);
 
     const hoursLeft = (appointmentDateTime - new Date()) / (1000 * 60 * 60);
 

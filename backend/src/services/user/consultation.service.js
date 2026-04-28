@@ -15,7 +15,9 @@ export const createConsultationService = async ({ appointmentId }) => {
   if (existing) return existing;
 
   const sessionId = crypto.randomUUID();
-  const tokenExpiresAt = new Date(appointment.appointmentDate);
+
+  const baseTime = new Date(appointment.appointmentDateTime);
+  const tokenExpiresAt = new Date(baseTime);
   tokenExpiresAt.setMinutes(
     tokenExpiresAt.getMinutes() + (appointment.duration || 30) + 10,
   );
@@ -39,7 +41,10 @@ export const createConsultationService = async ({ appointmentId }) => {
 
 export const joinConsultationService = async (consultationId, userId) => {
   const consultation = await Consultation.findById(consultationId)
-    .populate("appointment", "appointmentDate duration timeSlot")
+    .populate(
+      "appointment",
+      "appointmentDate appointmentDateTime duration timeSlot",
+    )
     .populate("patient", "name profilePicture")
     .populate("doctor", "name profilePicture");
 
@@ -68,27 +73,26 @@ export const joinConsultationService = async (consultationId, userId) => {
   const isPatient = consultation.patient._id.toString() === userId;
   const isDoctor = consultation.doctor._id.toString() === userId;
 
-  const appointmentDate = new Date(consultation.appointment.appointmentDate);
-  const [hours, minutes] = consultation?.appointment?.timeSlot
-    .split(":")
-    .map(Number);
-  appointmentDate.setHours(hours, minutes, 0, 0);
+  const appointmentDateTime = new Date(
+    consultation?.appointment?.appointmentDateTime,
+  );
   const now = new Date();
 
   const earlyJoinBuffer = 5; //minutes before
 
   //---------- start window -----------
-  const startTime = new Date(appointmentDate);
-  startTime.setMinutes(startTime.getMinutes() - earlyJoinBuffer);
+  const startTime = new Date(
+    appointmentDateTime.getTime() - earlyJoinBuffer * 60 * 1000,
+  );
 
   //-------- Consultation end ------------
-  const consultationEnd = new Date(appointmentDate);
-  consultationEnd.setMinutes(
-    consultationEnd.getMinutes() + (consultation.appointment.duration || 15),
+
+  const consultationEnd = new Date(
+    appointmentDateTime.getTime() +
+      (consultation.appointment.duration || 15) * 60 * 1000,
   );
   //--------- end window --------------
-  const endTime = new Date(consultationEnd);
-  endTime.setMinutes(endTime.getMinutes());
+  const endTime = consultationEnd;
 
   if (now < startTime) {
     throw new Error("Consultation not started yet");
@@ -301,12 +305,12 @@ export const submitPrescriptionService = async (
   if (consultation.doctor._id.toString() !== doctorId)
     throw new Error("Unauthorized");
 
-  if(consultation.isPrescribed){
-    throw new Error('Already submitted prescription')
+  if (consultation.isPrescribed) {
+    throw new Error("Already submitted prescription");
   }
 
   consultation.isPrescribed = true;
-  
+
   await consultation.save();
 
   const prescription = await Prescription.create({
@@ -317,8 +321,6 @@ export const submitPrescriptionService = async (
     diagnosis,
     medicines,
   });
-
-  
 
   // Generate PDF
   const browser = getBrowser();
