@@ -54,37 +54,44 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   };
 
 
-  //-------------------- Get available dates ------------
-  const getAvailableDates = () => {
-    if (!hasBookingInfo) return [];
+  // -------------------- Get available dates --------------------
+const getAvailableDates = () => {
+  if (!hasBookingInfo) return [];
 
-    const now = new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    return activeDoctor?.availability
-      ?.map((day) => new Date(day.date))
-      .filter((date) => {
-        return date >= new Date(now.setHours(0, 0, 0, 0));
-      })
-      .map((date) => date.toISOString().split("T")[0]);
-  };
+  return activeDoctor?.availability
+    ?.map((day) => day.date)
+    .filter((date) => {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      return d >= today;
+    });
+};
 
 const availableSlots = () => {
   if (!hasBookingInfo || !formData.date) return [];
 
+  const now = new Date();
+
   const day = activeDoctor?.availability?.find(
-    (d) => d.date === formData.date
+    (d) =>
+      new Date(d.date).toISOString().split("T")[0] === formData.date
   );
 
   if (!day?.slots) return [];
 
-  const now = new Date();
-
   return day.slots.filter((slot) => {
-    const slotDateTime = new Date(`${formData.date}T${slot.start}:00`);
+    const [h, m] = slot.start.split(":");
 
-    return slotDateTime.getTime() - now.getTime() >= 5 * 60 * 1000;
+    const slotTime = new Date(formData.date);
+    slotTime.setHours(Number(h), Number(m), 0, 0);
+
+    return slotTime > now;
   });
 };
+
   const today = new Date().toISOString().split("T")[0];
 
   //------------- amount to pay --------------
