@@ -75,6 +75,12 @@ export const saveAvailabilityService = async (doctorId, payload) => {
       const startAt = buildUTCDate(slot.date, slot.start);
       const endAt = buildUTCDate(slot.date, slot.end);
 
+       console.log(
+    "Slot Debug:",
+    startAt.toISOString(),
+    new Date(startAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+  );
+
       return {
         slotId: `${doctorId}_${dateKey}_${startAt.toISOString()}`,
 
@@ -113,11 +119,7 @@ export const saveAvailabilityService = async (doctorId, payload) => {
     }
   }
 
-  console.log(
-  "Slot Debug:",
-  startAt.toISOString(),
-  new Date(startAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-);
+  
 
   return true;
 };
