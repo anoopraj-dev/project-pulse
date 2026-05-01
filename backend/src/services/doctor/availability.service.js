@@ -113,6 +113,12 @@ export const saveAvailabilityService = async (doctorId, payload) => {
     }
   }
 
+  console.log(
+  "Slot Debug:",
+  startAt.toISOString(),
+  new Date(startAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+);
+
   return true;
 };
 
