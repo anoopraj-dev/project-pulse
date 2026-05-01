@@ -87,12 +87,13 @@ const availableSlots = () => {
 
   return day.slots.filter((slot) => {
     const [h, m] = slot.start.split(":").map(Number);
+
     const slotMinutes = h * 60 + m;
 
+    // same-day filtering only
     return slotMinutes > nowMinutes;
   });
 };
-
   const today = new Date().toISOString().split("T")[0];
 
   //------------- amount to pay --------------
