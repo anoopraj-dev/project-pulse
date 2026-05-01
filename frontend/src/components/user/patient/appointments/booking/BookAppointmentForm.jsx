@@ -54,6 +54,9 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   };
 
 
+  console.log("BOOKING INFO RESPONSE:", bookingInfo);
+
+
   // -------------------- Get available dates --------------------
 const getAvailableDates = () => {
   if (!hasBookingInfo) return [];
