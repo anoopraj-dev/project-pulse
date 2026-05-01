@@ -7,8 +7,7 @@ const AppointmentFormSection = ({
   availableSlots,
   today,
 }) => {
-
-  console.log('available slots',availableSlots)
+  console.log("available slots", availableSlots);
   return (
     <form className="space-y-6">
       {/* Specialty */}
@@ -163,11 +162,9 @@ const AppointmentFormSection = ({
               className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             >
               <option value="">Select time</option>
-              {availableSlots().map((slot) => (
-                <option key={slot.start} value={slot.start}>
-                  {slot.start} - {slot.end}
-                </option>
-              ))}
+              <option key={slot.start} value={slot.start}>
+                {slot.start} - {slot.end}
+              </option>
             </select>
           ) : (
             <input
