@@ -94,7 +94,7 @@ const PatientViewAppointment = () => {
     try {
       const consultationId = appointment?.consultation?._id;
       if (!consultationId) {
-        return toast.error("Consultation not available yet");
+        return toast.error("Consultation not found");
       }
       const res = await joinConsultation(consultationId, "patient");
       if (!res.data?.success) {

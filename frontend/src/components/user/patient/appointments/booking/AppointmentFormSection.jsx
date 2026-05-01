@@ -162,10 +162,10 @@ const AppointmentFormSection = ({
             >
               <option value="">Select time</option>
               {availableSlots().map((slot) => (
-                <option key={slot.startTime} value={slot.startTime}>
-                  {slot.startTime} - {slot.endTime}
-                </option>
-              ))}
+  <option key={slot.start} value={slot.start}>
+    {slot.start} - {slot.end}
+  </option>
+))}
             </select>
           ) : (
             <input

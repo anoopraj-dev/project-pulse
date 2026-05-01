@@ -46,40 +46,73 @@ export const getApprovedDoctorsService = async () => {
   return doctorsWithRating;
 };
 
-// -------- VIEW DOCTOR PROFILE --------
-export const viewDoctorProfileService = async (doctorId) => {
-  const doctor = await Doctor.findById(doctorId).select("-password");
 
-  if (!doctor) {
+export const viewDoctorProfileService = async (doctorId) => {
+  const doctor = await Doctor.findById(doctorId);
+
+  if (!doctor || doctor.role !== "doctor") {
     throw new Error("Doctor not found");
   }
 
-  // fetch availability
-  const availability = await DoctorAvailability.find({ doctorId }).sort({
-    date: 1,
+  const availabilityDocs = await DoctorAvailability.find({ doctorId }).sort({
+    dateKey: 1,
   });
 
-  const formattedAvailability = availability.map((day) => ({
-    date: day.date.toISOString().split("T")[0],
-    slots: day.slots.map((slot) => ({
-      startTime: slot.startTime.trim(),
-      endTime: slot.endTime.trim(),
-      isBooked: slot.isBooked ?? false,
-    })),
-  }));
+  const now = new Date();
 
-  // -------- GET DOCTOR RATING --------
-  const reviews = await Review.find({ doctor: doctorId });
+  const availability = availabilityDocs.map((day) => {
+    const slots = day.slots
+      .map((slot) => {
+        let startAt;
+        let endAt;
 
-  const rating =
-    reviews.length > 0
-      ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-      : 0;
+        if (slot.startAt && slot.endAt) {
+          startAt = new Date(slot.startAt);
+          endAt = new Date(slot.endAt);
+        } else {
+          startAt = new Date(`${day.dateKey}T${slot.start}:00`);
+          endAt = new Date(`${day.dateKey}T${slot.end}:00`);
+        }
+
+        const isBooked = slot.status === "booked";
+        const isLocked = slot.status === "locked";
+        const isExpired = slot.status === "available" && startAt < now;
+
+        return {
+          slotId: slot.slotId,
+
+          startAt,
+          endAt,
+
+          start:
+            slot.start ||
+            startAt.toTimeString().slice(0, 5),
+
+          end:
+            slot.end ||
+            endAt.toTimeString().slice(0, 5),
+
+          isBooked,
+          isLocked,
+          isExpired,
+        };
+      })
+      .filter(
+        (slot) =>
+          !slot.isBooked &&
+          !slot.isLocked &&
+          !slot.isExpired
+      )
+      .sort((a, b) => a.startAt - b.startAt);
+
+    return {
+      date: day.dateKey,
+      slots,
+    };
+  });
 
   return {
     doctor,
-    rating,
-    ratingCount: reviews.length,
-    availability: formattedAvailability,
+    availability,
   };
 };

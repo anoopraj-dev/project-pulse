@@ -51,13 +51,12 @@ export const saveAvailability = async (req, res) => {
 export const removeAvailabilitySlot = async (req, res) => {
   try {
     const doctorId = req.user.id;
-    const { date, start, end } = req.body;
+    const { dateKey, slotId } = req.body;
 
     await removeAvailabilitySlotService(
       doctorId,
-      date,
-      start,
-      end
+      dateKey,
+      slotId
     );
 
     return res.status(200).json({

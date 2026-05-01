@@ -13,32 +13,27 @@ export const getAllAppointmentsService = async (doctorId) => {
   const appointments = await Appointment.find({ doctor: doctorId });
 
   const now = new Date();
-  //----------- Find expired appointments -----
+
   const expiredIds = appointments
     .filter((appt) => {
-      if (!appt.time) return false;
-      if (appt.status !== "pending") return false;
+      if (!appt.appointmentDateTime) return false;
+      if (appt.status !== "pending" && appt.status !== "confirmed") return false;
 
-      const [hours, minutes] = appt.time.split(":");
-      const apptDateTime = new Date(appt.appointmentDate);
-      apptDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
+      const apptDateTime = new Date(appt.appointmentDateTime);
       return apptDateTime < now;
     })
     .map((appt) => appt._id);
 
-  // Update expired
   if (expiredIds.length > 0) {
     await Appointment.updateMany(
       { _id: { $in: expiredIds } },
-      { $set: { status: "expired" } },
+      { $set: { status: "expired" } }
     );
   }
 
-  // Fetch updated
   const updatedAppointments = await Appointment.find({ doctor: doctorId })
     .populate("patient", "name profilePicture gender")
-    .sort({ appointmentDate: 1 });
+    .sort({ appointmentDateTime: 1 });
 
   return updatedAppointments;
 };
@@ -69,6 +64,7 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
   session.startTransaction();
 
   let appointment, doctor, patient, patientId;
+
   try {
     appointment = await Appointment.findById(id);
     if (!appointment) throw new Error("Appointment not found");
@@ -94,25 +90,29 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
       throw new Error("Appointment already cancelled");
     }
 
-    // Update appointment
+    // ---------------- Cancel appointment ----------------
     appointment.status = "cancelled";
     appointment.cancelledBy = "doctor";
     appointment.cancellationReason = reason.trim();
 
     await appointment.save({ session });
 
-    // Free slot
+    // ---------------- FREE SLOT (STRING MATCH) ----------------
     await DoctorAvailability.updateOne(
       {
-        doctor: appointment.doctor,
-        date: appointment.appointmentDate,
-        "slots.time": appointment.timeSlot,
+        doctorId: appointment.doctor,
+        date: appointment.appointmentDate, // "YYYY-MM-DD" string
+        "slots.startTime": appointment.timeSlot, // "HH:mm"
       },
-      { $set: { "slots.$.isBooked": false } },
+      {
+        $set: {
+          "slots.$.isBooked": false,
+        },
+      },
       { session },
     );
 
-    // Refund
+    // ---------------- Refund ----------------
     const payment = await Payment.findOne({ appointment: appointment._id });
 
     if (payment && payment.status !== "refunded") {
@@ -157,21 +157,25 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
     throw error;
   }
 
-  //-------------- Notifications---------------
-  await Promise.all([
-    createNotification({
-      userId: doctor?._id.toString(),
-      role: "doctor",
-      title: "Appointment Cancelled",
-      message: `Appointment with ${patient.name} has been cancelled`,
-    }),
-    createNotification({
-      userId: patient?._id.toString(),
-      role: "patient",
-      title: "Appointment Cancelled",
-      message: `Appointment with ${doctor.name} has been cancelled`,
-    }),
-  ]);
+  // ---------------- Notifications ----------------
+  try {
+    await Promise.all([
+      createNotification({
+        userId: doctor?._id.toString(),
+        role: "doctor",
+        title: "Appointment Cancelled",
+        message: `Appointment with ${patient.name} has been cancelled`,
+      }),
+      createNotification({
+        userId: patient?._id.toString(),
+        role: "patient",
+        title: "Appointment Cancelled",
+        message: `Appointment with ${doctor.name} has been cancelled`,
+      }),
+    ]);
+  } catch (err) {
+    console.error("Notification failed", err);
+  }
 
   return {
     appointment,

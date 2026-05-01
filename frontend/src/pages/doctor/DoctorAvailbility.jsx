@@ -31,9 +31,7 @@ const DoctorAvailability = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [removingSlot, setRemovingSlot] = useState(null);
 
-  // -------------------------------
   // FIX: consistent local date helper (NO UTC SHIFT)
-  // -------------------------------
   const getLocalDate = () => {
     const now = new Date();
     const offset = now.getTimezoneOffset();
@@ -42,9 +40,7 @@ const DoctorAvailability = () => {
       .split("T")[0];
   };
 
-  // -------------------------------
   // FIX: next 7 days must be LOCAL safe
-  // -------------------------------
   const getNext7Days = () => {
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -68,9 +64,7 @@ const DoctorAvailability = () => {
 
   const days = getNext7Days();
 
-  // -------------------------------
   // FIX: initialize with LOCAL date
-  // -------------------------------
   useEffect(() => {
     setSelectedDate(getLocalDate());
   }, []);
@@ -98,9 +92,7 @@ const DoctorAvailability = () => {
     if (selectedDate) fetchAvailability();
   }, [selectedDate]);
 
-  // -------------------------------
-  // FIX: correct today comparison
-  // -------------------------------
+  // correct today comparison
   const generateSlots = () => {
     if (!startTime || !endTime || duration <= 0) return;
 
@@ -120,7 +112,7 @@ const DoctorAvailability = () => {
       const startStr = cur.toTimeString().slice(0, 5);
       const endStr = next.toTimeString().slice(0, 5);
 
-      // FIX: correct slot datetime in LOCAL context
+      //  slot datetime in LOCAL context
       const slotDateTime = new Date(`${selectedDate}T${startStr}:00`);
 
       // Skip past slots ONLY for today
@@ -203,30 +195,29 @@ const DoctorAvailability = () => {
   };
 
   const handleRemoveSlot = async (slot) => {
-    if (!selectedDate) return;
+  if (!selectedDate) return;
 
-    try {
-      setRemovingSlot(`${slot.start}-${slot.end}`);
+  try {
+    setRemovingSlot(`${slot.start}-${slot.end}`);
 
-      const res = await removeAvailabilitySlot({
-        date: selectedDate,
-        start: slot.start,
-        end: slot.end,
-      });
+    const res = await removeAvailabilitySlot({
+      dateKey: selectedDate,
+      slotId: slot.slotId, 
+    });
 
-      if (res?.data?.success) {
-        toast.success("Slot removed");
-        fetchAvailability();
-      } else {
-        toast.error(res?.data?.message || "Failed to remove slot");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error removing slot");
-    } finally {
-      setRemovingSlot(null);
+    if (res?.data?.success) {
+      toast.success("Slot removed");
+      fetchAvailability();
+    } else {
+      toast.error(res?.data?.message || "Failed to remove slot");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Error removing slot");
+  } finally {
+    setRemovingSlot(null);
+  }
+};
 
   const isInvalidTime = startTime >= endTime;
 

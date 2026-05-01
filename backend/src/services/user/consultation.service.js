@@ -7,22 +7,43 @@ import { getBrowser } from "../../config/puppeteer.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import { emailTemplate } from "../../utils/emailTemplate.js";
 
-export const createConsultationService = async ({ appointmentId }) => {
-  const appointment = await Appointment.findById(appointmentId);
+export const createConsultationService = async ({ appointmentId,session }) => {
+  const appointment = await Appointment.findById(appointmentId).session(session);
+
   if (!appointment) throw new Error("Appointment not found");
 
   const existing = await Consultation.findOne({ appointment: appointmentId });
   if (existing) return existing;
-
   const sessionId = crypto.randomUUID();
 
-  const baseTime = new Date(appointment.appointmentDateTime);
-  const tokenExpiresAt = new Date(baseTime);
+  // ---------- FIX: safe validation ----------
+  if (!appointment.appointmentDate || !appointment.timeSlot) {
+    throw new Error("Appointment date or timeSlot missing");
+  }
+
+  // ---------- FIX: build proper datetime ----------
+  const appointmentDate = new Date(appointment.appointmentDate);
+
+  const [hours, minutes] = appointment.timeSlot.split(":");
+
+  if (!hours || !minutes) {
+    throw new Error("Invalid timeSlot format");
+  }
+
+  const appointmentDateTime = new Date(appointmentDate);
+  appointmentDateTime.setHours(Number(hours), Number(minutes), 0, 0);
+
+  if (isNaN(appointmentDateTime.getTime())) {
+    throw new Error("Invalid appointment date or timeSlot");
+  }
+
+  const tokenExpiresAt = new Date(appointmentDateTime);
   tokenExpiresAt.setMinutes(
-    tokenExpiresAt.getMinutes() + (appointment.duration || 30) + 10,
+    tokenExpiresAt.getMinutes() + (appointment.duration || 30) + 10
   );
 
-  const consultation = await Consultation.create({
+  const consultation = await Consultation.create(
+  [{
     appointment: appointmentId,
     patient: appointment.patient,
     doctor: appointment.doctor,
@@ -30,21 +51,22 @@ export const createConsultationService = async ({ appointmentId }) => {
     token: crypto.randomBytes(16).toString("hex"),
     tokenExpiresAt,
     status: "scheduled",
-  });
+  }],
+  { session }
+);
 
-  await Appointment.findByIdAndUpdate(appointment._id, {
-    consultation: consultation._id,
-  });
+  await Appointment.findByIdAndUpdate(appointmentId, {
+    consultation: consultation[0]._id,
+    
+  },{session});
 
-  return consultation;
+  return consultation[0];
 };
 
+//------------------ Join Consultation Service --------------------
 export const joinConsultationService = async (consultationId, userId) => {
   const consultation = await Consultation.findById(consultationId)
-    .populate(
-      "appointment",
-      "appointmentDate appointmentDateTime duration timeSlot",
-    )
+    .populate("appointment", "appointmentDate duration timeSlot")
     .populate("patient", "name profilePicture")
     .populate("doctor", "name profilePicture");
 
@@ -63,6 +85,50 @@ export const joinConsultationService = async (consultationId, userId) => {
     throw new Error("Unauthorized");
   }
 
+  // -------- Build appointment datetime safely --------
+  const appointmentDate = new Date(consultation.appointment.appointmentDate);
+  const [hours, minutes] = consultation.appointment.timeSlot.split(":");
+
+  const appointmentDateTime = new Date(
+    appointmentDate.getFullYear(),
+    appointmentDate.getMonth(),
+    appointmentDate.getDate(),
+    Number(hours),
+    Number(minutes),
+    0,
+    0
+  );
+
+  if (isNaN(appointmentDateTime.getTime())) {
+    throw new Error("Invalid appointment datetime");
+  }
+
+  const now = new Date();
+
+  // -------- Buffers --------
+  const earlyJoinBuffer = 5;   // minutes before
+  const lateGraceBuffer = 10;  // minutes after
+
+  const startWindow = new Date(
+    appointmentDateTime.getTime() - earlyJoinBuffer * 60 * 1000
+  );
+
+  const endWindow = new Date(
+    appointmentDateTime.getTime() +
+      (consultation.appointment.duration || 15) * 60 * 1000 +
+      lateGraceBuffer * 60 * 1000
+  );
+
+  // -------- Validation --------
+  if (now < startWindow) {
+    throw new Error("Consultation not started yet");
+  }
+
+  if (now > endWindow) {
+    throw new Error("Consultation time expired");
+  }
+
+  // -------- Initialize participants --------
   if (!consultation.participants) {
     consultation.participants = {
       patient: { joinedAt: null, isPresent: false },
@@ -73,48 +139,13 @@ export const joinConsultationService = async (consultationId, userId) => {
   const isPatient = consultation.patient._id.toString() === userId;
   const isDoctor = consultation.doctor._id.toString() === userId;
 
-  const appointmentDateTime = new Date(
-    consultation?.appointment?.appointmentDateTime,
-  );
-  const now = new Date();
-
-  const earlyJoinBuffer = 5; //minutes before
-
-  //---------- start window -----------
-  const startTime = new Date(
-    appointmentDateTime.getTime() - earlyJoinBuffer * 60 * 1000,
-  );
-
-  //-------- Consultation end ------------
-
-  const consultationEnd = new Date(
-    appointmentDateTime.getTime() +
-      (consultation.appointment.duration || 15) * 60 * 1000,
-  );
-  //--------- end window --------------
-  const endTime = consultationEnd;
-
-  if (now < startTime) {
-    throw new Error("Consultation not started yet");
-  }
-
-  if (now > endTime) {
-    throw new Error("Consultation time expired");
-  }
-
   if (isPatient) {
-    if (!consultation.participants.patient) {
-      consultation.participants.patient = {};
-    }
     consultation.participants.patient.joinedAt =
       consultation.participants.patient.joinedAt || now;
     consultation.participants.patient.isPresent = true;
   }
 
   if (isDoctor) {
-    if (!consultation.participants.doctor) {
-      consultation.participants.doctor = {};
-    }
     consultation.participants.doctor.joinedAt =
       consultation.participants.doctor.joinedAt || now;
     consultation.participants.doctor.isPresent = true;
@@ -123,22 +154,7 @@ export const joinConsultationService = async (consultationId, userId) => {
   const patientReady = consultation.participants.patient?.isPresent;
   const doctorReady = consultation.participants.doctor?.isPresent;
 
-  // if (patientReady && doctorReady && consultation.status === "scheduled") {
-  //   consultation.status = "in-progress";
-  //   consultation.startTime = new Date();
-  // }
-
-  //   if (patientReady && doctorReady) {
-  //   if (!consultation.startTime) {
-  //     consultation.startTime = new Date();
-  //   }
-  //   consultation.status = "in-progress";
-  // }
-
-  if (consultation.status === "completed") {
-    return consultation;
-  }
-
+  // -------- Status update --------
   if (consultation.status === "scheduled" && patientReady && doctorReady) {
     consultation.status = "in-progress";
     consultation.startTime = consultation.startTime || new Date();
@@ -146,7 +162,7 @@ export const joinConsultationService = async (consultationId, userId) => {
 
   await consultation.save();
 
-  // Emit status via socket
+  // -------- Socket emit --------
   const io = getIO();
   io.to(consultationId).emit("consultation:status-update", {
     status: consultation.status,
@@ -157,7 +173,6 @@ export const joinConsultationService = async (consultationId, userId) => {
     sessionId: consultation.sessionId,
     status: consultation.status,
     startTime: consultation.startTime,
-    endTime: consultation.endTime,
     participants: {
       patient: consultation.patient,
       doctor: consultation.doctor,
@@ -165,6 +180,7 @@ export const joinConsultationService = async (consultationId, userId) => {
   };
 };
 
+//---------------- End consultation service ----------------
 export const endConsultationService = async (consultationId, userId) => {
   const io = getIO();
   const consultation =

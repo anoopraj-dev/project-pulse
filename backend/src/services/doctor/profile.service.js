@@ -3,26 +3,36 @@ import DoctorAvailability from "../../models/availability.model.js";
 import { Notification } from "../../models/notification.model.js";
 
 // ---------- GET PROFILE ----------
+// ---------- GET PROFILE ----------
 export const getDoctorProfileService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).select("-password");
   if (!doctor) throw new Error("Doctor not found");
 
   const availability = await DoctorAvailability.find({ doctorId }).sort({
-    date: 1,
+    dateKey: 1,
   });
 
   const formattedAvailability = availability.map((day) => ({
-    date: day.date.toISOString().split("T")[0],
+    date: day.dateKey, // already correct string YYYY-MM-DD
+
     slots: day.slots.map((slot) => ({
-      startTime: slot.startTime.trim(),
-      endTime: slot.endTime.trim(),
-      isBooked: slot.isBooked ?? false,
+      slotId: slot.slotId,
+
+      startTime: slot.startAt
+        ? new Date(slot.startAt).toISOString().slice(11, 16)
+        : null,
+
+      endTime: slot.endAt
+        ? new Date(slot.endAt).toISOString().slice(11, 16)
+        : null,
+
+      isBooked: slot.status === "booked",
     })),
   }));
 
   return {
     doctor,
-    availability: formattedAvailability || [],
+    availability: formattedAvailability,
   };
 };
 

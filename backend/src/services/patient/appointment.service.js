@@ -1,51 +1,51 @@
 import mongoose from "mongoose";
 import Doctor from "../../models/doctor.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
-import Consultation from "../../models/consultation.model.js";
 import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
-import Wallet from "../../models/wallet.model.js";
-import Transaction from "../../models/transaction.model.js";
 import Patient from "../../models/patient.model.js";
-// import { createConsultation } from "../consultationService.js";
 import { createNotification } from "../user/notification.service.js";
 import { createConsultationService } from "../user/consultation.service.js";
 import paginate from "../../utils/paginate.js";
 
-//-------------- Get booking info ----------------
-export const getBookingInfoService = async (doctorId) => {
-  if (!mongoose.Types.ObjectId.isValid(doctorId)) {
-    throw new Error("Invalid doctor ID");
-  }
+// -------- Helper: Build UTC Date --------
+const buildUTCDate = (date, time) => {
+  const local = new Date(`${date}T${time}:00`);
+  return new Date(local.toISOString());
+};
 
+//-------- Get Booking Info --------
+export const getBookingInfoService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).lean();
   if (!doctor) throw new Error("Doctor not found");
-
-  if (doctor.isBlocked || doctor.status !== "approved") {
-    throw new Error("Doctor not available for booking");
-  }
 
   const services = doctor.services.map((s) => ({
     serviceType: s.serviceType,
     fees: s.fees,
   }));
 
-  const availabilityDocs = await DoctorAvailability.find({
-    doctorId: doctor._id,
-  }).lean();
+  const availabilityDocs = await DoctorAvailability.find({ doctorId }).lean();
 
   const availability = availabilityDocs
-    .map((doc) => {
-      const freeSlots = doc.slots
-        .filter((slot) => !slot.isBooked)
-        .map((slot) => ({
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-        }));
+    .map((doc) => ({
+      date: doc.dateKey,
+      slots: doc.slots
+        .filter((slot) => slot.status === "available")
+        .map((slot) => {
+          const start = new Date(slot.startAt);
+          const end = new Date(slot.endAt);
 
-      return { date: doc.date, slots: freeSlots };
-    })
-    .filter((doc) => doc.slots.length > 0);
+          return {
+            start: `${String(start.getHours()).padStart(2, "0")}:${String(
+              start.getMinutes(),
+            ).padStart(2, "0")}`,
+            end: `${String(end.getHours()).padStart(2, "0")}:${String(
+              end.getMinutes(),
+            ).padStart(2, "0")}`,
+          };
+        }),
+    }))
+    .filter((d) => d.slots.length > 0);
 
   return {
     doctorId: doctor._id,
@@ -57,60 +57,86 @@ export const getBookingInfoService = async (doctorId) => {
   };
 };
 
-//---------------- Book Appointment ----------------
+// -------- Book Appointment --------
+/* -------- Book Appointment -------- */
 export const bookAppointmentService = async (data, patientId) => {
-  let appointment, doctor, patient;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const { doctorId, date, time, reason, orderId } = data;
-
-  if (!doctorId || !date || !time || !reason) {
-    throw new Error("Missing required fields");
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(doctorId)) {
-    throw new Error("Invalid doctor ID");
-  }
-
-  doctor = await Doctor.findById(doctorId).select("email name");
-  patient = await Patient.findById(patientId).select("email name");
-
-  const appointmentDateTime = new Date(`${date}T${time}:00`);
-  const appointmentDate = new Date(date);
-
-  const payment = await Payment.findOne({
-    orderId: orderId?.razorpay_order_id || orderId,
-    patient: patientId,
-    status: "verified",
-  });
-
-  if (!payment) throw new Error("Payment not verified");
-
-  const availabilityUpdate = await DoctorAvailability.findOneAndUpdate(
-    {
-      doctorId,
-      date: appointmentDate,
-      "slots.startTime": time,
-      "slots.isBooked": false,
-    },
-    { $set: { "slots.$.isBooked": true } },
-    { new: true },
-  );
-
-  if (!availabilityUpdate) {
-    throw new Error("Time slot already booked or unavailable");
-  }
-  appointment = await Appointment.findByIdAndUpdate(
-    payment.appointment._id,
-    { status: "confirmed", appointmentDateTime },
-    { new: true },
-  );
-
-  await createConsultationService({
-    appointmentId: appointment._id,
-  });
-
-  //-------------- Notification ------------
   try {
+    const { doctorId, date, time, reason, orderId } = data;
+
+    if (!doctorId || !date || !time || !reason) {
+      throw new Error("Missing required fields");
+    }
+
+    const doctor = await Doctor.findById(doctorId).select("email name");
+    const patient = await Patient.findById(patientId).select("email name");
+
+    if (!doctor || !patient) {
+      throw new Error("Doctor or patient not found");
+    }
+
+    const slotStartUTC = buildUTCDate(date, time);
+
+    /* -------- Verify payment -------- */
+    const payment = await Payment.findOne({
+      orderId: orderId?.razorpay_order_id || orderId,
+      patient: patientId,
+      status: "verified",
+    });
+
+    if (!payment) throw new Error("Payment not verified");
+
+    /* -------- Atomic slot locking -------- */
+    const availabilityUpdate = await DoctorAvailability.findOneAndUpdate(
+      {
+        doctorId,
+        dateKey: date,
+        "slots.startAt": slotStartUTC,
+        "slots.status": "available",
+      },
+      {
+        $set: {
+          "slots.$.status": "booked",
+          "slots.$.appointmentId": payment.appointment, // important linkage
+        },
+      },
+      { new: true, session },
+    );
+
+    if (!availabilityUpdate) {
+      throw new Error("Time slot already booked or unavailable");
+    }
+
+    /* -------- Store date safely (NO timezone shift) -------- */
+    const appointmentDate = new Date(date + "T00:00:00.000Z");
+
+    /* -------- Update appointment -------- */
+    const appointment = await Appointment.findByIdAndUpdate(
+      payment.appointment,
+      {
+        status: "confirmed",
+        appointmentDate,
+        timeSlot: time,
+        reason,
+        isActive: true,
+      },
+      { new: true, session },
+    );
+
+    if (!appointment) throw new Error("Appointment not found");
+
+    /* -------- Create consultation -------- */
+    await createConsultationService({
+      appointmentId: appointment._id,
+      session,
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    /* -------- Notifications -------- */
     await Promise.all([
       createNotification({
         userId: patient._id.toString(),
@@ -125,14 +151,18 @@ export const bookAppointmentService = async (data, patientId) => {
         message: `New appointment booked by ${patient.name}`,
       }),
     ]);
-  } catch (error) {
-    console.error("Notification failed", error);
+
+    return { appointment, doctor, patient };
+  } catch (err) {
+    console.error("BOOK APPOINTMENT ERROR:", err);
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    session.endSession();
+    throw err;
   }
-
-  return { appointment, doctor, patient };
 };
-
-//---------------- Get all appointments ----------------
+/* -------- Get All Appointments -------- */
 export const getAllAppointmentsService = async (
   patientId,
   { page = 1, limit = 5, status },
@@ -164,7 +194,7 @@ export const getAllAppointmentsService = async (
   });
 };
 
-//---------------- Get appointment by ID ----------------
+/* -------- Get Appointment By ID -------- */
 export const getAppointmentByIdService = async (id, patientId) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid appointment ID");
@@ -183,132 +213,78 @@ export const getAppointmentByIdService = async (id, patientId) => {
   return appointment;
 };
 
-//---------------- Cancel appointment ----------------
+/* -------- Cancel Appointment -------- */
 export const cancelAppointmentService = async (id, patientId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  let appointment;
-
   try {
-    appointment = await Appointment.findById(id)
-      .populate("patient", "name")
-      .populate("doctor", "name");
+    const appointment = await Appointment.findById(id)
+      .populate("doctor", "name")
+      .populate("patient", "name");
 
     if (!appointment) throw new Error("Appointment not found");
-    if (appointment.patient._id.toString() !== patientId)
+
+    if (appointment.patient._id.toString() !== patientId) {
       throw new Error("Unauthorized action");
+    }
 
-    if (appointment.status === "completed")
-      throw new Error("Completed appointment cannot be cancelled");
+    if (appointment.status === "completed") {
+      throw new Error("Cannot cancel completed appointment");
+    }
 
-    if (appointment.status === "cancelled")
-      throw new Error("Appointment already cancelled");
+    if (appointment.status === "cancelled") {
+      throw new Error("Already cancelled");
+    }
 
-    const appointmentDateTime = new Date(appointment.appointmentDateTime);
+    const dateKey = appointment.appointmentDate.toISOString().split("T")[0];
 
-    const hoursLeft = (appointmentDateTime - new Date()) / (1000 * 60 * 60);
+    const slotStartUTC = buildUTCDate(dateKey, appointment.timeSlot);
 
-    let refundPercentage;
-    if (hoursLeft > 24) refundPercentage = 1;
-    else if (hoursLeft > 6) refundPercentage = 0.8;
-    else if (hoursLeft > 2) refundPercentage = 0.5;
-    else throw new Error("Cannot cancel within 2 hours");
-
-    appointment.status = "cancelled";
-    appointment.cancelledBy = "patient";
-    appointment.cancellationReason = "Patient cancelled";
-
-    await appointment.save({ session });
-
+    /* Unlock slot */
     await DoctorAvailability.updateOne(
       {
-        doctorId: appointment.doctor,
-        date: appointment.appointmentDate,
-        "slots.startTime": appointment.timeSlot,
+        doctorId: appointment.doctor._id,
+        dateKey,
+        "slots.startAt": slotStartUTC,
       },
-      { $set: { "slots.$.isBooked": false } },
+      {
+        $set: {
+          "slots.$.status": "available",
+        },
+      },
       { session },
     );
 
-    const payment = await Payment.findOne({ appointment: appointment._id });
+    /* Update appointment */
+    appointment.status = "cancelled";
+    appointment.cancelledBy = "patient";
 
-    if (payment && payment.status !== "refunded") {
-      const refundAmount =
-        (payment.amount - payment.amount * 0.05) * refundPercentage;
-
-      let wallet = await Wallet.findOne({
-        userId: appointment.patient,
-        role: "patient",
-      });
-
-      if (!wallet) {
-        wallet = new Wallet({
-          userId: appointment.patient,
-          role: "patient",
-          balance: 0,
-        });
-      }
-
-      wallet.balance += refundAmount;
-      await wallet.save({ session });
-
-      await Transaction.create(
-        [
-          {
-            wallet: wallet._id,
-            type: "credit",
-            amount: refundAmount,
-            referenceType: "refund",
-            referenceId: payment._id,
-          },
-        ],
-        { session },
-      );
-
-      payment.status = "refunded";
-      await payment.save({ session });
-
-      //----------- Update consultation status ------------
-      await Consultation.findOneAndUpdate(
-        { appointment: appointment._id },
-        {
-          status: "cancelled",
-          endedAt: new Date(),
-        },
-        { session },
-      );
-    }
+    await appointment.save({ session });
 
     await session.commitTransaction();
     session.endSession();
+
+    /* Notifications */
+    await Promise.all([
+      createNotification({
+        userId: appointment.patient._id.toString(),
+        role: "patient",
+        title: "Appointment Cancelled",
+        message: `Your appointment with Dr. ${appointment.doctor.name} has been cancelled`,
+      }),
+      createNotification({
+        userId: appointment.doctor._id.toString(),
+        role: "doctor",
+        title: "Appointment Cancelled",
+        message: `Appointment with ${appointment.patient.name} has been cancelled`,
+      }),
+    ]);
+
+    return appointment;
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
     throw err;
   }
-
-  //-------------- Notifications -------------
-  if (appointment?.patient && appointment?.doctor) {
-    try {
-      await Promise.all([
-        createNotification({
-          userId: appointment.patient._id.toString(),
-          role: "patient",
-          title: "Appointment Cancelled",
-          message: `Your appointment with Dr. ${appointment.doctor.name} has been cancelled`,
-        }),
-        createNotification({
-          userId: appointment.doctor._id.toString(),
-          role: "doctor",
-          title: "Appointment Cancelled",
-          message: `Appointment with ${appointment.patient.name} has been cancelled`,
-        }),
-      ]);
-    } catch (error) {
-      console.error("Notification failed", error);
-    }
-  }
-
-  return appointment;
 };

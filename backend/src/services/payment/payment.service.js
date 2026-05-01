@@ -23,6 +23,12 @@ const calculateDuration = (startTime, endTime = null, fallback = 30) => {
   return eh * 60 + em - (sh * 60 + sm);
 };
 
+//------------------- Build UTC date ------
+const buildUTCDate = (date, time) => {
+  const local = new Date(`${date}T${time}:00`);
+  return new Date(local.toISOString());
+};
+
 // -------- CREATE ORDER ----------
 export const createOrderService = async (userId, body) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = body;
@@ -35,11 +41,19 @@ export const createOrderService = async (userId, body) => {
 
   const availability = await DoctorAvailability.findOne({
     doctorId,
-    date: new Date(date),
+    dateKey: date,
   });
 
-  const slot = availability.slots?.find(
-    (s) => s.startTime === time && !s.isBooked,
+  if (!availability) {
+    throw new Error("No availability found");
+  }
+
+  const slotStartUTC = buildUTCDate(date, time);
+
+  const slot = availability.slots.find(
+    (s) =>
+      s.startAt.getTime() === slotStartUTC.getTime() &&
+      s.status === "available",
   );
 
   if (!slot) {
@@ -47,7 +61,7 @@ export const createOrderService = async (userId, body) => {
   }
 
   const duration =
-    slot?.duration || calculateDuration(slot.startTime, slot.endTime);
+    (new Date(slot.endAt) - new Date(slot.startAt)) / (1000 * 60);
 
   const order = await razorpay.orders.create({
     amount: amount * 100,
@@ -55,20 +69,19 @@ export const createOrderService = async (userId, body) => {
     receipt: `receipt_${Date.now()}`,
   });
 
-  const appointmentDateTime = new Date(`${date}T${time}:00`);
 
-  const appointment = await Appointment.create({
-    patient: userId,
-    doctor: doctorId,
-    appointmentDateTime,
-    timeSlot: time,
-    reason,
-    notes,
-    serviceType,
-    duration,
-    status: "pending",
-    isActive: false,
-  });
+const appointment = await Appointment.create({
+  patient: userId,
+  doctor: doctorId,
+  appointmentDate: date,
+  timeSlot: time,
+  reason,
+  notes,
+  serviceType,
+  duration,
+  status: "pending",
+  isActive: false,
+});
 
   await Payment.create({
     patient: userId,
@@ -186,18 +199,41 @@ export const retryPaymentService = async (paymentId) => {
 
   const appointment = await Appointment.findById(payment.appointment);
 
+  if (!appointment) {
+    throw new Error("Appointment not found");
+  }
+
   const now = new Date();
-  const diffInHours = (now - new Date(payment.createdAt)) / (1000 * 60 * 60);
+
+  const diffInHours =
+    (now - new Date(payment.createdAt)) / (1000 * 60 * 60);
 
   if (diffInHours > 6) {
     throw new Error("Retry window expired (6 hours)");
   }
 
-  // Appointment validity check
+  // -------- FIX: derive datetime safely from schema fields --------
+  if (!appointment.appointmentDate || !appointment.timeSlot) {
+    throw new Error("Appointment data missing");
+  }
+
+  const baseDate =
+    appointment.appointmentDate instanceof Date
+      ? appointment.appointmentDate
+      : new Date(appointment.appointmentDate);
+
+  if (isNaN(baseDate.getTime())) {
+    throw new Error("Invalid appointment date");
+  }
+
   const [hours, minutes] = appointment.timeSlot.split(":").map(Number);
 
-  const appointmentDateTime = new Date(appointment.appointmentDate);
+  const appointmentDateTime = new Date(baseDate);
   appointmentDateTime.setHours(hours, minutes, 0, 0);
+
+  if (isNaN(appointmentDateTime.getTime())) {
+    throw new Error("Invalid appointment timeSlot");
+  }
 
   const diff = appointmentDateTime - now;
 
@@ -228,7 +264,6 @@ export const retryPaymentService = async (paymentId) => {
     },
   };
 };
-
 // -------- WALLET PAYMENT ----------
 export const walletPaymentService = async (userId, body) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = body;

@@ -4,7 +4,7 @@ import {
   viewDoctorProfileService,
 } from "../../services/patient/viewDoctors.service.js";
 
-// -------- GET ALL DOCTORS --------
+// GET ALL DOCTORS
 export const getApprovedDoctors = async (req, res) => {
   try {
     const doctors = await getApprovedDoctorsService();
@@ -24,7 +24,7 @@ export const getApprovedDoctors = async (req, res) => {
   }
 };
 
-// -------- VIEW DOCTOR PROFILE --------
+// VIEW DOCTOR PROFILE
 export const viewDoctorProfile = async (req, res) => {
   try {
     const { doctor, availability } =

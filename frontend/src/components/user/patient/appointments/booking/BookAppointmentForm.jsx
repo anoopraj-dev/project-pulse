@@ -53,6 +53,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     }));
   };
 
+
   //-------------------- Get available dates ------------
   const getAvailableDates = () => {
     if (!hasBookingInfo) return [];
@@ -67,23 +68,23 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
       .map((date) => date.toISOString().split("T")[0]);
   };
 
-  const availableSlots = () => {
-    if (!hasBookingInfo || !formData.date) return [];
+const availableSlots = () => {
+  if (!hasBookingInfo || !formData.date) return [];
 
-    const day = activeDoctor?.availability?.find(
-      (d) => d.date.split("T")[0] === formData.date,
-    );
+  const day = activeDoctor?.availability?.find(
+    (d) => d.date === formData.date
+  );
 
-    if (!day?.slots) return [];
+  if (!day?.slots) return [];
 
-    const now = new Date();
+  const now = new Date();
 
-    return day.slots.filter((slot) => {
-      const slotDateTime = new Date(`${formData.date}T${slot.startTime}`);
-      return slotDateTime.getTime() - now.getTime() >= 5 * 60 * 1000;
-    });
-  };
+  return day.slots.filter((slot) => {
+    const slotDateTime = new Date(`${formData.date}T${slot.start}:00`);
 
+    return slotDateTime.getTime() - now.getTime() >= 5 * 60 * 1000;
+  });
+};
   const today = new Date().toISOString().split("T")[0];
 
   //------------- amount to pay --------------

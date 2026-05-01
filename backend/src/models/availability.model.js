@@ -2,12 +2,37 @@ import mongoose from "mongoose";
 
 const timeSlotSchema = new mongoose.Schema(
   {
-    startTime: { type: String, required: true }, 
-    endTime: { type: String, required: true },   
-    isBooked: { type: Boolean, default: false },
+    slotId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
+    startAt: { type: Date, required: true },
+    endAt: { type: Date, required: true },
+
+    status: {
+      type: String,
+      enum: ["available", "locked", "booked"],
+      default: "available",
+      index: true,
+    },
+
+    lockExpiresAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
+
+    appointmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Appointment",
+      default: null,
+    },
   },
-  { _id: false }
+  { _id: true }
 );
+
 
 const doctorAvailabilitySchema = new mongoose.Schema(
   {
@@ -18,17 +43,13 @@ const doctorAvailabilitySchema = new mongoose.Schema(
       index: true,
     },
 
-    date: {
-      type: Date, 
+    dateKey: {
+      type: String,
       required: true,
       index: true,
     },
 
-    slots: {
-      type: [timeSlotSchema],
-      required: true,
-    },
-
+    slots: [timeSlotSchema],
   },
   { timestamps: true }
 );
