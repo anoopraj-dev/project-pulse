@@ -3,19 +3,7 @@ import DoctorAvailability from "../../models/availability.model.js";
 
 // ----------------- Helper: Safe UTC Conversion ----------------
 const buildUTCDate = (date, time) => {
-  const [hours, minutes] = time.split(":").map(Number);
-
-  const d = new Date(date);
-
-  return new Date(Date.UTC(
-    d.getFullYear(),
-    d.getMonth(),
-    d.getDate(),
-    hours - 5,     // IST offset
-    minutes - 30,
-    0,
-    0
-  ));
+  return new Date(`${date}T${time}:00+05:30`);
 };
 
 // ----------------- Helper: Format time for frontend ----------------

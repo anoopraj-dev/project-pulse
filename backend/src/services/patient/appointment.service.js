@@ -10,18 +10,7 @@ import paginate from "../../utils/paginate.js";
 
 // -------- Helper: Build UTC Date --------
 const buildUTCDate = (date, time) => {
-  const [hours, minutes] = time.split(":").map(Number);
-
-  // Create UTC by subtracting IST offset (5h 30m)
-  return new Date(Date.UTC(
-    new Date(date).getFullYear(),
-    new Date(date).getMonth(),
-    new Date(date).getDate(),
-    hours - 5,
-    minutes - 30,
-    0,
-    0
-  ));
+  return new Date(`${date}T${time}:00+05:30`);
 };
 
 //-------- Get Booking Info --------
