@@ -22,16 +22,7 @@ export const createConsultationService = async ({ appointmentId,session }) => {
   }
 
   // ---------- FIX: build proper datetime ----------
-  const appointmentDate = new Date(appointment.appointmentDate);
-
-  const [hours, minutes] = appointment.timeSlot.split(":");
-
-  if (!hours || !minutes) {
-    throw new Error("Invalid timeSlot format");
-  }
-
-  const appointmentDateTime = new Date(appointmentDate);
-  appointmentDateTime.setHours(Number(hours), Number(minutes), 0, 0);
+  const appointmentDateTime = new Date(appointment.appointmentDate); 
 
   if (isNaN(appointmentDateTime.getTime())) {
     throw new Error("Invalid appointment date or timeSlot");
@@ -86,18 +77,9 @@ export const joinConsultationService = async (consultationId, userId) => {
   }
 
   // -------- Build appointment datetime safely --------
-  const appointmentDate = new Date(consultation.appointment.appointmentDate);
-  const [hours, minutes] = consultation.appointment.timeSlot.split(":");
-
   const appointmentDateTime = new Date(
-    appointmentDate.getFullYear(),
-    appointmentDate.getMonth(),
-    appointmentDate.getDate(),
-    Number(hours),
-    Number(minutes),
-    0,
-    0
-  );
+  consultation.appointment.appointmentDate
+);
 
   if (isNaN(appointmentDateTime.getTime())) {
     throw new Error("Invalid appointment datetime");
@@ -118,6 +100,9 @@ export const joinConsultationService = async (consultationId, userId) => {
       (consultation.appointment.duration || 15) * 60 * 1000 +
       lateGraceBuffer * 60 * 1000
   );
+
+  console.log("UTC:", appointmentDateTime.toISOString());
+console.log("IST:", appointmentDateTime.toLocaleString());
 
   // -------- Validation --------
   if (now < startWindow) {

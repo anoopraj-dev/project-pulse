@@ -109,8 +109,8 @@ export const bookAppointmentService = async (data, patientId) => {
       throw new Error("Time slot already booked or unavailable");
     }
 
-    /* -------- Store date safely (NO timezone shift) -------- */
-    const appointmentDate = new Date(date + "T00:00:00.000Z");
+    //---------------- store date in utc--------
+    const appointmentDate = buildUTCDate(date, time);
 
     /* -------- Update appointment -------- */
     const appointment = await Appointment.findByIdAndUpdate(
