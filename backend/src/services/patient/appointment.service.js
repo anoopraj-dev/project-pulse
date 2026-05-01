@@ -14,6 +14,7 @@ const buildUTCDate = (date, time) => {
 };
 
 //-------- Get Booking Info --------
+// -------- Get Booking Info --------
 export const getBookingInfoService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).lean();
   if (!doctor) throw new Error("Doctor not found");
@@ -30,19 +31,10 @@ export const getBookingInfoService = async (doctorId) => {
       date: doc.dateKey,
       slots: doc.slots
         .filter((slot) => slot.status === "available")
-        .map((slot) => {
-          const start = new Date(slot.startAt);
-          const end = new Date(slot.endAt);
-
-          return {
-            start: `${String(start.getHours()).padStart(2, "0")}:${String(
-              start.getMinutes(),
-            ).padStart(2, "0")}`,
-            end: `${String(end.getHours()).padStart(2, "0")}:${String(
-              end.getMinutes(),
-            ).padStart(2, "0")}`,
-          };
-        }),
+        .map((slot) => ({
+          startAt: slot.startAt,
+          endAt: slot.endAt,
+        })),
     }))
     .filter((d) => d.slots.length > 0);
 
