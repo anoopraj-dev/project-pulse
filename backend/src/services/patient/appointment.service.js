@@ -57,7 +57,6 @@ export const getBookingInfoService = async (doctorId) => {
 };
 
 // -------- Book Appointment --------
-/* -------- Book Appointment -------- */
 export const bookAppointmentService = async (data, patientId) => {
   const session = await mongoose.startSession();
   session.startTransaction();

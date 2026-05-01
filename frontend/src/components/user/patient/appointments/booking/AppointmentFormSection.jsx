@@ -7,6 +7,8 @@ const AppointmentFormSection = ({
   availableSlots,
   today,
 }) => {
+
+  console.log('available slots',availableSlots)
   return (
     <form className="space-y-6">
       {/* Specialty */}
