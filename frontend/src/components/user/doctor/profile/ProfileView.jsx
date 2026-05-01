@@ -68,16 +68,24 @@ const ProfileView = ({
   const [activeAction, setActiveAction] = useState(null);
 
   const isSlotExpired = (date, endTime, isBooked) => {
-    if (isBooked) return false;
+  if (isBooked) return false;
 
-    const now = new Date();
-    const slotDateTime = new Date(date);
+  // guard against null/undefined
+  if (!date || !endTime) return true;
 
-    const [h, m] = endTime.split(":").map(Number);
-    slotDateTime.setHours(h, m, 0, 0);
+  const now = new Date();
 
-    return slotDateTime < now;
-  };
+  const slotDateTime = new Date(date);
+  if (isNaN(slotDateTime)) return true;
+
+  const [h, m] = endTime.split(":").map(Number);
+
+  if (isNaN(h) || isNaN(m)) return true;
+
+  slotDateTime.setHours(h, m, 0, 0);
+
+  return slotDateTime < now;
+};
 
   const handleAction = async (action, fn) => {
     try {

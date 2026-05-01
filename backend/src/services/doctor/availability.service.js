@@ -1,17 +1,168 @@
+// import DoctorAvailability from "../../models/availability.model.js";
+
+// // ----------------- Get Availability ----------------
+// export const getAvailabilityService = async (doctorId) => {
+//   const availability = await DoctorAvailability.find({ doctorId }).sort({
+//     dateKey: 1,
+//   });
+
+//   return availability.map((day) => ({
+//     date: day.dateKey,
+
+//     slots: day.slots.map((slot) => ({
+//       slotId: slot.slotId,
+
+//       startAt: slot.startAt,
+//       endAt: slot.endAt,
+
+//       isBooked: slot.status === "booked",
+//       isLocked: slot.status === "locked",
+//     })),
+//   }));
+// };
+
+// // ----------------- Save Availability ----------------
+// export const saveAvailabilityService = async (doctorId, payload) => {
+//   if (!Array.isArray(payload) || payload.length === 0) {
+//     throw new Error("No availability provided");
+//   }
+
+//   const grouped = payload.reduce((acc, item) => {
+//     const dateKey = item.date;
+
+//     if (!acc[dateKey]) acc[dateKey] = [];
+//     acc[dateKey].push(item);
+
+//     return acc;
+//   }, {});
+
+//   for (const dateKey in grouped) {
+//     const slotsPayload = grouped[dateKey];
+
+//     const formattedSlots = slotsPayload.map((slot) => {
+//       const startAt = new Date(slot.startAt);
+//       const endAt = new Date(slot.endAt);
+
+//       return {
+//         slotId: `${doctorId}_${dateKey}_${startAt.toISOString()}`,
+
+//         startAt,
+//         endAt,
+
+//         status: "available",
+//         lockExpiresAt: null,
+//         appointmentId: null,
+//       };
+//     });
+
+//     let availability = await DoctorAvailability.findOne({
+//       doctorId,
+//       dateKey,
+//     });
+
+//     if (availability) {
+//       const existingSlotIds = new Set(
+//         availability.slots.map((s) => s.slotId)
+//       );
+
+//       const newSlots = formattedSlots.filter(
+//         (s) => !existingSlotIds.has(s.slotId)
+//       );
+
+//       availability.slots.push(...newSlots);
+
+//       await availability.save();
+//     } else {
+//       await DoctorAvailability.create({
+//         doctorId,
+//         dateKey,
+//         slots: formattedSlots,
+//       });
+//     }
+//   }
+
+//   return true;
+// };
+// // ----------------- Remove Slot ----------------
+
+// export const removeAvailabilitySlotService = async (
+//   doctorId,
+//   dateKey,
+//   slotId
+// ) => {
+//   if (!dateKey || !slotId) {
+//     throw new Error("DateKey and slotId are required");
+//   }
+
+//   const availability = await DoctorAvailability.findOne({
+//     doctorId,
+//     dateKey,
+//   });
+
+//   if (!availability) {
+//     throw new Error("No availability found for this date");
+//   }
+
+//   const slot = availability.slots.find((s) => s.slotId === slotId);
+
+//   if (!slot) {
+//     throw new Error("Slot not found");
+//   }
+
+//   if (slot.status !== "available") {
+//     throw new Error("Cannot remove booked/locked slot");
+//   }
+
+//   availability.slots = availability.slots.filter(
+//     (s) => s.slotId !== slotId
+//   );
+
+//   await availability.save();
+
+//   return true;
+// };
+
+
 import DoctorAvailability from "../../models/availability.model.js";
+
+// ----------------- Helper: Safe UTC Conversion ----------------
+const buildUTCDate = (date, time) => {
+  const local = new Date(`${date}T${time}:00`);
+  return new Date(local.toISOString());
+};
+
+// ----------------- Helper: Format time for frontend ----------------
+const formatTimeLocal = (dateObj) => {
+  if (!dateObj) return null;
+
+  const date = new Date(dateObj);
+
+  if (isNaN(date.getTime())) return null;
+
+  // Convert UTC -> LOCAL time
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+};
 
 // ----------------- Get Availability ----------------
 export const getAvailabilityService = async (doctorId) => {
   const availability = await DoctorAvailability.find({ doctorId }).sort({
-    date: 1,
+    dateKey: 1,
   });
 
   return availability.map((day) => ({
-    date: day.date.toISOString().split("T")[0],
+    date: day.dateKey,
+
     slots: day.slots.map((slot) => ({
-      start: slot.startTime.trim(),
-      end: slot.endTime.trim(),
-      isBooked: slot.isBooked ?? false,
+      slotId: slot.slotId,
+
+      start: formatTimeLocal(slot.startAt),
+      end: formatTimeLocal(slot.endAt),
+
+      isBooked: slot.status === "booked",
+      isLocked: slot.status === "locked",
     })),
   }));
 };
@@ -23,54 +174,54 @@ export const saveAvailabilityService = async (doctorId, payload) => {
   }
 
   const grouped = payload.reduce((acc, item) => {
-    if (!acc[item.date]) acc[item.date] = [];
-    acc[item.date].push(item);
+    const dateKey = item.date;
+
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(item);
+
     return acc;
   }, {});
 
-  for (const date in grouped) {
-    const slotsPayload = grouped[date];
+  for (const dateKey in grouped) {
+    const slotsPayload = grouped[dateKey];
 
-    const formattedSlots = slotsPayload.map((slot) => ({
-      startTime: slot.start,
-      endTime: slot.end,
-      isBooked: false,
-    }));
+    const formattedSlots = slotsPayload.map((slot) => {
+      const startAt = buildUTCDate(slot.date, slot.start);
+      const endAt = buildUTCDate(slot.date, slot.end);
+
+      return {
+        slotId: `${doctorId}_${dateKey}_${startAt.toISOString()}`,
+
+        startAt,
+        endAt,
+
+        status: "available",
+        lockExpiresAt: null,
+        appointmentId: null,
+      };
+    });
 
     let availability = await DoctorAvailability.findOne({
       doctorId,
-      date: new Date(date),
+      dateKey,
     });
 
     if (availability) {
-      const bookedSlots = availability.slots.filter((s) => s.isBooked);
-
-      const existingSlotKeys = availability.slots.map(
-        (s) => `${s.startTime}-${s.endTime}`
+      const existingSlotIds = new Set(
+        availability.slots.map((s) => s.slotId)
       );
 
       const newSlots = formattedSlots.filter(
-        (s) => !existingSlotKeys.includes(`${s.startTime}-${s.endTime}`)
+        (s) => !existingSlotIds.has(s.slotId)
       );
 
-      availability.slots = [
-        ...bookedSlots,
-        ...availability.slots.filter(
-          (s) =>
-            !s.isBooked &&
-            !newSlots.some(
-              (n) =>
-                n.startTime === s.startTime && n.endTime === s.endTime
-            )
-        ),
-        ...newSlots,
-      ];
+      availability.slots.push(...newSlots);
 
       await availability.save();
     } else {
       await DoctorAvailability.create({
         doctorId,
-        date: new Date(date),
+        dateKey,
         slots: formattedSlots,
       });
     }
@@ -82,35 +233,40 @@ export const saveAvailabilityService = async (doctorId, payload) => {
 // ----------------- Remove Slot ----------------
 export const removeAvailabilitySlotService = async (
   doctorId,
-  date,
-  start,
-  end
+  dateKey,
+  slotId
 ) => {
-  if (!date || !start || !end) {
-    throw new Error("Date, start and end time are required");
+
+  if (!dateKey || !slotId) {
+    throw new Error("DateKey and slotId are required");
   }
 
   const availability = await DoctorAvailability.findOne({
     doctorId,
-    date: new Date(date),
+    dateKey,
   });
 
   if (!availability) {
     throw new Error("No availability found for this date");
   }
 
-  const slotIndex = availability.slots.findIndex(
-    (s) =>
-      s.startTime === start &&
-      s.endTime === end &&
-      !s.isBooked
-  );
+  const slot = availability.slots.find((s) =>{
+     return s.slotId.toString() === slotId.toString()
+  } 
+);
 
-  if (slotIndex === -1) {
-    throw new Error("Slot not found or already booked");
+  if (!slot) {
+    throw new Error("Slot not found");
   }
 
-  availability.slots.splice(slotIndex, 1);
+  if (slot.status !== "available") {
+    throw new Error("Cannot remove booked/locked slot");
+  }
+
+  availability.slots = availability.slots.filter(
+    (s) => s.slotId !== slotId
+  );
+
   await availability.save();
 
   return true;
