@@ -76,22 +76,21 @@ const getAvailableDates = () => {
 const availableSlots = () => {
   if (!hasBookingInfo || !formData.date) return [];
 
-  const now = new Date();
-
   const day = activeDoctor?.availability?.find(
-    (d) =>
-      new Date(d.date).toISOString().split("T")[0] === formData.date
+    (d) => d.date === formData.date
   );
 
   if (!day?.slots) return [];
 
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
   return day.slots.filter((slot) => {
-    const [h, m] = slot.start.split(":");
+    const [h, m] = slot.start.split(":").map(Number);
+    const slotMinutes = h * 60 + m;
 
-    const slotTime = new Date(formData.date);
-    slotTime.setHours(Number(h), Number(m), 0, 0);
-
-    return slotTime > now;
+    // only future slots
+    return slotMinutes > nowMinutes;
   });
 };
 
