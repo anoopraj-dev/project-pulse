@@ -66,20 +66,16 @@ const getAvailableDates = () => {
 
   return (
     activeDoctor?.availability
-      ?.map((day) => {
+      ?.filter((day) => {
         const d = new Date(day.date);
         d.setHours(0, 0, 0, 0);
-        return {
-          raw: day.date,
-          dateObj: d,
-        };
+        return d >= today;
       })
-      .filter((item) => item.dateObj >= today)
-      .map((item) => item.raw) || []
+      .map((day) => day.date) || []
   );
 };
 
-const availableSlots = () => {
+  const availableSlots = () => {
   if (!hasBookingInfo || !formData.date) return [];
 
   const day = activeDoctor?.availability?.find(
@@ -90,15 +86,11 @@ const availableSlots = () => {
 
   const now = new Date();
 
-  const nowUTCMinutes =
-    now.getUTCHours() * 60 + now.getUTCMinutes();
-
   return day.slots.filter((slot) => {
-    const [h, m] = slot.start.split(":").map(Number);
+    if (!slot?.startAt) return false;
 
-    const slotMinutes = h * 60 + m; // already UTC
-
-    return slotMinutes > nowUTCMinutes;
+    const slotStart = new Date(slot.startAt);
+    return slotStart > now;
   });
 };
 

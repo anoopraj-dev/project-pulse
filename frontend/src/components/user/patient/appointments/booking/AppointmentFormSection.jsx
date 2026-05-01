@@ -165,9 +165,17 @@ const AppointmentFormSection = ({
     <option value="">Select time</option>
 
     {availableSlots()?.map((slot) => (
-      <option key={slot.start} value={slot.start}>
-        {slot.start} - {slot.end}
-      </option>
+      <option key={slot.startAt} value={slot.startAt}>
+  {new Date(slot.startAt).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+  {" - "}
+  {new Date(slot.endAt).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</option>
     ))}
   </select>
 ) : (
