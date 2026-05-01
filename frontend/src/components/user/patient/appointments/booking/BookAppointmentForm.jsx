@@ -89,20 +89,16 @@ const availableSlots = () => {
   if (!day?.slots) return [];
 
   const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const nowUTCMinutes =
+    now.getUTCHours() * 60 + now.getUTCMinutes();
 
   return day.slots.filter((slot) => {
-    if (!slot?.start) return false;
+    const [h, m] = slot.start.split(":").map(Number);
 
-    const time = slot.start.trim();
+    const slotMinutes = h * 60 + m; // already UTC
 
-    const [h, m] = time.split(":").map(Number);
-
-    if (isNaN(h) || isNaN(m)) return false;
-
-    const slotMinutes = h * 60 + m;
-
-    return slotMinutes > nowMinutes;
+    return slotMinutes > nowUTCMinutes;
   });
 };
 
