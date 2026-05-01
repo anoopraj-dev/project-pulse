@@ -162,10 +162,10 @@ const AppointmentFormSection = ({
             >
               <option value="">Select time</option>
               {availableSlots().map((slot) => (
-  <option key={slot.start} value={slot.start}>
-    {slot.start} - {slot.end}
-  </option>
-))}
+                <option key={slot.start} value={slot.start}>
+                  {slot.start} - {slot.end}
+                </option>
+              ))}
             </select>
           ) : (
             <input
@@ -206,8 +206,7 @@ const AppointmentFormSection = ({
           htmlFor="notes"
           className="block text-sm font-medium text-slate-700 mb-1.5"
         >
-          Additional Notes{" "}
-          <span className="text-slate-400">(Optional)</span>
+          Additional Notes <span className="text-slate-400">(Optional)</span>
         </label>
 
         <textarea
