@@ -90,7 +90,6 @@ const availableSlots = () => {
 
     const slotMinutes = h * 60 + m;
 
-    // same-day filtering only
     return slotMinutes > nowMinutes;
   });
 };
