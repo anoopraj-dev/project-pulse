@@ -64,13 +64,19 @@ const getAvailableDates = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return activeDoctor?.availability
-    ?.map((day) => day.date)
-    .filter((date) => {
-      const d = new Date(date);
-      d.setHours(0, 0, 0, 0);
-      return d >= today;
-    });
+  return (
+    activeDoctor?.availability
+      ?.map((day) => {
+        const d = new Date(day.date);
+        d.setHours(0, 0, 0, 0);
+        return {
+          raw: day.date,
+          dateObj: d,
+        };
+      })
+      .filter((item) => item.dateObj >= today)
+      .map((item) => item.raw) || []
+  );
 };
 
 const availableSlots = () => {
@@ -86,13 +92,20 @@ const availableSlots = () => {
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   return day.slots.filter((slot) => {
-    const [h, m] = slot.start.split(":").map(Number);
+    if (!slot?.start) return false;
+
+    const time = slot.start.trim();
+
+    const [h, m] = time.split(":").map(Number);
+
+    if (isNaN(h) || isNaN(m)) return false;
 
     const slotMinutes = h * 60 + m;
 
     return slotMinutes > nowMinutes;
   });
 };
+
   const today = new Date().toISOString().split("T")[0];
 
   //------------- amount to pay --------------
