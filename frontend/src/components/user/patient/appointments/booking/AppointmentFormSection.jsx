@@ -7,6 +7,8 @@ const AppointmentFormSection = ({
   availableSlots,
   today,
 }) => {
+  const slots = availableSlots();
+  console.log('available Slots',slots)
 
   return (
     <form className="space-y-6">
