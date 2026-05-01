@@ -82,21 +82,17 @@ const availableSlots = () => {
 
   if (!day?.slots) return [];
 
-  const nowIST = new Date();
-
-  const nowMinutes = nowIST.getHours() * 60 + nowIST.getMinutes();
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   return day.slots.filter((slot) => {
-    const utcDate = new Date(`${formData.date}T${slot.start}:00Z`);
-
-    const istHours = utcDate.getHours();
-    const istMinutes = utcDate.getMinutes();
-
-    const slotMinutes = istHours * 60 + istMinutes;
+    const [h, m] = slot.start.split(":").map(Number);
+    const slotMinutes = h * 60 + m;
 
     return slotMinutes > nowMinutes;
   });
 };
+
   const today = new Date().toISOString().split("T")[0];
 
   //------------- amount to pay --------------
