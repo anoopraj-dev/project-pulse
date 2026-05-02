@@ -115,13 +115,16 @@ const CheckoutSection = ({
               user={user}
               doctorId={formData.doctorId}
               bookingData={formData}
-              onSuccess={(orderId) =>
+              onSuccess={(orderId) =>{
+                console.log(...formData,orderId)
                 handleBooking({
                   ...formData,
                   doctorId: activeDoctor?.doctorId,
                   paymentMethod: "razorpay",
                   orderId,
                 })
+              }
+                
               }
               className="w-full py-3 bg-gradient-to-br from-[#0096C7] to-[#0077B6] text-white rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.99] transition-all"
             />
