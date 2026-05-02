@@ -25,13 +25,14 @@ const calculateDuration = (startTime, endTime = null, fallback = 30) => {
 
 //------------------- Build UTC date ------
 const buildUTCDate = (date, time) => {
-  const local = new Date(`${date}T${time}:00`);
-  return new Date(local.toISOString());
+  return new Date(`${date}T${time}:00+05:30`);
 };
 
 // -------- CREATE ORDER ----------
 export const createOrderService = async (userId, body) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = body;
+
+  console.log('payload recieved in create order',body)
 
   if (!doctorId || !date || !time || !serviceType || !reason) {
     throw new Error("Missing booking fields");
