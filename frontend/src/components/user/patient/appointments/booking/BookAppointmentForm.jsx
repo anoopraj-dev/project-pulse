@@ -133,7 +133,6 @@ const getAvailableDates = () => {
   //--------------------- Handle Book appointment -------------
   const handleBooking = async (payload) => {
     try {
-      console.log(...payload);
       const res = await bookAppointment(payload);
 
       if (res.data?.success) {
