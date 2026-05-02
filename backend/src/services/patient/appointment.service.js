@@ -13,7 +13,6 @@ const buildUTCDate = (date, time) => {
   return new Date(`${date}T${time}:00+05:30`);
 };
 
-//-------- Get Booking Info --------
 // -------- Get Booking Info --------
 export const getBookingInfoService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).lean();

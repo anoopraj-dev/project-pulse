@@ -20,6 +20,7 @@ export const getBookingInfo = async (req, res) => {
 //---------------- Book Appointment ----------------
 export const bookAppointment = async (req, res) => {
   try {
+    console.log("BOOK APPOINTMENT PAYLOAD:", req.body); 
     const { appointment } = await bookAppointmentService(req.body, req.user.id);
     res.status(201).json({
       success: true,
