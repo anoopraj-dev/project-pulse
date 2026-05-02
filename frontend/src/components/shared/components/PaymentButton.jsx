@@ -13,9 +13,6 @@ const PaymentButton = ({
   onSuccess,
 }) => {
   const navigate = useNavigate();
-
-  
-
   const handlePayment = async () => {
     try {
 

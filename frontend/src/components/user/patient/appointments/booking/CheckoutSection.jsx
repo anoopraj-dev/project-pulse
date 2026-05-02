@@ -116,7 +116,6 @@ const CheckoutSection = ({
               doctorId={formData.doctorId}
               bookingData={formData}
               onSuccess={(orderId) =>{
-                console.log(...formData,orderId)
                 handleBooking({
                   ...formData,
                   doctorId: activeDoctor?.doctorId,
