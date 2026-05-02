@@ -8,7 +8,7 @@ const AppointmentFormSection = ({
   today,
 }) => {
   const slots = availableSlots();
-  console.log('available Slots',slots)
+  console.log("available Slots", slots);
 
   return (
     <form className="space-y-6">
@@ -154,40 +154,48 @@ const AppointmentFormSection = ({
             Time <span className="text-red-500">*</span>
           </label>
           {hasBookingInfo ? (
-  <select
-    name="time"
-    value={formData.time}
-    onChange={handleChange}
-    required
-    disabled={!formData.date}
-    className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-  >
-    <option value="">Select time</option>
+            <select
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              required
+              disabled={!formData.date}
+              className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              <option value="">Select time</option>
 
-    {availableSlots()?.map((slot) => (
-      <option key={slot.startAt} value={slot.startAt}>
-  {new Date(slot.startAt).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}
-  {" - "}
-  {new Date(slot.endAt).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}
-</option>
-    ))}
-  </select>
-) : (
-  <input
-    type="time"
-    name="time"
-    value={formData.time}
-    onChange={handleChange}
-    required
-    className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-  />
-)}
+              {availableSlots()?.map((slot) => {
+                const start = new Date(slot.startAt);
+                const end = new Date(slot.endAt);
+
+                return (
+                  <option
+                    key={slot.startAt}
+                    value={start.toTimeString().slice(0, 5)}
+                  >
+                    {start.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {" - "}
+                    {end.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </option>
+                );
+              })}
+            </select>
+          ) : (
+            <input
+              type="time"
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              required
+              className="w-full rounded-sm border border-slate-200 bg-white pl-4 pr-4 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          )}
         </div>
       </div>
 
