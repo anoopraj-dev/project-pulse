@@ -84,12 +84,7 @@ const ViewPatients = () => {
       <div className=" ">
         <PageBanner config={pageBannerConfig.adminPatients}/>
 
-        <div className="mx-auto px-4 mt-6 sm:px-6 lg:px-8">
-          <PatientStatusTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        </div>
+
       </div>
 
       <div className="mx-auto sm:px-6">
@@ -113,7 +108,11 @@ const ViewPatients = () => {
       {/* Content section */}
       <div className="mx-auto pb-6 pt-2 sm:px-6">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+          <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <PatientStatusTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Icon icon="mdi:account-multiple-outline" />

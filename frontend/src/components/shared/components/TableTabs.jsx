@@ -12,7 +12,7 @@ import { Icon } from "@iconify/react";
  */
 const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }) => {
   return (
-    <div className={`flex overflow-x-auto no-scrollbar gap-2 ${className}`}>
+    <div className={`flex gap-1 p-1 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm rounded-xl w-fit mb-5${className}`}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
@@ -20,12 +20,11 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
             className={`
-              flex items-center gap-2 whitespace-nowrap px-3 py-1.5 rounded-lg border
-              text-xs transition-all duration-200
+              flex items-center gap-1.5 px-5 py-2 text-sm font-medium rounded-lg transition-all duration-150
               ${
                 isActive
-                  ? "bg-blue-50 border-blue-200 text-blue-600"
-                  : "bg-white border-gray-200 text-slate-500 hover:bg-gray-50"
+                  ? "bg-[#0096C7] text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
               }
             `}
           >

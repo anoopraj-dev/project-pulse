@@ -23,7 +23,7 @@ const DoctorPaymentTabs = ({ activeTab, setActiveTab, counts = {} }) => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       counts={counts}
-      className="mb-4"
+      className=""
     />
   );
 };
