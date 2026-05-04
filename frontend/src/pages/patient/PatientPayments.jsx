@@ -169,15 +169,15 @@ const filteredSearchResult = results?.filter((payment) => {
           {/* Header band */}
           <PageBanner
             config={pageBannerConfig.patientPayments}
-            activeTab={activeTab}
             isLoading={isLoading}
-            tabsComponent={
-              <PatientPaymentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
+
+          <div className="mx-auto px-4 mt-6 sm:px-6 lg:px-8">
+            <PatientPaymentTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </div>
 
           {/* Search Section */}
           {activeTab !== "book" && (

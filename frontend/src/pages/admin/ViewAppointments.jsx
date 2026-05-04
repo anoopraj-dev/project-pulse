@@ -106,14 +106,14 @@ const ViewAppointments = () => {
     <div className="min-h-screen">
       {/* Header band */}
       <div className="my-2">
-        <PageBanner config={pageBannerConfig.adminAppointments}/>
-          {/* Tabs */}
-          <div className="mt-5">
-            <AdminAppointmentTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-        </div>
+      <PageBanner config={pageBannerConfig.adminAppointments}/>
+
+      <div className="mx-auto px-4 mt-6 sm:px-6 lg:px-8">
+        <AdminAppointmentTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </div>
       </div>
 
       {/* Search Section */}

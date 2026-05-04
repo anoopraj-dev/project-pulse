@@ -116,15 +116,15 @@ const DoctorAppointments = () => {
           {/* Header band */}
           <PageBanner
             config={pageBannerConfig.doctorAppointments}
-            activeTab={activeTab}
             isLoading={isLoading}
-            tabsComponent={
-              <DoctorAppointmentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
+
+          <div className="max-w-7xl mx-auto px-4 mt-6">
+            <DoctorAppointmentTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </div>
 
           {/* Search Section */}
           {activeTab !== "book" && (

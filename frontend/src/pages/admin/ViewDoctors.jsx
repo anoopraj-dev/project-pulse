@@ -76,13 +76,13 @@ const ViewDoctors = () => {
       {/* ---------- Header band ---------- */}
       <div className="my-2">
       <PageBanner config={pageBannerConfig.adminDoctors}/>
-          {/* Tabs */}
-          <div className="mt-5">
-            <DoctorStatusTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-        </div>
+
+      <div className="mx-auto px-4 mt-6 sm:px-6 lg:px-8">
+        <DoctorStatusTabs
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      </div>
         <div className="mx-auto  sm:px-6 lg:px-8">
           <SearchInput
             value={query}

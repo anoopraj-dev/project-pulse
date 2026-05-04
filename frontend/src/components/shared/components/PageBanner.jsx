@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react";
 const PageBanner = ({
   config,
   isLoading,
-  tabsComponent,
 }) => {
   return (
     <div className="w-full bg-white border-b border-gray-100">
@@ -38,12 +37,6 @@ const PageBanner = ({
             )}
           </div>
         </div>
-
-        {tabsComponent && (
-          <div className="mt-8">
-            {tabsComponent}
-          </div>
-        )}
       </div>
     </div>
   );

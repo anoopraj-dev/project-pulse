@@ -82,15 +82,14 @@ const ViewPatients = () => {
     <div className="min-h-screen ">
       {/* Header band */}
       <div className=" ">
-          <PageBanner config={pageBannerConfig.adminPatients}/>
+        <PageBanner config={pageBannerConfig.adminPatients}/>
 
-          {/* Tabs */}
-          <div className="">
-            <PatientStatusTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </div>
+        <div className="mx-auto px-4 mt-6 sm:px-6 lg:px-8">
+          <PatientStatusTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
       </div>
 
       <div className="mx-auto sm:px-6">

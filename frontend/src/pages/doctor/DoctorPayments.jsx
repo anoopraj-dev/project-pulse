@@ -93,15 +93,15 @@ const filteredPayments = payments?.filter((item) => {
           {/* HEADER */}
           <PageBanner
             config={pageBannerConfig.doctorPayments}
-            activeTab={activeTab}
             isLoading={isLoading}
-            tabsComponent={
-              <DoctorPaymentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
+
+          <div className="max-w-7xl mx-auto px-4 mt-6">
+            <DoctorPaymentTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </div>
 
           {/* TABLE */}
           <div className="mx-auto px-4 pb-12 pt-4 sm:px-6 lg:px-8">

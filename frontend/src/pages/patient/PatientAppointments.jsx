@@ -148,14 +148,14 @@ const PatientAppointments = () => {
           {/* Header band */}
           <PageBanner
             config={pageBannerConfig.patientAppointments}
-            activeTab={activeTab}
-            tabsComponent={
-              <PatientAppointmentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
+
+          <div className="mx-auto px-4 mt-6 sm:px-6 lg:px-8">
+            <PatientAppointmentTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </div>
           {/* Search Section */}
           {activeTab !== "book" && (
             <div className="z-10 mx-auto  px-4 pb-2 pt-2 sm:px-6 lg:px-8">
