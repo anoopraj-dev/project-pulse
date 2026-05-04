@@ -129,7 +129,7 @@ const DoctorProfile = () => {
   if (!user) return null;
 
   return (
-    <div className="flex flex-col pb-12">
+    <div className="flex flex-col pb-6">
       <DoctorStatusBanner
         approvalStatus={user?.status}
         submissionCount={user?.submissionCount}

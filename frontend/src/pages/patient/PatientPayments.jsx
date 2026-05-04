@@ -148,9 +148,9 @@ const filteredSearchResult = results?.filter((payment) => {
 
   useEffect(() => {}, [activeTab]);
 
-  const displayedPayments = query.trim()
+  const displayedPayments = (query.trim()
     ? filteredSearchResult
-    : filteredPayments;
+    : filteredPayments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchPaymentsAction.loading;
 
@@ -169,15 +169,10 @@ const filteredSearchResult = results?.filter((payment) => {
           {/* Header band */}
           <PageBanner
             config={pageBannerConfig.patientPayments}
-            activeTab={activeTab}
             isLoading={isLoading}
-            tabsComponent={
-              <PatientPaymentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
+
+
 
           {/* Search Section */}
           {activeTab !== "book" && (
@@ -207,7 +202,11 @@ const filteredSearchResult = results?.filter((payment) => {
           {/* Content section */}
           <div className="mx-auto px-4 pb-12 sm:px-6 lg:px-8">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-              <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <PatientPaymentTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Icon icon="mdi:clipboard-text-outline" />

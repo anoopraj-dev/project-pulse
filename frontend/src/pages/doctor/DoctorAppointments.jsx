@@ -94,9 +94,9 @@ const DoctorAppointments = () => {
     return true;
   });
 
-  const displayedAppointments = query.trim()
+  const displayedAppointments = (query.trim()
     ? filteredSearchResult
-    : filteredAppointments;
+    : filteredAppointments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchAppointmentsAction.loading;
 
@@ -116,19 +116,13 @@ const DoctorAppointments = () => {
           {/* Header band */}
           <PageBanner
             config={pageBannerConfig.doctorAppointments}
-            activeTab={activeTab}
             isLoading={isLoading}
-            tabsComponent={
-              <DoctorAppointmentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
+
 
           {/* Search Section */}
           {activeTab !== "book" && (
-            <div className="mx-auto px-4 pb-2 pt-2 sm:px-6 lg:px-8">
+            <div className="mx-auto py-1 px-1 sm:px-2">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1">
                   <SearchInput
@@ -152,9 +146,13 @@ const DoctorAppointments = () => {
           )}
 
           {/* Content section */}
-          <div className="mx-auto px-4 pt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto py-1 px-1 sm:px-2">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-              <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <DoctorAppointmentTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Icon icon="mdi:clipboard-text-outline" />

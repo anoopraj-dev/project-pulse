@@ -147,7 +147,7 @@ const DoctorWallet = () => {
         <>
           <PageBanner config={pageBannerConfig.doctorWallet} />
 
-          <div className="w-full px-4 pb-16 flex flex-col gap-4 lg:flex-row">
+          <div className="w-full px-4 pb-6 flex flex-col gap-4 lg:flex-row">
             {/* ---------------- BALANCE CARD ---------------- */}
             <div className="w-full lg:w-1/3">
               <div

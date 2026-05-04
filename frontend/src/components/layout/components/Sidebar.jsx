@@ -8,7 +8,12 @@ import SidebarShimmer from "../../ui/loaders/SidebarShimmer";
 const Sidebar = ({ toggleSidebar, config, isOpen }) => {
   const { isLoading } = useUser();
   const location = useLocation();
-  
+
+  const handleItemClick = () => {
+    if (window.innerWidth < 1024) {
+      toggleSidebar(false);
+    }
+  };
 
   if (isLoading) return <SidebarShimmer />;
 
@@ -21,8 +26,9 @@ const Sidebar = ({ toggleSidebar, config, isOpen }) => {
           <SidebarItem
             key={item.path}
             item={item}
-            isActive={location.pathname.startsWith ( item.path)}
+            isActive={location.pathname.startsWith(item.path)}
             isOpen={isOpen}
+            onClick={handleItemClick}
           />
         ))}
       </ul>

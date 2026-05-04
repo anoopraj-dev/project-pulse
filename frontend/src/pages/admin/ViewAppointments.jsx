@@ -96,9 +96,9 @@ const ViewAppointments = () => {
     return true;
   });
 
-  const displayedAppointments = query.trim()
+  const displayedAppointments = (query.trim()
     ? filteredSearchResult
-    : filteredAppointments;
+    : filteredAppointments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchAppointmentsAction.loading;
 
@@ -106,14 +106,9 @@ const ViewAppointments = () => {
     <div className="min-h-screen">
       {/* Header band */}
       <div className="my-2">
-        <PageBanner config={pageBannerConfig.adminAppointments}/>
-          {/* Tabs */}
-          <div className="mt-5">
-            <AdminAppointmentTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-        </div>
+      <PageBanner config={pageBannerConfig.adminAppointments}/>
+
+
       </div>
 
       {/* Search Section */}
@@ -142,10 +137,14 @@ const ViewAppointments = () => {
       )}
 
       {/* Content section */}
-      <div className="mx-auto  pb-12 pt-2 sm:px-6 lg:px-8">
+      <div className="mx-auto  pb-6 pt-2 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <AdminAppointmentTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Icon icon="mdi:clipboard-text-outline" />
                 {activeTab === "upcoming"

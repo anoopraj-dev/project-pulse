@@ -1,5 +1,7 @@
 import { Icon } from "@iconify/react";
 
+import TableTabs from "@/components/shared/components/TableTabs";
+
 const AdminAppointmentTabs = ({ activeTab, setActiveTab, counts = {} }) => {
   const tabs = [
     { key: "all", label: "All", icon: "solar:list-linear" },
@@ -11,51 +13,13 @@ const AdminAppointmentTabs = ({ activeTab, setActiveTab, counts = {} }) => {
   ];
 
   return (
-    <div className="mb-4">
-      <div className="flex overflow-x-auto no-scrollbar gap-2 p-1 bg-slate-100 rounded-xl w-full lg:justify-center">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.key;
-
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`
-                flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-lg
-                text-sm font-medium transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }
-              `}
-            >
-              {/* Icon */}
-              <Icon icon={tab.icon} width="18" height="18" />
-
-              {/* Label */}
-              <span>{tab.label}</span>
-
-              {/* Optional Count */}
-              {counts[tab.key] !== undefined && (
-                <span
-                  className={`
-                    text-xs px-2 py-0.5 rounded-full
-                    ${
-                      isActive
-                        ? "bg-blue-100 text-blue-600"
-                        : "bg-slate-200 text-slate-600"
-                    }
-                  `}
-                >
-                  {counts[tab.key]}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <TableTabs
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      counts={counts}
+      className="mb-4 lg:justify-center"
+    />
   );
 };
 

@@ -75,7 +75,7 @@ const filteredPayments = payments?.filter((item) => {
     default:
       return true;
   }
-});
+})?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const isLoading = fetchPaymentsAction.loading;
 
   return (
@@ -93,22 +93,21 @@ const filteredPayments = payments?.filter((item) => {
           {/* HEADER */}
           <PageBanner
             config={pageBannerConfig.doctorPayments}
-            activeTab={activeTab}
             isLoading={isLoading}
-            tabsComponent={
-              <DoctorPaymentTabs
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
-            }
           />
 
+
+
           {/* TABLE */}
-          <div className="mx-auto px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto pb-2 px-1 sm:px-2">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
 
               {/* HEADER */}
-              <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <DoctorPaymentTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
                 <div className="flex items-center justify-between">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <Icon icon="mdi:cash-multiple" />

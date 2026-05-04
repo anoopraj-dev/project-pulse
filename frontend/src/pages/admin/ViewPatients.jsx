@@ -72,9 +72,9 @@ const ViewPatients = () => {
     (patient) => patient?.status === activeTab
   );
 
-  const displayedPatients = query.trim()
+  const displayedPatients = (query.trim()
     ? results
-    : filteredPatients;
+    : filteredPatients)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchPatientsAction.loading;
 
@@ -82,15 +82,9 @@ const ViewPatients = () => {
     <div className="min-h-screen ">
       {/* Header band */}
       <div className=" ">
-          <PageBanner config={pageBannerConfig.adminPatients}/>
+        <PageBanner config={pageBannerConfig.adminPatients}/>
 
-          {/* Tabs */}
-          <div className="">
-            <PatientStatusTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </div>
+
       </div>
 
       <div className="mx-auto sm:px-6">
@@ -112,9 +106,13 @@ const ViewPatients = () => {
       </div>
 
       {/* Content section */}
-      <div className="mx-auto pb-12 pt-2 sm:px-6">
+      <div className="mx-auto pb-6 pt-2 sm:px-6">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+          <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <PatientStatusTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Icon icon="mdi:account-multiple-outline" />

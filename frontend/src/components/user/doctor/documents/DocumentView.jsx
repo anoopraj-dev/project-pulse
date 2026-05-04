@@ -58,7 +58,7 @@ const DocumentView = ({ professionalInfo, deleteDoc }) => {
 
   return (
     <div className="min-h-screen dark:bg-gray-950">
-      <div className="w-full px-4 py-6 pb-16 sm:px-6 lg:px-8 space-y-5">
+      <div className="w-full px-4 py-6 pb-6 sm:px-6 lg:px-8 space-y-5">
 
         {/* ------- Medical License ------------ */}
         <Card>

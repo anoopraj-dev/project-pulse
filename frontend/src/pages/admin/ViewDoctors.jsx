@@ -68,7 +68,7 @@ const ViewDoctors = () => {
 
   const searchedDoctors = results?.filter((doc) => doc.status === activeTab);
 
-  const displayedDoctors = query.trim() ? searchedDoctors : filteredDoctors;
+  const displayedDoctors = (query.trim() ? searchedDoctors : filteredDoctors)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const isLoading = fetchAllDoctorsAction.loading;
 
   return (
@@ -76,13 +76,8 @@ const ViewDoctors = () => {
       {/* ---------- Header band ---------- */}
       <div className="my-2">
       <PageBanner config={pageBannerConfig.adminDoctors}/>
-          {/* Tabs */}
-          <div className="mt-5">
-            <DoctorStatusTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-        </div>
+
+
         <div className="mx-auto  sm:px-6 lg:px-8">
           <SearchInput
             value={query}
@@ -97,10 +92,14 @@ const ViewDoctors = () => {
       </div>
 
       {/* ---------- Content ---------- */}
-      <div className="mx-auto  pb-12 pt-2 sm:px-6 lg:px-8">
+      <div className="mx-auto  pb-6 pt-2 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           {/* Table header */}
-          <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
+          <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                <DoctorStatusTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <Icon icon="mdi:doctor" className="h-4 w-4 text-sky-600" />
