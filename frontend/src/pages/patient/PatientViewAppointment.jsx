@@ -200,9 +200,11 @@ const PatientViewAppointment = () => {
         </>
       ) : (
         <>
-          <PageBanner config={pageBannerConfig.patientAppointmentView} />
+          <div className="mb-6">
+            <PageBanner config={pageBannerConfig.patientAppointmentView} />
+          </div>
 
-          <div className="mx-auto px-2 pb-16">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-8">
             <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
               {/* Doctor banner */}
               <div className="flex items-center gap-4 border-b border-slate-100 text-sky-600 font-bold px-6 py-5">
