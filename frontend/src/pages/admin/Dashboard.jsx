@@ -231,6 +231,7 @@ const Dashboard = () => {
         <PageBanner config={pageBannerConfig.adminDashboard} />
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div onClick={() => navigate('/admin/doctors')} className="cursor-pointer">
           <StatCard
             label="Doctors"
             value={loadingCounts ? "..." : (counts?.doctorCount ?? 0)}
@@ -239,8 +240,9 @@ const Dashboard = () => {
             icon="mdi:doctor"
             iconBg="bg-blue-50 dark:bg-blue-950"
             iconColor="text-blue-600 dark:text-blue-400"
-          />
+          /></div>
 
+          <div onClick={() => navigate('/admin/patients')} className="cursor-pointer">
           <StatCard
             label="Patients"
             value={loadingCounts ? "..." : (counts?.patientCount ?? 0)}
@@ -249,8 +251,9 @@ const Dashboard = () => {
             icon="mdi:account-group"
             iconBg="bg-purple-50 dark:bg-purple-950"
             iconColor="text-purple-600 dark:text-purple-400"
-          />
+          /></div>
 
+          <div onClick={() => navigate('/admin/appointments')} className="cursor-pointer">
           <StatCard
             label="Appointments"
             value={loadingCounts ? "..." : (counts?.appointmentCount ?? 0)}
@@ -259,8 +262,9 @@ const Dashboard = () => {
             icon="mdi:calendar-check"
             iconBg="bg-emerald-50 dark:bg-emerald-950"
             iconColor="text-emerald-600 dark:text-emerald-400"
-          />
+          /></div>
 
+          <div onClick={() => navigate('/admin/revenue')} className="cursor-pointer">
           <StatCard
             label="Revenue"
             value={
@@ -273,7 +277,7 @@ const Dashboard = () => {
             icon="mdi:cash-multiple"
             iconBg="bg-amber-50 dark:bg-amber-950"
             iconColor="text-amber-600 dark:text-amber-400"
-          />
+          /></div>
         </div>
 
         {/* Row 2 — Charts + Pending Approvals */}
@@ -288,9 +292,12 @@ const Dashboard = () => {
               title="Revenue Overview"
               subtitle="Cashflow (Last 7 days)"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide">
-                  Multi-metric
-                </span>
+                <button
+                  onClick={() => navigate('/admin/revenue')}
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide hover:underline transition"
+                >
+                  View Revenue
+                </button>
               }
             />
 
@@ -424,9 +431,12 @@ const Dashboard = () => {
               title="Pending Approvals"
               subtitle="Doctors awaiting review"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide">
-                  {data?.pendingDoctorsApproval?.length ?? 0} pending
-                </span>
+                <button
+                  onClick={() => navigate('/admin/doctors')}
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide hover:underline transition"
+                >
+                  View All
+                </button>
               }
             />
             <div className="divide-y divide-gray-50 dark:divide-gray-800">
@@ -479,9 +489,12 @@ const Dashboard = () => {
               title="User Growth"
               subtitle="Doctors vs Patients"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900 uppercase tracking-wide">
-                  6 months
-                </span>
+                <button
+                  onClick={() => navigate('/admin/doctors')}
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900 uppercase tracking-wide hover:underline transition"
+                >
+                  View Users
+                </button>
               }
             />
             <div className="px-5 pt-4 pb-3">
@@ -524,9 +537,12 @@ const Dashboard = () => {
               title="Support Center"
               subtitle="Alerts & user queries"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide">
-                  {alerts?.length || 0} new
-                </span>
+                <button
+                  onClick={() => navigate('/admin/support-center')}
+                  className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide hover:underline transition"
+                >
+                  View All
+                </button>
               }
             />
 

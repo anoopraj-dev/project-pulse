@@ -23,7 +23,7 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
               flex items-center gap-1.5 px-5 py-2 text-sm font-medium rounded-lg transition-all duration-150
               ${
                 isActive
-                  ? "bg-[#0096C7] text-white shadow-sm"
+                  ? "bg-amber-500 text-white shadow-sm"
                   : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
               }
             `}
@@ -31,7 +31,7 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
             {tab.icon && (
               <Icon 
                 icon={tab.icon} 
-                className={isActive ? "text-blue-600" : "text-gray-400"} 
+                className={isActive ? "text-white" : "text-gray-400"} 
                 width="14" 
                 height="14" 
               />
@@ -41,7 +41,7 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
             
             {counts[tab.key] !== undefined && (
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                isActive ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-400"
+                isActive ? "bg-amber-600 text-white" : "bg-gray-100 text-gray-400"
               }`}>
                 {counts[tab.key]}
               </span>

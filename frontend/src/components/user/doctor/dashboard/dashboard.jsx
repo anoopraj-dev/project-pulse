@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import {
   LineChart,
@@ -316,10 +317,11 @@ const Dashboard = () => {
   };
 
   const getWidth = (count) => `${(count / total) * 100}%`;
+  const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen dark:bg-gray-950 font-sans">
-      <div className="w-full mx-auto px-4 py-0 pb-6">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
+      <div>
         {/* -------- Stat Cards ------ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
@@ -498,9 +500,12 @@ const Dashboard = () => {
               title="Upcoming"
               subtitle="Next appointments"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900 uppercase tracking-wide">
-                  Today
-                </span>
+                <button
+                  onClick={() => navigate('/doctor/appointments')}
+                  className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 border border-emerald-100 dark:border-emerald-900 uppercase tracking-wide transition"
+                >
+                  View All
+                </button>
               }
             />
 
@@ -583,9 +588,12 @@ const Dashboard = () => {
               title="Recent patients"
               subtitle="Last 6 visits"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900 uppercase tracking-wide">
-                  6 patients
-                </span>
+                <button
+                  onClick={() => navigate('/doctor/appointments')}
+                  className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:underline px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950 border border-purple-100 dark:border-purple-900 uppercase tracking-wide transition"
+                >
+                  View All
+                </button>
               }
             />
 
@@ -648,6 +656,14 @@ const Dashboard = () => {
               iconColor="text-amber-500 dark:text-amber-400"
               title="Patient feedback"
               subtitle="Latest reviews"
+              right={
+                <button
+                  onClick={() => navigate('/doctor/profile')}
+                  className="text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:underline px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 border border-amber-100 dark:border-amber-900 uppercase tracking-wide transition"
+                >
+                  My Profile
+                </button>
+              }
             />
 
             {/* Rating Summary */}

@@ -54,7 +54,7 @@ const DoctorEditProfile = () => {
   }, []);
 
   return (
-    <div className="mt-18 flex flex-col items-center mb-18">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-12 flex flex-col items-center">
       <DynamicForm
         config={doctorEditProfileConfig}
         onSubmit={handleUpdateProfile}

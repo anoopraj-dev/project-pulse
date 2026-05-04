@@ -526,6 +526,14 @@ const Dashboard = () => {
               iconColor="text-blue-600"
               title="Prescriptions"
               subtitle="Recently added records"
+              right={
+                <button
+                  onClick={() => navigate('/patient/appointments')}
+                  className="text-[10px] font-bold text-[#0096C7] hover:underline"
+                >
+                  View All
+                </button>
+              }
             />
 
             <div className="divide-y divide-slate-100">
@@ -583,6 +591,14 @@ const Dashboard = () => {
               iconColor="text-red-600"
               title="Vitals Overview"
               subtitle="Latest health indicators"
+              right={
+                <button
+                  onClick={() => navigate('/patient/doctors')}
+                  className="text-[10px] font-bold text-[#0096C7] hover:underline"
+                >
+                  Find Doctors
+                </button>
+              }
             />
 
             <div className="p-6 grid grid-cols-2 gap-4">
