@@ -167,11 +167,19 @@ const OtpInputs = () => {
   const time = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 
   return (
-    <div className="flex flex-col">
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <p className="mb-6">Enter the OTP sent to your email.</p>
+    <div className="flex flex-col space-y-8 w-full max-w-md">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold text-gray-900 uppercase tracking-tight">Verify Identity</h1>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+          Enter the 6-digit code sent to your email
+        </p>
+      </div>
 
-        <div className="flex gap-2 justify-center mb-4">
+      <form 
+        className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 p-8 sm:p-10 space-y-8" 
+        onSubmit={handleSubmit}
+      >
+        <div className="flex gap-2 sm:gap-3 justify-center">
           {otp.map((value, index) => (
             <input
               key={index}
@@ -181,32 +189,39 @@ const OtpInputs = () => {
               value={value}
               onChange={(e) => handleInputs(e, index)}
               onPaste={index === 0 ? handlePaste : undefined}
-              className="bg-white border border-opacity-20 border-[rgba(117,202,255,0.5)] rounded-md w-12 h-12 text-center text-xl focus:border-blue-500 focus:outline-none"
+              className="w-10 h-12 sm:w-12 sm:h-14 bg-gray-50 border border-gray-100 rounded-md text-center text-xl font-medium text-gray-900 placeholder:font-normal placeholder:text-xs placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all"
             />
           ))}
         </div>
 
-        <PrimaryButton text="Submit OTP" className="w-full" type="submit" />
+        <div className="space-y-4">
+          <PrimaryButton 
+            text="Verify OTP" 
+            className="w-full py-4 text-white bg-[#0096C7] hover:bg-[#0280ab] rounded-md shadow-lg shadow-blue-100 active:scale-[0.98] transition-all text-xs font-bold uppercase tracking-widest" 
+            type="submit" 
+          />
+          
+          <div className="text-center">
+            {!loading ? (
+              <button
+                disabled={secondsLeft > 0}
+                onClick={handleResendOtp}
+                className={`text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                  secondsLeft > 0
+                    ? "text-gray-300 cursor-not-allowed"
+                    : "text-[#0096C7] hover:text-[#0280ab] underline underline-offset-4"
+                }`}
+              >
+                {secondsLeft === 0 ? "Resend Verification Code" : `Resend in ${time}`}
+              </button>
+            ) : (
+              <div className="flex justify-center">
+                <Icon icon="ph:spinner-gap-bold" className="w-5 h-5 text-[#0096C7] animate-spin" />
+              </div>
+            )}
+          </div>
+        </div>
       </form>
-
-      <div className="flex justify-center p-8 text-sm text-gray-600">
-        Didn’t receive the OTP?{" "}
-        {!loading ? (
-          <button
-            disabled={secondsLeft > 0}
-            onClick={handleResendOtp}
-            className={`${
-              secondsLeft > 0
-                ? "text-gray-400 cursor-not-allowed"
-                : "text-blue-500 cursor-pointer"
-            }`}
-          >
-            {secondsLeft === 0 ? "Resend OTP" : time}
-          </button>
-        ) : (
-          <Icon icon="line-md:loading-twotone-loop" className="w-5 h-5" />
-        )}
-      </div>
     </div>
   );
 };

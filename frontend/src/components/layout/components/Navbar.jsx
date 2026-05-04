@@ -12,8 +12,9 @@ import NotificationPanel from "../../shared/components/NotificationPanel.jsx";
 import { socket } from "../../../socket.js";
 import toast from "react-hot-toast";
 
-const Navbar = () => {
-  const { email, role, name, dispatch, isLoading, profilePicture,id } = useUser();
+
+const Navbar = ({ toggleSidebar }) => {
+  const { email, role, name, dispatch, isLoading, profilePicture, id } = useUser();
   const navigate = useNavigate();
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -23,7 +24,7 @@ const Navbar = () => {
   const { signOut } = useClerk();
   const isLoggedIn = !!email;
   const { width } = useWindowSize();
-  const isMobile = width <= 768;
+  const isMobile = width <= 1024;
   const profileImage = user?.imageUrl || profilePicture || '/profile.png';
 
   useEffect(() => {
@@ -31,7 +32,7 @@ const Navbar = () => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setProfileMenuOpen(false);
         setNavMenuOpen(false);
-        setOpenNotification(false)
+        setOpenNotification(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -51,7 +52,6 @@ const Navbar = () => {
         dispatch({ type: "CLEAR_USER" });
         sessionStorage.clear();
         setProfileMenuOpen(false);
-        
         navigate("/signin");
         return;
       }
@@ -59,7 +59,7 @@ const Navbar = () => {
       const res = await logoutUser();
       dispatch({ type: "CLEAR_USER" });
       setProfileMenuOpen(false);
-      if (!res.success) toast.error('Logout failed')
+      if (!res.success) toast.error('Logout failed');
       navigate(role === "admin" ? "/admin/login" : "/signin");
     } catch (error) {
       console.error(error);
@@ -67,99 +67,78 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-60 backdrop-blur-md bg-white/95 shadow-sm border-b border-slate-100">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-3 sm:py-4">
-          {/* Left: Logo + Mobile hamburger */}
+    <nav className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-gray-200 h-14 sm:h-16">
+      <div className="h-full mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+        <div className="h-full flex items-center justify-between gap-4">
+          
+          {/* Brand Section */}
           <div className="flex items-center gap-4">
-            {isMobile && (
-              <Icon
-                icon="mdi:hamburger-menu"
-                className="text-slate-700 cursor-pointer h-6 w-6 hover:text-sky-600 transition-colors"
-                onClick={() => {
+            <button
+              className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => {
+                if (toggleSidebar) {
+                  toggleSidebar();
+                } else {
                   setNavMenuOpen((prev) => !prev);
-                  setProfileMenuOpen(false);
-                }}
+                }
+                setProfileMenuOpen(false);
+              }}
+              aria-label="Menu"
+            >
+              <Icon
+                icon={navMenuOpen ? "ph:x" : "ph:list"}
+                className="h-5 w-5"
               />
-            )}
+            </button>
 
-            <Link to="/" className="block h-8 w-28 sm:h-10 sm:w-48">
+            <Link to="/" className="flex items-center shrink-0">
               <img
                 src={logo}
-                alt="Logo"
-                className="h-full w-full object-contain"
+                alt="Pulse360"
+                className="h-5 w-auto sm:h-6 lg:h-7 object-contain"
               />
             </Link>
+
+            {/* Desktop Links */}
+            {!isLoggedIn && (
+              <div className="hidden md:flex items-center gap-6 ml-8">
+                <Link
+                  to="/"
+                  className="text-xs font-bold text-gray-600 hover:text-[#0096C7] transition-colors"
+                >
+                  Home
+                </Link>
+                <Link 
+                  to='/about-us'
+                  className="text-xs font-bold text-gray-600 hover:text-[#0096C7] transition-colors"
+                >
+                  About
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* Center: Search */}
-          {!isLoggedIn && !isMobile && (
-            <div className="flex-1 max-w-md mx-8">
-              <div className="relative">
-                <Icon
-                  icon="mdi:magnify"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400"
-                />
-                <input
-                  type="text"
-                  placeholder="Search doctors, services..."
-                  className="
-                    w-full pl-10 pr-4 py-2.5 text-sm
-                    rounded-2xl border border-slate-200
-                    bg-slate-50
-                    focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent
-                    transition-all
-                  "
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Right: Nav + Profile */}
-          {!isLoading && (
-            <div className="flex items-center gap-2 sm:gap-4">
-              {/* Desktop nav */}
-              {!isLoggedIn && !isMobile && (
-                <div className="hidden md:flex items-center gap-2">
-                  <Link
-                    to="/"
-                    className="px-3 py-2 text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
-                  >
-                    Home
-                  </Link>
-                  <Link to='/about-us'
-                  className="px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all">
-                    About
-                  </Link>
-      
-                </div>
-              )}
-
-              {/* Auth buttons */}
-              {!isLoggedIn ? (
-                <>
-                  <Link
-                    to="/signin"
-                    className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/admin/login"
-                    className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
-                  >
-                    Admin
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 rounded-xl transition-all shadow-sm"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              ) : (
-                <div ref={menuRef} className="relative flex items-center gap-3">
-                  <div className="relative">
+          {/* Action Section */}
+          <div className="flex items-center gap-4">
+            {!isLoading && (
+              <>
+                {!isLoggedIn ? (
+                  <div className="flex items-center gap-2 sm:gap-4">
+                    <Link
+                      to="/signin"
+                      className="hidden sm:block text-xs font-bold text-gray-700 hover:text-[#0096C7] px-3 py-2 transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="bg-[#0096C7] hover:bg-[#007da6] text-white text-[11px] sm:text-xs font-bold px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg shadow-sm transition-all active:scale-95 uppercase tracking-wide"
+                    >
+                      Join Now
+                    </Link>
+                  </div>
+                ) : (
+                  <div ref={menuRef} className="flex items-center gap-2 sm:gap-4">
                     <NotificationBell
                       onClick={() => {
                         setOpenNotification((prev) => !prev);
@@ -168,110 +147,86 @@ const Navbar = () => {
                     />
 
                     {openNotification && (
-                      <div className="absolute right-0 top-12 z-50">
+                      <div className="absolute right-4 top-full mt-2 w-80 sm:w-96 z-[110]">
                         <NotificationPanel setOpenNotification={setOpenNotification}/>
                       </div>
                     )}
-                  </div>
 
-                  <div
-                    className="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-slate-50 rounded-xl transition-colors"
-                    onClick={() => setProfileMenuOpen((prev) => !prev)}
-                  >
-                    {profileImage ? (
-                      <img
-                        src={`${profileImage}?t=${Date.now()}`}
-                        alt="Profile"
-                        className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center ring-2 ring-slate-200">
-                        <span className="text-sm font-semibold text-white">
-                          {name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                    {!isMobile && (
-                      <span className="hidden sm:block text-sm font-semibold text-slate-900 truncate max-w-[120px]">
-                        {name}
-                      </span>
-                    )}
-                    <Icon
-                      icon="mdi:chevron-down"
-                      className="h-4 w-4 text-slate-500"
-                    />
-                  </div>
-
-                  {/* Profile dropdown */}
-                  {profileMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-2xl shadow-lg py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="px-4 py-2 text-xs text-slate-500 border-b border-slate-100">
-                        {email}
-                      </div>
+                    <div className="relative">
                       <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-2"
+                        className="flex items-center gap-2 p-1 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-100 transition-all"
+                        onClick={() => setProfileMenuOpen((prev) => !prev)}
                       >
-                        <Icon icon="mdi:logout" className="h-4 w-4" />
-                        Logout
+                        <img
+                          src={profileImage}
+                          alt={name}
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200"
+                        />
+                        <Icon
+                          icon="ph:caret-down"
+                          className={`h-3 w-3 text-gray-400 hidden sm:block transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`}
+                        />
                       </button>
+
+                      {/* Dropdown */}
+                      {profileMenuOpen && (
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-[110]">
+                          <div className="px-4 py-2 border-b border-gray-100">
+                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tight">Account</p>
+                            <p className="text-xs font-semibold text-gray-700 truncate">{name}</p>
+                          </div>
+                          
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <Icon icon="ph:sign-out" className="h-4 w-4" />
+                            Logout
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Mobile bottom nav */}
-        {navMenuOpen && isMobile && (
-          <div className="md:hidden bg-white/95 backdrop-blur border-t border-slate-100 shadow-sm">
-            <div className="flex flex-col items-center py-4 space-y-3 px-4">
-              <Link
-                to="/"
-                onClick={() => setNavMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
-              >
-                <Icon icon="mdi:home" className="h-5 w-5" />
-                Home
-              </Link>
-              <span className="flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all cursor-default">
-                <Icon icon="mdi:information" className="h-5 w-5" />
-                About
-              </span>
-
-              {!isLoggedIn ? (
-                <>
-                  <Link
-                    to="/signin"
-                    onClick={() => setNavMenuOpen(false)}
-                    className="w-full text-center px-4 py-2 text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/admin/login"
-                    onClick={() => setNavMenuOpen(false)}
-                    className="w-full text-center px-4 py-2 text-sm font-medium text-slate-700 hover:text-sky-600 hover:bg-sky-50 rounded-xl transition-all"
-                  >
-                    Admin
-                  </Link>
-                </>
-              ) : (
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-700 hover:to-cyan-600 rounded-xl transition-all shadow-sm"
-                >
-                  Logout
-                </button>
-              )}
-            </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {navMenuOpen && !isLoggedIn && !toggleSidebar && (
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-xl py-4 px-4 flex flex-col gap-1">
+          <Link
+            to="/"
+            onClick={() => setNavMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+          >
+            <Icon icon="ph:house" className="h-5 w-5 text-gray-400" />
+            Home
+          </Link>
+          <Link
+            to="/about-us"
+            onClick={() => setNavMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+          >
+            <Icon icon="ph:info" className="h-5 w-5 text-gray-400" />
+            About Us
+          </Link>
+          <Link
+            to="/signin"
+            onClick={() => setNavMenuOpen(false)}
+            className="sm:hidden flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+          >
+            <Icon icon="ph:sign-in" className="h-5 w-5 text-gray-400" />
+            Sign In
+          </Link>
+        </div>
+      )}
     </nav>
   );
 };
+
 
 export default Navbar;
 

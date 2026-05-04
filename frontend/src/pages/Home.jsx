@@ -135,12 +135,13 @@ const Home = () => {
   return val + "+";
 };
 
+
   return (
-    <div className="h-root min-h-screen bg-slate-50 font-[Georgia,serif]">
+    <div className="h-root min-h-screen bg-slate-50 font-[Georgia,serif] overflow-x-hidden">
       <GlobalStyles />
 
       {/* ------------ Hero Section ------------ */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-20 sm:pt-24 lg:pt-0">
         <div
           className="absolute inset-0"
           style={{
@@ -160,7 +161,7 @@ const Home = () => {
 
         {/* Blobs */}
         <motion.div
-          className="absolute -top-48 -right-32 w-[700px] h-[700px] rounded-full pointer-events-none"
+          className="absolute -top-48 -right-32 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] lg:w-[700px] lg:h-[700px] rounded-full pointer-events-none"
           style={{
             background:
               "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)",
@@ -169,7 +170,7 @@ const Home = () => {
           {...floatY(14, 7)}
         />
         <motion.div
-          className="absolute -bottom-28 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none"
+          className="absolute -bottom-28 -left-24 w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px] rounded-full pointer-events-none"
           style={{
             background:
               "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)",
@@ -178,16 +179,16 @@ const Home = () => {
           {...floatYReverse(14, 9)}
         />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-20 flex items-center justify-between gap-12">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
           <motion.div
-            className="flex-1 min-w-0 space-y-7"
+            className="flex-1 w-full space-y-6 sm:space-y-8 text-center lg:text-left"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
             <motion.div
               variants={staggerChild}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[11px] font-bold tracking-[.12em] uppercase"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[10px] sm:text-[11px] font-bold tracking-[.12em] uppercase"
               style={{
                 background: "rgba(0,150,199,.12)",
                 borderColor: "rgba(0,150,199,.3)",
@@ -205,10 +206,10 @@ const Home = () => {
             <motion.h1
               variants={staggerChild}
               {...simpleHover}
-              className="font-[Georgia] text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.09] "
+              className="font-[Georgia] text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.1] sm:leading-[1.09]"
             >
               Care that fits
-              <br />
+              <br className="hidden sm:block" />
               your&nbsp;
               <em className="not-italic" style={{ color: "#48cae4" }}>
                 lifestyle
@@ -218,7 +219,7 @@ const Home = () => {
             <motion.p
               variants={staggerChild}
               {...simpleHover}
-              className="text-[1.05rem] leading-relaxed max-w-[480px]"
+              className="text-base sm:text-[1.05rem] leading-relaxed max-w-lg mx-auto lg:mx-0"
               style={{ color: "rgba(255,255,255,.55)" }}
             >
               {welcomeText}
@@ -227,15 +228,15 @@ const Home = () => {
             <motion.div
               variants={staggerChild}
               {...simpleHover}
-              className="flex flex-wrap gap-3"
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2"
             >
               <PrimaryBtn onClick={() => navigate("/signin")}>
                 Find your doctor <ArrowRight />
               </PrimaryBtn>
               <motion.button
-                className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold border transition-all"
                 style={{
-                  border: "1.5px solid rgba(255,255,255,.18)",
+                  borderColor: "rgba(255,255,255,.18)",
                   color: "rgba(255,255,255,.65)",
                 }}
                 whileHover={{
@@ -243,7 +244,6 @@ const Home = () => {
                   color: "#fff",
                 }}
                 whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2 }}
                 onClick={() => navigate("/about-us")}
               >
                 How it works
@@ -252,17 +252,17 @@ const Home = () => {
 
             <motion.div
               variants={staggerChild}
-              className="flex justify-center gap-10 pt-6 border-t"
+              className="flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10 pt-8 sm:pt-10 border-t"
               style={{ borderColor: "rgba(255,255,255,.1)" }}
             >
               {statsData.length > 0 &&
                 statsData.map((stat, i) => (
-                  <div key={stat.label}>
-                    <div className="h-serif text-2xl font-bold text-white">
+                  <div key={stat.label} className="text-center lg:text-left">
+                    <div className="h-serif text-xl sm:text-2xl font-bold text-white">
                       {formatStat(stats[i], i)}
                     </div>
                     <div
-                      className="text-[10px] uppercase tracking-widest mt-0.5"
+                      className="text-[9px] sm:text-[10px] uppercase tracking-widest mt-1"
                       style={{ color: "rgba(255,255,255,.38)" }}
                     >
                       {stat.label}
@@ -273,24 +273,22 @@ const Home = () => {
           </motion.div>
 
           {/*---------- Right card ----------------- */}
-
           <motion.div
-            className="hidden lg:flex shrink-0 items-center justify-center lg:w-[650px] lg:aspect-square relative"
+            className="hidden lg:flex shrink-0 items-center justify-center lg:w-[500px] xl:w-[650px] lg:aspect-square relative"
             variants={slideInRight}
             initial="hidden"
             animate="visible"
             custom={0.5}
           >
-            {/* Heart */}
             <Heart />
           </motion.div>
         </div>
 
-        <div className="h-wave absolute bottom-0 left-0 right-0">
+        <div className="absolute bottom-0 left-0 right-0">
           <svg
             viewBox="0 0 1440 60"
             preserveAspectRatio="none"
-            style={{ width: "100%", height: 60 }}
+            className="w-full h-8 sm:h-12 md:h-16"
           >
             <path
               d="M0,60 C480,0 960,0 1440,60 L1440,60 L0,60 Z"
@@ -300,39 +298,41 @@ const Home = () => {
         </div>
       </section>
 
-      {/* -------------- Healthier tommorow --------------- */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-10 py-20">
-        <div className="grid md:grid-cols-2 gap-14 items-center">
+      {/* -------------- Healthier tomorrow --------------- */}
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
+        <div className="grid lg:grid-cols-2 gap-12 sm:gap-20 items-center">
           <motion.div
-            className="space-y-6"
+            className="space-y-6 sm:space-y-8 order-2 lg:order-1 text-center lg:text-left"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
           >
-            <motion.p
-              variants={staggerChild}
-              className="text-[11px] font-bold tracking-[.14em] uppercase"
-              style={{ color: "#0096C7" }}
-            >
-              Our promise
-            </motion.p>
-            <motion.h2
-              variants={staggerChild}
-              className="h-serif text-3xl md:text-4xl font-bold text-slate-900 leading-tight"
-            >
-              A Healthier Tomorrow
-              <br />
-              <em className="not-italic" style={{ color: "#0096C7" }}>
-                Starts Here
-              </em>
-            </motion.h2>
-            <motion.p
-              variants={staggerChild}
-              className="text-slate-500 text-base leading-relaxed"
-            >
-              {welcomeText}
-            </motion.p>
+            <div className="space-y-4 sm:space-y-6">
+              <motion.p
+                variants={staggerChild}
+                className="text-[11px] font-bold tracking-[.14em] uppercase"
+                style={{ color: "#0096C7" }}
+              >
+                Our promise
+              </motion.p>
+              <motion.h2
+                variants={staggerChild}
+                className="h-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight"
+              >
+                A Healthier Tomorrow
+                <br />
+                <em className="not-italic" style={{ color: "#0096C7" }}>
+                  Starts Here
+                </em>
+              </motion.h2>
+              <motion.p
+                variants={staggerChild}
+                className="text-slate-500 text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0"
+              >
+                {welcomeText}
+              </motion.p>
+            </div>
             <motion.div variants={staggerChild}>
               <PrimaryBtn onClick={() => navigate("/signup")}>
                 Find your doctor <ArrowRight />
@@ -341,7 +341,7 @@ const Home = () => {
           </motion.div>
 
           <motion.div
-            className="relative"
+            className="relative order-1 lg:order-2"
             variants={slideInRight}
             initial="hidden"
             whileInView="visible"
@@ -349,13 +349,13 @@ const Home = () => {
             custom={0.15}
           >
             <div
-              className="absolute -top-4 -right-4 w-full h-full rounded-3xl border-2 border-dashed opacity-30 pointer-events-none"
+              className="absolute -top-4 -right-4 w-full h-full rounded-3xl border-2 border-dashed opacity-30 pointer-events-none hidden sm:block"
               style={{ borderColor: "#0096C7" }}
             />
             <img
               src="/banner.webp"
-              alt="Banner"
-              className="relative w-full rounded-3xl object-cover shadow-2xl"
+              alt="Healthcare Banner"
+              className="w-full rounded-3xl object-cover shadow-2xl relative z-10"
               style={{ boxShadow: "0 24px 60px rgba(0,150,199,.2)" }}
             />
           </motion.div>
@@ -364,12 +364,12 @@ const Home = () => {
 
       {/* ------------- Stats display -------------------- */}
       <section
-        className="py-20"
+        className="py-16 sm:py-24"
         style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}
       >
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <motion.div
-            className="text-center mb-14 space-y-2"
+            className="text-center mb-12 sm:mb-20 space-y-3"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -384,7 +384,7 @@ const Home = () => {
             </motion.p>
             <motion.h2
               variants={staggerChild}
-              className="h-serif text-3xl md:text-4xl font-bold text-slate-900"
+              className="h-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900"
             >
               Trusted By{" "}
               <em className="not-italic" style={{ color: "#0096C7" }}>
@@ -393,14 +393,14 @@ const Home = () => {
             </motion.h2>
             <motion.p
               variants={staggerChild}
-              className="text-slate-500 text-sm"
+              className="text-slate-500 text-sm sm:text-base"
             >
               Real results from real users
             </motion.p>
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-3 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 lg:gap-12"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -410,23 +410,21 @@ const Home = () => {
               <motion.div
                 key={stat.label}
                 variants={staggerChild}
-               
-                className="bg-white rounded-2xl p-6 text-center border border-slate-100 cursor-default"
-                style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}
+                className="bg-white rounded-3xl p-8 text-center border border-slate-100 shadow-sm transition-all hover:shadow-md cursor-default"
               >
                 <div
-                  className="w-14 h-14 mx-auto mb-4 rounded-xl flex items-center justify-center transition-all duration-300"
+                  className="w-16 h-16 mx-auto mb-6 rounded-2xl flex items-center justify-center"
                   style={{ background: "#ddf1f8" }}
                 >
                   <Icon
                     icon={stat.icon}
-                    style={{ color: "#0096C7", fontSize: "1.5rem" }}
+                    className="text-3xl text-[#0096C7]"
                   />
                 </div>
-                <div className="h-serif text-2xl font-bold text-slate-900">
+                <div className="h-serif text-3xl font-bold text-slate-900">
                   {formatStat(stats[i], i)}
                 </div>
-                <p className="text-xs text-slate-500 mt-1 font-medium">
+                <p className="text-sm text-slate-500 mt-2 font-medium tracking-wide">
                   {stat.label}
                 </p>
               </motion.div>
@@ -436,9 +434,9 @@ const Home = () => {
       </section>
 
       {/* ----------------- Why Pulse360 */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-10 py-20">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
         <motion.div
-          className="text-center mb-12 space-y-2"
+          className="text-center mb-12 sm:mb-16 space-y-3"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
@@ -453,7 +451,7 @@ const Home = () => {
           </motion.p>
           <motion.h2
             variants={staggerChild}
-            className="h-serif text-3xl md:text-4xl font-bold text-slate-900"
+            className="h-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900"
           >
             Why{" "}
             <em className="not-italic" style={{ color: "#0096C7" }}>
@@ -463,7 +461,7 @@ const Home = () => {
         </motion.div>
 
         <motion.div
-          className="grid md:grid-cols-2 gap-5"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10"
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
@@ -495,23 +493,22 @@ const Home = () => {
               key={i}
               variants={staggerChild}
               {...hoverLift}
-              className="h-why-card flex items-start gap-5 bg-white p-6 rounded-2xl border border-slate-100 cursor-default"
-              style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}
+              className="flex items-start gap-6 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm cursor-default"
             >
               <div
-                className="h-why-icon w-14 h-14 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
                 style={{ background: "#ddf1f8" }}
               >
                 <Icon
                   icon={item.icon}
-                  style={{ color: "#0096C7", fontSize: "1.5rem" }}
+                  className="text-2xl text-[#0096C7]"
                 />
               </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-slate-900">
                   {item.title}
                 </h3>
-                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                <p className="text-sm text-slate-500 leading-relaxed">
                   {item.text}
                 </p>
               </div>
@@ -522,13 +519,13 @@ const Home = () => {
 
       {/* --------------- About ---------------------- */}
       <section
-        className="py-20"
+        className="py-16 sm:py-24"
         style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}
       >
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
-          <div className="grid md:grid-cols-2 gap-14 items-center">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
+          <div className="grid lg:grid-cols-2 gap-14 sm:gap-20 items-center">
             <motion.div
-              className="relative"
+              className="relative order-2 lg:order-1"
               variants={scaleIn}
               initial="hidden"
               whileInView="visible"
@@ -536,77 +533,67 @@ const Home = () => {
               custom={0}
             >
               <div
-                className="absolute -bottom-4 -left-4 w-full h-full rounded-3xl border-2 border-dashed opacity-30 pointer-events-none"
+                className="absolute -bottom-4 -left-4 w-full h-full rounded-3xl border-2 border-dashed opacity-30 pointer-events-none hidden sm:block"
                 style={{ borderColor: "#0096C7" }}
               />
               <img
                 src="/connection.webp"
                 alt="Healthcare connection"
-                className="relative w-full rounded-3xl object-cover shadow-2xl"
+                className="w-full rounded-3xl object-cover shadow-2xl relative z-10"
                 style={{ boxShadow: "0 24px 60px rgba(0,150,199,.18)" }}
               />
             </motion.div>
 
             <motion.div
-              className="space-y-6"
+              className="space-y-6 sm:space-y-8 order-1 lg:order-2 text-center lg:text-left"
               variants={staggerContainer}
               initial="hidden"
               whileInView="visible"
               viewport={viewportOnce}
             >
-              <motion.p
-                variants={staggerChild}
-                className="text-[11px] font-bold tracking-[.14em] uppercase"
-                style={{ color: "#0096C7" }}
-              >
-                Who we are
-              </motion.p>
-              <motion.h2
-                variants={staggerChild}
-                className="h-serif text-3xl md:text-4xl font-bold text-slate-900 leading-tight"
-              >
-                About Our{" "}
-                <em className="not-italic" style={{ color: "#0096C7" }}>
-                  Mission
-                </em>
-              </motion.h2>
-              <motion.div variants={staggerChild} className="space-y-4">
+              <div className="space-y-4">
+                <motion.p
+                  variants={staggerChild}
+                  className="text-[11px] font-bold tracking-[.14em] uppercase"
+                  style={{ color: "#0096C7" }}
+                >
+                  Who we are
+                </motion.p>
+                <motion.h2
+                  variants={staggerChild}
+                  className="h-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight"
+                >
+                  About Our{" "}
+                  <em className="not-italic" style={{ color: "#0096C7" }}>
+                    Mission
+                  </em>
+                </motion.h2>
+              </div>
+              
+              <motion.div variants={staggerChild} className="space-y-4 text-left">
                 {[aboutUs[0], aboutUs[1]].map((text, i) => (
                   <motion.div
                     key={i}
                     {...hoverLiftSubtle}
-                    className="bg-white p-5 rounded-2xl border border-slate-100"
-                    style={{ boxShadow: "0 2px 12px rgba(0,150,199,.07)" }}
+                    className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-4">
                       <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1"
                         style={{ background: "#ddf1f8" }}
                       >
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 10 10"
-                          fill="none"
-                        >
-                          <path
-                            d="M2 5l2.5 2.5L8 3"
-                            stroke="#0096C7"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                        <Icon icon="mdi:check-bold" className="text-[10px] text-[#0096C7]" />
                       </div>
-                      <p className="text-sm text-slate-600 leading-relaxed">
+                      <p className="text-sm text-slate-600 leading-relaxed font-medium">
                         {text}
                       </p>
                     </div>
                   </motion.div>
                 ))}
               </motion.div>
+              
               <motion.div variants={staggerChild}>
-                <PrimaryBtn onClick={() => navigate("about-us")}>
+                <PrimaryBtn onClick={() => navigate("/about-us")}>
                   Learn more <ArrowRight />
                 </PrimaryBtn>
               </motion.div>
@@ -616,9 +603,9 @@ const Home = () => {
       </section>
 
       {/* -------------------- Footer CTA-------------------- */}
-      <section className="px-6 lg:px-10 py-14">
+      <section className="px-6 lg:px-16 py-16 sm:py-20">
         <motion.div
-          className="max-w-6xl mx-auto rounded-3xl px-10 py-12 flex flex-wrap items-center justify-between gap-8"
+          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
           style={{
             background:
               "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
@@ -630,32 +617,31 @@ const Home = () => {
           viewport={viewportOnce}
           custom={0}
         >
-          <div>
-            <h2 className="h-serif text-3xl md:text-4xl font-bold text-white leading-tight">
+          <div className="text-center lg:text-left space-y-4">
+            <h2 className="h-serif text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
               Ready to take charge
-              <br />
+              <br className="hidden sm:block" />
               of your{" "}
               <em className="not-italic" style={{ color: "#90e0ef" }}>
                 health?
               </em>
             </h2>
             <p
-              className="text-sm mt-2"
-              style={{ color: "rgba(255,255,255,.5)" }}
+              className="text-base sm:text-lg opacity-60 font-medium"
+              style={{ color: "rgba(255,255,255,.8)" }}
             >
               Join millions who trust Pulse360 every day.
             </p>
           </div>
           <motion.button
-            className="flex items-center gap-2.5 px-8 py-4 rounded-full font-bold text-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-full font-bold text-base transition-all"
             style={{
               background: "#fff",
               color: "#0096C7",
               boxShadow: "0 4px 20px rgba(0,0,0,.12)",
             }}
-            whileHover={{ y: -2, boxShadow: "0 8px 28px rgba(0,0,0,.18)" }}
+            whileHover={{ y: -3, boxShadow: "0 12px 32px rgba(0,0,0,.18)" }}
             whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.2 }}
             onClick={() => navigate("/signup")}
           >
             Get Started Now <ArrowRight />
@@ -666,6 +652,7 @@ const Home = () => {
       <Footer />
     </div>
   );
+
 };
 
 export default Home;

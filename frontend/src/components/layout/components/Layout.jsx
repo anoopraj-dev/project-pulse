@@ -14,24 +14,24 @@ import ProtectedFooter from "./ProtectedFooter";
 
 const NAVBAR_HEIGHT = "h-16"; // navbar height
 
+
 const Layout = () => {
   const { role } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      const device = getDeviceTypes(window.innerWidth);
-
-      if (device === "desktop") {
+      // Desktop: Sidebar open by default
+      // Tablet/Mobile: Sidebar closed by default
+      if (window.innerWidth >= 1024) {
         setIsSidebarOpen(true);
       } else {
         setIsSidebarOpen(false);
       }
     };
 
-    handleResize(); // run once on mount
+    handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -42,52 +42,62 @@ const Layout = () => {
         ? doctorSidebarMenu
         : adminSidebarMenu;
 
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
-      {/* Navbar */}
-      <header className={`fixed top-0 left-0 right-0 z-50 ${NAVBAR_HEIGHT}`}>
-        <Navbar toggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
+      {/* Navbar - Fixed top */}
+      <header className="fixed top-0 left-0 right-0 z-[100] h-14 sm:h-16">
+        <Navbar toggleSidebar={toggleSidebar} />
       </header>
 
-      {/* Sidebar */}
-      <aside
-        className={`
-    fixed z-40
-    top-[4.9rem] left-0 bottom-0
-     md:top-[7rem] sm:top-[5rem]
-    md:left-6 sm:left-2
-    bottom-2 sm:bottom-4
-
-    flex flex-col
-    bg-[#0096C7] text-white
-    transition-all duration-300
-    shadow-2xl
-    rounded-2xl
-    overflow-hidden
-    backdrop-blur-sm
-
-    ${isSidebarOpen ? "w-60 sm:w-64" : "w-16 sm:w-20"}
-  `}
-      >
-        <Sidebar
-          config={config}
-          isOpen={isSidebarOpen}
-          toggleSidebar={setIsSidebarOpen}
+      {/* Content Wrapper */}
+      <div className="flex flex-1 pt-14 sm:pt-16 overflow-hidden relative">
+        
+        {/* Mobile Sidebar Overlay */}
+        <div 
+          className={`
+            fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] lg:hidden transition-all duration-500
+            ${isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
+          `}
+          onClick={() => setIsSidebarOpen(false)}
         />
-      </aside>
 
-      {/* Main content */}
-      <main
-        className={`
-    mt-20 h-[calc(100vh-4rem)] overflow-y-auto
-    transition-all duration-300
-    px-2 sm:px-4 md:px-6 lg:px-8 xl:px-32
-    ${isSidebarOpen ? "ml-60 sm:ml-64" : "ml-16 sm:ml-20"}
-  `}
-      >
-        <Outlet />
-        <ProtectedFooter />
-      </main>
+        {/* Sidebar - Modern transitions */}
+        <aside
+          className={`
+            fixed lg:static z-[100] lg:z-40
+            top-0 lg:top-auto bottom-0 left-0
+            bg-[#0096C7] text-white
+            transition-all duration-300 ease-in-out
+            shadow-2xl lg:shadow-none
+            ${isSidebarOpen ? "translate-x-0 w-72 lg:w-64" : "-translate-x-full lg:translate-x-0 lg:w-20"}
+          `}
+        >
+          {/* Top padding on mobile to clear fixed navbar if needed */}
+          <div className="h-full pt-14 sm:pt-16 lg:pt-0">
+            <Sidebar
+              config={config}
+              isOpen={isSidebarOpen}
+              toggleSidebar={setIsSidebarOpen}
+            />
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50">
+          <div className="min-h-full flex flex-col p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto w-full space-y-8 flex-1">
+              <Outlet />
+            </div>
+            
+            {/* Protected Footer within main scroll */}
+            <div className="max-w-7xl mx-auto w-full border-t border-slate-200 mt-12 pt-8">
+              <ProtectedFooter />
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

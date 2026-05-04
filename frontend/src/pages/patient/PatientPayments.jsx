@@ -181,7 +181,7 @@ const filteredSearchResult = results?.filter((payment) => {
 
           {/* Search Section */}
           {activeTab !== "book" && (
-        <div className="mx-auto px-4 pb-2 pt-2 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 pb-2 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
               <SearchInput
@@ -205,7 +205,7 @@ const filteredSearchResult = results?.filter((payment) => {
       )}
 
           {/* Content section */}
-          <div className="mx-auto  px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto px-4 pb-12 sm:px-6 lg:px-8">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
               <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

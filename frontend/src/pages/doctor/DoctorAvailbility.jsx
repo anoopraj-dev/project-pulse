@@ -244,7 +244,7 @@ const DoctorAvailability = () => {
       </div>
 
       {!user?.isBlocked && (
-        <div className="px-4 sm:px-6 mt-6 space-y-5">
+        <div className="px-4 sm:px-6 pb-16 space-y-5">
           {/* Date selector */}
           <div>
             <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2.5">

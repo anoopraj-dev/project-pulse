@@ -321,7 +321,7 @@ const Dashboard = () => {
     <div className="min-h-screen dark:bg-gray-950 font-sans">
       <div className="w-full mx-auto px-4 py-6 pb-16">
         {/* -------- Stat Cards ------ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
             label="Today's consultations"
             value={loadingStats ? "..." : (stats?.todayConsultations ?? 0)}
@@ -590,7 +590,7 @@ const Dashboard = () => {
             />
 
             {/* -------- Recent patients --------- */}
-            <div className="grid grid-cols-2 divide-x divide-y divide-gray-50 dark:divide-gray-800">
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-x divide-y divide-gray-50 dark:divide-gray-800">
               {loadingPatients ? (
                 <p className="px-4 py-3 text-xs text-gray-400">Loading...</p>
               ) : recentPatients.length === 0 ? (

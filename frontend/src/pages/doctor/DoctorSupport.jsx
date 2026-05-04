@@ -175,7 +175,7 @@ const DoctorSupportPage = () => {
     <div className="min-h-screen dark:bg-gray-950">
       <PageBanner config={pageBannerConfig.doctorSupportCenter} />
 
-      <div className="w-full px-4 py-6 pb-16">
+      <div className="w-full px-4 pb-16">
 
         {/* MAIN TABS */}
         <div className="flex gap-1 p-1 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm rounded-xl w-fit mb-5">

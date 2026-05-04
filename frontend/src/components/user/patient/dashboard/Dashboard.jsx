@@ -248,11 +248,28 @@ const Dashboard = () => {
     year: "numeric",
   });
 
+
   return (
-    <div className="min-h-screen font-sans">
-      <div className="w-full mx-auto px-4 py-6 pb-16">
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <div className="min-h-screen bg-slate-50">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-16">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-slate-900">{greeting}, {name?.split(' ')[0]}</h1>
+            <p className="text-sm text-slate-500 font-medium">{formattedDate}</p>
+          </div>
+          <button 
+            onClick={() => navigate('/patient/appointments')}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0096C7] text-white text-sm font-bold rounded-xl hover:bg-[#0077a1] transition-all shadow-lg shadow-sky-500/20 active:scale-95"
+          >
+            <Icon icon="ph:calendar-plus-bold" className="h-4 w-4" />
+            Book Appointment
+          </button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             label="Appointments"
             value={loadingStats ? "..." : (stats?.totalAppointments ?? 0)}
@@ -270,9 +287,9 @@ const Dashboard = () => {
                     ? "down"
                     : "neutral"
             }
-            icon="mdi:calendar"
-            iconBg="bg-blue-50 dark:bg-blue-950"
-            iconColor="text-blue-600 dark:text-blue-400"
+            icon="ph:calendar-bold"
+            iconBg="bg-blue-50"
+            iconColor="text-blue-600"
           />
 
           <StatCard
@@ -280,9 +297,9 @@ const Dashboard = () => {
             value={loadingStats ? "..." : (stats?.consultations ?? 0)}
             change="Completed sessions"
             changeType="neutral"
-            icon="mdi:stethoscope"
-            iconBg="bg-purple-50 dark:bg-purple-950"
-            iconColor="text-purple-600 dark:text-purple-400"
+            icon="ph:stethoscope-bold"
+            iconBg="bg-purple-50"
+            iconColor="text-purple-600"
           />
 
           <StatCard
@@ -303,12 +320,12 @@ const Dashboard = () => {
               !stats
                 ? "neutral"
                 : stats.expenses > stats.lastMonthExpenses
-                  ? "down" // more expense = bad
+                  ? "down" 
                   : "up"
             }
-            icon="mdi:currency-inr"
-            iconBg="bg-amber-50 dark:bg-amber-950"
-            iconColor="text-amber-600 dark:text-amber-400"
+            icon="ph:currency-circle-inr-bold"
+            iconBg="bg-amber-50"
+            iconColor="text-amber-600"
           />
 
           <StatCard
@@ -318,193 +335,178 @@ const Dashboard = () => {
               stats?.upcoming ? `${stats.upcoming} scheduled` : "No upcoming"
             }
             changeType="neutral"
-            icon="mdi:calendar-clock"
-            iconBg="bg-emerald-50 dark:bg-emerald-950"
-            iconColor="text-emerald-600 dark:text-emerald-400"
+            icon="ph:calendar-clock-bold"
+            iconBg="bg-emerald-50"
+            iconColor="text-emerald-600"
           />
         </div>
 
-        {/* Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+        {/* Row 2: Chart & Appointments */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Expense Chart */}
-          <Card className="lg:col-span-3">
+          <Card className="lg:col-span-2">
             <CardHeader
-              icon="mdi:chart-line"
-              iconBg="bg-amber-50 dark:bg-amber-950"
-              iconColor="text-amber-600 dark:text-amber-400"
-              title="Expenses"
-              subtitle="Last 7 days"
+              icon="ph:chart-line-up-bold"
+              iconBg="bg-amber-50"
+              iconColor="text-amber-600"
+              title="Health & Expenses"
+              subtitle="Activity from the last 7 days"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900 uppercase tracking-wide">
-                  This week
+                <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-100 uppercase tracking-widest">
+                  Weekly
                 </span>
               }
             />
-            <div className="px-5 pt-4 pb-3">
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-2xl font-semibold text-gray-900 dark:text-white">
+            <div className="p-6">
+              <div className="flex items-baseline gap-2 mb-6">
+                <span className="text-3xl font-bold text-slate-900">
                   ₹
                   {chartData
                     .reduce((sum, d) => sum + (Number(d.expenses) || 0), 0)
                     .toLocaleString()}
                 </span>
-                <span className="text-xs text-red-500 flex items-center gap-0.5">
-                  <Icon icon="mdi:trending-up" className="w-3.5 h-3.5" /> +9.6%
-                  vs last week
+                <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                  <Icon icon="ph:trend-up-bold" className="h-3.5 w-3.5" /> +9.6%
+                  <span className="text-slate-400 font-medium">vs last week</span>
                 </span>
               </div>
-              <ResponsiveContainer width="100%" height={160}>
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 0, right: 10, left: -10, bottom: 0 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="rgba(0,0,0,0.05)"
-                    vertical={false}
-                  />
+              <div className="h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#f1f5f9"
+                      vertical={false}
+                    />
 
-                  {/* X Axis */}
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
+                      axisLine={false}
+                      tickLine={false}
+                      dy={10}
+                    />
 
-                  {/* LEFT Y-AXIS → EXPENSES */}
-                  <YAxis
-                    yAxisId="left"
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) => `₹${v / 1000}k`}
-                  />
+                    <YAxis
+                      yAxisId="left"
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `₹${v >= 1000 ? v / 1000 + 'k' : v}`}
+                    />
 
-                  {/* RIGHT Y-AXIS → CONSULTATIONS */}
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    tick={{ fontSize: 10, fill: "#9ca3af" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      tick={{ fontSize: 11, fontWeight: 600, fill: "#94a3b8" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
 
-                  <Tooltip
-                    contentStyle={{
-                      background: "white",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                    }}
-                  />
+                    <Tooltip
+                      contentStyle={{
+                        background: "rgba(255,255,255,0.95)",
+                        backdropFilter: "blur(8px)",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "16px",
+                        boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                        fontSize: "12px",
+                      }}
+                    />
 
-                  {/* EXPENSE LINE */}
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="expenses"
-                    name="Expenses"
-                    stroke="#f59e0b"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#f59e0b" }}
-                    activeDot={{ r: 5 }}
-                  />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="expenses"
+                      name="Expenses"
+                      stroke="#f59e0b"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: "#f59e0b", strokeWidth: 2, stroke: "#fff" }}
+                      activeDot={{ r: 6, strokeWidth: 0 }}
+                    />
 
-                  {/* CONSULTATION LINE */}
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="consultations"
-                    name="Consultations"
-                    stroke="#6366f1"
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: "#6366f1" }}
-                    activeDot={{ r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="consultations"
+                      name="Consultations"
+                      stroke="#6366f1"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
+                      activeDot={{ r: 6, strokeWidth: 0 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </Card>
 
-          {/* Appointments */}
-          <Card className="lg:col-span-2">
+          {/* Upcoming Appointments */}
+          <Card>
             <CardHeader
-              icon="mdi:calendar-check"
-              iconBg="bg-emerald-50 dark:bg-emerald-950"
-              iconColor="text-emerald-600 dark:text-emerald-400"
+              icon="ph:calendar-check-bold"
+              iconBg="bg-emerald-50"
+              iconColor="text-emerald-600"
               title="Upcoming"
-              subtitle="Next appointments"
+              subtitle="Next scheduled visits"
               right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900 uppercase tracking-wide">
-                  Today
-                </span>
+                <button 
+                  onClick={() => navigate('/patient/appointments')}
+                  className="text-[10px] font-bold text-[#0096C7] hover:underline"
+                >
+                  View All
+                </button>
               }
             />
 
-            {/* Ongoing Banner */}
-            {/* <div className="mx-4 mt-3 mb-1 rounded-xl bg-blue-50 dark:bg-blue-950/50 border border-blue-100 dark:border-blue-900 px-3.5 py-2.5 flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 animate-pulse" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 truncate">
-                  Dr. Meera — In progress
-                </p>
-                <p className="text-[10px] text-blue-500 dark:text-blue-400">
-                  Video · Started 10 min ago
-                </p>
-              </div>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition flex-shrink-0">
-                Join
-              </button>
-            </div> */}
-
-            <div className="divide-y divide-gray-50 dark:divide-gray-800">
+            <div className="divide-y divide-slate-100">
               {loadingAppointments ? (
-                <div className="px-4 py-3 text-[11px] text-gray-400">
-                  Loading appointments...
+                <div className="p-8 text-center">
+                  <Icon icon="ph:spinner-gap-bold" className="h-6 w-6 text-slate-300 animate-spin mx-auto mb-2" />
+                  <p className="text-xs text-slate-400 font-medium">Loading...</p>
                 </div>
               ) : !appointments || appointments.length === 0 ? (
-                <div className="px-4 py-3 text-[11px] text-gray-400">
-                  No upcoming appointments
+                <div className="p-12 text-center">
+                  <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Icon icon="ph:calendar-blank-bold" className="h-6 w-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm text-slate-500 font-bold">No appointments</p>
+                  <p className="text-xs text-slate-400 mt-1">Ready for a checkup?</p>
                 </div>
               ) : (
                 appointments.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center gap-3 px-4 py-2.5"
+                    className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors cursor-pointer group"
                   >
-                    {/* Dot */}
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-emerald-400" />
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={a.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(a.name || "Dr")}&background=f1f5f9&color=64748b`}
+                        alt={a.name}
+                        className="w-11 h-11 rounded-xl object-cover ring-2 ring-white shadow-sm"
+                      />
+                      <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
+                    </div>
 
-                    {/* Avatar */}
-                    <img
-                      src={
-                        a.profilePicture ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          a.name || "Doctor",
-                        )}&background=f0fdf4&color=16a34a`
-                      }
-                      alt={a.name || "Doctor"}
-                      className="w-8 h-8 rounded-xl object-cover border border-gray-200 dark:border-gray-700 flex-shrink-0"
-                    />
-
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
-                        {a.name || "Doctor"}
+                      <p className="text-sm font-bold text-slate-800 group-hover:text-[#0096C7] transition-colors truncate">
+                        Dr. {a.name || "Doctor"}
                       </p>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                      <p className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                        <Icon icon="ph:tag-bold" className="h-3 w-3" />
                         {a.type || "Consultation"}
                       </p>
                     </div>
 
-                    {/* Time */}
                     <div className="text-right flex-shrink-0">
-                      <p className="text-[11px] font-semibold text-gray-600 dark:text-gray-300">
-                        {a.time || ""}
+                      <p className="text-xs font-bold text-slate-700">
+                        {a.time || "TBD"}
                       </p>
-                      <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                        {a.date || ""}
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        {a.date || "Today"}
                       </p>
                     </div>
                   </div>
@@ -514,173 +516,139 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Row 3 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Row 3: Prescriptions & Vitals */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Prescriptions */}
           <Card>
             <CardHeader
-              icon="mdi:file-document-outline"
-              iconBg="bg-blue-50 dark:bg-blue-950"
-              iconColor="text-blue-600 dark:text-blue-400"
+              icon="ph:file-text-bold"
+              iconBg="bg-blue-50"
+              iconColor="text-blue-600"
               title="Prescriptions"
-              subtitle="Recent"
-              right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900 uppercase tracking-wide">
-                  {prescriptions.length} records
-                </span>
-              }
+              subtitle="Recently added records"
             />
 
-            <div className="divide-y divide-gray-50 dark:divide-gray-800">
+            <div className="divide-y divide-slate-100">
               {loadingPrescriptions ? (
-                <div className="px-4 py-3 text-[11px] text-gray-400">
-                  Loading prescriptions...
-                </div>
+                <div className="p-12 text-center text-slate-400">Loading...</div>
               ) : prescriptions.length === 0 ? (
-                <div className="px-4 py-3 text-[11px] text-gray-400">
-                  No prescriptions found
-                </div>
+                <div className="p-12 text-center text-slate-400">No records found</div>
               ) : (
                 prescriptions.map((p) => (
                   <div
                     key={p._id}
-                    className="px-4 py-3 flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
+                    className="p-5 hover:bg-slate-50 transition-colors"
                   >
-                    {/* left indicator */}
-                    <span className="w-1.5 h-1.5 mt-2 rounded-full flex-shrink-0 bg-blue-400" />
-
-                    <div className="flex-1 min-w-0">
-                      {/* TOP: doctor + date */}
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">
-                          {p.doctor?.name || "Doctor"}
-                        </p>
-
-                        <p className="text-[10px] text-gray-400 whitespace-nowrap">
-                          {new Date(p.createdAt).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "short",
-                          })}
-                        </p>
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                          <Icon icon="ph:pill-bold" className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">Dr. {p.doctor?.name}</p>
+                          <p className="text-xs text-slate-400 font-medium">
+                            {new Date(p.createdAt).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
                       </div>
-
-                      {/* diagnosis (important but subtle) */}
-                      <p className="text-[11px] text-gray-500 mt-0.5">
-                        Diagnosis:{" "}
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {p.diagnosis}
-                        </span>
-                      </p>
-
-                      {/* medicines structured */}
-                      <div className="mt-2 space-y-1">
-                        {p.medicines?.map((m, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-between text-[11px] bg-gray-50 dark:bg-gray-800 rounded-lg px-2 py-1"
-                          >
-                            {/* medicine name */}
-                            <span className="font-medium text-gray-800 dark:text-gray-200">
-                              {m.medicine}
-                            </span>
-
-                            {/* tags */}
-                            <div className="flex items-center gap-1 text-[10px]">
-                              <span className="px-2 py-[2px] rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
-                                {m.dosage}
-                              </span>
-
-                              <span
-                                className={`px-2 py-[2px] rounded-md ${
-                                  m.timing === "before"
-                                    ? "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300"
-                                    : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-300"
-                                }`}
-                              >
-                                {m.timing}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                        {p.diagnosis || 'General'}
+                      </span>
                     </div>
 
-                    {/* action */}
-                    {/* <button
-                      onClick={() => setSelectedPrescription(p)}
-                      className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 px-2.5 py-1 h-fit rounded-lg border border-blue-100 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100 dark:hover:bg-blue-900 transition"
-                    >
-                      View
-                    </button> */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {p.medicines?.map((m, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-slate-100"
+                        >
+                          <span className="text-xs font-bold text-slate-700">{m.medicine}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-500">{m.dosage}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ))
               )}
             </div>
           </Card>
 
-          {/* Vitals */}
+          {/* Vitals Overview */}
           <Card>
             <CardHeader
-              icon="mdi:heart-pulse"
-              iconBg="bg-red-50 dark:bg-red-950"
-              iconColor="text-red-600 dark:text-red-400"
-              title="Vitals"
-              subtitle="Overview"
-              right={
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900 uppercase tracking-wide">
-                  Latest
-                </span>
-              }
+              icon="ph:heart-bold"
+              iconBg="bg-red-50"
+              iconColor="text-red-600"
+              title="Vitals Overview"
+              subtitle="Latest health indicators"
             />
 
-            <div className="grid grid-cols-2 divide-x divide-y divide-gray-50 dark:divide-gray-800">
+            <div className="p-6 grid grid-cols-2 gap-4">
               {[
-  {
-    label: "Blood Pressure",
-    value: vitals?.bp ? `${vitals.bp} mmHg` : "--",
-    icon: "mdi:blood-bag",
-    color: "text-red-500",
-  },
-  {
-    label: "Sugar Level",
-    value: vitals?.sugar ? `${vitals.sugar} mg/dL` : "--",
-    icon: "mdi:water-percent",
-    color: "text-blue-500",
-  },
-  {
-    label: "Weight",
-    value: vitals?.weight ? `${vitals.weight} kg` : "--",
-    icon: "mdi:scale-bathroom",
-    color: "text-emerald-500",
-  },
-  {
-    label: "Cholesterol",
-    value: vitals?.cholesterol ? `${vitals.cholesterol} mg/dL` : "--",
-    icon: "mdi:heart-pulse",
-    color: "text-pink-500",
-  },
-].map((vital, i) => (
-                <div key={i} className="flex items-center gap-3 px-4 py-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                      {vital.label}
-                    </p>
-                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                      {vital.value}
-                    </p>
+                {
+                  label: "Blood Pressure",
+                  value: vitals?.bp ? `${vitals.bp}` : "--",
+                  unit: "mmHg",
+                  icon: "ph:gauge-bold",
+                  color: "text-rose-500",
+                  bg: "bg-rose-50",
+                },
+                {
+                  label: "Sugar Level",
+                  value: vitals?.sugar ? `${vitals.sugar}` : "--",
+                  unit: "mg/dL",
+                  icon: "ph:drop-bold",
+                  color: "text-blue-500",
+                  bg: "bg-blue-50",
+                },
+                {
+                  label: "Body Weight",
+                  value: vitals?.weight ? `${vitals.weight}` : "--",
+                  unit: "kg",
+                  icon: "ph:scales-bold",
+                  color: "text-emerald-500",
+                  bg: "bg-emerald-50",
+                },
+                {
+                  label: "Cholesterol",
+                  value: vitals?.cholesterol ? `${vitals.cholesterol}` : "--",
+                  unit: "mg/dL",
+                  icon: "ph:heartbeat-bold",
+                  color: "text-indigo-500",
+                  bg: "bg-indigo-50",
+                },
+              ].map((vital, i) => (
+                <div key={i} className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-10 h-10 rounded-xl ${vital.bg} ${vital.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
+                      <Icon icon={vital.icon} className="h-5 w-5" />
+                    </div>
+                    <Icon icon="ph:dots-three-bold" className="h-4 w-4 text-slate-300" />
                   </div>
-                  <Icon
-                    icon={vital.icon}
-                    className={`w-5 h-5 ${vital.color} flex-shrink-0 opacity-60`}
-                  />
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{vital.label}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold text-slate-900">{vital.value}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">{vital.unit}</span>
+                  </div>
                 </div>
               ))}
+            </div>
+            
+            {/* Vitals Summary Footer */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
+              <p className="text-xs text-slate-500 font-medium flex items-center gap-2">
+                <Icon icon="ph:info-bold" className="h-3.5 w-3.5 text-[#0096C7]" />
+                Values are based on your most recent consultation.
+              </p>
             </div>
           </Card>
         </div>
       </div>
     </div>
   );
+
 };
 
 export default Dashboard;

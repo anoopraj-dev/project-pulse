@@ -230,7 +230,7 @@ const Dashboard = () => {
         {/* Header */}
         <PageBanner config={pageBannerConfig.adminDashboard} />
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
             label="Doctors"
             value={loadingCounts ? "..." : (counts?.doctorCount ?? 0)}
