@@ -182,7 +182,7 @@ const PatientAppointments = () => {
           )}
 
           {/* Content section */}
-          <div className="mx-auto  px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+          <div className="mx-auto px-4 pb-6 pt-4 sm:px-6 lg:px-8">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
               <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

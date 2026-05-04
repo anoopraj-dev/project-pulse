@@ -89,7 +89,7 @@ const DoctorStatusBanner = ({
 
   return (
     <div
-      className={`w-full mt-4 px-6 py-4 rounded-xl flex flex-col items-center ${current.bg} ${current.text}`}
+      className={`w-full px-6 py-4 rounded-xl flex flex-col items-center ${current.bg} ${current.text}`}
     >
       <h2 className="font-semibold text-lg">{current.title}</h2>
       <p className="text-sm mt-1 text-center">{current.message}</p>

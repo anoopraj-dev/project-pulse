@@ -169,7 +169,7 @@ const RevenuePage = () => {
 
   return (
     <div className="min-h-screen dark:bg-gray-950 font-sans">
-      <div className="w-full mx-auto px-4 py-6 pb-16">
+      <div className="w-full mx-auto px-4 py-6 pb-6">
 
         {/* HEADER */}
         <PageBanner config={pageBannerConfig.adminRevenue} />

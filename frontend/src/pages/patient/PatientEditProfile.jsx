@@ -44,7 +44,7 @@ const PatientEditProfile = () => {
     getUser();
   }, []);
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-6">
       <PageBanner config={pageBannerConfig.patientEditProfile}/>
 
       <div className="px-8">

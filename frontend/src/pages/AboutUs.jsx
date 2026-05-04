@@ -60,7 +60,7 @@ const DoctorLanding = () => {
     <div className="h-root min-h-screen bg-slate-50 overflow-x-hidden">
       <GlobalStyles />
       {/* -------------- Hero section ---------------- */}
-      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-16 sm:pt-20">
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden">
         {/* dark backdrop */}
         <div
           className="absolute inset-0"
@@ -369,7 +369,7 @@ const DoctorLanding = () => {
       </section>
 
       {/* -------------- Find a doctor --------------------- */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-16 pb-20 sm:pb-32">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 pb-6 sm:pb-8">
         <motion.div
           variants={fadeUp}
           custom={0}

@@ -6,8 +6,8 @@ const PageBanner = ({
   tabsComponent,
 }) => {
   return (
-    <div className="w-full bg-white border-b border-gray-100 rounded-lg">
-      <div className=" mx-auto px-2 md:px-6 lg:px-8 py-2 sm:py-4">
+    <div className="w-full bg-white border-b border-gray-100">
+      <div className=" mx-auto px-2 md:px-6 lg:px-8 py-1 sm:py-2">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           
           <div className="space-y-2">

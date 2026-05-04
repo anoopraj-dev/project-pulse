@@ -319,7 +319,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen dark:bg-gray-950 font-sans">
-      <div className="w-full mx-auto px-4 py-6 pb-16">
+      <div className="w-full mx-auto px-4 py-0 pb-6">
         {/* -------- Stat Cards ------ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard

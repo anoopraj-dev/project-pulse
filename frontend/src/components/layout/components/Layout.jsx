@@ -86,13 +86,13 @@ const Layout = () => {
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50">
-          <div className="min-h-full flex flex-col p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto w-full space-y-8 flex-1">
+          <div className="min-h-full flex flex-col pt-0 pb-4 sm:pb-6 lg:pb-8">
+            <div className="max-w-7xl mx-auto w-full flex-1">
               <Outlet />
             </div>
             
             {/* Protected Footer within main scroll */}
-            <div className="max-w-7xl mx-auto w-full border-t border-slate-200 mt-12 pt-8">
+            <div className="max-w-7xl mx-auto w-full mt-12">
               <ProtectedFooter />
             </div>
           </div>

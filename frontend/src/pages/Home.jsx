@@ -141,7 +141,7 @@ const Home = () => {
       <GlobalStyles />
 
       {/* ------------ Hero Section ------------ */}
-      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-20 sm:pt-24 lg:pt-0">
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden">
         <div
           className="absolute inset-0"
           style={{

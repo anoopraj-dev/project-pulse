@@ -2,7 +2,7 @@ import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 import { useChatContext } from "../../../contexts/ChatContext";
 
-const SidebarItem = ({ item, isActive, isOpen }) => {
+const SidebarItem = ({ item, isActive, isOpen, onClick }) => {
   const { totalUnread } = useChatContext();
 
   // Show unread badge ONLY for Messages item
@@ -10,7 +10,7 @@ const SidebarItem = ({ item, isActive, isOpen }) => {
     item.label === "Messages" && totalUnread > 0;
 
   return (
-    <Link to={item.path}>
+    <Link to={item.path} onClick={onClick}>
       <li
         className={`group flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 relative
           ${
