@@ -72,9 +72,9 @@ const ViewPatients = () => {
     (patient) => patient?.status === activeTab
   );
 
-  const displayedPatients = query.trim()
+  const displayedPatients = (query.trim()
     ? results
-    : filteredPatients;
+    : filteredPatients)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchPatientsAction.loading;
 

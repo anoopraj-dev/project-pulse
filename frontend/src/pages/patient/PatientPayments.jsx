@@ -148,9 +148,9 @@ const filteredSearchResult = results?.filter((payment) => {
 
   useEffect(() => {}, [activeTab]);
 
-  const displayedPayments = query.trim()
+  const displayedPayments = (query.trim()
     ? filteredSearchResult
-    : filteredPayments;
+    : filteredPayments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchPaymentsAction.loading;
 

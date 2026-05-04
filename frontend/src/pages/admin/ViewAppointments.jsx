@@ -96,9 +96,9 @@ const ViewAppointments = () => {
     return true;
   });
 
-  const displayedAppointments = query.trim()
+  const displayedAppointments = (query.trim()
     ? filteredSearchResult
-    : filteredAppointments;
+    : filteredAppointments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const isLoading = fetchAppointmentsAction.loading;
 

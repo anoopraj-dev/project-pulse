@@ -68,7 +68,7 @@ const ViewDoctors = () => {
 
   const searchedDoctors = results?.filter((doc) => doc.status === activeTab);
 
-  const displayedDoctors = query.trim() ? searchedDoctors : filteredDoctors;
+  const displayedDoctors = (query.trim() ? searchedDoctors : filteredDoctors)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const isLoading = fetchAllDoctorsAction.loading;
 
   return (

@@ -75,7 +75,7 @@ const filteredPayments = payments?.filter((item) => {
     default:
       return true;
   }
-});
+})?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const isLoading = fetchPaymentsAction.loading;
 
   return (
