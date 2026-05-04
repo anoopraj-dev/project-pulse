@@ -48,8 +48,8 @@ const DynamicForm = ({
       <div
         className={
           mode === "modal"
-            ? "flex flex-col min-w-[400px] max-w-[600px]"
-            : "grid sm:grid-cols-1 md:grid-cols-2 space-x-6 space-y-2"
+            ? "flex flex-col w-full"
+            : "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2"
         }
       >
         {config.fields.map((field) =>

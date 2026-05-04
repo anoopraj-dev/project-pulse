@@ -141,11 +141,11 @@ const Footer = () => {
             <p className="text-white font-semibold text-sm">Stay in the loop</p>
             <p className="text-[12px] mt-0.5" style={{ color: "rgba(255,255,255,.38)" }}>Health tips and updates, no spam.</p>
           </div>
-          <div className="flex items-center gap-0 rounded-full overflow-hidden"
+          <div className="flex items-center w-full sm:w-auto rounded-full overflow-hidden"
             style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)" }}>
             <input
               type="email" placeholder="your@email.com"
-              className="bg-transparent px-5 py-2.5 text-sm outline-none w-52 placeholder:text-white/30 text-white"
+              className="bg-transparent px-5 py-2.5 text-sm outline-none flex-1 sm:w-52 placeholder:text-white/30 text-white"
             />
             <motion.button
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}

@@ -234,157 +234,199 @@ const AuthCard = ({ role: initialRole }) => {
       animate="visible"
     >
       <div className="flex flex-col">
-        <div className="flex flex-col items-center">
-          {!isAdmin && !email && (
-            <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />
-          )}
-          <div className=" w-full flex justify-center align-center p-1 rounded-md">
-            <h1 className=" font-[Georgia] font-semibold text-2xl my-2">{`${isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"} ${isSignup ? "SignUp" : "SignIn"}`}</h1>
-          </div>
-        </div>
 
         <form
-          className="my-2 bg-white rounded-xl"
+          className="bg-white rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 overflow-hidden"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div
-            className={`flex flex-col items-center w-sm bg-white rounded-xl ${isAdmin ? "p-10" : "p-2"}`}
+            className={`flex flex-col w-full max-w-md bg-white ${
+              isAdmin ? "p-10" : "px-6 py-10 sm:p-12"
+            } space-y-8`}
           >
-            {!isAdmin && isSignup && (
-              <div className="w-full my-2">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  {...register("name", { required: "Name is required" })}
-                  className="w-full p-4 border border-gray-300 rounded-md"
-                />
-                {errors.name && (
-                  <span className="text-red-600 text-sm">
-                    {errors.name.message}
+            <div className="flex flex-col items-center space-y-6">
+              {!isAdmin && !email && (
+                <div className="scale-110">
+                  <SliderToggle isChecked={isDoctor} onToggle={toggleRole} />
+                </div>
+              )}
+              <div className="w-full text-center">
+                <h1 className="text-xl font-bold text-gray-900 uppercase tracking-tight">
+                  {isAdmin ? "Admin" : isDoctor ? "Doctor" : "Patient"}
+                  <span className="block text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">
+                    {isSignup ? "Create Account" : "Access Portal"}
                   </span>
-                )}
+                </h1>
               </div>
-            )}
-
-            <div className="w-full my-2">
-              <input
-                type="email"
-                placeholder="Email"
-                {...register("email", { required: "Email is required" })}
-                className="w-full p-4 border border-gray-300 rounded-md"
-              />
-              {errors.email && (
-                <span className="text-red-600 text-sm">
-                  {errors.email.message}
-                </span>
-              )}
             </div>
-
-            <div className="w-full my-2 relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                {...register("password", { required: "Password is required" })}
-                className="w-full p-4 border border-gray-300 rounded-md"
-              />
-              <span
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
-                onClick={handleShowPassword}
-              >
-                <Icon
-                  icon={showPassword ? "mdi:eye-off" : "mdi:eye"}
-                  width="20"
-                  height="20"
-                />
-              </span>
-              {errors.password && (
-                <span className="text-red-600 text-sm">
-                  {errors.password.message}
-                </span>
+            <div className="space-y-4">
+              {!isAdmin && isSignup && (
+                <div className="w-full">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                  <div className="relative mt-1.5">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                      <Icon icon="ph:user-bold" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Enter your name"
+                      {...register("name", { required: "Name is required" })}
+                      className="w-full pl-11 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-md text-sm font-medium text-gray-900 placeholder:font-normal placeholder:text-xs placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all"
+                    />
+                  </div>
+                  {errors.name && (
+                    <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-1 block">
+                      {errors.name.message}
+                    </span>
+                  )}
+                </div>
               )}
-            </div>
 
-            {!isAdmin && isSignup && (
-              <div className="w-full my-2 relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Confirm Password"
-                  {...register("confirmPassword", {
-                    required: "Confirm your password",
-                  })}
-                  className="w-full p-4 border border-gray-300 rounded-md"
-                />
-                <span
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
-                  onClick={handleShowPassword}
-                >
-                  <Icon
-                    icon={showPassword ? "mdi:eye-off" : "mdi:eye"}
-                    width="20"
-                    height="20"
+              <div className="w-full">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                <div className="relative mt-1.5">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Icon icon="ph:envelope-simple-bold" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    {...register("email", { required: "Email is required" })}
+                    className="w-full pl-11 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-md text-sm font-medium text-gray-900 placeholder:font-normal placeholder:text-xs placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all"
                   />
-                </span>
-                {errors.confirmPassword && (
-                  <span className="text-red-600 text-sm">
-                    {errors.confirmPassword.message}
+                </div>
+                {errors.email && (
+                  <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-1 block">
+                    {errors.email.message}
                   </span>
                 )}
               </div>
-            )}
 
-            {!authFormAction.loading ? (
-              <PrimaryButton
-                ref={buttonRef}
-                text={isSignup ? "SIGN UP" : "SIGN IN"}
-                className="w-full mt-2 text-white bg-[#0096C7]"
-                type="submit"
-              />
-            ) : (
-              <div className="my-4">
-                <ClipLoader color="#0096C7" />
+              <div className="w-full">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Password</label>
+                <div className="relative mt-1.5">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Icon icon="ph:lock-bold" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter password"
+                    {...register("password", { required: "Password is required" })}
+                    className="w-full pl-11 pr-12 py-4 bg-gray-50 border border-gray-100 rounded-md text-sm font-medium text-gray-900 placeholder:font-normal placeholder:text-xs placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors"
+                    onClick={handleShowPassword}
+                  >
+                    <Icon
+                      icon={showPassword ? "ph:eye-slash-bold" : "ph:eye-bold"}
+                      className="text-lg"
+                    />
+                  </button>
+                </div>
+                {errors.password && (
+                  <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-1 block">
+                    {errors.password.message}
+                  </span>
+                )}
               </div>
-            )}
 
-            {!isSignup && !isAdmin && (
-              <PrimaryButton
-                type="button"
-                onClick={handleGoogleSignin}
-                disabled={oauthProgress}
-                text={oauthProgress ? "Signing in.." : "SIGN IN WITH GOOGLE"}
-                className="w-full bg-white mt-2 border border-[#0096C7] !text-[#0096C7]"
-              />
-            )}
+              {!isAdmin && isSignup && (
+                <div className="w-full">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Confirm Password</label>
+                  <div className="relative mt-1.5">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                      <Icon icon="ph:lock-key-bold" />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Re-enter password"
+                      {...register("confirmPassword", {
+                        required: "Confirm your password",
+                      })}
+                      className="w-full pl-11 pr-12 py-4 bg-gray-50 border border-gray-100 rounded-md text-sm font-medium text-gray-900 placeholder:font-normal placeholder:text-xs placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 focus:bg-white transition-all"
+                    />
+                  </div>
+                  {errors.confirmPassword && (
+                    <span className="text-red-500 text-[10px] font-bold uppercase tracking-widest mt-1 ml-1 block">
+                      {errors.confirmPassword.message}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
 
-            <div className="my-5 text-center">
+            <div className="space-y-4 pt-2">
+              {!authFormAction.loading ? (
+                <PrimaryButton
+                  ref={buttonRef}
+                  text={isSignup ? "Create Account" : "Sign In"}
+                  className="w-full py-4 text-white bg-[#0096C7] hover:bg-[#0280ab] rounded-md shadow-lg shadow-blue-100 active:scale-[0.98] transition-all text-xs font-bold uppercase tracking-widest"
+                  type="submit"
+                />
+              ) : (
+                <div className="flex justify-center py-2">
+                  <ClipLoader color="#0096C7" size={28} />
+                </div>
+              )}
+
+              {!isSignup && !isAdmin && (
+                <button
+                  type="button"
+                  onClick={handleGoogleSignin}
+                  disabled={oauthProgress}
+                  className="w-full py-4 px-6 bg-white border border-gray-100 rounded-md shadow-sm hover:shadow-md hover:bg-gray-50 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                >
+                  {oauthProgress ? (
+                    <ClipLoader color="#2563eb" size={16} />
+                  ) : (
+                    <Icon icon="logos:google-icon" className="text-lg" />
+                  )}
+                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+                    {oauthProgress ? "Signing in..." : "Continue with Google"}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            <div className="text-center pt-2">
               {isAdmin ? (
-                <p className="text-gray-600">
-                  Login with your admin credentials
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Secure Admin Authentication Required
                 </p>
               ) : isSignup ? (
-                <p>
-                  Already a member?{" "}
-                  <Link to="/signin" className="text-blue-600 underline">
-                    SignIn Now
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  Already have an account?{" "}
+                  <Link
+                    to="/signin"
+                    className="text-blue-600 hover:text-blue-700 underline underline-offset-4 decoration-blue-200 hover:decoration-blue-500 transition-all"
+                  >
+                    Sign In
                   </Link>
                 </p>
               ) : (
-                <>
-                  <p>
-                    Forgot Password?{" "}
-                    <span
-                      className="text-blue-600 underline cursor-pointer"
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    Forgot your credentials?{" "}
+                    <button
+                      type="button"
+                      className="text-blue-600 hover:text-blue-700 underline underline-offset-4 decoration-blue-200 hover:decoration-blue-500 transition-all"
                       onClick={handleForgotPassword}
                     >
                       Reset Password
-                    </span>
+                    </button>
                   </p>
-                  <p>
-                    Not a member yet?{" "}
-                    <Link to="/signup" className="text-blue-600 underline">
-                      Signup Now
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    New to Pulse360?{" "}
+                    <Link
+                      to="/signup"
+                      className="text-blue-600 hover:text-blue-700 underline underline-offset-4 decoration-blue-200 hover:decoration-blue-500 transition-all"
+                    >
+                      Create Account
                     </Link>
                   </p>
-                </>
+                </div>
               )}
             </div>
           </div>

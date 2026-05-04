@@ -126,7 +126,7 @@ const PatientRecords = () => {
         <>
           <PageBanner config={pageBannerConfig?.patientRecords} />
 
-          <div className="w-full px-4 py-6 pb-16 sm:px-6 lg:px-8">
+          <div className="w-full px-4 pb-16 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
               {/* ── LEFT COLUMN — Upload Form ── */}

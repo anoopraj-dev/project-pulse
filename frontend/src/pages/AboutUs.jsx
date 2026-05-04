@@ -55,11 +55,12 @@ const DoctorLanding = () => {
     })();
   }, []);
 
+
   return (
-    <div className="h-root min-h-screen bg-slate-50 ">
+    <div className="h-root min-h-screen bg-slate-50 overflow-x-hidden">
       <GlobalStyles />
       {/* -------------- Hero section ---------------- */}
-      <section className="relative min-h-screen flex items-center overflow-hidden pt-20">
+      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-16 sm:pt-20">
         {/* dark backdrop */}
         <div
           className="absolute inset-0"
@@ -82,7 +83,7 @@ const DoctorLanding = () => {
         {/* glow blobs */}
         <motion.div
           {...floatY(12, 7)}
-          className="absolute -top-48 -right-32 w-[700px] h-[700px] rounded-full pointer-events-none"
+          className="absolute -top-48 -right-32 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] lg:w-[700px] lg:h-[700px] rounded-full pointer-events-none"
           style={{
             background:
               "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)",
@@ -91,7 +92,7 @@ const DoctorLanding = () => {
         />
         <motion.div
           {...floatYReverse(12, 9)}
-          className="absolute -bottom-28 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none"
+          className="absolute -bottom-28 -left-24 w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px] rounded-full pointer-events-none"
           style={{
             background:
               "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)",
@@ -100,15 +101,15 @@ const DoctorLanding = () => {
         />
 
         {/* inner */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-20 flex items-center justify-between gap-12">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-12">
           {/* ── Left copy ── */}
-          <div className="flex-1 min-w-0 space-y-7">
+          <div className="flex-1 w-full space-y-6 sm:space-y-8 text-center lg:text-left">
             <motion.div
               variants={fadeUp}
               custom={0.1}
               initial="hidden"
               animate="visible"
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[11px] tracking-[.12em] uppercase"
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[10px] sm:text-[11px] tracking-[.12em] uppercase"
               style={{
                 background: "rgba(0,150,199,.12)",
                 borderColor: "rgba(0,150,199,.3)",
@@ -128,10 +129,10 @@ const DoctorLanding = () => {
               custom={0.25}
               initial="hidden"
               animate="visible"
-              className="font-[Georgia,serif] text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.09] "
+              className="font-[Georgia,serif] text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-medium text-white leading-[1.1] sm:leading-[1.09]"
             >
               Healthcare
-              <br />
+              <br className="hidden sm:block" />
               at your&nbsp;
               <em className="not-italic" style={{ color: "#48cae4" }}>
                 fingertips
@@ -143,7 +144,7 @@ const DoctorLanding = () => {
               custom={0.4}
               initial="hidden"
               animate="visible"
-              className="text-[1.05rem] leading-relaxed max-w-[480px]"
+              className="text-base sm:text-[1.05rem] leading-relaxed max-w-lg mx-auto lg:mx-0"
               style={{ color: "rgba(255,255,255,.55)" }}
             >
               Consult online or book appointments with trusted, verified doctors
@@ -155,39 +156,24 @@ const DoctorLanding = () => {
               custom={0.55}
               initial="hidden"
               animate="visible"
-              className="flex flex-wrap gap-3"
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2"
             >
               <motion.button
                 {...tapScale}
-                className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-white transition-all duration-200"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-bold text-white transition-all shadow-lg"
                 style={{
                   background: "#0096C7",
-                  boxShadow: "0 6px 28px rgba(0,150,199,.45)",
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#007aa3")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#0096C7")
-                }
                 onClick={() => navigate("/signin")}
               >
                 Find your doctor <ArrowRight />
               </motion.button>
               <motion.button
                 {...tapScale}
-                className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold transition-all duration-200"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold border transition-all"
                 style={{
-                  border: "1.5px solid rgba(255,255,255,.18)",
+                  borderColor: "rgba(255,255,255,.18)",
                   color: "rgba(255,255,255,.65)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,.07)";
-                  e.currentTarget.style.color = "#fff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "rgba(255,255,255,.65)";
                 }}
                 onClick={() => navigate("/signin")}
               >
@@ -201,7 +187,7 @@ const DoctorLanding = () => {
               custom={0.7}
               initial="hidden"
               animate="visible"
-              className="flex gap-10 pt-6 border-t"
+              className="flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-10 pt-8 sm:pt-10 border-t"
               style={{ borderColor: "rgba(255,255,255,.1)" }}
             >
               {[
@@ -209,12 +195,12 @@ const DoctorLanding = () => {
                 ["4.9 ★", "Avg. Rating"],
                 ["15 min", "Avg. Wait"],
               ].map(([v, l]) => (
-                <div key={l}>
-                  <div className="font-[Georgia,serif] text-2xl font-bold text-white">
+                <div key={l} className="text-center lg:text-left">
+                  <div className="font-[Georgia,serif] text-xl sm:text-2xl font-bold text-white">
                     {v}
                   </div>
                   <div
-                    className="text-[10px] uppercase tracking-widest mt-0.5"
+                    className="text-[9px] sm:text-[10px] uppercase tracking-widest mt-1"
                     style={{ color: "rgba(255,255,255,.38)" }}
                   >
                     {l}
@@ -233,15 +219,15 @@ const DoctorLanding = () => {
             className="hidden lg:block shrink-0"
           >
             <div
-              className="w-72 rounded-3xl p-6 space-y-4 border backdrop-blur-2xl"
+              className="w-80 rounded-[2rem] p-8 space-y-6 border backdrop-blur-2xl shadow-2xl"
               style={{
                 background: "rgba(255,255,255,.07)",
                 borderColor: "rgba(255,255,255,.12)",
               }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
                   style={{
                     background: "linear-gradient(135deg,#0096C7,#00B4D8)",
                   }}
@@ -249,29 +235,29 @@ const DoctorLanding = () => {
                   R
                 </div>
                 <div>
-                  <div className="text-white font-semibold text-sm">
+                  <div className="text-white font-bold text-base">
                     Dr. Reena Nair
                   </div>
                   <div
-                    className="text-[11px]"
+                    className="text-xs font-medium"
                     style={{ color: "rgba(255,255,255,.45)" }}
                   >
                     Cardiologist
                   </div>
                 </div>
                 <span
-                  className="ml-auto text-[10px] font-bold px-2.5 py-1 rounded-full"
+                  className="ml-auto text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider"
                   style={{
                     background: "rgba(0,150,199,.22)",
                     color: "#48cae4",
                   }}
                 >
-                  Available
+                  Live
                 </span>
               </div>
 
               <div
-                className="divide-y"
+                className="divide-y space-y-1"
                 style={{ borderColor: "rgba(255,255,255,.08)" }}
               >
                 {[
@@ -280,16 +266,16 @@ const DoctorLanding = () => {
                   ["Next Slot", "2:30 PM Today"],
                   ["Rating", "4.9 ★"],
                 ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between py-2.5">
+                  <div key={k} className="flex justify-between py-3">
                     <span
-                      className="text-[11px]"
+                      className="text-xs font-medium"
                       style={{ color: "rgba(255,255,255,.38)" }}
                     >
                       {k}
                     </span>
                     <span
-                      className="text-[11px] font-medium"
-                      style={{ color: "rgba(255,255,255,.8)" }}
+                      className="text-xs font-bold"
+                      style={{ color: "rgba(255,255,255,.9)" }}
                     >
                       {v}
                     </span>
@@ -299,14 +285,8 @@ const DoctorLanding = () => {
 
               <motion.button
                 {...tapScale}
-                className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200"
+                className="w-full py-4 rounded-2xl text-sm font-bold text-white shadow-lg transition-all"
                 style={{ background: "#0096C7" }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#007aa3")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#0096C7")
-                }
                 onClick={() => navigate("/signin")}
               >
                 Book Appointment
@@ -316,11 +296,11 @@ const DoctorLanding = () => {
         </div>
 
         {/* wave bottom */}
-        <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-[0]">
+        <div className="absolute bottom-0 left-0 right-0">
           <svg
             viewBox="0 0 1440 60"
             preserveAspectRatio="none"
-            style={{ width: "100%", height: 60 }}
+            className="w-full h-8 sm:h-12 md:h-16"
           >
             <path
               d="M0,60 C480,0 960,0 1440,60 L1440,60 L0,60 Z"
@@ -331,14 +311,14 @@ const DoctorLanding = () => {
       </section>
 
       {/* ---------------- What we offer -------------- */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-10 py-20">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
         <motion.div
           variants={fadeUp}
           custom={0}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="mb-10 space-y-2"
+          className="mb-12 sm:mb-16 space-y-3 text-center lg:text-left"
         >
           <p
             className="text-[11px] font-bold tracking-[.14em] uppercase"
@@ -346,7 +326,7 @@ const DoctorLanding = () => {
           >
             What we offer
           </p>
-          <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-slate-900">
+          <h2 className="font-[Georgia,serif] text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
             Care that fits your{" "}
             <em className="not-italic" style={{ color: "#0096C7" }}>
               lifestyle
@@ -359,28 +339,28 @@ const DoctorLanding = () => {
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
         >
           {[
             {
               icon: "mdi:phone",
               title: "Voice Consultation",
-              desc: "Talk to verified doctors in real-time.",
+              desc: "Talk to verified doctors in real-time with crystal clear audio.",
             },
             {
               icon: "mdi:hospital-building",
               title: "Offline Visits",
-              desc: "Book physical consultations nearby.",
+              desc: "Book physical consultations at top-rated clinics nearby.",
             },
             {
               icon: "mdi:pill",
               title: "Digital Prescription",
-              desc: "Receive prescriptions instantly.",
+              desc: "Receive and manage your prescriptions securely online.",
             },
             {
               icon: "mdi:file-document",
               title: "Health Records",
-              desc: "Securely store medical history.",
+              desc: "Securely store and share medical history with your care team.",
             },
           ].map((c) => (
             <OfferCard key={c.title} {...c} />
@@ -389,23 +369,23 @@ const DoctorLanding = () => {
       </section>
 
       {/* -------------- Find a doctor --------------------- */}
-      <section className="max-w-6xl mx-auto px-6 lg:px-10 pb-20">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 pb-20 sm:pb-32">
         <motion.div
           variants={fadeUp}
           custom={0}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="flex items-end justify-between flex-wrap gap-4 mb-8"
+          className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 sm:mb-16 text-center sm:text-left"
         >
-          <div className="space-y-1">
+          <div className="space-y-3">
             <p
               className="text-[11px] font-bold tracking-[.14em] uppercase"
               style={{ color: "#0096C7" }}
             >
               Our specialists
             </p>
-            <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="font-[Georgia,serif] text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
               Find a{" "}
               <em className="not-italic" style={{ color: "#0096C7" }}>
                 Doctor
@@ -415,34 +395,20 @@ const DoctorLanding = () => {
 
           <motion.button
             {...tapScale}
-            className="px-5 py-2.5 rounded-full text-sm font-bold border-2 transition-all duration-200"
+            className="w-full sm:w-auto px-8 py-3 rounded-full text-sm font-bold border-2 transition-all hover:bg-[#0096C7] hover:text-white"
             style={{ borderColor: "#0096C7", color: "#0096C7" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#0096C7";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "#0096C7";
-            }}
             onClick={() => navigate("/signup")}
           >
-            View all
+            View all specialists
           </motion.button>
         </motion.div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-2xl h-60"
-                style={{
-                  background:
-                    "linear-gradient(90deg,#ddf1f8 25%,#b8e4f3 50%,#ddf1f8 75%)",
-                  backgroundSize: "200% auto",
-                  animation: "shimmer 1.5s linear infinite",
-                }}
+                className="rounded-3xl h-72 animate-pulse bg-slate-100"
               />
             ))}
           </div>
@@ -452,7 +418,7 @@ const DoctorLanding = () => {
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            className="grid grid-cols-2 md:grid-cols-4 gap-5"
+            className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
           >
             {doctors.slice(0, 8).map((doc) => (
               <DoctorCard key={doc._id} doctor={doc} />
@@ -463,17 +429,17 @@ const DoctorLanding = () => {
 
       {/* ---------------- Testimonials---------------- */}
       <section
-        className="py-20"
+        className="py-16 sm:py-24"
         style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}
       >
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <motion.div
             variants={fadeUp}
             custom={0}
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            className="mb-10 space-y-2"
+            className="mb-12 sm:mb-20 space-y-3 text-center lg:text-left"
           >
             <p
               className="text-[11px] font-bold tracking-[.14em] uppercase"
@@ -481,7 +447,7 @@ const DoctorLanding = () => {
             >
               Patient stories
             </p>
-            <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-slate-900">
+            <h2 className="font-[Georgia,serif] text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
               What people{" "}
               <em className="not-italic" style={{ color: "#0096C7" }}>
                 say
@@ -493,7 +459,7 @@ const DoctorLanding = () => {
             initial="hidden"
             whileInView="visible"
             viewport={viewportOnce}
-            className="grid grid-cols-1 md:grid-cols-3 gap-5"
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
           >
             <Testimonial
               name="Hari Narayanan"
@@ -514,51 +480,40 @@ const DoctorLanding = () => {
         </div>
       </section>
 
-      {/* ---------------- Footer ---------------- */}
-      <section className="px-6 lg:px-10 py-14">
+      {/* ---------------- Footer CTA ---------------- */}
+      <section className="px-6 lg:px-16 py-16 sm:py-24">
         <motion.div
           variants={scaleIn}
           custom={0}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="max-w-6xl mx-auto rounded-3xl px-10 py-12 flex flex-wrap items-center justify-between gap-8"
+          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
           style={{
             background:
               "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
             boxShadow: "0 20px 60px rgba(0,150,199,.28)",
           }}
         >
-          <div>
-            <h2 className="font-[Georgia,serif] text-3xl md:text-4xl font-bold text-white leading-tight">
+          <div className="text-center lg:text-left space-y-4">
+            <h2 className="font-[Georgia,serif] text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
               Ready to take charge
-              <br />
+              <br className="hidden sm:block" />
               of your{" "}
               <em className="not-italic" style={{ color: "#90e0ef" }}>
                 health?
               </em>
             </h2>
             <p
-              className="text-sm mt-2"
-              style={{ color: "rgba(255,255,255,.5)" }}
+              className="text-base sm:text-lg opacity-60 font-medium"
+              style={{ color: "rgba(255,255,255,.8)" }}
             >
               Join thousands who trust us every day.
             </p>
           </div>
           <motion.button
             {...tapScale}
-            className="flex items-center gap-2.5 px-8 py-4 rounded-full font-bold text-sm transition-all duration-200"
-            style={{
-              background: "#fff",
-              color: "#0096C7",
-              boxShadow: "0 4px 20px rgba(0,0,0,.12)",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-2px)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "translateY(0)")
-            }
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 rounded-full font-bold text-base transition-all bg-white text-[#0096C7] shadow-xl"
             onClick={() => navigate("/signin")}
           >
             Get Started Now <ArrowRight />
@@ -569,6 +524,7 @@ const DoctorLanding = () => {
       <Footer />
     </div>
   );
+
 };
 
 // ---------------------sub components -------------------

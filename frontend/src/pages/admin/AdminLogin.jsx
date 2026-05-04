@@ -4,9 +4,8 @@ import AuthCard from '../../components/auth/components/AuthCard'
 const AdminLogin = () => {
   return (
     <div>
-      <div className="flex justify-center items-center bg-[linear-gradient(150deg,#FFFFFF_0%,#E0F7FA_26%,#B2EBF2_72%,#FFFFFF_100%)] min-h-screen">
+      <div className="flex justify-center items-center bg-[linear-gradient(150deg,#FFFFFF_0%,#E0F7FA_26%,#B2EBF2_72%,#FFFFFF_100%)] min-h-[calc(100vh-80px)] px-5 py-8">
         <AuthCard />
-
       </div>
     
     </div>

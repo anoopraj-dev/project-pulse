@@ -193,8 +193,8 @@ const DoctorOnboarding = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-5xl p-10">
+    <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-10">
+      <div className="w-full max-w-5xl bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-10">
         <Headings
           text={
             currentStep === 0
