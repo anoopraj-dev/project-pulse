@@ -13,13 +13,13 @@ const AnimatedHeart = () => {
     if (!scene) return;
 
     // Custom material
-    // const customMaterial = new THREE.MeshStandardMaterial({
-    //   color: 0x0a9292f,
-    //   emissive: 0x0a192f,
-    //   emissiveIntensity: 0.6,
-    //   roughness: 0.5,
-    //   metalness: 0.1,
-    // });
+    const customMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0a9292f,
+      emissive: 0x0a192f,
+      emissiveIntensity: 0.6,
+      roughness: 0.5,
+      metalness: 0.1,
+    });
 
     // Apply material to all meshes
     scene.traverse((child) => {
