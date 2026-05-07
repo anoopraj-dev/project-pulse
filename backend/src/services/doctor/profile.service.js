@@ -3,7 +3,6 @@ import DoctorAvailability from "../../models/availability.model.js";
 import { Notification } from "../../models/notification.model.js";
 
 // ---------- GET PROFILE ----------
-// ---------- GET PROFILE ----------
 export const getDoctorProfileService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).select("-password");
   if (!doctor) throw new Error("Doctor not found");
@@ -13,18 +12,13 @@ export const getDoctorProfileService = async (doctorId) => {
   });
 
   const formattedAvailability = availability.map((day) => ({
-    date: day.dateKey, // already correct string YYYY-MM-DD
+    date: day.dateKey,
 
     slots: day.slots.map((slot) => ({
       slotId: slot.slotId,
 
-      startTime: slot.startAt
-        ? new Date(slot.startAt).toISOString().slice(11, 16)
-        : null,
-
-      endTime: slot.endAt
-        ? new Date(slot.endAt).toISOString().slice(11, 16)
-        : null,
+      startTime: slot.startAt,
+      endTime: slot.endAt,
 
       isBooked: slot.status === "booked",
     })),
@@ -52,13 +46,7 @@ const safeParse = (value) => {
 };
 
 export const updateDoctorProfileService = async (payload) => {
-  const {
-    _id,
-    services,
-    qualifications,
-    specializations,
-    ...rest
-  } = payload;
+  const { _id, services, qualifications, specializations, ...rest } = payload;
 
   const updatePayload = { ...rest };
 
@@ -89,7 +77,7 @@ export const updateDoctorProfileService = async (payload) => {
   const doctor = await Doctor.findByIdAndUpdate(
     _id,
     { $set: updatePayload },
-    { new: true, runValidators: true, context: "query" }
+    { new: true, runValidators: true, context: "query" },
   );
 
   if (!doctor) throw new Error("Doctor not found");
