@@ -35,7 +35,7 @@ const AnimatedHeart = () => {
       Object.values(actions).forEach((action) => {
         action.reset();
         action.play();
-        action.timeScale = 0.9;
+        action.timeScale = 0.8;
       });
     }
 
@@ -46,8 +46,8 @@ const AnimatedHeart = () => {
   return (
     <group
       ref={group}
-      position={[0, 0, 0]}
-      scale={0.9}
+      position={[1.5, 0, 0]}
+      scale={1}
       rotation={[0, -0.55, 0]}
       // visible={materialApplied} // hide until materials applied
     >

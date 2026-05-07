@@ -21,8 +21,8 @@ const Heart = () => {
           enableZoom={false}
           minPolarAngle={Math.PI / 2}
           maxPolarAngle={Math.PI / 2}
-          // minAzimuthAngle={-Math.PI / 7}
-          // maxAzimuthAngle={Math.PI / 2}
+          minAzimuthAngle={-Math.PI / 7}
+          maxAzimuthAngle={Math.PI / 2}
           enableDamping
           dampingFactor={0.02}
         />
