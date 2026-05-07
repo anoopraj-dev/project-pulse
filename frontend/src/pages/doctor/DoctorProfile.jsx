@@ -44,6 +44,8 @@ const DoctorProfile = () => {
     }
   };
 
+  console.log('availability in profile',availability)
+
   //--------------- EDIT PROFILE ---------------
 
   const handleProfileEdit = () => {

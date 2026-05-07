@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 const AnimatedHeart = () => {
   const group = useRef();
-  const { scene, animations } = useGLTF("/models/doc2.glb");
+  const { scene, animations } = useGLTF("/models/heart.glb");
   const { actions } = useAnimations(animations, group);
   const [materialApplied, setMaterialApplied] = useState(false);
 
@@ -46,8 +46,8 @@ const AnimatedHeart = () => {
   return (
     <group
       ref={group}
-      position={[0, 2, 0]}
-      scale={1.5}
+      position={[0, 0, 0]}
+      scale={0.9}
       rotation={[0, -0.55, 0]}
       // visible={materialApplied} // hide until materials applied
     >

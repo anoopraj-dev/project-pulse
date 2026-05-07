@@ -61,6 +61,11 @@ export const doctorSidebarMenu = [
     path: "/doctor/profile",
   },
   {
+    label:'Availability',
+    icon:'mdi:calendar',
+    path:'/doctor/availability'
+  },
+  {
     label: "Messages",
     icon: "mdi:message-bubble",
     path: "/doctor/messages",

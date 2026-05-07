@@ -4,6 +4,7 @@ import { Icon } from "@iconify/react";
 import BasicInfoCard from "../../../ui/cards/BasicInfoCard";
 import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
 import AvailabilityPreview from "../availability/AvailabilityPreview";
+import AvailabilityList from '../availability/AvailabilityList'
 import ActionButton from "@/components/shared/components/ActionButton";
 
 //------------- Card Shell --------------
@@ -67,24 +68,14 @@ const ProfileView = ({
   const [viewMore, setViewmore] = useState(false);
   const [activeAction, setActiveAction] = useState(null);
 
-  const isSlotExpired = (date, endTime, isBooked) => {
+  const isSlotExpired = (endTime, isBooked) => {
   if (isBooked) return false;
+  if (!endTime) return true;
 
-  // guard against null/undefined
-  if (!date || !endTime) return true;
+  const slotTime = new Date(endTime);
+  if (isNaN(slotTime)) return true;
 
-  const now = new Date();
-
-  const slotDateTime = new Date(date);
-  if (isNaN(slotDateTime)) return true;
-
-  const [h, m] = endTime.split(":").map(Number);
-
-  if (isNaN(h) || isNaN(m)) return true;
-
-  slotDateTime.setHours(h, m, 0, 0);
-
-  return slotDateTime < now;
+  return slotTime < new Date();
 };
 
   const handleAction = async (action, fn) => {
@@ -103,7 +94,7 @@ const ProfileView = ({
       const validSlots = day.slots.filter(
         (slot) =>
           !slot.isBooked &&
-          !isSlotExpired(day.date, slot.endTime, slot.isBooked),
+          !isSlotExpired(slot.endTime, slot.isBooked)
       );
 
       return { ...day, slots: validSlots };
@@ -400,7 +391,8 @@ const ProfileView = ({
           <div className="lg:col-span-2 space-y-4">
             {/* Availability first */}
             {(viewer === "doctor" || viewer === "patient") && (
-              <AvailabilityPreview availability={filteredAvailability} />
+              // <AvailabilityPreview availability={filteredAvailability} />
+              <AvailabilityList availability={filteredAvailability}/>
             )}
 
             {/* About */}

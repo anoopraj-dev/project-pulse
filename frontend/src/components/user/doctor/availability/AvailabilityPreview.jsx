@@ -122,6 +122,7 @@ const AvailabilityPreview = ({ availability = [], loading = false }) => {
                 </div>
               );
             })}
+            <span>View more</span>
           </div>
         )}
       </div>
