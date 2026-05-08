@@ -46,9 +46,9 @@ const AnimatedHeart = () => {
   return (
     <group
       ref={group}
-      position={[1.5, 0, 0]}
+      position={[0.5, 0.8, 0]}
       scale={1}
-      rotation={[0, -0.55, 0]}
+      rotation={[0, -0.65, 0]}
       // visible={materialApplied} // hide until materials applied
     >
       <primitive object={scene} />
