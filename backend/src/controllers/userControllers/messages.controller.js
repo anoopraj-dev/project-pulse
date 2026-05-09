@@ -3,14 +3,17 @@ import Conversation from "../../models/conversation.model.js";
 import Message from "../../models/message.model.js";
 import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import AppError from "../../utils/AppError.js";
 
 const modelMap = {
   Doctor,
   Patient,
 };
 
+
 // --------------------- GET ALL MESSAGES ---------------
-export const getAllMessages = async (req, res) => {
+export const getAllMessages = asyncHandler(async (req, res) => {
   try {
     const userId1 = req.user.id;
     const userId2 = req.params.id;
@@ -24,10 +27,7 @@ export const getAllMessages = async (req, res) => {
       userModel1 = "Doctor";
       userModel2 = "Patient";
     } else {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user role",
-      });
+      throw new AppError("Invalid user role", 400);
     }
 
     const ParticipantModel = modelMap[userModel2];
@@ -36,12 +36,7 @@ export const getAllMessages = async (req, res) => {
       "name profilePicture",
     );
 
-    if (!participant) {
-      return res.status(404).json({
-        success: false,
-        message: "Participant not found",
-      });
-    }
+    if (!participant) throw new AppError("Participant not found", 404);
 
     let conversation = await Conversation.findOne({
       participants: {
@@ -110,16 +105,12 @@ export const getAllMessages = async (req, res) => {
       messages: formattedMessages,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch messages",
-    });
+    throw error;
   }
-};
+});
 
 //------------------- GET ALL CHATS -----------------------
-export const getAllConversations = async (req, res) => {
+export const getAllConversations = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -160,9 +151,9 @@ export const getAllConversations = async (req, res) => {
       conversations: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false });
+    throw err;
   }
-};
+});
 
 //-------------------- SEND MESSAGE ----------------------
 

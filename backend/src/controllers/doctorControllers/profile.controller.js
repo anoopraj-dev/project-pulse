@@ -5,97 +5,49 @@ import {
   requestProfileResubmissionService,
   resubmitProfileService,
 } from "../../services/doctor/profile.service.js";
-
 import { getIO } from "../../socket.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import AppError from "../../utils/AppError.js";
 
 // ---------- GET PROFILE ----------
-export const getDoctorProfile = async (req, res) => {
-  try {
-    if (!req.user || req.user.role !== "doctor") {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    const { doctor, availability } =
-      await getDoctorProfileService(req.user.id);
-
-    return res.json({
-      success: true,
-      user: doctor,
-      availability,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Server error",
-    });
+export const getDoctorProfile = asyncHandler(async (req, res) => {
+  if (!req.user || req.user.role !== "doctor") {
+    throw new AppError("Not authorized", 403);
   }
-};
+
+  const { doctor, availability } = await getDoctorProfileService(req.user.id);
+
+  return res.json({ success: true, user: doctor, availability });
+});
 
 // ---------- UPDATE PROFILE ----------
-export const updateDoctorProfile = async (req, res) => {
-  try {
-    const doctor = await updateDoctorProfileService(req.body);
-
-    return res.status(200).json({
-      success: true,
-      user: doctor,
-    });
-  } catch (error) {
-    return res.status(
-      error.message === "Doctor not found" ? 404 : 500
-    ).json({
-      success: false,
-      message: error.message || "Server error",
-    });
-  }
-};
+export const updateDoctorProfile = asyncHandler(async (req, res) => {
+  const doctor = await updateDoctorProfileService(req.body);
+  return res.status(200).json({ success: true, user: doctor });
+});
 
 // ---------- REQUEST RESUBMISSION ----------
-export const requestProfileResubmission = async (req, res) => {
-  try {
-    const io = getIO();
+export const requestProfileResubmission = asyncHandler(async (req, res) => {
+  const io = getIO();
+  const { doctor, notification } = await requestProfileResubmissionService(req.user.id);
+  io.to("role:admin").emit("notification:new", notification);
 
-    const { doctor, notification } =
-      await requestProfileResubmissionService(req.user.id);
-
-    io.to("role:admin").emit("notification:new", notification);
-
-    return res.status(200).json({
-      success: true,
-      message: "Resubmission request sent to admin",
-      user: doctor,
-    });
-  } catch (error) {
-    return res.status(
-      error.message.includes("not found") ? 404 : 400
-    ).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+  return res.status(200).json({
+    success: true,
+    message: "Resubmission request sent to admin",
+    user: doctor,
+  });
+});
 
 // ---------- RESUBMIT PROFILE ----------
-export const resubmitProfile = async (req, res) => {
-  try {
-    const io = getIO();
+export const resubmitProfile = asyncHandler(async (req, res) => {
+  const io = getIO();
+  const { doctor, notification } = await resubmitProfileService(req.user.id);
+  io.to("role:admin").emit("notification:new", notification);
 
-    const { doctor, notification } =
-      await resubmitProfileService(req.user.id);
-
-    io.to("role:admin").emit("notification:new", notification);
-
-    return res.status(200).json({
-      success: true,
-      message: "Profile resubmitted successfully",
-      user: doctor,
-    });
-  } catch (error) {
-    return res.status(
-      error.message.includes("not found") ? 404 : 500
-    ).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+  return res.status(200).json({
+    success: true,
+    message: "Profile resubmitted successfully",
+    user: doctor,
+  });
+});

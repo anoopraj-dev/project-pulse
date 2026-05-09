@@ -7,68 +7,45 @@ import {
   walletPaymentService,
   verifyWalletTopupService,
 } from "../../services/payment/payment.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
 // CREATE ORDER
-export const createOrder = async (req, res) => {
-  try {
-    const order = await createOrderService(req.user.id, req.body);
-    res.json({ success: true, order });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
+export const createOrder = asyncHandler(async (req, res) => {
+  const order = await createOrderService(req.user.id, req.body);
+  res.json({ success: true, order });
+});
 
 // VERIFY PAYMENT
-export const verifyPayment = async (req, res) => {
-  try {
-    await verifyPaymentService(req.body);
-    res.json({ success: true, message: "Payment Verified" });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
+export const verifyPayment = asyncHandler(async (req, res) => {
+  await verifyPaymentService(req.body);
+  res.json({ success: true, message: "Payment Verified" });
+});
 
 // UPDATE STATUS
-export const updatePaymentStatus = async (req, res) => {
-  try {
-    const result = await updatePaymentStatusService(req.body);
+export const updatePaymentStatus = asyncHandler(async (req, res) => {
+  const result = await updatePaymentStatusService(req.body);
 
-    if (result?.alreadyProcessed) {
-      return res.json({ success: true, message: "Already processed" });
-    }
-
-    res.json({ success: true, payment: result.payment });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+  if (result?.alreadyProcessed) {
+    return res.json({ success: true, message: "Already processed" });
   }
-};
+
+  res.json({ success: true, payment: result.payment });
+});
 
 // RETRY
-export const retryPayment = async (req, res) => {
-  try {
-    const data = await retryPaymentService(req.params.id);
-    res.json({ success: true, ...data });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
+export const retryPayment = asyncHandler(async (req, res) => {
+  const data = await retryPaymentService(req.params.id);
+  res.json({ success: true, ...data });
+});
 
 // WALLET PAYMENT
-export const walletPayment = async (req, res) => {
-  try {
-    const payment = await walletPaymentService(req.user.id, req.body);
-    res.json({ success: true, payment });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
+export const walletPayment = asyncHandler(async (req, res) => {
+  const payment = await walletPaymentService(req.user.id, req.body);
+  res.json({ success: true, payment });
+});
 
 // VERIFY WALLET TOPUP
-export const verifyWalletPayment = async (req, res) => {
-  try {
-    const data = await verifyWalletTopupService(req.user.id, req.body);
-    res.json({ success: true, ...data });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
+export const verifyWalletPayment = asyncHandler(async (req, res) => {
+  const data = await verifyWalletTopupService(req.user.id, req.body);
+  res.json({ success: true, ...data });
+});

@@ -1,21 +1,8 @@
 
 import { getDoctorPaymentHistoryService } from "../../services/doctor/payment.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
-export const getDoctorPaymentHistory = async (req, res) => {
-  try {
-    const doctorId = req.user.id;
-
-    const payments = await getDoctorPaymentHistoryService(doctorId);
-
-    res.status(200).json({
-      success: true,
-      payments,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-};
+export const getDoctorPaymentHistory = asyncHandler(async (req, res) => {
+  const payments = await getDoctorPaymentHistoryService(req.user.id);
+  res.status(200).json({ success: true, payments });
+});

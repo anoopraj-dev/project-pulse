@@ -5,81 +5,50 @@ import {
   endConsultationService,
   getConsultationDetailsService,
   submitPrescriptionService,
-  generateConsultationPDFService
+  generateConsultationPDFService,
 } from "../../services/user/consultation.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
-export const createConsultation = async (req, res) => {
-  try {
-    const consultation = await createConsultationService({ appointmentId: req.body.appointmentId });
-    res.status(201).json({ success: true, consultation });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const createConsultation = asyncHandler(async (req, res) => {
+  const consultation = await createConsultationService({ appointmentId: req.body.appointmentId });
+  res.status(201).json({ success: true, consultation });
+});
 
-export const joinConsultation = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    const consultation = await joinConsultationService(id, userId);
-    res.status(200).json({ success: true, message: "Joined consultation successfully", consultation });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const joinConsultation = asyncHandler(async (req, res) => {
+  const consultation = await joinConsultationService(req.params.id, req.user.id);
+  res.status(200).json({ success: true, message: "Joined consultation successfully", consultation });
+});
 
-export const endConsultation = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    const data = await endConsultationService(id, userId);
-    res.status(200).json({ success: true, message: "Consultation ended", data });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const endConsultation = asyncHandler(async (req, res) => {
+  const data = await endConsultationService(req.params.id, req.user.id);
+  res.status(200).json({ success: true, message: "Consultation ended", data });
+});
 
-export const getConsultationDetails= async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-    const consultation = await getConsultationDetailsService(id, userId);
-    res.status(200).json({ success: true, consultation });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const getConsultationDetails = asyncHandler(async (req, res) => {
+  const consultation = await getConsultationDetailsService(req.params.id, req.user.id);
+  res.status(200).json({ success: true, consultation });
+});
 
-export const submitPrescription = async (req, res) => {
-  try {
-    const { consultationId } = req.params;
-    const doctorId = req.user.id;
-    const { diagnosis, medicines } = req.body;
+export const submitPrescription = asyncHandler(async (req, res) => {
+  const { consultationId } = req.params;
+  const { diagnosis, medicines } = req.body;
 
-    const prescription = await submitPrescriptionService(consultationId, doctorId, diagnosis, medicines);
-    res.status(201).json({ success: true, message: "Prescription submitted successfully", prescription });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+  const prescription = await submitPrescriptionService(
+    consultationId,
+    req.user.id,
+    diagnosis,
+    medicines
+  );
+  res.status(201).json({
+    success: true,
+    message: "Prescription submitted successfully",
+    prescription,
+  });
+});
 
-
-
-export const generateConsultationPDF= async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.id;
-
-    const pdfBuffer = await generateConsultationPDFService(id, userId);
-
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename=consultation-${id}.pdf`);
-    res.send(pdfBuffer);
-  } catch (error) {
-    console.error("Generate consultation PDF error:", error);
-    res.status(error.status || 500).json({
-      success: false,
-      message: error.message || "Server error",
-    });
-  }
-};
+export const generateConsultationPDF = asyncHandler(async (req, res) => {
+  const pdfBuffer = await generateConsultationPDFService(req.params.id, req.user.id);
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename=consultation-${req.params.id}.pdf`);
+  res.send(pdfBuffer);
+});
