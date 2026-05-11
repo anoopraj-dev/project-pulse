@@ -1,25 +1,11 @@
 import { Notification } from "../../models/notification.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
-export const getDoctorNotifications = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const notifications = await Notification.find({
-      recipient: userId,      
-      role: "doctor",
-    }).sort({ createdAt: -1 });
+export const getDoctorNotifications = asyncHandler(async (req, res) => {
+  const notifications = await Notification.find({
+    recipient: req.user.id,
+    role: "doctor",
+  }).sort({ createdAt: -1 });
 
-    return res.json({
-      success: true,
-      notifications,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to load notifications",
-    });
-  }
-};
-
-
-
+  return res.json({ success: true, notifications });
+});

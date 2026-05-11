@@ -5,90 +5,56 @@ import {
   searchPayments,
   searchTransactions,
   searchPatients,
-  getSearchSuggestions
+  getSearchSuggestions,
 } from "../../services/user/search.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import AppError from "../../utils/AppError.js";
 
 //------------- SEARCH CONTROLLER ----------------
-export const searchController = async (req, res) => {
-  try {
-    const { query, type, filters } = req.query;
-    const { role, id: userId } = req.user;
+export const searchController = asyncHandler(async (req, res) => {
+  const { query, type, filters } = req.query;
+  const { role, id: userId } = req.user;
 
-    if (!query || !type) {
-      return res.status(400).json({
-        success: false,
-        message: "Bad request: query & type are required",
-      });
-    }
+  if (!query || !type) throw new AppError("Bad request: query & type are required", 400);
 
-    const parsedFilters = filters ? JSON.parse(filters) : {};
-    const regex = new RegExp(query, "i");
+  const parsedFilters = filters ? JSON.parse(filters) : {};
+  const regex = new RegExp(query, "i");
 
-    //---------------- SEARCH SWITCH ----------------
-    let results = [];
-    switch (type) {
-      case "doctors":
-        results = await searchDoctors(regex, parsedFilters);
-        break;
-      case "appointments":
-        results = await searchAppointments(regex, parsedFilters, role, userId);
-        break;
-      case "payments":
-        results = await searchPayments(regex, parsedFilters, role, userId);
-        break;
-      case "transactions":
-        results = await searchTransactions(regex, parsedFilters, role, userId);
-        break;
-      case "patients":
-        results = await searchPatients(regex, parsedFilters, role, userId);
-        break;
-      default:
-        return res.status(400).json({
-          success: false,
-          message: "Invalid search type",
-        });
-    }
-
-    //---------------- RETURN RESULTS ----------------
-    return res.status(200).json({
-      success: true,
-      message: results.length ? "Results found" : "No matching results",
-      data: results,
-    });
-  } catch (error) {
-    console.error("Search error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error, failed to complete the request",
-    });
+  let results = [];
+  switch (type) {
+    case "doctors":
+      results = await searchDoctors(regex, parsedFilters);
+      break;
+    case "appointments":
+      results = await searchAppointments(regex, parsedFilters, role, userId);
+      break;
+    case "payments":
+      results = await searchPayments(regex, parsedFilters, role, userId);
+      break;
+    case "transactions":
+      results = await searchTransactions(regex, parsedFilters, role, userId);
+      break;
+    case "patients":
+      results = await searchPatients(regex, parsedFilters, role, userId);
+      break;
+    default:
+      throw new AppError("Invalid search type", 400);
   }
-};
 
-
+  return res.status(200).json({
+    success: true,
+    message: results.length ? "Results found" : "No matching results",
+    data: results,
+  });
+});
 
 //---------------- Search Suggestions Controller ----------------
-export const searchSuggestionsController = async (req, res) => {
-  try {
-    const { query = "", type } = req.query;
+export const searchSuggestionsController = asyncHandler(async (req, res) => {
+  const { query = "", type } = req.query;
 
-    if (!query || !type) {
-      return res.status(400).json({
-        success: false,
-        message: "Query and type are required",
-      });
-    }
+  if (!query || !type) throw new AppError("Query and type are required", 400);
 
-    const data = await getSearchSuggestions(query, type, req.user);
+  const data = await getSearchSuggestions(query, type, req.user);
 
-    return res.status(200).json({
-      success: true,
-      data,
-    });
-  } catch (error) {
-    console.error("Suggestion error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Suggestion fetch failed",
-    });
-  }
-};
+  return res.status(200).json({ success: true, data });
+});

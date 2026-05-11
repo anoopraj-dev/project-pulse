@@ -5,55 +5,33 @@ import {
   createWalletOrderService,
   verifyWalletPaymentService,
 } from "../../services/patient/wallet.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
 // -------- GET WALLET ----------
-export const getPatientWallet = async (req, res) => {
-  try {
-    const { wallet, transactions } = await getPatientWalletService(
-      req.user.id
-    );
-
-    res.json({ success: true, wallet, transactions });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+export const getPatientWallet = asyncHandler(async (req, res) => {
+  const { wallet, transactions } = await getPatientWalletService(req.user.id);
+  res.json({ success: true, wallet, transactions });
+});
 
 // -------- REFUND ----------
-export const refundToWallet = async (req, res) => {
-  try {
-    const { patientWallet, transaction } =
-      await refundToWalletService(req.user.id, req.body);
-
-    res.status(200).json({
-      success: true,
-      message: "Refund credited",
-      patientWallet,
-      transaction,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const refundToWallet = asyncHandler(async (req, res) => {
+  const { patientWallet, transaction } = await refundToWalletService(req.user.id, req.body);
+  res.status(200).json({
+    success: true,
+    message: "Refund credited",
+    patientWallet,
+    transaction,
+  });
+});
 
 // -------- CREATE ORDER ----------
-export const createWalletOrder = async (req, res) => {
-  try {
-    const order = await createWalletOrderService(req.body);
-
-    res.status(200).json({ success: true, order });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const createWalletOrder = asyncHandler(async (req, res) => {
+  const order = await createWalletOrderService(req.body);
+  res.status(200).json({ success: true, order });
+});
 
 // -------- VERIFY PAYMENT ----------
-export const verifyWalletPayment = async (req, res) => {
-  try {
-    await verifyWalletPaymentService(req.user.id, req.body);
-
-    res.json({ success: true, message: "Wallet credited successfully" });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
+export const verifyWalletPayment = asyncHandler(async (req, res) => {
+  await verifyWalletPaymentService(req.user.id, req.body);
+  res.json({ success: true, message: "Wallet credited successfully" });
+});

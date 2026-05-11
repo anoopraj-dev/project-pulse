@@ -142,6 +142,23 @@ export const initSocket = (server) => {
       });
     });
 
+    // ---------------- TYPING INDICATOR ----------------
+    socket.on("chat:typing", ({ conversationId }) => {
+      if (!conversationId) return;
+      socket.to(conversationId.toString()).emit("chat:typing", {
+        conversationId,
+        userId,
+      });
+    });
+
+    socket.on("chat:stop-typing", ({ conversationId }) => {
+      if (!conversationId) return;
+      socket.to(conversationId.toString()).emit("chat:stop-typing", {
+        conversationId,
+        userId,
+      });
+    });
+
     //------------ WEBRTC SIGNALING -------------------
     socket.on("consultation:join", async ({ sessionId }) => {
       if (!sessionId) return;

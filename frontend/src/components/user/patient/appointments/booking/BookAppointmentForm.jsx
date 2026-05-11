@@ -53,46 +53,44 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     }));
   };
 
-
   console.log("BOOKING INFO RESPONSE:", bookingInfo);
 
-
   // -------------------- Get available dates --------------------
-const getAvailableDates = () => {
-  if (!hasBookingInfo) return [];
+  const getAvailableDates = () => {
+    if (!hasBookingInfo) return [];
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  return (
-    activeDoctor?.availability
-      ?.filter((day) => {
-        const d = new Date(day.date);
-        d.setHours(0, 0, 0, 0);
-        return d >= today;
-      })
-      .map((day) => day.date) || []
-  );
-};
+    return (
+      activeDoctor?.availability
+        ?.filter((day) => {
+          const d = new Date(day.date);
+          d.setHours(0, 0, 0, 0);
+          return d >= today;
+        })
+        .map((day) => day.date) || []
+    );
+  };
 
   const availableSlots = () => {
-  if (!hasBookingInfo || !formData.date) return [];
+    if (!hasBookingInfo || !formData.date) return [];
 
-  const day = activeDoctor?.availability?.find(
-    (d) => d.date === formData.date
-  );
+    const day = activeDoctor?.availability?.find(
+      (d) => d.date === formData.date,
+    );
 
-  if (!day?.slots) return [];
+    if (!day?.slots) return [];
 
-  const now = new Date();
+    const now = new Date();
 
-  return day.slots.filter((slot) => {
-    if (!slot?.startAt) return false;
+    return day.slots.filter((slot) => {
+      if (!slot?.startAt) return false;
 
-    const slotStart = new Date(slot.startAt);
-    return slotStart > now;
-  });
-};
+      const slotStart = new Date(slot.startAt);
+      return slotStart > now;
+    });
+  };
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -111,7 +109,6 @@ const getAvailableDates = () => {
         amount: amountToPay,
       });
 
-
       let payload;
       if (res.data?.success) {
         payload = {
@@ -120,7 +117,6 @@ const getAvailableDates = () => {
           doctorId: res.data?.payment?.doctor,
           orderId: res.data?.payment?.orderId,
         };
-        
 
         handleBooking(payload);
       }
@@ -162,9 +158,9 @@ const getAvailableDates = () => {
     try {
       setQuery(item.name);
 
-      if(!item?._id) {
-        console.error('Invalid doctor Item:',item);
-        return 
+      if (!item?._id) {
+        console.error("Invalid doctor Item:", item);
+        return;
       }
 
       const res = await getBookingInfo(item._id);
@@ -204,9 +200,8 @@ const getAvailableDates = () => {
           hasBookingInfo={hasBookingInfo}
           activeDoctor={activeDoctor}
           formData={formData}
+          setFormData={setFormData}
           handleChange={handleChange}
-          getAvailableDates={getAvailableDates}
-          availableSlots={availableSlots}
           today={today}
         />
 

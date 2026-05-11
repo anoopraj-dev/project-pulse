@@ -12,6 +12,7 @@ import { fileURLToPath } from 'url';
 import { monitorMiddleware } from './middlewares/monitor.js';
 import morgan from 'morgan'
 import fs from 'fs'
+import errorHandler, { notFoundHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
@@ -86,9 +87,8 @@ app.use('/api/admin',adminRoutes)
 //----------- common routes -------------
 app.use('/api',userRoutes)
 
+app.use(notFoundHandler);
 
-
-
-
+app.use(errorHandler);
 
 export default app;

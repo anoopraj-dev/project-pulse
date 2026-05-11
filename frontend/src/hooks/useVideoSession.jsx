@@ -23,6 +23,8 @@ export const useVideoSession = (sessionId, role, stream) => {
 
   const callStartedRef = useRef(false);
   const isReconnectingRef = useRef(false);
+  const iceCandidateQueueRef = useRef([]);
+  const lastOfferTimeRef = useRef(0);
 
   const statusRef = useRef("waiting");
 
@@ -44,6 +46,7 @@ export const useVideoSession = (sessionId, role, stream) => {
       pcRef.current.close();
       pcRef.current = null;
     }
+    iceCandidateQueueRef.current = [];
   };
 
   // ---------------- CREATE PEER CONNECTION ----------------
@@ -51,7 +54,13 @@ export const useVideoSession = (sessionId, role, stream) => {
     if (!localStreamRef.current) return null;
 
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" },
+      ],
     });
 
     // Add local tracks once
@@ -270,6 +279,7 @@ export const useVideoSession = (sessionId, role, stream) => {
 
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
+        lastOfferTimeRef.current = Date.now();
 
         socket.emit("webrtc:offer", { sessionId, offer });
       }
@@ -277,16 +287,12 @@ export const useVideoSession = (sessionId, role, stream) => {
 
     socket.on("consultation:user-joined", async () => {
       if (role !== "doctor") return;
-      callStartedRef.current = false;
-      closePC();
+      
+      // Debounce if both-joined just fired
+      if (Date.now() - lastOfferTimeRef.current < 2000) return;
 
-      const pc = createPeerConnection();
-      if (!pc) return;
-
-      const offer = await pc.createOffer({ iceRestart: true });
-      await pc.setLocalDescription(offer);
-
-      socket.emit("webrtc:offer", { sessionId, offer });
+      rebuildConnection();
+      lastOfferTimeRef.current = Date.now();
     });
 
     socket.on("webrtc:offer", async ({ offer }) => {
@@ -301,6 +307,16 @@ export const useVideoSession = (sessionId, role, stream) => {
 
       await pc.setRemoteDescription(offer);
 
+      // Flush ICE candidate queue now that remote description is set
+      while (iceCandidateQueueRef.current.length > 0) {
+        const candidate = iceCandidateQueueRef.current.shift();
+        try {
+          await pc.addIceCandidate(candidate);
+        } catch (e) {
+          console.error("Error adding queued ice candidate:", e);
+        }
+      }
+
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
@@ -312,12 +328,26 @@ export const useVideoSession = (sessionId, role, stream) => {
       if (!pcRef.current) return;
 
       await pcRef.current.setRemoteDescription(answer);
+
+      // Flush ICE candidate queue
+      while (iceCandidateQueueRef.current.length > 0) {
+        const candidate = iceCandidateQueueRef.current.shift();
+        try {
+          await pcRef.current.addIceCandidate(candidate);
+        } catch (e) {
+          console.error("Error adding queued ice candidate:", e);
+        }
+      }
     });
 
     socket.on("webrtc:ice-candidate", async ({ candidate }) => {
       try {
-        if (pcRef.current && candidate) {
-          await pcRef.current.addIceCandidate(candidate);
+        if (candidate) {
+          if (!pcRef.current || !pcRef.current.remoteDescription) {
+            iceCandidateQueueRef.current.push(candidate);
+          } else {
+            await pcRef.current.addIceCandidate(candidate);
+          }
         }
       } catch (err) {
         console.error("ICE error:", err);

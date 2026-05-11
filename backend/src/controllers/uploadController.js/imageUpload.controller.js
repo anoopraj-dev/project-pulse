@@ -1,44 +1,23 @@
 
 import { handleImageUpload } from "../../services/uploads/imageUpload.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import AppError from "../../utils/AppError.js";
 
-export const uploadImage = async (req, res) => {
-  try {
-    const files = req.files || [];
+export const uploadImage = asyncHandler(async (req, res) => {
+  const files = req.files || [];
 
-    if (!files || files.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No files uploaded",
-      });
-    }
+  if (!files || files.length === 0) throw new AppError("No files uploaded", 400);
 
-    const type = req.query.type || req.body.type;
-    if (!type) {
-      return res.status(400).json({
-        success: false,
-        message: "Upload type missing",
-      });
-    }
+  const type = req.query.type || req.body.type;
+  if (!type) throw new AppError("Upload type missing", 400);
 
-    const { urls, updatedDoc } = await handleImageUpload({
-      files,
-      type,
-      user: req.user,
-    });
+  const { urls, updatedDoc } = await handleImageUpload({ files, type, user: req.user });
 
-    return res.status(200).json({
-      success: true,
-      message: "Upload successful",
-      uploadedCount: urls.length,
-      urls,
-      user: updatedDoc,
-    });
-  } catch (error) {
-    console.error("UPLOAD ERROR:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Server error during file upload",
-    });
-  }
-};
+  return res.status(200).json({
+    success: true,
+    message: "Upload successful",
+    uploadedCount: urls.length,
+    urls,
+    user: updatedDoc,
+  });
+});

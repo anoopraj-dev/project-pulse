@@ -1,46 +1,21 @@
 import { Notification } from "../../models/notification.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
-export const getPatientNotifications = async (req, res) => {
-  try {
-    const userId = req.user.id;
+export const getPatientNotifications = asyncHandler(async (req, res) => {
+  const notifications = await Notification.find({
+    recipient: req.user.id,
+    role: "patient",
+  }).sort({ createdAt: -1 });
 
-    const notifications = await Notification.find({
-      recipient: userId,      
-      role: "patient",
-    }).sort({ createdAt: -1 });
-
-    return res.json({
-      success: true,
-      notifications,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to load notifications",
-    });
-  }
-};
-
+  return res.json({ success: true, notifications });
+});
 
 //------------------- MARK ALL READ ---------------------
-export const setMarkAllRead = async (req, res) => {
-  try {
-    const role = req.user.role; 
-    const result = await Notification.updateMany(
-      { role, read: false },
-      { $set: { read: true } }
-    );
+export const setMarkAllRead = asyncHandler(async (req, res) => {
+  const result = await Notification.updateMany(
+    { role: req.user.role, read: false },
+    { $set: { read: true } }
+  );
 
-    return res.json({
-      success: true,
-      modifiedCount: result.modifiedCount,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to mark notifications as read",
-    });
-  }
-};
+  return res.json({ success: true, modifiedCount: result.modifiedCount });
+});
