@@ -1,9 +1,12 @@
-
-import { useRef, useState } from "react";
+import { useSocket } from "../../../contexts/SocketContext";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 
-const MessageInput = ({ onSend, disabled = false, disabledMessage = "" }) => {
+const MessageInput = ({ onSend, disabled = false, disabledMessage = "", conversationId }) => {
+  const { socket } = useSocket();
   const [message, setMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef(null);
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef();
 
@@ -20,6 +23,14 @@ const MessageInput = ({ onSend, disabled = false, disabledMessage = "" }) => {
   const handleSend = (e) => {
     e.preventDefault();
     if (disabled || (!message.trim() && files.length === 0)) return;
+
+    // Stop typing immediately when sending
+    if (isTyping) {
+      setIsTyping(false);
+      socket.emit("chat:stop-typing", { conversationId });
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    }
+
     onSend({ text: message.trim(), files });
     setMessage("");
     setFiles([]);
@@ -107,6 +118,19 @@ const MessageInput = ({ onSend, disabled = false, disabledMessage = "" }) => {
               setMessage(e.target.value);
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+
+              // Typing logic
+              if (!isTyping) {
+                setIsTyping(true);
+                socket.emit("chat:typing", { conversationId });
+              }
+
+              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+              typingTimeoutRef.current = setTimeout(() => {
+                setIsTyping(false);
+                socket.emit("chat:stop-typing", { conversationId });
+              }, 3000);
             }}
             onKeyDown={handleKeyDown}
             disabled={disabled}

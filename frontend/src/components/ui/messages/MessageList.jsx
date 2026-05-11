@@ -3,26 +3,30 @@ import { useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 import PDFViewer from "../pdrViewer/PDFViewer";
 
-const MessageList = ({ messages, userId, activeConversationId }) => {
+const MessageList = ({ messages, userId, activeConversationId, typingUsers }) => {
   const bottomRef = useRef(null);
 
   const filteredMessages = messages.filter(
-    (msg) => msg?.conversationId === activeConversationId
+    (msg) => msg?.conversationId === activeConversationId,
   );
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [filteredMessages]);
+  }, [filteredMessages, typingUsers]);
 
-  if (filteredMessages.length === 0) {
+  if (filteredMessages.length === 0 && (!typingUsers || typingUsers.size === 0)) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 bg-slate-50 text-center px-6">
         <div className="w-14 h-14 rounded-2xl bg-sky-100 flex items-center justify-center">
           <Icon icon="mdi:chat-outline" className="w-7 h-7 text-sky-400" />
         </div>
         <div>
-          <p className="text-[14px] font-semibold text-slate-700">No messages yet</p>
-          <p className="text-[12px] text-slate-400 mt-0.5">Start the conversation below.</p>
+          <p className="text-[14px] font-semibold text-slate-700">
+            No messages yet
+          </p>
+          <p className="text-[12px] text-slate-400 mt-0.5">
+            Start the conversation below.
+          </p>
         </div>
       </div>
     );
@@ -53,7 +57,9 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                   }`}
                 >
                   <p>{msg.text}</p>
-                  <p className={`text-[10px] mt-1 flex items-center justify-end gap-0.5 ${isMe ? "text-sky-200" : "text-slate-400"}`}>
+                  <p
+                    className={`text-[10px] mt-1 flex items-center justify-end gap-0.5 ${isMe ? "text-sky-200" : "text-slate-400"}`}
+                  >
                     {timestamp}
                     {isMe && (
                       <Icon
@@ -79,13 +85,24 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                 const timestampOverlay = (
                   <span className="absolute bottom-2 right-2 text-[10px] px-1.5 py-0.5 rounded-md bg-black/30 text-white flex items-center gap-0.5">
                     {timestamp}
-                    {isMe && <Icon icon={msg.isRead ? "mdi:check-all" : "mdi:check"} className="w-3 h-3" />}
+                    {isMe && (
+                      <Icon
+                        icon={msg.isRead ? "mdi:check-all" : "mdi:check"}
+                        className="w-3 h-3"
+                      />
+                    )}
                   </span>
                 );
 
-                if (file.resourceType === "image" || (isTemp && (!isProtected || isMe))) {
+                if (
+                  file.resourceType === "image" ||
+                  (isTemp && (!isProtected || isMe))
+                ) {
                   return (
-                    <div key={idx} className="relative mt-1 inline-block rounded-xl overflow-hidden shadow-sm">
+                    <div
+                      key={idx}
+                      className="relative mt-1 inline-block rounded-xl overflow-hidden shadow-sm"
+                    >
                       <img
                         src={file.url || file.localPreview}
                         alt={file.name || "image"}
@@ -98,7 +115,10 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
 
                 if (file.resourceType === "video" || isTemp) {
                   return (
-                    <div key={idx} className="relative mt-1 inline-block rounded-xl overflow-hidden shadow-sm">
+                    <div
+                      key={idx}
+                      className="relative mt-1 inline-block rounded-xl overflow-hidden shadow-sm"
+                    >
                       <video
                         src={file.url || file.localPreview}
                         controls
@@ -110,7 +130,14 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
                 }
 
                 if (file.resourceType === "raw" || isTemp) {
-                  return <PDFViewer key={idx} file={file} timestamp={timestamp} isRead={msg.isRead} />;
+                  return (
+                    <PDFViewer
+                      key={idx}
+                      file={file}
+                      timestamp={timestamp}
+                      isRead={msg.isRead}
+                    />
+                  );
                 }
 
                 return null;
@@ -119,6 +146,20 @@ const MessageList = ({ messages, userId, activeConversationId }) => {
           </div>
         );
       })}
+
+      {/* Typing Indicator */}
+      {typingUsers && typingUsers.size > 0 && (
+        <div className="flex justify-start">
+          <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-sm">
+            <div className="flex gap-1">
+              <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+              <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+              <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div ref={bottomRef} />
     </div>
   );

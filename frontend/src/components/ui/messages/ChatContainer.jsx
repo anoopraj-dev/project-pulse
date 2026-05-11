@@ -26,6 +26,7 @@ const ChatContainer = () => {
   const [messages, setMessages] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [typingUsers, setTypingUsers] = useState(new Set());
 
   // ---------------- Fetch Sidebar Conversations ----------------
   useEffect(() => {
@@ -298,6 +299,39 @@ const ChatContainer = () => {
     return () => socket.off("message:read", handleMessageRead);
   }, [socket, id]);
 
+  // ---------------- Typing Indicator ----------------
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleTyping = ({ conversationId, userId }) => {
+      if (conversationId === activeConversation?.id && userId !== id) {
+        setTypingUsers((prev) => {
+          const next = new Set(prev);
+          next.add(userId);
+          return next;
+        });
+      }
+    };
+
+    const handleStopTyping = ({ conversationId, userId }) => {
+      if (conversationId === activeConversation?.id) {
+        setTypingUsers((prev) => {
+          const next = new Set(prev);
+          next.delete(userId);
+          return next;
+        });
+      }
+    };
+
+    socket.on("chat:typing", handleTyping);
+    socket.on("chat:stop-typing", handleStopTyping);
+
+    return () => {
+      socket.off("chat:typing", handleTyping);
+      socket.off("chat:stop-typing", handleStopTyping);
+    };
+  }, [socket, activeConversation?.id, id]);
+
   //-------------- Total Unread for Global use ---------------
 
   useEffect(() => {
@@ -342,10 +376,12 @@ const ChatContainer = () => {
             messages={messages}
             userId={id}
             activeConversationId={activeConversation?.id}
+            typingUsers={typingUsers}
           />
           <MessageInput
             onSend={handleSendMessage}
             disabled={!isConnected || isUploading}
+            conversationId={activeConversation?.id}
           />
         </>
       ) : (
