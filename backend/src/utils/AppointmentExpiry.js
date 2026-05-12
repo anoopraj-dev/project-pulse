@@ -1,4 +1,5 @@
 import Appointment from "../models/appointments.model.js";
+import { buildUTCDate } from "./timeUtils.js";
 
 export const expireAppointments = async () => {
     const now = new Date();
@@ -8,14 +9,12 @@ export const expireAppointments = async () => {
     }).populate('consultation');
 
     for (const appt of appointments) {
-        const [hours, minutes] = appt.timeSlot.split(':').map(Number);
-
-        const startTime = new Date(appt.appointmentDate);
-        startTime.setHours(hours, minutes, 0, 0);
+        const startTime = buildUTCDate(appt.appointmentDate, appt.timeSlot);
 
         const endTime = new Date(
-            startTime.getTime() + (appt.duration + appt.buffer) * 60000
+            startTime.getTime() + (appt.duration + (appt.buffer || 0)) * 60000
         );
+
 
         if (now > endTime) {
             const consult = appt.consultation;

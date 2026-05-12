@@ -4,6 +4,7 @@ import Appointment from "../../models/appointments.model.js";
 import Consultation from "../../models/consultation.model.js";
 import Review from "../../models/review.model.js";
 import Settlement from "../../models/settlement.model.js";
+import { getStartOfTodayIndia } from "../../utils/timeUtils.js";
 
 export const doctorRevenueService = async (doctorId, range) => {
   const now = new Date();
@@ -95,8 +96,7 @@ export const doctorRevenueService = async (doctorId, range) => {
 };
 
 export const upcomingAppointmentService = async (doctorId, limit = 10) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getStartOfTodayIndia();
 
   const appointments = await Appointment.aggregate([
     {
@@ -152,17 +152,16 @@ export const dashboardStatsService = async (doctorId) => {
   const doctorObjectId = new mongoose.Types.ObjectId(doctorId);
 
   // ---------- Date Helpers ----------
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const startOfToday = getStartOfTodayIndia();
 
-  const endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
+  const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000 - 1);
 
   const startOfYesterday = new Date(startOfToday);
   startOfYesterday.setDate(startOfYesterday.getDate() - 1);
 
   const endOfYesterday = new Date(startOfToday);
   endOfYesterday.setMilliseconds(-1);
+
 
   const startOfWeek = new Date(startOfToday);
   startOfWeek.setDate(startOfWeek.getDate() - 7);
