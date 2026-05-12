@@ -2,11 +2,11 @@ import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
 import Prescription from "../../models/prescription.model.js";
 import Patient from "../../models/patient.model.js";
+import { getStartOfTodayIndia } from "../../utils/timeUtils.js";
 
 //------------ Dashboard Stats ---------------
 export const patientDashboardStatsService = async (patientId) => {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
+  const now = getStartOfTodayIndia();
 
   const startOfLastMonth = new Date(
     now.getFullYear(),
@@ -91,8 +91,7 @@ export const patientDashboardStatsService = async (patientId) => {
 
 //---------------- Upcoming appointments -------------
 export const upcomingAppointmentsService = async (patientId) => {
-  const now = new Date();
-now.setHours(0, 0, 0, 0);
+  const now = getStartOfTodayIndia();
 
   const appointments = await Appointment.find({
     patient: patientId,
@@ -126,9 +125,8 @@ now.setHours(0, 0, 0, 0);
 export const patientDashboardChartService = async (patientId) => {
   const now = new Date();
 
-  const startDate = new Date();
-  startDate.setDate(now.getDate() - 6);
-  startDate.setHours(0, 0, 0, 0);
+  const startDate = getStartOfTodayIndia();
+  startDate.setDate(startDate.getDate() - 6);
 
   // ---------------- INIT 7 DAYS (SAFE KEY) ----------------
   const daysMap = {};

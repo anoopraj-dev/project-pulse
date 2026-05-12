@@ -1,17 +1,15 @@
-export const validateAdvanceBooking = (date,time,minHours = 1) =>{
-    const [hours,minutes] = time.split(':').map(Number);
+import { buildUTCDate } from "./timeUtils.js";
 
-    const appointmentDateTime = new Date(date);
-    appointmentDateTime.setHours(hours,minutes,0,0);
-
+export const validateAdvanceBooking = (date, time, minHours = 1) => {
+    const appointmentDateTime = buildUTCDate(date, time);
     const now = new Date();
+    
     const diffInMs = appointmentDateTime - now;
+    const requiredMs = minHours * 60 * 60 * 1000;
 
-    const requiredMs = minHours*1*60*1000;
-
-    if(diffInMs < requiredMs){
+    if (diffInMs < requiredMs) {
         throw new Error(
-            `Appointments must be booked atleast ${minHours} hour(s) in advance`
-        )
+            `Appointments must be booked at least ${minHours} hour(s) in advance`
+        );
     }
-}
+};

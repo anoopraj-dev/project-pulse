@@ -10,10 +10,10 @@ const Heart = () => {
     <div className="w-full aspect-square">
       <Canvas camera={{ position: [0, 0, 8], fov: 50 }} style={{ background: "transparent" }}>
         {/* -------- Lights -------- */}
-        <ambientLight intensity={0.4} color="#6ea8ff" />
-        <directionalLight position={[4, 5, 5]} intensity={1.6} color="#fff" />
-        <directionalLight position={[-5, -2, 3]} intensity={1.2} color="#3b82f6" />
-        <pointLight position={[0, 1, 2.5]} intensity={5} color="#ff4d4d" />
+        <ambientLight intensity={1.5} color="#ffffff" />
+        <directionalLight position={[5, 10, 5]} intensity={1.2} color="#ffffff" />
+        <pointLight position={[-5, 5, -5]} intensity={0.8} color="#ffffff" />
+
 
         {/* -------- Controls -------- */}
         <OrbitControls

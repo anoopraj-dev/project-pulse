@@ -7,11 +7,9 @@ import Patient from "../../models/patient.model.js";
 import { createNotification } from "../user/notification.service.js";
 import { createConsultationService } from "../user/consultation.service.js";
 import paginate from "../../utils/paginate.js";
+import { buildUTCDate, getIndiaDateString } from "../../utils/timeUtils.js";
 
-// -------- Helper: Build UTC Date --------
-const buildUTCDate = (date, time) => {
-  return new Date(`${date}T${time}:00+05:30`);
-};
+// Time utility imported from utils/timeUtils.js
 
 // -------- Get Booking Info --------
 export const getBookingInfoService = async (doctorId) => {
@@ -226,7 +224,7 @@ export const cancelAppointmentService = async (id, patientId) => {
       throw new Error("Already cancelled");
     }
 
-    const dateKey = appointment.appointmentDate.toISOString().split("T")[0];
+    const dateKey = getIndiaDateString(appointment.appointmentDate);
 
     const slotStartUTC = buildUTCDate(dateKey, appointment.timeSlot);
 

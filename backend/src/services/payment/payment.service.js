@@ -7,6 +7,7 @@ import Admin from "../../models/admin.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
 import { validateAdvanceBooking } from "../../utils/timeValidation.js";
+import { buildUTCDate } from "../../utils/timeUtils.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -23,10 +24,7 @@ const calculateDuration = (startTime, endTime = null, fallback = 30) => {
   return eh * 60 + em - (sh * 60 + sm);
 };
 
-//------------------- Build UTC date ------
-const buildUTCDate = (date, time) => {
-  return new Date(`${date}T${time}:00+05:30`);
-};
+// Time utility imported from utils/timeUtils.js
 
 // -------- CREATE ORDER ----------
 export const createOrderService = async (userId, body) => {
@@ -227,10 +225,7 @@ export const retryPaymentService = async (paymentId) => {
     throw new Error("Invalid appointment date");
   }
 
-  const [hours, minutes] = appointment.timeSlot.split(":").map(Number);
-
-  const appointmentDateTime = new Date(baseDate);
-  appointmentDateTime.setHours(hours, minutes, 0, 0);
+  const appointmentDateTime = buildUTCDate(baseDate, appointment.timeSlot);
 
   if (isNaN(appointmentDateTime.getTime())) {
     throw new Error("Invalid appointment timeSlot");
@@ -273,11 +268,19 @@ export const walletPaymentService = async (userId, body) => {
 
   const availability = await DoctorAvailability.findOne({
     doctorId,
-    date: new Date(date),
+    dateKey: date,
   });
 
-  const slot = availability?.slots?.find(
-    (s) => s.startTime === time && !s.isBooked,
+  if (!availability) {
+    throw new Error("No availability found");
+  }
+
+  const slotStartUTC = buildUTCDate(date, time);
+
+  const slot = availability.slots.find(
+    (s) =>
+      s.startAt.getTime() === slotStartUTC.getTime() &&
+      s.status === "available",
   );
 
   if (!slot) throw new Error("Selected slot is not available");

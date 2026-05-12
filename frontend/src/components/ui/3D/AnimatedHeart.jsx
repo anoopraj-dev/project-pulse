@@ -12,21 +12,13 @@ const AnimatedHeart = () => {
   useEffect(() => {
     if (!scene) return;
 
-    // Custom material
-    // const customMaterial = new THREE.MeshStandardMaterial({
-    //   color: 0x0a9292f,
-    //   emissive: 0x0a192f,
-    //   emissiveIntensity: 0.6,
-    //   roughness: 0.5,
-    //   metalness: 0.1,
-    // });
-
-    // Apply material to all meshes
+    // Apply properties to all meshes
     scene.traverse((child) => {
       if (child.isMesh) {
-        // child.material = customMaterial;
-        child.castShadow = true;
-        child.receiveShadow = true;
+        if (child.material) {
+          child.material.metalness = 0;
+          child.material.roughness = 1;
+        }
       }
     });
 
@@ -49,7 +41,6 @@ const AnimatedHeart = () => {
       position={[0.5, 0.8, 0]}
       scale={1}
       rotation={[0, -0.65, 0]}
-      // visible={materialApplied} // hide until materials applied
     >
       <primitive object={scene} />
     </group>
