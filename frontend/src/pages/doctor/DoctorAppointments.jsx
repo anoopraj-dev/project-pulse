@@ -70,29 +70,30 @@ const DoctorAppointments = () => {
     navigate(`/doctor/appointments/${id}`);
   };
 
+  const getStatusFromTab = (tab) => {
+    const mapping = {
+      upcoming: ["confirmed", "ongoing"],
+      history: ["completed"],
+      pending: ["pending"],
+      cancelled: ["cancelled"],
+      expired: ["expired"],
+    };
+    return mapping[tab] || [tab];
+  };
+
   const filteredAppointments = appointments?.filter((appointment) => {
-    if (activeTab === "upcoming") {
-      return appointment?.status === "confirmed";
-    } else if (activeTab === "history") {
-      return appointment?.status === "completed";
-    } else if (activeTab === "pending") {
-      return appointment?.status === "pending";
-    } else if (activeTab === "cancelled") {
-      return appointment?.status === "cancelled";
-    } else if (activeTab === "expired") {
-      return appointment?.status === "expired";
-    }
-    return true;
+    if (activeTab === "all") return true;
+    const statuses = getStatusFromTab(activeTab);
+    return statuses.includes(appointment?.status);
   });
 
   const filteredSearchResult = results?.filter((appointment) => {
-    if (activeTab === "upcoming") {
-      return appointment?.status === "upcoming";
-    } else if (activeTab === "history") {
-      return appointment?.status === "completed";
-    }
-    return true;
+    if (activeTab === "all") return true;
+    const statuses = getStatusFromTab(activeTab);
+    return statuses.includes(appointment?.status);
   });
+
+
 
   const displayedAppointments = (query.trim()
     ? filteredSearchResult

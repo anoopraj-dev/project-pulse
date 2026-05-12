@@ -83,27 +83,30 @@ const PatientAppointments = () => {
     navigate(`/patient/appointments/${id}`);
   };
 
+  const getStatusFromTab = (tab) => {
+    const mapping = {
+      confirmed: ["confirmed", "ongoing", "pending"],
+      history: ["completed"],
+      cancelled: ["cancelled"],
+      expired: ["expired"],
+    };
+    return mapping[tab] || [tab];
+  };
+
+
   const filteredAppointments = appointments?.filter((appointment) => {
-    if (activeTab === "confirmed") {
-      return appointment?.status === "confirmed";
-    } else if (activeTab === "history") {
-      return appointment?.status === "completed";
-    } else if (activeTab === "cancelled") {
-      return appointment?.status === "cancelled";
-    }
-    return true;
+    if (activeTab === "all") return true;
+    const statuses = getStatusFromTab(activeTab);
+    return statuses.includes(appointment?.status);
   });
 
   const filteredSearchResult = results?.filter((appointment) => {
-    if (activeTab === "confirmed") {
-      return appointment?.status === "confirmed";
-    } else if (activeTab === "history") {
-      return appointment?.status === "completed";
-    } else if (activeTab === "cancelled") {
-      return appointment?.status === "cancelled";
-    }
-    return true;
+    if (activeTab === "all") return true;
+    const statuses = getStatusFromTab(activeTab);
+    return statuses.includes(appointment?.status);
   });
+
+
 
   //------------------- Fetch selected doc info (prefill form) -----------
   useEffect(() => {

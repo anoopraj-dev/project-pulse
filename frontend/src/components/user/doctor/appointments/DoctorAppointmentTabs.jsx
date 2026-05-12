@@ -7,7 +7,9 @@ const DoctorAppointmentTabs = ({ activeTab, setActiveTab, counts = {} }) => {
     { key: "upcoming", label: "Upcoming", icon: "solar:clock-circle-linear" },
     { key: "cancelled", label: "Cancelled", icon: "solar:close-circle-linear" },
     { key: "history", label: "History", icon: "solar:history-linear" },
+    { key: "expired", label: "Expired", icon: "solar:calendar-remove-linear" },
   ];
+
 
   return (
     <TableTabs
