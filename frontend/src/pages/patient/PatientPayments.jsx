@@ -126,25 +126,27 @@ const PatientPayments = () => {
     }
   };
 
+  const getStatusFromTab = (tab) => {
+    const mapping = {
+      success: "verified",
+    };
+    return mapping[tab] || tab;
+  };
+
   const filteredPayments = payments?.filter((payment) => {
     if (activeTab === "all") {
       return payment?.status !== "created";
-    } else if (activeTab === "success") {
-      return payment?.status === "verified";
-    } else if (activeTab === "failed") {
-      return payment?.status === "failed";
-    } else if (activeTab === "refunded") {
-      return payment?.status === "refunded";
     }
-    return true;
+    return payment?.status === getStatusFromTab(activeTab);
   });
 
-const filteredSearchResult = results?.filter((payment) => {
-  if (activeTab === "success") return payment?.status === "verified";
-  if (activeTab === "failed") return payment?.status === "failed";
-  if (activeTab === "refunded") return payment?.status === "refunded";
-  return payment?.status !== "created";
-});
+  const filteredSearchResult = results?.filter((payment) => {
+    if (activeTab === "all") {
+      return payment?.status !== "created";
+    }
+    return payment?.status === getStatusFromTab(activeTab);
+  });
+
 
   useEffect(() => {}, [activeTab]);
 

@@ -73,8 +73,9 @@ const ViewPatients = () => {
   );
 
   const displayedPatients = (query.trim()
-    ? results
-    : filteredPatients)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    ? filteredSearchResult
+    : filteredAppointments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
 
   const isLoading = fetchPatientsAction.loading;
 

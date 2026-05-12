@@ -8,8 +8,10 @@ export const getPatientPaymentHistoryService = async (
   const query = { patient: patientId };
 
   if (status && status !== "all") {
-    query.status = status;
+    // Map frontend status 'success' to DB status 'verified'
+    query.status = status === "success" ? "verified" : status;
   }
+
 
   return await paginate({
     model: Payment,

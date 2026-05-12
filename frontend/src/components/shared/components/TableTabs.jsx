@@ -12,7 +12,7 @@ import { Icon } from "@iconify/react";
  */
 const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }) => {
   return (
-    <div className={`flex gap-1 p-1 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm rounded-xl w-fit mb-5${className}`}>
+    <div className={`flex items-center gap-1 p-1 bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm rounded-xl w-full sm:w-fit overflow-x-auto no-scrollbar flex-nowrap mb-5 ${className}`}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
@@ -20,7 +20,7 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
             className={`
-              flex items-center gap-1.5 px-5 py-2 text-sm font-medium rounded-lg transition-all duration-150
+              flex items-center shrink-0 gap-1.5 px-3 sm:px-5 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all duration-150
               ${
                 isActive
                   ? "bg-amber-500 text-white shadow-sm"
@@ -32,12 +32,12 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
               <Icon 
                 icon={tab.icon} 
                 className={isActive ? "text-white" : "text-gray-400"} 
-                width="14" 
-                height="14" 
+                width="16" 
+                height="16" 
               />
             )}
             
-            <span>{tab.label}</span>
+            <span className={tab.icon ? "hidden sm:inline" : ""}>{tab.label}</span>
             
             {counts[tab.key] !== undefined && (
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
@@ -50,6 +50,7 @@ const TableTabs = ({ tabs, activeTab, onTabChange, counts = {}, className = "" }
         );
       })}
     </div>
+
   );
 };
 
