@@ -5,11 +5,14 @@ import { Toaster } from "react-hot-toast";
 import { FileUploadProvider } from "./contexts/FileUploadContext";
 import { ImageModalProvider } from "./contexts/ImageModalContext";
 import { ChatProvider } from "./contexts/ChatContext";
+import ScrollToTop from "./components/layout/components/ScrollToTop";
 
 const App = () => {
   return (
     <Router>
+      <ScrollToTop />
       <ChatProvider>
+
       <FileUploadProvider>
         <ImageModalProvider>
           <ModalProvider>

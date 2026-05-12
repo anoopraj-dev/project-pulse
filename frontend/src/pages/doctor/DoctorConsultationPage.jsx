@@ -132,9 +132,11 @@ const DoctorConsultationPage = () => {
   };
 }, []);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleSubmitPrescription = async (e) => {
     e.preventDefault();
     try {
+      setIsSubmitting(true);
       await submitPrescription(sessionId, form);
       toast.success("Prescription submitted successfully!");
       setPrescriptionSubmitted(true);
@@ -149,6 +151,8 @@ const DoctorConsultationPage = () => {
     } catch (error) {
       console.error("Error submitting prescription:", error);
       toast.error("Failed to submit prescription. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -223,6 +227,7 @@ const DoctorConsultationPage = () => {
         form={form}
         setForm={setForm}
         handleSubmitPrescription={handleSubmitPrescription}
+        isSubmitting={isSubmitting}
         patientData={patientData}
         addMedicine={addMedicine}
         removeMedicine={removeMedicine}

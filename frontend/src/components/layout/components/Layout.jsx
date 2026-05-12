@@ -1,8 +1,8 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { useUser } from "../../../contexts/UserContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getDeviceTypes } from "@/utilis/deviceTypes";
 
 import {
@@ -18,9 +18,18 @@ const NAVBAR_HEIGHT = "h-16"; // navbar height
 const Layout = () => {
   const { role } = useUser();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { pathname } = useLocation();
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo(0, 0);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const handleResize = () => {
+
       // Desktop: Sidebar open by default
       // Tablet/Mobile: Sidebar closed by default
       if (window.innerWidth >= 1024) {
@@ -85,7 +94,11 @@ const Layout = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50">
+        <main 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden relative bg-slate-50"
+        >
+
           <div className="min-h-full flex flex-col pt-0 pb-4 sm:pb-6 lg:pb-8">
             <div className="max-w-7xl mx-auto w-full flex-1">
               <Outlet />

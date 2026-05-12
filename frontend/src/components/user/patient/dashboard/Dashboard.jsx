@@ -18,6 +18,7 @@ import {
   fetchPatientVitals,
   fetchUpcomingAppointments,
 } from "@/api/patient/patientApis";
+import Skeleton, { StatsSkeleton, CardSkeleton, TableSkeleton } from "@/components/ui/loaders/Skeleton";
 
 // ---------------- Reusable Components ------------------
 
@@ -272,7 +273,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             label="Appointments"
-            value={loadingStats ? "..." : (stats?.totalAppointments ?? 0)}
+            value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.totalAppointments ?? 0)}
             change={
               stats
                 ? `${stats.totalAppointments - stats.lastMonthAppointments} vs last month`
@@ -294,7 +295,7 @@ const Dashboard = () => {
 
           <StatCard
             label="Consultations"
-            value={loadingStats ? "..." : (stats?.consultations ?? 0)}
+            value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.consultations ?? 0)}
             change="Completed sessions"
             changeType="neutral"
             icon="ph:stethoscope-bold"
@@ -306,7 +307,7 @@ const Dashboard = () => {
             label="Expenses"
             value={
               loadingStats
-                ? "..."
+                ? <Skeleton className="h-8 w-24" />
                 : `₹${(stats?.expenses ?? 0).toLocaleString()}`
             }
             change={
@@ -330,7 +331,7 @@ const Dashboard = () => {
 
           <StatCard
             label="Upcoming"
-            value={loadingStats ? "..." : (stats?.upcoming ?? 0)}
+            value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.upcoming ?? 0)}
             change={
               stats?.upcoming ? `${stats.upcoming} scheduled` : "No upcoming"
             }
@@ -464,9 +465,16 @@ const Dashboard = () => {
 
             <div className="divide-y divide-slate-100">
               {loadingAppointments ? (
-                <div className="p-8 text-center">
-                  <Icon icon="ph:spinner-gap-bold" className="h-6 w-6 text-slate-300 animate-spin mx-auto mb-2" />
-                  <p className="text-xs text-slate-400 font-medium">Loading...</p>
+                <div className="space-y-4 p-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <Skeleton variant="circle" className="h-11 w-11" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-2 w-1/4" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : !appointments || appointments.length === 0 ? (
                 <div className="p-12 text-center">
@@ -538,7 +546,23 @@ const Dashboard = () => {
 
             <div className="divide-y divide-slate-100">
               {loadingPrescriptions ? (
-                <div className="p-12 text-center text-slate-400">Loading...</div>
+                <div className="space-y-6 p-5">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Skeleton variant="circle" className="h-10 w-10" />
+                        <div className="space-y-2 flex-1">
+                          <Skeleton className="h-3 w-1/3" />
+                          <Skeleton className="h-2 w-1/4" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Skeleton className="h-10 rounded-xl" />
+                        <Skeleton className="h-10 rounded-xl" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : prescriptions.length === 0 ? (
                 <div className="p-12 text-center text-slate-400">No records found</div>
               ) : (

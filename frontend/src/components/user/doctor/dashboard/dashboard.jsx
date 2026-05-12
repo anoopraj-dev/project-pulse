@@ -20,6 +20,7 @@ import {
   fetchPatientReviews,
 } from "@/api/doctor/doctorApis";
 import toast from "react-hot-toast";
+import Skeleton, { StatsSkeleton, CardSkeleton, TableSkeleton } from "@/components/ui/loaders/Skeleton";
 
 // ---------------- Sub-components ------------------
 
@@ -326,7 +327,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard
             label="Today's consultations"
-            value={loadingStats ? "..." : (stats?.todayConsultations ?? 0)}
+            value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.todayConsultations ?? 0)}
             change={stats ? getConsultationChange() : ""}
             changeType={
               !stats
@@ -344,7 +345,7 @@ const Dashboard = () => {
 
           <StatCard
             label="Upcoming appointments"
-            value={loadingStats ? "..." : (stats?.upcomingAppointments ?? 0)}
+            value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.upcomingAppointments ?? 0)}
             change={
               stats?.nextAppointmentInMinutes != null
                 ? `Next in ${stats.nextAppointmentInMinutes} min`
@@ -358,7 +359,7 @@ const Dashboard = () => {
 
           <StatCard
             label="Total completed"
-            value={loadingStats ? "..." : (stats?.totalCompleted ?? 0)}
+            value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.totalCompleted ?? 0)}
             change={
               stats ? `${stats.completedThisWeek ?? 0} added this week` : ""
             }
@@ -372,7 +373,7 @@ const Dashboard = () => {
             label="Overall earnings"
             value={
               loadingStats
-                ? "..."
+                ? <Skeleton className="h-8 w-24" />
                 : `₹${(stats?.earnings ?? 0).toLocaleString()}`
             }
             change={stats ? getEarningsChange() : ""}
@@ -527,7 +528,17 @@ const Dashboard = () => {
 
             <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {loadingAppointments ? (
-                <p className="px-4 py-3 text-xs text-gray-400">Loading...</p>
+                <div className="space-y-4 p-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton variant="circle" className="h-8 w-8" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-2 w-1/4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : appointments.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-gray-400">
                   No upcoming appointments
@@ -600,7 +611,17 @@ const Dashboard = () => {
             {/* -------- Recent patients --------- */}
             <div className="grid grid-cols-1 sm:grid-cols-2 divide-x divide-y divide-gray-50 dark:divide-gray-800">
               {loadingPatients ? (
-                <p className="px-4 py-3 text-xs text-gray-400">Loading...</p>
+                <div className="col-span-2 space-y-4 p-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton variant="circle" className="h-10 w-10" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-2 w-1/4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : recentPatients.length === 0 ? (
                 <p className="px-4 py-3 text-xs text-gray-400">
                   No recent patients
@@ -705,7 +726,18 @@ const Dashboard = () => {
             {/* Review list */}
             <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {loadingReviews ? (
-                <p className="px-5 py-3 text-xs text-gray-400">Loading...</p>
+                <div className="space-y-4 p-5">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Skeleton variant="circle" className="h-6 w-6" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
+                  ))}
+                </div>
               ) : reviews.length === 0 ? (
                 <p className="px-5 py-3 text-xs text-gray-400">
                   No feedback yet
