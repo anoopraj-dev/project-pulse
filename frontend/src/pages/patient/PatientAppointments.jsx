@@ -86,11 +86,13 @@ const PatientAppointments = () => {
   const getStatusFromTab = (tab) => {
     const mapping = {
       confirmed: ["confirmed", "ongoing", "pending"],
-      history: ["completed", "expired"],
+      history: ["completed"],
       cancelled: ["cancelled"],
+      expired: ["expired"],
     };
     return mapping[tab] || [tab];
   };
+
 
   const filteredAppointments = appointments?.filter((appointment) => {
     if (activeTab === "all") return true;

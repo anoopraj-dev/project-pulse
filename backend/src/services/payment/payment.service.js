@@ -297,68 +297,137 @@ export const walletPaymentService = async (userId, body) => {
     throw new Error("Insufficient wallet balance");
   }
 
-  wallet.balance -= amount * 100;
-  await wallet.save();
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const appointment = await Appointment.create({
-    patient: userId,
-    doctor: doctorId,
-    appointmentDate: date,
-    timeSlot: time,
-    reason,
-    notes,
-    serviceType,
-    duration,
-    status: "pending",
-    isActive: false,
-  });
+  try {
+    wallet.balance -= amount * 100;
+    await wallet.save({ session });
 
-  const payment = await Payment.create({
-    patient: userId,
-    doctor: doctorId,
-    appointment: appointment._id,
-    method: "wallet",
-    orderId: `wal_${Date.now()}`,
-    amount: amount * 100,
-    currency: "INR",
-    status: "verified",
-  });
+    const slotUpdate = await DoctorAvailability.findOneAndUpdate(
 
-  await Transaction.create({
-    wallet: wallet._id,
-    type: "debit",
-    amount: amount * 100,
-    referenceType: "payment",
-    referenceId: payment._id,
-    notes: "Appointment payment via wallet",
-  });
+      {
+        doctorId,
+        dateKey: date,
+        "slots.startAt": slotStartUTC,
+        "slots.status": "available",
+      },
+      {
+        $set: {
+          "slots.$.status": "booked",
+        },
+      },
+      { new: true, session }
+    );
 
-  const admin = await Admin.findOne();
-  let adminWallet = await Wallet.findOne({ role: "admin" });
+    if (!slotUpdate) throw new Error("Slot already booked or unavailable");
 
-  if (!adminWallet) {
-    adminWallet = await Wallet.create({
-      userId: admin._id,
-      role: "admin",
-      balance: amount * 100,
+    const appointment = await Appointment.create(
+      [
+        {
+          patient: userId,
+          doctor: doctorId,
+          appointmentDate: slotStartUTC,
+          timeSlot: time,
+          reason,
+          notes,
+          serviceType,
+          duration,
+          status: "confirmed",
+          isActive: true,
+        },
+      ],
+      { session }
+    );
+
+    const payment = await Payment.create(
+      [
+        {
+          patient: userId,
+          doctor: doctorId,
+          appointment: appointment[0]._id,
+          method: "wallet",
+          orderId: `wal_${Date.now()}`,
+          amount: amount * 100,
+          currency: "INR",
+          status: "verified",
+        },
+      ],
+      { session }
+    );
+
+    // Update slot with appointmentId
+    await DoctorAvailability.updateOne(
+      {
+        doctorId,
+        dateKey: date,
+        "slots.startAt": slotStartUTC,
+      },
+      {
+        $set: { "slots.$.appointmentId": appointment[0]._id },
+      },
+      { session }
+    );
+
+    await Transaction.create(
+      [
+        {
+          wallet: wallet._id,
+          type: "debit",
+          amount: amount * 100,
+          referenceType: "payment",
+          referenceId: payment[0]._id,
+          notes: "Appointment payment via wallet",
+        },
+      ],
+      { session }
+    );
+
+    const admin = await Admin.findOne().session(session);
+    let adminWallet = await Wallet.findOne({ role: "admin" }).session(session);
+
+    if (!adminWallet) {
+      adminWallet = await Wallet.create(
+        [{ userId: admin._id, role: "admin", balance: amount * 100 }],
+        { session }
+      );
+      adminWallet = adminWallet[0];
+    } else {
+      adminWallet.balance += amount * 100;
+      await adminWallet.save({ session });
+    }
+
+    await Transaction.create(
+      [
+        {
+          wallet: adminWallet._id,
+          type: "credit",
+          amount: amount * 100,
+          referenceType: "payment",
+          referenceId: payment[0]._id,
+          notes: `Wallet payment from patient ${userId}`,
+        },
+      ],
+      { session }
+    );
+
+    /* -------- Create consultation -------- */
+    await createConsultationService({
+      appointmentId: appointment[0]._id,
+      session,
     });
-  } else {
-    adminWallet.balance += amount * 100;
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return payment[0];
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  await Transaction.create({
-    wallet: adminWallet._id,
-    type: "credit",
-    amount: amount * 100,
-    referenceType: "payment",
-    referenceId: payment._id,
-    notes: `Wallet payment from patient ${userId}`,
-  });
-
-  await adminWallet.save();
-
-  return payment;
 };
+
 
 // -------- VERIFY WALLET TOPUP ----------
 export const verifyWalletTopupService = async (userId, body) => {
