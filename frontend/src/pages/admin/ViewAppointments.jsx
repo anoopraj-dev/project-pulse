@@ -13,6 +13,8 @@ import { useModal } from "@/contexts/ModalContext";
 import { AppointmentsActionModal } from "@/components/ui/modals/ModalInputs";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
+import { TableSkeleton } from "@/components/ui/loaders/Skeleton";
+
 
 const ViewAppointments = () => {
   const [appointments, setAppointments] = useState(null);
@@ -170,7 +172,9 @@ const ViewAppointments = () => {
           </div>
 
           <div className="px-2 py-3 sm:px-4">
-            {activeTab === "book" ? (
+            {isLoading ? (
+              <TableSkeleton rows={8} cols={6} />
+            ) : activeTab === "book" ? (
               <BookAppointmentForm
                 onSuccess={fetchAllAppointments}
                 bookingInfo={bookingInfo}
@@ -184,6 +188,7 @@ const ViewAppointments = () => {
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
                   <Icon
                     icon="mdi:calendar-remove-outline"

@@ -11,11 +11,14 @@ import NotificationBell from "../../shared/components/NotificationBell.jsx";
 import NotificationPanel from "../../shared/components/NotificationPanel.jsx";
 import { socket } from "../../../socket.js";
 import toast from "react-hot-toast";
+import { useChatContext } from "../../../contexts/ChatContext.jsx";
 
 
 const Navbar = ({ toggleSidebar }) => {
   const { email, role, name, dispatch, isLoading, profilePicture, id } = useUser();
+  const { totalUnread } = useChatContext();
   const navigate = useNavigate();
+
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
   const [openNotification, setOpenNotification] = useState(false);
@@ -139,6 +142,22 @@ const Navbar = ({ toggleSidebar }) => {
                   </div>
                 ) : (
                   <div ref={menuRef} className="flex items-center gap-2 sm:gap-4">
+                    {(role === "doctor" || role === "patient") && (
+                      <Link
+                        to={`/${role}/messages`}
+                        className="relative p-1.5 text-gray-600 hover:text-[#0096C7] hover:bg-gray-50 rounded-lg transition-all active:scale-95"
+                        title="Messages"
+                      >
+                        <Icon icon="ph:chat-circle-dots" className="h-6 w-6" />
+                        {totalUnread > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                            {totalUnread > 99 ? "99+" : totalUnread}
+                          </span>
+                        )}
+                      </Link>
+                    )}
+
+
                     <NotificationBell
                       onClick={() => {
                         setOpenNotification((prev) => !prev);

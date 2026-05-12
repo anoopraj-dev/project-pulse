@@ -15,6 +15,8 @@ import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 import DoctorStatusBanner from "@/components/user/doctor/profile/DoctorStatusBanner";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import { useUser } from "@/contexts/UserContext";
+import { TableSkeleton } from "@/components/ui/loaders/Skeleton";
+
 
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState(null);
@@ -179,7 +181,9 @@ const DoctorAppointments = () => {
               </div>
 
               <div className="px-2 py-3 sm:px-4">
-                {activeTab === "book" ? (
+                {isLoading ? (
+                  <TableSkeleton rows={8} cols={5} />
+                ) : activeTab === "book" ? (
                   <BookAppointmentForm
                     onSuccess={fetchAllAppointments}
                     bookingInfo={bookingInfo}
@@ -193,6 +197,7 @@ const DoctorAppointments = () => {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
                       <Icon
                         icon="mdi:calendar-remove-outline"
