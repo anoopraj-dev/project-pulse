@@ -18,6 +18,8 @@ import {
   fetchPatientVitals,
   fetchUpcomingAppointments,
 } from "@/api/patient/patientApis";
+import toast from "react-hot-toast";
+import { useUser } from "@/contexts/UserContext";
 import Skeleton, { StatsSkeleton, CardSkeleton, TableSkeleton } from "@/components/ui/loaders/Skeleton";
 
 // ---------------- Reusable Components ------------------
@@ -107,11 +109,14 @@ const Dashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [chartData, setChartData] = useState([]);
+  const [loadingChart, setLoadingChart] = useState(true);
+  const [chartRange, setChartRange] = useState("week");
   const [prescriptions, setPrescriptions] = useState([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(true);
   const [vitals, setVitals] = useState(null);
   const [loadingVitals, setLoadingVitals] = useState(true);
   const navigate = useNavigate();
+  const { user } = useUser();
 
   //------- api calls -----------
   //------ stats -------------
@@ -165,24 +170,27 @@ const Dashboard = () => {
   useEffect(() => {
     const getChart = async () => {
       try {
-        const res = await fetchDashboardChart();
+        setLoadingChart(true);
+        const res = await fetchDashboardChart(chartRange);
 
         if (!res?.data?.success) return;
 
         const normalized = (res?.data?.data || []).map((d) => ({
           ...d,
-          expenses: Number(d.expenses || 0), // paise => rupees
+          expenses: Number(d.expenses || 0),
           consultations: Number(d.consultations || 0),
         }));
         setChartData(normalized);
       } catch (err) {
         console.error("Chart error:", err);
         setChartData([]);
+      } finally {
+        setLoadingChart(false);
       }
     };
 
     getChart();
-  }, []);
+  }, [chartRange]);
 
   //------------- get prescriptions --------
   useEffect(() => {
@@ -257,7 +265,7 @@ const Dashboard = () => {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-slate-900">{greeting}, {name?.split(' ')[0]}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">{greeting}, {user?.name?.split(' ')[0]}</h1>
             <p className="text-sm text-slate-500 font-medium">{formattedDate}</p>
           </div>
           <button 
@@ -276,18 +284,10 @@ const Dashboard = () => {
             value={loadingStats ? <Skeleton className="h-8 w-16" /> : (stats?.totalAppointments ?? 0)}
             change={
               stats
-                ? `${stats.totalAppointments - stats.lastMonthAppointments} vs last month`
+                ? `${stats.totalAppointments} total`
                 : ""
             }
-            changeType={
-              !stats
-                ? "neutral"
-                : stats.totalAppointments > stats.lastMonthAppointments
-                  ? "up"
-                  : stats.totalAppointments < stats.lastMonthAppointments
-                    ? "down"
-                    : "neutral"
-            }
+            changeType="neutral"
             icon="ph:calendar-bold"
             iconBg="bg-blue-50"
             iconColor="text-blue-600"
@@ -304,25 +304,21 @@ const Dashboard = () => {
           />
 
           <StatCard
-            label="Expenses"
+            label="Total Expenses"
             value={
               loadingStats
                 ? <Skeleton className="h-8 w-24" />
                 : `₹${(stats?.expenses ?? 0).toLocaleString()}`
             }
             change={
-              stats
-                ? `₹${Math.abs(
-                    stats.expenses - stats.lastMonthExpenses / 100,
-                  ).toLocaleString()} vs last month`
-                : ""
+              stats && stats.lastMonthExpenses > 0
+                ? `₹${stats.lastMonthExpenses.toLocaleString()} last month`
+                : "Initial expenses"
             }
             changeType={
-              !stats
+              !stats || stats.expenses >= stats.lastMonthExpenses
                 ? "neutral"
-                : stats.expenses > stats.lastMonthExpenses
-                  ? "down" 
-                  : "up"
+                : "up"
             }
             icon="ph:currency-circle-inr-bold"
             iconBg="bg-amber-50"
@@ -351,11 +347,23 @@ const Dashboard = () => {
               iconBg="bg-amber-50"
               iconColor="text-amber-600"
               title="Health & Expenses"
-              subtitle="Activity from the last 7 days"
+              subtitle={`Activity over the last ${chartRange}`}
               right={
-                <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-100 uppercase tracking-widest">
-                  Weekly
-                </span>
+                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                  {["day", "week", "month", "year"].map((range) => (
+                    <button
+                      key={range}
+                      onClick={() => setChartRange(range)}
+                      className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${
+                        chartRange === range
+                          ? "bg-white dark:bg-slate-700 text-amber-600 shadow-sm"
+                          : "text-slate-500 hover:text-slate-700"
+                      } capitalize`}
+                    >
+                      {range}
+                    </button>
+                  ))}
+                </div>
               }
             />
             <div className="p-6">
@@ -366,12 +374,16 @@ const Dashboard = () => {
                     .reduce((sum, d) => sum + (Number(d.expenses) || 0), 0)
                     .toLocaleString()}
                 </span>
-                <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                  <Icon icon="ph:trend-up-bold" className="h-3.5 w-3.5" /> +9.6%
-                  <span className="text-slate-400 font-medium">vs last week</span>
+                <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                  Spent this {chartRange}
                 </span>
               </div>
               <div className="h-[240px]">
+                {loadingChart ? (
+                   <div className="w-full h-full flex items-center justify-center">
+                      <Skeleton className="w-full h-full rounded-2xl" />
+                   </div>
+                ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={chartData}
@@ -441,6 +453,7 @@ const Dashboard = () => {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                )}
               </div>
             </div>
           </Card>

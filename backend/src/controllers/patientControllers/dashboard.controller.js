@@ -23,7 +23,8 @@ export const patientUpcomingAppointments = asyncHandler(async (req, res) => {
 
 //-------------- chart data ----------
 export const patientDashboardChart = asyncHandler(async (req, res) => {
-  const data = await patientDashboardChartService(req.user.id);
+  const { range } = req.query;
+  const data = await patientDashboardChartService(req.user.id, range);
   return res.status(200).json({ success: true, data });
 });
 

@@ -145,9 +145,11 @@ export const fetchUpcomingAppointments = () =>{
   return api.get('/api/patient/dashboard/upcoming-appointments')
 }
 
-export const fetchDashboardChart = () =>{
-  return api.get('/api/patient/dashboard/chart')
-}
+export const fetchDashboardChart = (range = "week") => {
+  return api.get("/api/patient/dashboard/chart", {
+    params: { range },
+  });
+};
 
 export const fetchPatientPrescriptions = () =>{
   return api.get('/api/patient/dashboard/prescriptions')
