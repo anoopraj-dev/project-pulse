@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
 import Prescription from "../../models/prescription.model.js";
@@ -33,11 +34,11 @@ export const patientDashboardStatsService = async (patientId) => {
     status: { $in: ["confirmed", "pending"] },
   });
 
-  // ---------------- EXPENSES (ONLY PAYMENTS) ----------------
+  // ---------------- EXPENSES (ALL VERIFIED PAYMENTS) ----------------
   const paymentAgg = await Payment.aggregate([
     {
       $match: {
-        appointment: { $in: completedIds },
+        patient: new mongoose.Types.ObjectId(patientId),
         status: "verified",
       },
     },
@@ -52,19 +53,12 @@ export const patientDashboardStatsService = async (patientId) => {
   const expenses = (paymentAgg[0]?.total || 0) / 100; // convert to rupees
 
   // ---------------- LAST MONTH EXPENSES ----------------
-  const lastMonthAppointments = await Appointment.find({
-    patient: patientId,
-    status: "completed",
-    createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
-  }).select("_id");
-
-  const lastMonthIds = lastMonthAppointments.map((a) => a._id);
-
   const lastMonthPaymentAgg = await Payment.aggregate([
     {
       $match: {
-        appointment: { $in: lastMonthIds },
+        patient: new mongoose.Types.ObjectId(patientId),
         status: "verified",
+        createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
       },
     },
     {
@@ -84,7 +78,7 @@ export const patientDashboardStatsService = async (patientId) => {
     consultations: completedIds.length,
     upcoming,
     expenses,
-    lastMonthAppointments: lastMonthAppointments.length,
+    lastMonthAppointments: 0, // Placeholder if needed, or calculate actual
     lastMonthExpenses,
   };
 };
@@ -122,63 +116,107 @@ export const upcomingAppointmentsService = async (patientId) => {
 };
 
 
-export const patientDashboardChartService = async (patientId) => {
+export const patientDashboardChartService = async (patientId, range = "week") => {
   const now = new Date();
+  let startDate = new Date();
 
-  const startDate = getStartOfTodayIndia();
-  startDate.setDate(startDate.getDate() - 6);
-
-  // ---------------- INIT 7 DAYS (SAFE KEY) ----------------
-  const daysMap = {};
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
-
-    const key = d.toISOString().split("T")[0]; // YYYY-MM-DD (SAFE)
-
-    daysMap[key] = {
-      label: d.toLocaleDateString("en-US", { weekday: "short" }),
-      consultations: 0,
-      expenses: 0,
-    };
+  // ---------------- RANGE ----------------
+  if (range === "day") {
+    startDate.setHours(0, 0, 0, 0);
+  } else if (range === "week") {
+    startDate.setDate(now.getDate() - 6);
+    startDate.setHours(0, 0, 0, 0);
+  } else if (range === "month") {
+    startDate.setMonth(now.getMonth() - 1);
+    startDate.setHours(0, 0, 0, 0);
+  } else if (range === "year") {
+    startDate.setFullYear(now.getFullYear() - 1);
+    startDate.setHours(0, 0, 0, 0);
   }
 
-  // ---------------- COMPLETED APPOINTMENTS ----------------
+  // ---------------- INIT MAP ----------------
+  const dataMap = {};
+  let labelMap = [];
+
+  if (range === "day") {
+    for (let i = 0; i < 24; i++) {
+      const hour = i.toString().padStart(2, "0") + ":00";
+      dataMap[i] = { label: hour, consultations: 0, expenses: 0 };
+    }
+  } else if (range === "week") {
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const key = d.toISOString().split("T")[0];
+      dataMap[key] = {
+        label: d.toLocaleDateString("en-US", { weekday: "short" }),
+        consultations: 0,
+        expenses: 0,
+      };
+    }
+  } else if (range === "month") {
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const key = d.toISOString().split("T")[0];
+      dataMap[key] = {
+        label: d.getDate().toString(),
+        consultations: 0,
+        expenses: 0,
+      };
+    }
+  } else if (range === "year") {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(startDate);
+      d.setMonth(startDate.getMonth() + i);
+      const key = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}`;
+      dataMap[key] = {
+        label: months[d.getMonth()],
+        consultations: 0,
+        expenses: 0,
+      };
+    }
+  }
+
+  // ---------------- FETCH DATA ----------------
   const appointments = await Appointment.find({
     patient: patientId,
     status: "completed",
     appointmentDate: { $gte: startDate, $lte: now },
-  }).select("_id appointmentDate");
-
-  const appointmentMap = new Map();
+  }).select("appointmentDate");
 
   appointments.forEach((a) => {
-    const key = new Date(a.appointmentDate).toISOString().split("T")[0];
-    appointmentMap.set(a._id.toString(), key);
+    let key;
+    const date = new Date(a.appointmentDate);
+    if (range === "day") key = date.getHours();
+    else if (range === "year") key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
+    else key = date.toISOString().split("T")[0];
 
-    if (daysMap[key]) {
-      daysMap[key].consultations += 1;
+    if (dataMap[key]) {
+      dataMap[key].consultations += 1;
     }
   });
 
-  const appointmentIds = [...appointmentMap.keys()];
-
-  // ---------------- PAYMENTS (ONLY THESE APPOINTMENTS) ----------------
   const payments = await Payment.find({
-    appointment: { $in: appointmentIds },
+    patient: patientId,
     status: "verified",
-  }).select("amount appointment");
+    createdAt: { $gte: startDate, $lte: now },
+  }).select("amount createdAt");
 
   payments.forEach((p) => {
-    const apptKey = appointmentMap.get(p.appointment.toString());
+    let key;
+    const date = new Date(p.createdAt);
+    if (range === "day") key = date.getHours();
+    else if (range === "year") key = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
+    else key = date.toISOString().split("T")[0];
 
-    if (apptKey && daysMap[apptKey]) {
-      daysMap[apptKey].expenses += (p.amount || 0) / 100;
+    if (dataMap[key]) {
+      dataMap[key].expenses += (p.amount || 0) / 100;
     }
   });
 
-  return Object.values(daysMap);
+  return Object.values(dataMap);
 };
 
 //-------------- prescriptions --------------
