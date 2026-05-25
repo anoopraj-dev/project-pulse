@@ -36,7 +36,7 @@ export const createOrderService = async (userId, body) => {
     throw new Error("Missing booking fields");
   }
 
-  validateAdvanceBooking(date, time, 1);
+  validateAdvanceBooking(date, time, 0);
 
   const availability = await DoctorAvailability.findOne({
     doctorId,
@@ -233,7 +233,7 @@ export const retryPaymentService = async (paymentId) => {
 
   const diff = appointmentDateTime - now;
 
-  if (diff <= 60 * 60 * 1000) {
+  if (diff <= 0) {
     throw new Error("Cannot retry payment for past appointment");
   }
 
