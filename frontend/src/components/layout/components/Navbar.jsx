@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../../../contexts/UserContext.jsx";
 import { Icon } from "@iconify/react";
 import { useState, useRef, useEffect } from "react";
@@ -18,6 +18,14 @@ const Navbar = ({ toggleSidebar }) => {
   const { email, role, name, dispatch, isLoading, profilePicture, id } = useUser();
   const { totalUnread } = useChatContext();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [navMenuOpen, setNavMenuOpen] = useState(false);
@@ -107,21 +115,48 @@ const Navbar = ({ toggleSidebar }) => {
               <div className="hidden md:flex items-center gap-6 ml-8">
                 <Link
                   to="/"
-                  className="text-xs font-bold text-gray-600 hover:text-[#0096C7] transition-colors"
+                  className={`text-xs font-bold relative py-1.5 transition-colors duration-200 ${
+                    isActive("/")
+                      ? "text-[#0096C7]"
+                      : "text-gray-600 hover:text-[#0096C7]"
+                  }`}
                 >
                   Home
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-[2px] bg-[#0096C7] rounded-full transition-all duration-300 transform origin-left ${
+                      isActive("/") ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
+                    }`}
+                  />
                 </Link>
                 <Link 
                   to='/about-us'
-                  className="text-xs font-bold text-gray-600 hover:text-[#0096C7] transition-colors"
+                  className={`text-xs font-bold relative py-1.5 transition-colors duration-200 ${
+                    isActive("/about-us")
+                      ? "text-[#0096C7]"
+                      : "text-gray-600 hover:text-[#0096C7]"
+                  }`}
                 >
                   About
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-[2px] bg-[#0096C7] rounded-full transition-all duration-300 transform origin-left ${
+                      isActive("/about-us") ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
+                    }`}
+                  />
                 </Link>
                 <Link 
                   to='/how-it-works'
-                  className="text-xs font-bold text-gray-600 hover:text-[#0096C7] transition-colors"
+                  className={`text-xs font-bold relative py-1.5 transition-colors duration-200 ${
+                    isActive("/how-it-works")
+                      ? "text-[#0096C7]"
+                      : "text-gray-600 hover:text-[#0096C7]"
+                  }`}
                 >
                   How it works
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-[2px] bg-[#0096C7] rounded-full transition-all duration-300 transform origin-left ${
+                      isActive("/how-it-works") ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
+                    }`}
+                  />
                 </Link>
               </div>
             )}
@@ -225,25 +260,52 @@ const Navbar = ({ toggleSidebar }) => {
           <Link
             to="/"
             onClick={() => setNavMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+            className={`flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all ${
+              isActive("/")
+                ? "bg-[#0096C7]/10 text-[#0096C7]"
+                : "text-gray-700 hover:bg-gray-50"
+            }`}
           >
-            <Icon icon="ph:house" className="h-5 w-5 text-gray-400" />
+            <Icon
+              icon="ph:house"
+              className={`h-5 w-5 transition-colors ${
+                isActive("/") ? "text-[#0096C7]" : "text-gray-400"
+              }`}
+            />
             Home
           </Link>
           <Link
             to="/about-us"
             onClick={() => setNavMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+            className={`flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all ${
+              isActive("/about-us")
+                ? "bg-[#0096C7]/10 text-[#0096C7]"
+                : "text-gray-700 hover:bg-gray-50"
+            }`}
           >
-            <Icon icon="ph:info" className="h-5 w-5 text-gray-400" />
+            <Icon
+              icon="ph:info"
+              className={`h-5 w-5 transition-colors ${
+                isActive("/about-us") ? "text-[#0096C7]" : "text-gray-400"
+              }`}
+            />
             About Us
           </Link>
           <Link
             to="/how-it-works"
             onClick={() => setNavMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+            className={`flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all ${
+              isActive("/how-it-works")
+                ? "bg-[#0096C7]/10 text-[#0096C7]"
+                : "text-gray-700 hover:bg-gray-50"
+            }`}
           >
-            <Icon icon="ph:question" className="h-5 w-5 text-gray-400" />
+            <Icon
+              icon="ph:question"
+              className={`h-5 w-5 transition-colors ${
+                isActive("/how-it-works") ? "text-[#0096C7]" : "text-gray-400"
+              }`}
+            />
             How it works
           </Link>
           <Link
