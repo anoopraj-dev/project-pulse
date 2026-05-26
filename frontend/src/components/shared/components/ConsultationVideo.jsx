@@ -23,7 +23,7 @@ const ConsultationVideo = ({
 
   const startTimeRef = useRef(null);
 
-  //-------- Call duration -------------
+  // ---------------- CALL DURATION ----------------
   useEffect(() => {
   if (status !== "connected") return;
 

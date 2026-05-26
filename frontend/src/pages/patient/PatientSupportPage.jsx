@@ -12,7 +12,7 @@ import {
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
-// ---------------- Shared Card Components ----------------
+// ---------------- SHARED CARD COMPONENTS ----------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden ${className}`}
@@ -112,7 +112,7 @@ const PatientSupportPage = () => {
     return true;
   });
 
-  // -------------- CHANGE PASSWORD ----------------
+  // ---------------- CHANGE PASSWORD ----------------
   const handleChangePassword = async () => {
     try {
       const { currentPassword, newPassword } = passwordData;
@@ -130,7 +130,7 @@ const PatientSupportPage = () => {
     }
   };
 
-  // ------------- DOWNLOAD ACCOUNT INFO ------------
+  // ---------------- DOWNLOAD ACCOUNT INFO ----------------
   const handleDownloadAccountInfo = async () => {
     try {
       const toastId = toast.loading("Preparing your data...");

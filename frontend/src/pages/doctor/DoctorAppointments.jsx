@@ -55,7 +55,7 @@ const DoctorAppointments = () => {
     fetchAllAppointments();
   }, []);
 
-  //------------ Search Suggestions ------------------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "doctor",

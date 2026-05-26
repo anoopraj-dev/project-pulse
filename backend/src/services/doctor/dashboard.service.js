@@ -151,7 +151,7 @@ export const upcomingAppointmentService = async (doctorId, limit = 10) => {
 export const dashboardStatsService = async (doctorId) => {
   const doctorObjectId = new mongoose.Types.ObjectId(doctorId);
 
-  // ---------- Date Helpers ----------
+  // ---------------- DATE HELPERS ----------------
   const startOfToday = getStartOfTodayIndia();
 
   const endOfToday = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000 - 1);
@@ -166,7 +166,7 @@ export const dashboardStatsService = async (doctorId) => {
   const startOfWeek = new Date(startOfToday);
   startOfWeek.setDate(startOfWeek.getDate() - 7);
 
-  // ---------- Consultations ----------
+  // ---------------- CONSULTATIONS ----------------
   const todayConsultations = await Consultation.countDocuments({
     doctor: doctorObjectId,
     createdAt: { $gte: startOfToday, $lte: endOfToday },
@@ -188,7 +188,7 @@ export const dashboardStatsService = async (doctorId) => {
     createdAt: { $gte: startOfWeek },
   });
 
-  // ---------- Appointments ----------
+  // ---------------- APPOINTMENTS ----------------
   const upcomingAppointments = await Appointment.countDocuments({
     doctor: doctorObjectId,
     status: { $in: ["confirmed", "ongoing"] },
@@ -210,7 +210,7 @@ export const dashboardStatsService = async (doctorId) => {
     nextAppointmentInMinutes = Math.max(0, Math.floor(diffMs / 60000));
   }
 
-  // ---------- TOTAL EARNINGS ----------
+  // ---------------- TOTAL EARNINGS ----------------
   const totalEarningsAgg = await Settlement.aggregate([
     {
       $match: {
@@ -228,7 +228,7 @@ export const dashboardStatsService = async (doctorId) => {
 
   const earnings = (totalEarningsAgg[0]?.total || 0) / 100;
 
-  // ---------- THIS WEEK ----------
+  // ---------------- THIS WEEK ----------------
   const thisWeekAgg = await Settlement.aggregate([
     {
       $match: {
@@ -247,7 +247,7 @@ export const dashboardStatsService = async (doctorId) => {
 
   const thisWeekEarnings = (thisWeekAgg[0]?.total || 0) / 100;
 
-  // ---------- LAST WEEK ----------
+  // ---------------- LAST WEEK ----------------
   const lastWeekAgg = await Settlement.aggregate([
     {
       $match: {

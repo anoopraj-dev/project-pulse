@@ -1,6 +1,6 @@
 // src/components/forms/config/patientOnboarding.js
 
-// ---------- STEP 1 : PERSONAL INFO (WITH PROFILE PICTURE) ----------
+// ---------------- STEP 1 : PERSONAL INFO (WITH PROFILE PICTURE) ----------------
 
 const patientPersonalInfoConfig = {
   title: "Personal Information",
@@ -55,7 +55,7 @@ const patientPersonalInfoConfig = {
   ],
 };
 
-// ---------- STEP 2 : MEDICAL INFO ----------
+// ---------------- STEP 2 : MEDICAL INFO ----------------
 
 const patientMedicalInfoConfig = {
   title: "Medical Information",
@@ -105,7 +105,7 @@ const patientMedicalInfoConfig = {
   ],
 };
 
-// ---------- STEP 3 : LIFESTYLE INFO  ----------
+// ---------------- STEP 3 : LIFESTYLE INFO ----------------
 
 const patientLifestyleInfoConfig = {
   title: "Lifestyle & Habits",
@@ -188,7 +188,7 @@ const patientLifestyleInfoConfig = {
   ],
 };
 
-// ---------- FINAL EXPORT ----------
+// ---------------- FINAL EXPORT ----------------
 
 export const patientOnboarding = {
   personalInfo: patientPersonalInfoConfig,

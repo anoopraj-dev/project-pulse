@@ -4,7 +4,7 @@ import { emailTemplate } from "../../utils/emailTemplate.js";
 import { sendEmail } from "../../config/nodemailer.js";
 import { getIO } from "../../socket.js";
 
-//----------- Helper: Notify patient ---------------
+// ---------------- HELPER: NOTIFY PATIENT ----------------
 const notifyPatient = async (patientId, title, message, emailData = null) => {
   const io = getIO();
 
@@ -27,21 +27,21 @@ const notifyPatient = async (patientId, title, message, emailData = null) => {
   }
 };
 
-//---------------- Get All Patients -----------------
+// ---------------- GET ALL PATIENTS ----------------
 export const getAllPatientsService = async () => {
   const patients = await Patient.find();
   if (!patients || patients.length === 0) throw new Error("No patients found");
   return patients;
 };
 
-//---------------- Get Patient Profile --------------
+// ---------------- GET PATIENT PROFILE ----------------
 export const getPatientProfileService = async (patientId) => {
   const patient = await Patient.findById(patientId);
   if (!patient) throw new Error("Patient not found");
   return patient;
 };
 
-//---------------- Block Patient -------------------
+// ---------------- BLOCK PATIENT ----------------
 export const blockPatientService = async (patientId, reason) => {
   const patient = await Patient.findById(patientId);
   if (!patient) throw new Error("Patient not found");
@@ -72,7 +72,7 @@ export const blockPatientService = async (patientId, reason) => {
   return patient;
 };
 
-//---------------- Unblock Patient -----------------
+// ---------------- UNBLOCK PATIENT ----------------
 export const unblockPatientService = async (patientId) => {
   const patient = await Patient.findById(patientId);
   if (!patient) throw new Error("Patient not found");

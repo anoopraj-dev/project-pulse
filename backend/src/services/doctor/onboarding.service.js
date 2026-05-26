@@ -1,7 +1,7 @@
 import Doctor from "../../models/doctor.model.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
-// -------- PERSONAL INFO --------
+// ---------------- PERSONAL INFO ----------------
 export const updatePersonalInfoService = async (doctorId, body, file) => {
   const doctor = await Doctor.findById(doctorId);
   if (!doctor) throw new Error("Doctor not found");
@@ -31,7 +31,7 @@ export const updatePersonalInfoService = async (doctorId, body, file) => {
   );
 };
 
-// -------- PROFESSIONAL INFO --------
+// ---------------- PROFESSIONAL INFO ----------------
 export const updateProfessionalInfoService = async (
   doctorId,
   body,
@@ -140,7 +140,7 @@ export const updateProfessionalInfoService = async (
   return updatedDoctor.professionalInfo;
 };
 
-// -------- SERVICES INFO --------
+// ---------------- SERVICES INFO ----------------
 export const updateServicesInfoService = async (doctorId, services) => {
   if (!services) throw new Error("Services data missing");
 

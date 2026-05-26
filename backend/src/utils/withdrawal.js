@@ -5,7 +5,7 @@ export const runWithdrawalCron = async () => {
   try {
     console.log("Withdrawal job started...");
 
-    //----------- Get pending withdrawals ------------
+    // ---------------- GET PENDING WITHDRAWALS ----------------
     const withdrawals = await Withdrawal.find({
       status: "pending",
     }).limit(10);
@@ -13,7 +13,7 @@ export const runWithdrawalCron = async () => {
 
     for (const withdrawal of withdrawals) {
       try {
-        //----------- Process withdrawal ------------
+        // ---------------- PROCESS WITHDRAWAL ----------------
         await processWithdrawalService(withdrawal._id);
       } catch (error) {
         console.error(
@@ -22,7 +22,7 @@ export const runWithdrawalCron = async () => {
           error.message
         );
 
-        //----------- Mark failed ------------
+        // ---------------- MARK FAILED ----------------
         await Withdrawal.findByIdAndUpdate(withdrawal._id, {
           status: "failed",
           failureReason: error.message,

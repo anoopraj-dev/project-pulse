@@ -29,12 +29,12 @@ const PatientsProfile = () => {
     }
   };
 
-  //--------- Edit profile -------------
+  // ---------------- EDIT PROFILE ----------------
   const handleProfileEdit = () => {
     navigate("/patient/edit-profile");
   };
 
-  //------------ Update Profile Picture --------------
+  // ---------------- UPDATE PROFILE PICTURE ----------------
   const handleUpdateProfilePicture = () => {
     openModal("Update your profile picture", UpdateProfilePictureModal);
   };

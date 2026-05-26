@@ -7,7 +7,7 @@ import {
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-// -------- PERSONAL INFO --------
+// ---------------- PERSONAL INFO ----------------
 export const updatePersonalInfo = asyncHandler(async (req, res) => {
   const doctorId = req.user?.id;
   if (!doctorId) throw new AppError("Unauthorized", 401);
@@ -21,7 +21,7 @@ export const updatePersonalInfo = asyncHandler(async (req, res) => {
   });
 });
 
-// -------- PROFESSIONAL INFO --------
+// ---------------- PROFESSIONAL INFO ----------------
 export const updateProfessionalInfo = asyncHandler(async (req, res) => {
   const doctorId = req.user?.id;
   if (!doctorId) throw new AppError("Unauthorized", 401);
@@ -35,7 +35,7 @@ export const updateProfessionalInfo = asyncHandler(async (req, res) => {
   });
 });
 
-// -------- SERVICES INFO --------
+// ---------------- SERVICES INFO ----------------
 export const updateServicesInfo = asyncHandler(async (req, res) => {
   const doctorId = req.user?.id;
   if (!doctorId) throw new AppError("Unauthorized", 401);

@@ -1,6 +1,8 @@
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { fetchHomepageStats } from "@/api/user/userApis";
 
 const ArrowRight = ({ size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
@@ -9,6 +11,34 @@ const ArrowRight = ({ size = 14 }) => (
 );
 
 const Footer = () => {
+  const [stats, setStats] = useState({ patients: 0, doctors: 0 });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const res = await fetchHomepageStats();
+        if (res.data?.success) {
+          const { patients, doctors } = res.data.data;
+          setStats({ patients, doctors });
+        }
+      } catch (err) {
+        console.error("Error loading footer stats:", err);
+      }
+    };
+    loadStats();
+  }, []);
+
+  const formatCount = (count, fallback) => {
+    if (!count) return fallback;
+    if (count >= 1000000) {
+      return (count / 1000000).toFixed(1).replace(/\.0$/, "") + "M+";
+    }
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1).replace(/\.0$/, "") + "K+";
+    }
+    return count + "+";
+  };
+
   const fadeUp = {
     hidden: { opacity: 0, y: 20 },
     visible: (d = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.6, delay: d, ease: [0.22, 1, 0.36, 1] } }),
@@ -75,7 +105,11 @@ const Footer = () => {
 
             {/* Stats mini-strip */}
             <div className="flex gap-6">
-              {[["50k+", "Patients"], ["1.2k+", "Doctors"], ["4.9★", "Rating"]].map(([v, l]) => (
+              {[
+                [formatCount(stats.patients, "50k+"), "Patients"],
+                [formatCount(stats.doctors, "1.2k+"), "Doctors"],
+                ["4.9★", "Rating"],
+              ].map(([v, l]) => (
                 <div key={l}>
                   <div className="font-[Georgia,serif] text-base font-bold text-white">{v}</div>
                   <div className="text-[10px] uppercase tracking-widest" style={{ color: "rgba(255,255,255,.3)" }}>{l}</div>

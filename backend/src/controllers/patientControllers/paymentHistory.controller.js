@@ -2,7 +2,7 @@ import Payment from "../../models/payments.model.js";
 import { getPatientPaymentHistoryService } from "../../services/patient/payment.service.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-//----------------- Payment history for patient -----------------
+// ---------------- PAYMENT HISTORY FOR PATIENT ----------------
 export const getPatientPaymentHistory = asyncHandler(async (req, res) => {
   const { page, limit, status } = req.query;
 

@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/utilis/animations";
 
-//------------- AUTH SERVICES ---------------
+// ---------------- AUTH SERVICES ----------------
 import {
   signup,
   signin,
@@ -52,7 +52,7 @@ const AuthCard = ({ role: initialRole }) => {
   } = useForm();
   const authFormAction = useAsyncAction();
 
-  // -------------- UTILITY HANDLERS ----------------
+  // ---------------- UTILITY HANDLERS ----------------
   const handleShowPassword = () => setShowPassword((prev) => !prev);
   const toggleRole = () => setIsDoctor((prev) => !prev);
 
@@ -78,13 +78,13 @@ const AuthCard = ({ role: initialRole }) => {
     return regex.test(password);
   };
 
-  // ----------- FORM SUBMISSION HANDLER ----------------
+  // ---------------- FORM SUBMISSION HANDLER ----------------
   const onSubmit = async (data) => {
     try {
       await authFormAction.executeAsyncFn(async () => {
         const role = isAdmin ? "admin" : isDoctor ? "doctor" : "patient";
 
-        // ---------- SIGNUP (DOCTOR / PATIENT) ----------
+        // ---------------- SIGNUP (DOCTOR / PATIENT) ----------------
         if (isSignup && !isAdmin) {
           if (!isValidPassword(data.password)) {
             return toast.error(
@@ -124,7 +124,7 @@ const AuthCard = ({ role: initialRole }) => {
           return;
         }
 
-        // ---------- ADMIN LOGIN ----------
+        // ---------------- ADMIN LOGIN ----------------
         if (isAdmin) {
           const response = await signin(data.email, data.password,'admin');
 
@@ -139,7 +139,7 @@ const AuthCard = ({ role: initialRole }) => {
           return;
         }
 
-        // ---------- DOCTOR / PATIENT LOGIN ----------
+        // ---------------- DOCTOR / PATIENT LOGIN ----------------
         const response = await signin(data.email, data.password, role);
         if (!response.user.isVerified) {
           return toast.error("Verify your email");

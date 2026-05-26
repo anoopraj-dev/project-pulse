@@ -23,11 +23,11 @@ export const expireAppointments = async () => {
             // if consultation not completed
             if (!consult || consult.status !== 'completed') {
 
-                // -------- Update Appointment --------
+                // ---------------- UPDATE APPOINTMENT ----------------
                 appt.status = 'expired';
                 await appt.save();
 
-                // -------- Update Consultation --------
+                // ---------------- UPDATE CONSULTATION ----------------
                 if (consult) {
                     consult.status = 'cancelled'; 
                     await consult.save();

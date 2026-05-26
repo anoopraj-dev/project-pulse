@@ -22,7 +22,7 @@ import toast from "react-hot-toast";
 import { useUser } from "@/contexts/UserContext";
 import Skeleton, { StatsSkeleton, CardSkeleton, TableSkeleton } from "@/components/ui/loaders/Skeleton";
 
-// ---------------- Reusable Components ------------------
+// ---------------- REUSABLE COMPONENTS ----------------
 
 const Card = ({ children, className = "" }) => (
   <div
@@ -101,7 +101,7 @@ const StatCard = ({
   </div>
 );
 
-// ---------------- Main Component ------------------
+// ---------------- MAIN COMPONENT ----------------
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -118,8 +118,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useUser();
 
-  //------- api calls -----------
-  //------ stats -------------
+  // ---------------- API CALLS ----------------
+  // ---------------- STATS ----------------
   useEffect(() => {
     const getStats = async () => {
       try {
@@ -144,7 +144,7 @@ const Dashboard = () => {
     getStats();
   }, []);
 
-  //---------------- upcoming appointments ------------
+  // ---------------- UPCOMING APPOINTMENTS ----------------
 
   useEffect(() => {
     const getUpcoming = async () => {
@@ -166,7 +166,7 @@ const Dashboard = () => {
     getUpcoming();
   }, []);
 
-  //------------- get chart data ------------
+  // ---------------- GET CHART DATA ----------------
   useEffect(() => {
     const getChart = async () => {
       try {
@@ -192,7 +192,7 @@ const Dashboard = () => {
     getChart();
   }, [chartRange]);
 
-  //------------- get prescriptions --------
+  // ---------------- GET PRESCRIPTIONS ----------------
   useEffect(() => {
     const getPrescriptions = async () => {
       try {
@@ -214,7 +214,7 @@ const Dashboard = () => {
     getPrescriptions();
   }, []);
 
-  //--------------- vitals ---------------
+  // ---------------- VITALS ----------------
   useEffect(() => {
   const getVitals = async () => {
     try {

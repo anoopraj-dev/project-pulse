@@ -3,7 +3,7 @@ import { exportQueue } from "../../queues/export.queue.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-// --------- REQUEST DOCTOR EXPORT ----------
+// ---------------- REQUEST DOCTOR EXPORT ----------------
 export const requestDoctorExport = asyncHandler(async (req, res) => {
   const doctorId = req.user?.id;
 
@@ -24,7 +24,7 @@ export const requestDoctorExport = asyncHandler(async (req, res) => {
   return res.status(202).json({ success: true, exportId: job._id });
 });
 
-// -------------- GET EXPORT STATUS -------------
+// ---------------- GET EXPORT STATUS ----------------
 export const getDoctorExportStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
 

@@ -1,10 +1,10 @@
 
 
-//------------ Shared Framer Motion variants & helpers ----------------
+// ---------------- SHARED FRAMER MOTION VARIANTS & HELPERS ----------------
 
 
 
-//------------- Fade up --------------
+// ---------------- FADE UP ----------------
 export const fadeUp = {
   hidden:  { opacity: 0, y: 28 },
   visible: (delay = 0) => ({
@@ -14,7 +14,7 @@ export const fadeUp = {
   }),
 };
 
-//-------------- Scale in -----------------
+// ---------------- SCALE IN ----------------
 export const scaleIn = {
   hidden:  { opacity: 0, scale: 0.93 },
   visible: (delay = 0) => ({
@@ -24,7 +24,7 @@ export const scaleIn = {
   }),
 };
 
-//-------------- Fade in ------------------
+// ---------------- FADE IN ----------------
 export const fadeIn = {
   hidden:  { opacity: 0 },
   visible: (delay = 0) => ({
@@ -33,7 +33,7 @@ export const fadeIn = {
   }),
 };
 
-//---------------- Slide in left -----------------
+// ---------------- SLIDE IN LEFT ----------------
 export const slideInLeft = {
   hidden:  { opacity: 0, x: -40 },
   visible: (delay = 0) => ({
@@ -43,7 +43,7 @@ export const slideInLeft = {
   }),
 };
 
-//-------- Slide in from right ------------
+// ---------------- SLIDE IN FROM RIGHT ----------------
 export const slideInRight = {
   hidden:  { opacity: 0, x: 40 },
   visible: (delay = 0) => ({
@@ -53,7 +53,7 @@ export const slideInRight = {
   }),
 };
 
-//------------- Stagger Container ------------------
+// ---------------- STAGGER CONTAINER ----------------
 export const staggerContainer = {
   hidden:  {},
   visible: {
@@ -61,7 +61,7 @@ export const staggerContainer = {
   },
 };
 
-//------------------- Stagger Child ------------
+// ---------------- STAGGER CHILD ----------------
 export const staggerChild = {
   hidden:  { opacity: 0, y: 22 },
   visible: {
@@ -71,7 +71,7 @@ export const staggerChild = {
   },
 };
 
-//------------- Floating -----------------
+// ---------------- FLOATING ----------------
 export const floatY = (yRange = 12, duration = 7) => ({
   animate: {
     y: [0, -yRange, 0],
@@ -86,7 +86,7 @@ export const floatYReverse = (yRange = 12, duration = 9) => ({
   },
 });
 
-//--------------- Pulse ring animation -------------
+// ---------------- PULSE RING ANIMATION ----------------
 export const pulseRing = {
   animate: {
     boxShadow: [
@@ -98,7 +98,7 @@ export const pulseRing = {
   },
 };
 
-//-------------- Hover Lift -------------------
+// ---------------- HOVER LIFT ----------------
 export const hoverLift = {
   whileHover: {
     y: -6,
@@ -107,7 +107,7 @@ export const hoverLift = {
   },
 };
 
-//-------------- Hover Lift -------------------
+// ---------------- HOVER LIFT ----------------
 export const simpleHover = {
   whileHover: {
     y: -6,
@@ -115,7 +115,7 @@ export const simpleHover = {
   },
 };
 
-//--------------- Hover lift lighter version -----------------
+// ---------------- HOVER LIFT LIGHTER VERSION ----------------
 export const hoverLiftSubtle = {
   whileHover: {
     y: -3,
@@ -124,7 +124,7 @@ export const hoverLiftSubtle = {
   },
 };
 
-//-------------------- Button Click -----------------
+// ---------------- BUTTON CLICK ----------------
 export const tapScale = {
   whileTap: { scale: 0.97, transition: { duration: 0.1 } },
 };
@@ -145,7 +145,7 @@ export const counterVariant = {
   }),
 };
 
-//------------- Section divider --------------
+// ---------------- SECTION DIVIDER ----------------
 export const waveFadeIn = {
   hidden:  { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.8, delay: 0.3 } },

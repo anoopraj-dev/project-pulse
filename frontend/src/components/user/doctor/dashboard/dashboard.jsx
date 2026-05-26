@@ -22,7 +22,7 @@ import {
 import toast from "react-hot-toast";
 import Skeleton, { StatsSkeleton, CardSkeleton, TableSkeleton } from "@/components/ui/loaders/Skeleton";
 
-// ---------------- Sub-components ------------------
+// ---------------- SUB-COMPONENTS ----------------
 
 const Card = ({ children, className = "" }) => (
   <div
@@ -55,7 +55,7 @@ const CardHeader = ({ icon, iconBg, iconColor, title, subtitle, right }) => (
   </div>
 );
 
-//-------------Stat card --------------
+// ---------------- STAT CARD ----------------
 const StatCard = ({
   label,
   value,
@@ -144,11 +144,11 @@ const CustomTooltip = ({ active, payload, label }) => {
     </div>
   );
 };
-//-------------Main Dashboad ------------------
+// ---------------- MAIN DASHBOAD ----------------
 
 const Dashboard = () => {
   const [rangeLabel, setRangeLabel] = useState("week");
-  //------------- revenue ------------------
+  // ---------------- REVENUE ----------------
   const [revenueData, setRevenueData] = useState([]);
   const [revenueSummary, setRevenueSummary] = useState(null);
   const [appointments, setAppointments] = useState([]);
@@ -162,8 +162,8 @@ const Dashboard = () => {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [reviewSummary, setReviewSummary] = useState(null);
 
-  //--------- api calls--------
-  //------- revenue -------------
+  // ---------------- API CALLS ----------------
+  // ---------------- REVENUE ----------------
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
@@ -187,7 +187,7 @@ const Dashboard = () => {
     fetchRevenue();
   }, [rangeLabel]);
 
-  //------------- appointments -------------
+  // ---------------- APPOINTMENTS ----------------
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -211,7 +211,7 @@ const Dashboard = () => {
     fetchAppointments();
   }, []);
 
-  //------------- dashboard stats --------------
+  // ---------------- DASHBOARD STATS ----------------
   useEffect(() => {
     const getStats = async () => {
       try {
@@ -236,7 +236,7 @@ const Dashboard = () => {
     getStats();
   }, []);
 
-  //------------- patients -------------
+  // ---------------- PATIENTS ----------------
   useEffect(() => {
     const loadRecentPatients = async () => {
       try {
@@ -261,7 +261,7 @@ const Dashboard = () => {
     loadRecentPatients();
   }, []);
 
-  //------------- Reviews ---------------
+  // ---------------- REVIEWS ----------------
   useEffect(() => {
     const loadReviews = async () => {
       try {
@@ -287,7 +287,7 @@ const Dashboard = () => {
 
     loadReviews();
   }, []);
-  //------------ helpers -------------
+  // ---------------- HELPERS ----------------
   const getConsultationChange = () => {
     if (!stats) return "";
 

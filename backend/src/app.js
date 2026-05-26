@@ -72,19 +72,19 @@ app.use(cors({
 
 app.options('/api/doctor/file-upload', cors());  // Handle preflight
 
-//----------- auth routes-----------------
+// ---------------- AUTH ROUTES ----------------
 app.use('/api/auth',authRoutes);
 
-//--------------patient routes---------------
+// ---------------- PATIENT ROUTES ----------------
 app.use('/api/patient',patientRoutes)
 
-//--------------doctor routes--------------
+// ---------------- DOCTOR ROUTES ----------------
 app.use('/api/doctor',doctorRoutes)
 
-//----------admin routes-------------
+// ---------------- ADMIN ROUTES ----------------
 app.use('/api/admin',adminRoutes)
 
-//----------- common routes -------------
+// ---------------- COMMON ROUTES ----------------
 app.use('/api',userRoutes)
 
 app.use(notFoundHandler);

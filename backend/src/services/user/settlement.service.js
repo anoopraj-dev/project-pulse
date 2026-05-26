@@ -3,7 +3,7 @@ import Payment from "../../models/payments.model.js";
 import Settlement from "../../models/settlement.model.js";
 import { calculateSettlement } from "../../utils/settlement.js";
 
-//-------- wallet services ----------
+// ---------------- WALLET SERVICES ----------------
 import { creditDoctorWalletService } from "../doctor/wallet.service.js";
 import { refundToWalletService } from "../patient/wallet.service.js";
 
@@ -17,7 +17,7 @@ export const runSettlementService = async () => {
     });
 
     for (const consultation of consultations) {
-      //----------- Get payment ------------
+      // ---------------- GET PAYMENT ----------------
       const payment = await Payment.findOne({
         appointment: consultation.appointment,
         status: { $in: ["verified", "refunded"] },
@@ -27,7 +27,7 @@ export const runSettlementService = async () => {
         continue;
       }
 
-      //----------- Check already settled (using appointment) ------------
+      // ---------------- CHECK ALREADY SETTLED (USING APPOINTMENT) ----------------
       const alreadySettled = await Settlement.findOne({
         appointment: consultation.appointment,
       });
@@ -36,14 +36,14 @@ export const runSettlementService = async () => {
         continue;
       }
 
-      //----------- Calculate settlement ------------
+      // ---------------- CALCULATE SETTLEMENT ----------------
       const settlementResult = calculateSettlement(consultation, payment);
 
       if (!settlementResult) {
         continue;
       }
 
-      // ------------ CREATE SETTLEMENT RECORD -------------
+      // ---------------- CREATE SETTLEMENT RECORD ----------------
       const settlement = await Settlement.create({
         appointment: consultation.appointment,
         doctor: consultation.doctor,
@@ -54,10 +54,10 @@ export const runSettlementService = async () => {
         processedAt: new Date(),
       });
 
-      // ----------- EXECUTE WALLET OPERATIONS ----------------
+      // ---------------- EXECUTE WALLET OPERATIONS ----------------
       const walletOps = [];
 
-      //----------- Doctor payout ------------
+      // ---------------- DOCTOR PAYOUT ----------------
       if (settlementResult.doctorPayout > 0) {
         walletOps.push(
           creditDoctorWalletService({
@@ -70,7 +70,7 @@ export const runSettlementService = async () => {
         );
       }
 
-      // ---------- Patient refund (if any) ------------
+      // ---------------- PATIENT REFUND (IF ANY) ----------------
       if (settlementResult.patientRefund > 0) {
         walletOps.push(
           refundToWalletService(consultation.patient, {
@@ -82,7 +82,7 @@ export const runSettlementService = async () => {
 
       await Promise.all(walletOps);
 
-      //----------- Mark completed ------------
+      // ---------------- MARK COMPLETED ----------------
       await Promise.all([
         Consultation.findByIdAndUpdate(consultation._id, {
           isSettled: true,

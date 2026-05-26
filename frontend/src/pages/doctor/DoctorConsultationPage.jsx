@@ -30,21 +30,21 @@ const DoctorConsultationPage = () => {
   const [showPatientPanel, setShowPatientPanel] = useState(false);
   const [activeTab, setActiveTab] = useState("records");
 
-  // -------- patient info (prefilled) --------
+  // ---------------- PATIENT INFO (PREFILLED) ----------------
   const patient = participants?.patient;
 
   const patientName = patient?.name || "Unknown";
   const reason = patient?.reason || "General Consultation";
   const appointmentInfo = patient?.time || "Today";
 
-  // -------- prescription form --------
+  // ---------------- PRESCRIPTION FORM ----------------
   const [form, setForm] = useState({
     diagnosis: "",
     medicines: [{ medicine: "", dosage: "", timing: "before" }],
   });
   const [prescriptionSubmitted, setPrescriptionSubmitted] = useState(false);
 
-  // -------- processed stream --------
+  // ---------------- PROCESSED STREAM ----------------
   const processedStream = useVideoProcessor(
     rawStream,
     mode,
@@ -97,7 +97,7 @@ const DoctorConsultationPage = () => {
   }
 }, []);
 
-  // -------- end call --------
+  // ---------------- END CALL ----------------
   const handleEndCall = async () => {
     if (!prescriptionSubmitted) {
       toast.error("Please submit a prescription before ending the consultation");
@@ -156,7 +156,7 @@ const DoctorConsultationPage = () => {
     }
   };
 
-  // -------- medicine management --------
+  // ---------------- MEDICINE MANAGEMENT ----------------
   const addMedicine = () => {
     setForm({
       ...form,

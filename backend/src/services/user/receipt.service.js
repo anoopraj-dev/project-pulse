@@ -2,7 +2,7 @@ import Payment from "../../models/payments.model.js";
 import Settlement from "../../models/settlement.model.js";
 import { getBrowser } from "../../config/puppeteer.js";
 
-//---------------- MAIN SERVICE ----------------
+// ---------------- MAIN SERVICE ----------------
 export const viewReceiptService = async (id, hostUrl, role) => {
   const browser = getBrowser();
   const page = await browser.newPage();

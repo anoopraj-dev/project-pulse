@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import {
   motion,
   useSpring,
@@ -23,10 +23,10 @@ import {
   hoverLiftSubtle,
   viewportOnce,
 } from "../utilis/animations";
-import Heart from "@/components/ui/3D/Heart";
+const Heart = lazy(() => import("@/components/ui/3D/Heart"));
 import { fetchHomepageStats } from "@/api/user/userApis";
 
-// -------------- Arrow ----------------------------------
+// ---------------- ARROW ----------------
 const ArrowRight = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
     <path
@@ -39,7 +39,7 @@ const ArrowRight = ({ size = 15 }) => (
   </svg>
 );
 
-// ---------------- Primary Button ----------------------
+// ---------------- PRIMARY BUTTON ----------------
 const PrimaryBtn = ({ children, onClick }) => (
   <motion.button
     onClick={onClick}
@@ -53,7 +53,7 @@ const PrimaryBtn = ({ children, onClick }) => (
   </motion.button>
 );
 
-// --------------------- Feature badge (top bar) ---------------------
+// ---------------- FEATURE BADGE (TOP BAR) ----------------
 const FeatureBadge = ({ icon, value, label, delay = 0 }) => (
   <motion.div
     className="flex items-center gap-2 px-3 py-2 rounded-xl pointer-events-none select-none"
@@ -77,7 +77,7 @@ const FeatureBadge = ({ icon, value, label, delay = 0 }) => (
   </motion.div>
 );
 
-// ------------------- Callout annotation -----------------------
+// ---------------- CALLOUT ANNOTATION ----------------
 const Callout = ({ side = "right", label, sub, delay = 0, color = "#48cae4" }) => {
   const isRight = side === "right";
   return (
@@ -115,7 +115,7 @@ const Callout = ({ side = "right", label, sub, delay = 0, color = "#48cae4" }) =
   );
 };
 
-// --------------- Scan ring ------------------------
+// ---------------- SCAN RING ----------------
 const ScanRing = ({ delay = 0 }) => (
   <motion.div
     className="absolute inset-0 rounded-full pointer-events-none z-10"
@@ -126,26 +126,25 @@ const ScanRing = ({ delay = 0 }) => (
   />
 );
 
-//-------------------- HOME -----------------------
+// ---------------- HOME ----------------
 const Home = () => {
   const [stats, setStats] = useState([]);
   const [statsData, setStatsData] = useState([]);
   const [isVisible, setIsVisible] = useState(false);
-  const [scrollPhase, setScrollPhase] = useState("initial");
   const navigate = useNavigate();
 
-  // -------------------- Refs ------------------------
+  // ---------------- REFS ----------------
   const heroRef = useRef(null);
   const isLockedRef = useRef(false);
   const progressRef = useRef(0);
   const touchStartRef = useRef(0);
   const rafRef = useRef(null);
 
-  // -------------------- Mouse rotation -----------------
+  // ---------------- MOUSE ROTATION ----------------
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // -------------- Scroll progress --------------------
+  // ---------------- SCROLL PROGRESS ----------------
   const progress = useMotionValue(0);
   const springProg = useSpring(progress, { stiffness: 60, damping: 22, mass: 1 });
 
@@ -156,13 +155,13 @@ const Home = () => {
   const textOpacity = useTransform(springProg, [0, 0.2], [0, 1]);
 
   // Heart reacts
-  const heartScale = useTransform(springProg, [0, 1], [1.3, 1]);
+  const heartScale = useTransform(springProg, [0, 1], [1.27, 1.5]);
   const heartDriftY = useTransform(springProg, [0, 1], ["0%", "-10%"]);
   const heartOpacity = useTransform(springProg, [0.25, 0.72], [1, 0.22]);
   const vignette = useTransform(springProg, [0, 0.5], [0, 0.95]);
   const hintOpacity = useTransform(springProg, [0, 0.08], [1, 0]);
 
-  // ------------------------ Mouse handlers -----------------
+  // ---------------- MOUSE HANDLERS ----------------
   const handleMouseMove = useCallback((e) => {
     if (!heroRef.current) return;
     const rect = heroRef.current.getBoundingClientRect();
@@ -175,7 +174,7 @@ const Home = () => {
     mouseY.set(0);
   }, [mouseX, mouseY]);
 
-  // --------- Check if hero is pinned at viewport top --------------
+  // ---------------- CHECK IF HERO IS PINNED AT VIEWPORT TOP ----------------
   const isHeroAtTop = useCallback(() => {
     if (!heroRef.current) return false;
     const rect = heroRef.current.getBoundingClientRect();
@@ -188,14 +187,14 @@ const Home = () => {
     return rect.top < window.innerHeight && rect.bottom > 0;
   }, []);
 
-  // ------ Lock scroll: keep hero pinned at top ---------------
+  // ---------------- LOCK SCROLL: KEEP HERO PINNED AT TOP ----------------
   const lockScroll = useCallback(() => {
     if (!heroRef.current) return;
     const top = heroRef.current.offsetTop;
     window.scrollTo(0, top);
   }, []);
 
-  // -------------- delta handler -----------------------
+  // ---------------- DELTA HANDLER ----------------
   const handleDelta = useCallback((rawDelta) => {
     if (!heroRef.current) return;
 
@@ -233,18 +232,14 @@ const Home = () => {
       progressRef.current = 1;
       progress.set(1);
       isLockedRef.current = false;
-      setScrollPhase("done");
     } else if (up && next <= 0.01) {
       progressRef.current = 0;
       progress.set(0);
       isLockedRef.current = false;
-      setScrollPhase("initial");
-    } else {
-      setScrollPhase("animating");
     }
   }, [progress, lockScroll, isHeroAtTop, isHeroVisible]);
 
-  // ------------------ Wheel (desktop only) ------------------------
+  // ---------------- WHEEL (DESKTOP ONLY) ----------------
   useEffect(() => {
     // Only attach parallax scroll on non-touch / desktop
     if (window.matchMedia("(max-width: 639px)").matches) return;
@@ -261,7 +256,7 @@ const Home = () => {
     return () => window.removeEventListener("wheel", onWheel);
   }, [handleDelta, isHeroVisible]);
 
-  // -------------------- Touch (desktop only) ---------------------
+  // ---------------- TOUCH (DESKTOP ONLY) ----------------
   useEffect(() => {
     if (window.matchMedia("(max-width: 639px)").matches) return;
 
@@ -287,7 +282,7 @@ const Home = () => {
     };
   }, [handleDelta, isHeroVisible]);
 
-  // ------------------ Prevent scroll drift while locked ------------------
+  // ---------------- PREVENT SCROLL DRIFT WHILE LOCKED ----------------
   useEffect(() => {
     if (window.matchMedia("(max-width: 639px)").matches) return;
 
@@ -304,7 +299,7 @@ const Home = () => {
     };
   }, [lockScroll]);
 
-  // ------------ Stats load ------------------
+  // ---------------- STATS LOAD ----------------
   useEffect(() => {
     const t = setTimeout(() => setIsVisible(true), 500);
     return () => clearTimeout(t);
@@ -349,14 +344,13 @@ const Home = () => {
     return v + "+";
   };
 
-  // ---------------- JSX ------------------
+  // ---------------- JSX ----------------
   return (
     <div className="min-h-screen bg-slate-50 font-[Georgia,serif] overflow-x-hidden">
       <GlobalStyles />
 
-      {/* ==========================================================
-          DESKTOP HERO (sm and above only — hidden on mobile)
-      ========================================================== */}
+      {/* 
+        ---------------DESKTOP HERO (sm and above only — hidden on mobile)----------- */}
       <div
         ref={heroRef}
         className="relative w-full overflow-hidden hidden sm:block"
@@ -395,9 +389,9 @@ const Home = () => {
         <motion.div
           className="absolute left-1/2 pointer-events-none"
           style={{
-            x: "-50%",
-            top: "35%",
-            width: "min(115vw, 900px)",
+            x: "-65%",
+            top: "-20%",
+            width: "min(95vw, 800px)",
             aspectRatio: "1",
             scale: heartScale,
             y: heartDriftY,
@@ -405,7 +399,9 @@ const Home = () => {
             transformOrigin: "center top",
           }}
         >
-          <Heart mouseX={mouseX} mouseY={mouseY} />
+          <Suspense fallback={null}>
+            <Heart mouseX={mouseX} mouseY={mouseY} />
+          </Suspense>
         </motion.div>
 
         {/* ------------- Vignette grows with scroll --------------- */}
@@ -618,7 +614,7 @@ const Home = () => {
                       }}
                       whileHover={{ backgroundColor: "rgba(255,255,255,0.10)", color: "#fff", borderColor: "rgba(255,255,255,0.35)" }}
                       whileTap={{ scale: 0.97 }}
-                      onClick={() => navigate("/about-us")}
+                      onClick={() => navigate("/how-it-works")}
                     >
                       How it works
                     </motion.button>
@@ -795,7 +791,7 @@ const Home = () => {
                 background: "rgba(255,255,255,0.04)",
               }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => navigate("/about-us")}
+              onClick={() => navigate("/how-it-works")}
             >
               How it works
             </motion.button>

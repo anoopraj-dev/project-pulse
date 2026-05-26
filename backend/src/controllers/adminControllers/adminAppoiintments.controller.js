@@ -6,13 +6,13 @@ import {
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-//-------------- Get appointments ------------
+// ---------------- GET APPOINTMENTS ----------------
 export const getAllAppointments = asyncHandler(async (req, res) => {
   const appointments = await getAllAppointmentsService(req.query);
   res.status(200).json({ success: true, appointments });
 });
 
-//--------------------- Set Appointment Status --------------------
+// ---------------- SET APPOINTMENT STATUS ----------------
 export const setAdminAppointmentStatus = asyncHandler(async (req, res) => {
   const { id: appointmentId } = req.params;
   const { status } = req.body;

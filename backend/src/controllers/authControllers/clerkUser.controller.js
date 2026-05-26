@@ -22,7 +22,7 @@ export const updateClerKUser = asyncHandler(async (req, res) => {
     throw new AppError("Missing or invalid authorization header", 401);
   }
 
-  // ---------------- Verify Clerk token -----------------
+  // ---------------- VERIFY CLERK TOKEN ----------------
   const tokenPayload = await verifyToken(authHeader.substring(7), {
     secretKey: process.env.CLERK_SECRET_KEY,
   });
@@ -37,7 +37,7 @@ export const updateClerKUser = asyncHandler(async (req, res) => {
     throw new AppError("Provided email does not match Clerk user email", 403);
   }
 
-  // ---------------- Check for role conflicts ----------------
+  // ---------------- CHECK FOR ROLE CONFLICTS ----------------
   const existingRole = clerkUserInfo?.unsafeMetadata?.role;
   if (existingRole && existingRole !== role) {
     throw new AppError(
@@ -46,7 +46,7 @@ export const updateClerKUser = asyncHandler(async (req, res) => {
     );
   }
 
-  // ---------------- Check for email conflicts in local DB ----------------
+  // ---------------- CHECK FOR EMAIL CONFLICTS IN LOCAL DB ----------------
   const Model = role === "doctor" ? Doctor : Patient;
   const uniqueIdKey = role === "doctor" ? "doctorId" : "patientId";
   const uniqueId = generateUniqueId(role.toUpperCase());
@@ -56,7 +56,7 @@ export const updateClerKUser = asyncHandler(async (req, res) => {
     throw new AppError(`Email registered as ${existingDbUser.role}`, 409);
   }
 
-  // ---------------- Upsert user in local DB ----------------
+  // ---------------- UPSERT USER IN LOCAL DB ----------------
   const user = await Model.findOneAndUpdate(
     { email },
     {
@@ -74,7 +74,7 @@ export const updateClerKUser = asyncHandler(async (req, res) => {
     }
   );
 
-  // ---------------- Generate JWT token ----------------
+  // ---------------- GENERATE JWT TOKEN ----------------
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) throw new AppError("JWT secret is not defined", 500);
 
@@ -94,7 +94,7 @@ export const updateClerKUser = asyncHandler(async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000,
   });
 
-  // --------------- Update Clerk user metadata  ----------------
+  // ---------------- UPDATE CLERK USER METADATA ----------------
   if (!existingRole) {
     await clerkClient.users.updateUser(id, {
       unsafeMetadata: { role },

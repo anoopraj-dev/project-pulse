@@ -75,14 +75,14 @@ import toast from "react-hot-toast";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
-//----------- EDIT & UPDATE PROFILE ------------
+// ---------------- EDIT & UPDATE PROFILE ----------------
 
 const PatientEditProfile = () => {
   const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
-  // -------- Prefill user data --------
+  // ---------------- PREFILL USER DATA ----------------
   const getUser = async () => {
     try {
       const response = await fetchPatientProfile();
@@ -98,7 +98,7 @@ const PatientEditProfile = () => {
     }
   };
 
-  //------------ Update Profile ----------------
+  // ---------------- UPDATE PROFILE ----------------
   const handleUpdateProfile = async (data) => {
     try {
       const response = await updatePatientProfile(data);

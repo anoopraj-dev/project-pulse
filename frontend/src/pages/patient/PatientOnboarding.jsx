@@ -56,7 +56,7 @@ const PatientOnboarding = () => {
           formData.append("profilePicture", files.profilePicture);
         }
 
-        // ---------- API CALL ----------
+        // ---------------- API CALL ----------------
         let response;
         switch (currentStep) {
           case 0:
@@ -109,7 +109,7 @@ const PatientOnboarding = () => {
 
         toast.success(response.data.message);
 
-        // ---------- CLEANUP ----------
+        // ---------------- CLEANUP ----------------
         Object.keys(files).forEach(clearField);
 
         if (currentStep < stepKeys.length - 1) {

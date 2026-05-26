@@ -12,7 +12,7 @@ const modelMap = {
 };
 
 
-// --------------------- GET ALL MESSAGES ---------------
+// ---------------- GET ALL MESSAGES ----------------
 export const getAllMessages = asyncHandler(async (req, res) => {
   try {
     const userId1 = req.user.id;
@@ -60,14 +60,14 @@ export const getAllMessages = asyncHandler(async (req, res) => {
       });
     }
 
-    //--------------- get conversations---------------------
+    // ---------------- GET CONVERSATIONS ----------------
     const messages = await Message.find({
       conversationId: conversation._id,
     })
       .sort({ createdAt: 1 })
       .lean();
 
-    //-------------- format messages --------------
+    // ---------------- FORMAT MESSAGES ----------------
     const formattedMessages = messages.map((msg) => ({
       ...msg,
       files:
@@ -80,7 +80,7 @@ export const getAllMessages = asyncHandler(async (req, res) => {
         })) || [],
     }));
 
-    //-------------- mark read --------------
+    // ---------------- MARK READ ----------------
     await Message.updateMany(
       {
         conversationId: conversation._id,
@@ -109,7 +109,7 @@ export const getAllMessages = asyncHandler(async (req, res) => {
   }
 });
 
-//------------------- GET ALL CHATS -----------------------
+// ---------------- GET ALL CHATS ----------------
 export const getAllConversations = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
@@ -130,7 +130,7 @@ export const getAllConversations = asyncHandler(async (req, res) => {
         "name profilePicture",
       );
 
-      //----------------- Unread count ----------------
+      // ---------------- UNREAD COUNT ----------------
       const unreadCount = await Message.countDocuments({
         conversationId: convo._id,
         receiverId: userId,
@@ -155,7 +155,7 @@ export const getAllConversations = asyncHandler(async (req, res) => {
   }
 });
 
-//-------------------- SEND MESSAGE ----------------------
+// ---------------- SEND MESSAGE ----------------
 
 export const sendMessage = async ({
   conversationId,
@@ -169,7 +169,7 @@ export const sendMessage = async ({
   let conversation = null;
   let isNewConversation = false;
 
-  //------------------- Find or Create conversation --------------------
+  // ---------------- FIND OR CREATE CONVERSATION ----------------
 
   if (conversationId) {
     conversation = await Conversation.findById(conversationId);
@@ -186,7 +186,7 @@ export const sendMessage = async ({
       },
     });
 
-    // ---- only create if still not found ------------------
+    // ---------------- ONLY CREATE IF STILL NOT FOUND ----------------
     if (!conversation) {
       conversation = await Conversation.create({
         participants: [
@@ -198,7 +198,7 @@ export const sendMessage = async ({
     }
   }
 
-  //------------ normalize files ------------
+  // ---------------- NORMALIZE FILES ----------------
   const normalizedFiles = files.map((f) => ({
     url: f.url,
     name: f.name,
@@ -207,7 +207,7 @@ export const sendMessage = async ({
     format: f.format
   }));
 
-  //---------------- Create Message -------------------------
+  // ---------------- CREATE MESSAGE ----------------
 
   const message = await Message.create({
     conversationId: conversation._id,
@@ -230,7 +230,7 @@ export const sendMessage = async ({
   conversation.updatedAt = message.createdAt;
   await conversation.save();
 
-  // --------------------- Populate pariicaipants ---------------------
+  // ---------------- POPULATE PARIICAIPANTS ----------------
 
   const populatedConversation = await Conversation.findById(
     conversation._id,
@@ -272,7 +272,7 @@ export const sendMessage = async ({
 };
 
 
-//--------------------- MarkConversation as read -----------------------
+// ---------------- MARKCONVERSATION AS READ ----------------
 export const markConversationAsRead = async ({
   conversationId,
 }) => {

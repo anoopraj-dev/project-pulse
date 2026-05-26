@@ -28,7 +28,7 @@ const ChatContainer = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [typingUsers, setTypingUsers] = useState(new Set());
 
-  // ---------------- Fetch Sidebar Conversations ----------------
+  // ---------------- FETCH SIDEBAR CONVERSATIONS ----------------
   useEffect(() => {
     const loadConversations = async () => {
       const res = await getConversations(role);
@@ -37,7 +37,7 @@ const ChatContainer = () => {
     loadConversations();
   }, [role]);
 
-  // ---------------- Fetch Messages ----------------
+  // ---------------- FETCH MESSAGES ----------------
   useEffect(() => {
     if (!receiverId) return;
 
@@ -59,7 +59,7 @@ const ChatContainer = () => {
     loadMessages();
   }, [receiverId, id, role]);
 
-  // ---------------- Conversation Created ----------------
+  // ---------------- CONVERSATION CREATED ----------------
   useEffect(() => {
     const handleConversationCreated = ({ conversationId, conversation }) => {
       setActiveConversation((prev) => ({
@@ -80,7 +80,7 @@ const ChatContainer = () => {
     return () => socket.off("conversation:created", handleConversationCreated);
   }, [socket]);
 
-  //---------------- Force refresh the chat after first message ---------------
+  // ---------------- FORCE REFRESH THE CHAT AFTER FIRST MESSAGE ----------------
   const forceRefreshChat = async () => {
     if (!receiverId) return;
 
@@ -99,7 +99,7 @@ const ChatContainer = () => {
     });
   };
 
-  // ---------------- Join / Leave Chat ----------------
+  // ---------------- JOIN / LEAVE CHAT ----------------
   useEffect(() => {
     if (!activeConversation?.id || !isConnected) return;
 
@@ -114,18 +114,18 @@ const ChatContainer = () => {
     };
   }, [activeConversation?.id, socket, isConnected]);
 
-  // ---------------- Send Message ----------------
+  // ---------------- SEND MESSAGE ----------------
   const handleSendMessage = async ({ text, files }) => {
     if (!receiverId) return;
     if (!text.trim() && (!files || files.length === 0)) return;
     try {
       setIsUploading(true);
 
-      //---------------- temperory message with thumbnail for video ---------------
+      // ---------------- TEMPERORY MESSAGE WITH THUMBNAIL FOR VIDEO ----------------
       const tempFiles = await Promise.all(
         files?.map(async (file) => {
           const category = getFileCategory(file);
-          //---------- video files --------------
+          // ---------------- VIDEO FILES ----------------
           if (category === "video") {
             const thumbnail = await generateVideoThumbnail(file);
             return {
@@ -137,7 +137,7 @@ const ChatContainer = () => {
             };
           }
 
-          //------------- images -----------------
+          // ---------------- IMAGES ----------------
           if (category === "image") {
             return {
               localPreview: URL.createObjectURL(file),
@@ -148,7 +148,7 @@ const ChatContainer = () => {
             };
           }
 
-          //--------------- pdf files ------------------
+          // ---------------- PDF FILES ----------------
           if (category === "pdf") {
             return {
               localPreview: URL.createObjectURL(file),
@@ -159,7 +159,7 @@ const ChatContainer = () => {
             };
           }
 
-          //------------- documents ---------------
+          // ---------------- DOCUMENTS ----------------
           return {
             localPreview: URL.createObjectURL(file),
             type: "raw",
@@ -170,7 +170,7 @@ const ChatContainer = () => {
         }),
       );
 
-      //----------------- create temperorry message for preview --------------------
+      // ---------------- CREATE TEMPERORRY MESSAGE FOR PREVIEW ----------------
       const tempId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
       const tempMessage = {
@@ -186,7 +186,7 @@ const ChatContainer = () => {
 
       setMessages((prev) => [...prev, tempMessage]);
 
-      //-------------------  upload to cloudinary ----------------------
+      // ---------------- UPLOAD TO CLOUDINARY ----------------
       let uploadedFiles = [];
 
       if (files && files.length > 0) {
@@ -207,7 +207,7 @@ const ChatContainer = () => {
         isProtected: role !== "doctor",
       }));
 
-      //-------------------- replace temp preview ------------------
+      // ---------------- REPLACE TEMP PREVIEW ----------------
       setMessages((prev) =>
         prev.map((m) =>
           m._id === tempId ? { ...m, files: uploadedFiles, status: "sent" } : m,
@@ -231,7 +231,7 @@ const ChatContainer = () => {
     }
   };
 
-  // ---------------- Receive Message ----------------
+  // ---------------- RECEIVE MESSAGE ----------------
   useEffect(() => {
     const handleReceiveMessage = (message) => {
       const isActiveChat = activeConversation?.id === message.conversationId;
@@ -249,7 +249,7 @@ const ChatContainer = () => {
         });
       }
 
-      //------------ update sidebar --------------
+      // ---------------- UPDATE SIDEBAR ----------------
       setConversations((prev) =>
         prev.map((c) =>
           c._id === message.conversationId
@@ -267,7 +267,7 @@ const ChatContainer = () => {
     return () => socket.off("message:receive", handleReceiveMessage);
   }, [socket, activeConversation?.id]);
 
-  // ---------------- Mark Messages as Read ----------------
+  // ---------------- MARK MESSAGES AS READ ----------------
   useEffect(() => {
     if (!activeConversation?.id) return;
 
@@ -299,7 +299,7 @@ const ChatContainer = () => {
     return () => socket.off("message:read", handleMessageRead);
   }, [socket, id]);
 
-  // ---------------- Typing Indicator ----------------
+  // ---------------- TYPING INDICATOR ----------------
   useEffect(() => {
     if (!socket) return;
 
@@ -332,7 +332,7 @@ const ChatContainer = () => {
     };
   }, [socket, activeConversation?.id, id]);
 
-  //-------------- Total Unread for Global use ---------------
+  // ---------------- TOTAL UNREAD FOR GLOBAL USE ----------------
 
   useEffect(() => {
     const total = conversations.reduce(
@@ -343,7 +343,7 @@ const ChatContainer = () => {
     setTotalUnread(total);
   }, [conversations, setTotalUnread]);
 
-  // ---------------- Reset on Route Change ----------------
+  // ---------------- RESET ON ROUTE CHANGE ----------------
   useEffect(() => {
     if (!receiverId) {
       setActiveConversation(null);

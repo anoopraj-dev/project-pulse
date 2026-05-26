@@ -8,7 +8,7 @@ export const userSignup = asyncHandler(async (req, res) => {
     registrationId: req.registrationId,
   });
 
-  // -------- Session --------
+  // ---------------- SESSION ----------------
   req.session.OTP = {
     email: user.email,
     type: "emailVerification",

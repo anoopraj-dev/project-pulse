@@ -189,7 +189,7 @@ export const useVideoSession = (sessionId, role, stream) => {
 
   const endCall = () => {
     try {
-      //---------- stop all media --------
+      // ---------------- STOP ALL MEDIA ----------------
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((track) => {
           track.stop();
@@ -209,7 +209,7 @@ export const useVideoSession = (sessionId, role, stream) => {
         remoteVideoRef.current.load();
       }
 
-      //------------ clear tracks ----------
+      // ---------------- CLEAR TRACKS ----------------
       if (pcRef.current) {
         pcRef.current.getSenders().forEach((sender) => {
           if (sender.track) {
@@ -218,14 +218,14 @@ export const useVideoSession = (sessionId, role, stream) => {
         });
       }
 
-      //------------ clear remote feed ------------
+      // ---------------- CLEAR REMOTE FEED ----------------
       if (remoteVideoRef.current?.srcObject) {
         remoteVideoRef.current.srcObject
           .getTracks()
           .forEach((track) => track.stop());
       }
 
-      //-------- close peer connection -----------
+      // ---------------- CLOSE PEER CONNECTION ----------------
       closePC();
 
       setStatusSafe("ended");

@@ -12,7 +12,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// -------- GET WALLET ----------
+// ---------------- GET WALLET ----------------
 export const getPatientWalletService = async (patientId) => {
   let wallet = await Wallet.findOne({ userId: patientId, role: "patient" });
 
@@ -31,7 +31,7 @@ export const getPatientWalletService = async (patientId) => {
   return { wallet, transactions };
 };
 
-// -------- REFUND ----------
+// ---------------- REFUND ----------------
 export const refundToWalletService = async (patientId, body) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -112,7 +112,7 @@ export const refundToWalletService = async (patientId, body) => {
   }
 };
 
-// -------- CREATE WALLET ORDER ----------
+// ---------------- CREATE WALLET ORDER ----------------
 export const createWalletOrderService = async ({ amount, notes }) => {
   if (!amount || amount <= 0) {
     throw new Error("Invalid amount");
@@ -131,7 +131,7 @@ export const createWalletOrderService = async ({ amount, notes }) => {
   return order;
 };
 
-// -------- VERIFY PAYMENT ----------
+// ---------------- VERIFY PAYMENT ----------------
 export const verifyWalletPaymentService = async (userId, body) => {
   const {
     razorpay_payment_id,

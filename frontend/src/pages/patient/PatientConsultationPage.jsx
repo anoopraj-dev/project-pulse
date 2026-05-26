@@ -43,7 +43,7 @@ const PatientConsultationPage = () => {
     remoteMuted,
   } = useVideoSession(sessionId, "patient", finalStream, user);
 
-  //-------- listen for end requests ----------
+  // ---------------- LISTEN FOR END REQUESTS ----------------
   useEffect(()=>{
     const handler = ({consultationId}) =>{
       openModal(
@@ -61,7 +61,7 @@ const PatientConsultationPage = () => {
     }
   },[openModal])
 
-  // ----------Navigate when consultation ends ---------------
+  // ---------------- NAVIGATE WHEN CONSULTATION ENDS ----------------
   useEffect(() => {
     if (status === "ended") {
       navigate("/patient/appointments");

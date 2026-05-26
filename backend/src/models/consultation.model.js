@@ -72,7 +72,7 @@ const consultationSchema = new mongoose.Schema({
 
 },{timestamps:true})
 
-// -------------- Indexes ----------
+// ---------------- INDEXES ----------------
 consultationSchema.index({appointment:1, sessionId:1});
 consultationSchema.index({patient:1,doctor:1})
 

@@ -10,7 +10,7 @@ import {
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-//------------- SEARCH CONTROLLER ----------------
+// ---------------- SEARCH CONTROLLER ----------------
 export const searchController = asyncHandler(async (req, res) => {
   const { query, type, filters } = req.query;
   const { role, id: userId } = req.user;
@@ -48,7 +48,7 @@ export const searchController = asyncHandler(async (req, res) => {
   });
 });
 
-//---------------- Search Suggestions Controller ----------------
+// ---------------- SEARCH SUGGESTIONS CONTROLLER ----------------
 export const searchSuggestionsController = asyncHandler(async (req, res) => {
   const { query = "", type } = req.query;
 

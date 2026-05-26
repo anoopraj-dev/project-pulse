@@ -7,19 +7,19 @@ import Admin from '../../models/admin.model.js'
 import Alert from "../../models/alert.model.js";
 import paginate from "../../utils/paginate.js";
 
-//--------- SUPPORT TICKETS -------------
+// ---------------- SUPPORT TICKETS ----------------
 
-//------------ Create Ticket -----------
+// ---------------- CREATE TICKET ----------------
 export const createTicketService = async (data) => {
   return await SupportTicket.create(data);
 };
 
-//------------ Get Tickets --------
+// ---------------- GET TICKETS ----------------
 export const getTicketsService = async () => {
   return await SupportTicket.find().sort({ createdAt: -1 }).lean();
 };
 
-//--------- Update ticket status -------
+// ---------------- UPDATE TICKET STATUS ----------------
 export const updateTicketStatusService = async (
   id,
   status,
@@ -31,7 +31,7 @@ export const updateTicketStatusService = async (
   );
 };
 
-//--------- SYSTEM ALERTS -----------
+// ---------------- SYSTEM ALERTS ----------------
 
 
 export const getSystemAlertsService = async ({ page = 1, limit = 10 }) => {
@@ -43,13 +43,13 @@ export const getSystemAlertsService = async ({ page = 1, limit = 10 }) => {
   });
 };
 
-//--------- update alert status ---------
+// ---------------- UPDATE ALERT STATUS ----------------
 export const updateAlertStatusService = async (id, status) => {
   return await Alert.findByIdAndUpdate(id, { status }, { new: true });
 };
 
 
-//----------- Helper (identify role) ---------
+// ---------------- HELPER (IDENTIFY ROLE) ----------------
 const getModelByRole = (role) => {
   switch (role) {
     case "patient":
@@ -64,7 +64,7 @@ const getModelByRole = (role) => {
 };
 
 
-//------------- Change Password -------------
+// ---------------- CHANGE PASSWORD ----------------
 export const changePasswordService = async (
   role,
   userId,

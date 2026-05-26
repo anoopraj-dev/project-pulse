@@ -78,17 +78,17 @@ const DoctorViewAppointment = () => {
     fetchAppointment();
   }, [id]);
 
-  // --------------- View Patient Profile ---------------
+  // ---------------- VIEW PATIENT PROFILE ----------------
   const viewPatientProfile = (patientId) => {
     navigate(`/doctor/appointments/patient-profile/${patientId}`);
   };
 
-  // --------------- Send Messages -------------------
+  // ---------------- SEND MESSAGES ----------------
   const handleMessages = (patientId) => {
     navigate(`/doctor/messages/${patientId}`);
   };
 
-  // --------------- View Consultation PDF -------------------
+  // ---------------- VIEW CONSULTATION PDF ----------------
   const handleViewPDF = async () => {
     try {
       const consultationId =
@@ -105,7 +105,7 @@ const DoctorViewAppointment = () => {
     }
   };
 
-  // --------------- Handle Cancellation ----------------
+  // ---------------- HANDLE CANCELLATION ----------------
   const handleCancel = async () => {
     if (!cancelReason.trim()) {
       toast.error("Please provide a cancellation reason");
@@ -146,7 +146,7 @@ const DoctorViewAppointment = () => {
     }
   };
 
-  // --------------- Join Consultation ----------------
+  // ---------------- JOIN CONSULTATION ----------------
   const handleJoinConsultation = async () => {
     try {
       const consultationId = appointment?.consultation;

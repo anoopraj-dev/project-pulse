@@ -5,7 +5,7 @@ import Transaction from "../../models/transaction.model.js";
 import Patient from "../../models/patient.model.js";
 import Wallet from "../../models/wallet.model.js";
 
-//---------------- Search doctors ----------------
+// ---------------- SEARCH DOCTORS ----------------
 export const searchDoctors = async (regex, filters) => {
   const limit = Number(filters.limit) || 20;
   const page = Number(filters.page) || 1;
@@ -37,7 +37,7 @@ export const searchDoctors = async (regex, filters) => {
     .skip((page - 1) * limit);
 };
 
-//---------------- Search appointments ----------------
+// ---------------- SEARCH APPOINTMENTS ----------------
 export const searchAppointments = async (regex, filters, role, userId) => {
   let query = {};
   if (role === "patient") query.patient = userId;
@@ -75,7 +75,7 @@ export const searchAppointments = async (regex, filters, role, userId) => {
     }));
 };
 
-//---------------- Search payments ----------------
+// ---------------- SEARCH PAYMENTS ----------------
 export const searchPayments = async (regex, filters, role, userId) => {
   let query = {};
   if (role === "patient") query.patient = userId;
@@ -99,7 +99,7 @@ export const searchPayments = async (regex, filters, role, userId) => {
     .slice(0, 10);
 };
 
-//---------------- Search transactions ----------------
+// ---------------- SEARCH TRANSACTIONS ----------------
 export const searchTransactions = async (regex, filters, role, userId) => {
   const wallet = await Wallet.findOne({ user: userId });
   if (!wallet) return [];
@@ -126,7 +126,7 @@ export const searchTransactions = async (regex, filters, role, userId) => {
     .slice(0, 10);
 };
 
-//---------------- Search patients ----------------
+// ---------------- SEARCH PATIENTS ----------------
 export const searchPatients = async (regex, filters, role, userId) => {
   const limit = Number(filters.limit) || 10;
 
@@ -148,13 +148,13 @@ export const searchPatients = async (regex, filters, role, userId) => {
 };
 
 
-//---------------- Search suggestions ----------------
+// ---------------- SEARCH SUGGESTIONS ----------------
 export const getSearchSuggestions = async (query, type, user) => {
   const regex = new RegExp(`^${query.trim()}`, "i");
   const limit = 6;
   let data = [];
 
-  //------------ Doctors ----------------
+  // ---------------- DOCTORS ----------------
   if (type === "doctors") {
     // doctor name matches
     const doctorMatches = await Doctor.find({ name: regex })
@@ -186,7 +186,7 @@ export const getSearchSuggestions = async (query, type, user) => {
     ].slice(0, limit);
   }
 
-  //------------ Appointments ----------------
+  // ---------------- APPOINTMENTS ----------------
   else if (type === "appointments") {
     let queryFilter = {};
     if (user.role === "patient") queryFilter.patient = user.id;
@@ -218,7 +218,7 @@ export const getSearchSuggestions = async (query, type, user) => {
     ].slice(0, limit);
   }
 
-  //------------ Payments ----------------
+  // ---------------- PAYMENTS ----------------
   else if (type === "payments") {
     let queryFilter = {};
     if (user.role === "patient") queryFilter.patient = user.id;
@@ -256,7 +256,7 @@ export const getSearchSuggestions = async (query, type, user) => {
     ].slice(0, limit);
   }
 
-  //------------ Specialization ----------------
+  // ---------------- SPECIALIZATION ----------------
   else if (type === "specialization") {
     const specs = await Doctor.distinct("professionalInfo.specializations", {
       "professionalInfo.specializations": regex,
@@ -265,20 +265,20 @@ export const getSearchSuggestions = async (query, type, user) => {
     data = specs.map((s) => ({ name: s }));
   }
 
-  //------------ Location ----------------
+  // ---------------- LOCATION ----------------
   else if (type === "location") {
     const loc = await Doctor.distinct("location", { location: regex });
     data = loc.map((l) => ({ name: l }));
   }
 
-  //------------ Patients ----------------
+  // ---------------- PATIENTS ----------------
   else if (type === "patients") {
     data = await Patient.find({ name: regex })
       .select("name profilePicture")
       .limit(limit);
   }
 
-  //------------ Transactions ----------------
+  // ---------------- TRANSACTIONS ----------------
   else if (type === "transactions") {
     const wallet = await Wallet.findOne({ user: user.id });
     if (!wallet) return [];

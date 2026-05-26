@@ -3,14 +3,14 @@ import { exportQueue } from "../../queues/export.queue.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-// --------- REQUEST REVENUE EXPORT (ADMIN ONLY) ----------
+// ---------------- REQUEST REVENUE EXPORT (ADMIN ONLY) ----------------
 export const requestRevenueExport = asyncHandler(async (req, res) => {
   const userId = req.user?.id;
   const role = req.user?.role;
 
   if (role !== "admin") throw new AppError("Admin only access", 403);
 
-  // --------- Create Export Job ----------
+  // ---------------- CREATE EXPORT JOB ----------------
   const job = await Export.create({
     role: "admin",
     status: "queued",
@@ -19,7 +19,7 @@ export const requestRevenueExport = asyncHandler(async (req, res) => {
     filters: req.body?.filters || {},
   });
 
-  // --------- Queue Job ----------
+  // ---------------- QUEUE JOB ----------------
   await exportQueue.add("export", {
     exportId: job._id,
     reportType: "admin_revenue_full",
@@ -34,7 +34,7 @@ export const requestRevenueExport = asyncHandler(async (req, res) => {
   });
 });
 
-// --------- GET REVENUE EXPORT STATUS ----------
+// ---------------- GET REVENUE EXPORT STATUS ----------------
 export const getRevenueExportStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
 

@@ -1,5 +1,5 @@
 
-// -------- DateTime Helpers ----------
+// ---------------- DATETIME HELPERS ----------------
 const formatDate = (date) => {
   const dt = new Date(date);
   return isNaN(dt) ? "-" : dt.toLocaleDateString("en-IN");
@@ -17,7 +17,7 @@ const formatTime = (date) => {
 
 
 
-//-------------- Doctors Table config ----------------
+// ---------------- DOCTORS TABLE CONFIG ----------------
 export const doctorColumns = [
   {
     header: "Joined",
@@ -65,7 +65,7 @@ export const doctorColumns = [
   },
 ];
 
-//-------------- Patients Table Config --------------------
+// ---------------- PATIENTS TABLE CONFIG ----------------
 export const patientColumns = [
   {
     header: "Joined",
@@ -98,7 +98,7 @@ export const patientColumns = [
   },
 ];
 
-//-------------- Patient Appointment --------------------
+// ---------------- PATIENT APPOINTMENT ----------------
 export const patientAppointmentColumns = [
   {
     header: "Booked On",
@@ -166,7 +166,7 @@ export const patientAppointmentColumns = [
   },
 ];
 
-//-------------- Doctor Appointment --------------------
+// ---------------- DOCTOR APPOINTMENT ----------------
 export const doctorAppointmentColumns = [
   {
     header: "Booked On",
@@ -225,7 +225,7 @@ export const doctorAppointmentColumns = [
   },
 ];
 
-//-------------- Admin Appointment --------------------
+// ---------------- ADMIN APPOINTMENT ----------------
 export const adminAppointmentColumns = [
   {
     header: "Booked On",
@@ -319,7 +319,7 @@ export const adminAppointmentColumns = [
   },
 ];
 
-//-------------- Payments ----------------
+// ---------------- PAYMENTS ----------------
 export const patientPaymentColumns = [
   {
     header: "Paid On",

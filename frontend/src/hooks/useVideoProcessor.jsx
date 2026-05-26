@@ -69,7 +69,7 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
 
-    // ----------- segmentation (media pipe) ---------------
+    // ---------------- SEGMENTATION (MEDIA PIPE) ----------------
     if (!segmentationRef.current) {
       const segmentation = getSegmentation();
 

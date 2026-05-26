@@ -8,13 +8,13 @@ import {
 } from "../../services/patient/appointment.service.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-//-------------- Get booking info ----------------
+// ---------------- GET BOOKING INFO ----------------
 export const getBookingInfo = asyncHandler(async (req, res) => {
   const bookingInfo = await getBookingInfoService(req.params.id);
   res.status(200).json({ success: true, bookingInfo });
 });
 
-//---------------- Book Appointment ----------------
+// ---------------- BOOK APPOINTMENT ----------------
 export const bookAppointment = asyncHandler(async (req, res) => {
   const { appointment } = await bookAppointmentService(req.body, req.user.id);
   res.status(201).json({
@@ -24,7 +24,7 @@ export const bookAppointment = asyncHandler(async (req, res) => {
   });
 });
 
-//---------------- Get all appointments ----------------
+// ---------------- GET ALL APPOINTMENTS ----------------
 export const getAllAppointments = asyncHandler(async (req, res) => {
   const { page, limit, status } = req.query;
   const pageNum = Math.max(1, parseInt(page) || 1);
@@ -39,13 +39,13 @@ export const getAllAppointments = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: appointments });
 });
 
-//---------------- Get appointment by ID ----------------
+// ---------------- GET APPOINTMENT BY ID ----------------
 export const getAppointmentById = asyncHandler(async (req, res) => {
   const appointment = await getAppointmentByIdService(req.params.id, req.user.id);
   res.status(200).json({ success: true, appointment });
 });
 
-//---------------- Cancel appointment ----------------
+// ---------------- CANCEL APPOINTMENT ----------------
 export const cancelAppointment = asyncHandler(async (req, res) => {
   const appointment = await cancelAppointmentService(req.params.id, req.user.id);
   res.status(200).json({

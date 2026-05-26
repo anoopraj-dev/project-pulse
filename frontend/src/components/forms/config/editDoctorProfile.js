@@ -1,7 +1,7 @@
 export const doctorEditProfileConfig = {
   title: "Edit Profile",
   fields: [
-    // ----------------------- Basic Information ------------------------
+    // ---------------- BASIC INFORMATION ----------------
     {
       name: "basicInfo",
       type: "title",
@@ -30,7 +30,7 @@ export const doctorEditProfileConfig = {
       placeholder: "Brief introduction about yourself",
     },
 
-    // -------------------------Professional Information ---------------------
+    // ---------------- PROFESSIONAL INFORMATION ----------------
     {
       name: "professionalInfo",
       type: "title",
@@ -49,7 +49,7 @@ export const doctorEditProfileConfig = {
       type: "text",
     },
 
-    // ---------------------- Services -------------------------------
+    // ---------------- SERVICES ----------------
 
     {
       name: "services",

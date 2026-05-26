@@ -39,7 +39,7 @@ export const useCamera = () => {
       cancelled = true;
       refCount--;
 
-      //---- stop only when no users ----------
+      // ---------------- STOP ONLY WHEN NO USERS ----------------
       if (refCount === 0 && globalStream) {
         globalStream.getTracks().forEach((track) => track.stop());
         globalStream = null;

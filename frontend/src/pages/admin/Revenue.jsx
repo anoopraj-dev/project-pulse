@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
-// ---------------- Shared UI (matches Dashboard) ----------------
+// ---------------- SHARED UI (MATCHES DASHBOARD) ----------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}
@@ -74,7 +74,7 @@ const StatCard = ({ label, value, change, changeType, icon, iconBg, iconColor })
   </div>
 );
 
-// ---------------- Revenue Page ----------------
+// ---------------- REVENUE PAGE ----------------
 const RevenuePage = () => {
   const [range, setRange] = useState("month");
   const [data, setData] = useState(null);

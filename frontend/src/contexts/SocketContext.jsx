@@ -39,7 +39,7 @@ export const SocketProvider = ({ children }) => {
     socket.auth = { userId: id, role };
     socket.connect();
 
-    //-------------------- Handlers ---------------------------
+    // ---------------- HANDLERS ----------------
 
     const handleConnect = () => {
       setIsConnected(true);
@@ -85,7 +85,7 @@ export const SocketProvider = ({ children }) => {
       });
     };
 
-    //----------------- Listen to events ---------------------
+    // ---------------- LISTEN TO EVENTS ----------------
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
@@ -99,7 +99,7 @@ export const SocketProvider = ({ children }) => {
       console.error("Socket connect error:", err.message);
     });
 
-    //---------------- Cleanup ------------------------
+    // ---------------- CLEANUP ----------------
 
     return () => {
       socket.off("connect", handleConnect);

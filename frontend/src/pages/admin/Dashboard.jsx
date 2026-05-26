@@ -26,7 +26,7 @@ import {
 import PageBanner from "@/components/shared/components/PageBanner";
 import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
-// ---------------- Reusable Components ------------------
+// ---------------- REUSABLE COMPONENTS ----------------
 
 const mockTraffic = {
   todayVisits: 128,
@@ -111,7 +111,7 @@ const StatCard = ({
   </div>
 );
 
-// ---------------- Main Component ------------------
+// ---------------- MAIN COMPONENT ----------------
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -124,7 +124,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  //------------ REVIEW PENDING APPROVAL ---------------
+  // ---------------- REVIEW PENDING APPROVAL ----------------
   const handleReview = async (id) => {
     try {
       const doctor = await fetchDoctorById(id);
@@ -138,7 +138,7 @@ const Dashboard = () => {
     }
   };
 
-  //------------ FETCH DATA -----------------
+  // ---------------- FETCH DATA ----------------
   const fetchStats = async () => {
     try {
       const stats = await fetchDashboardStats(range);
@@ -174,7 +174,7 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  //---------- FETCH REVENUE CHART DATA ---------------
+  // ---------------- FETCH REVENUE CHART DATA ----------------
   useEffect(() => {
     const loadRevenue = async () => {
       try {
@@ -189,7 +189,7 @@ const Dashboard = () => {
     loadRevenue();
   }, [range]);
 
-  //------------- FETCH USER GROWTH -------------
+  // ---------------- FETCH USER GROWTH ----------------
   useEffect(() => {
     const loadGrowth = async () => {
       try {
@@ -205,7 +205,7 @@ const Dashboard = () => {
     loadGrowth();
   }, []);
 
-  //--------------- FETCH ALERTS -------------
+  // ---------------- FETCH ALERTS ----------------
   useEffect(() => {
     const loadAlerts = async () => {
       try {

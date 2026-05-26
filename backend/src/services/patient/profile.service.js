@@ -1,6 +1,6 @@
 import Patient from "../../models/patient.model.js";
 
-// -------- GET PATIENT PROFILE SERVICE --------
+// ---------------- GET PATIENT PROFILE SERVICE ----------------
 export const getPatientProfileService = async (user) => {
   if (!user || user.role !== "patient") {
     throw new Error("Not authorized");
@@ -15,7 +15,7 @@ export const getPatientProfileService = async (user) => {
   return patient;
 };
 
-// -------- UPDATE PATIENT PROFILE SERVICE --------
+// ---------------- UPDATE PATIENT PROFILE SERVICE ----------------
 export const updatePatientProfileService = async (userId, body, file) => {
   const updatedData = { ...body };
 

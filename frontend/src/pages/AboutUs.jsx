@@ -18,7 +18,7 @@ import GlobalStyles from "@/components/shared/components/GlobalStyles";
 import { Icon } from "@iconify/react";
 import Footer from "@/components/layout/components/Footer";
 
-//--------------- Icon helpers -------------
+// ---------------- ICON HELPERS ----------------
 const ArrowRight = ({ size = 15 }) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
     <path
@@ -175,7 +175,7 @@ const DoctorLanding = () => {
                   borderColor: "rgba(255,255,255,.18)",
                   color: "rgba(255,255,255,.65)",
                 }}
-                onClick={() => navigate("/signin")}
+                onClick={() => navigate("/how-it-works")}
               >
                 How it works
               </motion.button>
@@ -527,7 +527,7 @@ const DoctorLanding = () => {
 
 };
 
-// ---------------------sub components -------------------
+// ---------------- SUB COMPONENTS ----------------
 const OfferCard = ({ icon, title, desc, featured }) => (
   <motion.div
     variants={staggerChild}

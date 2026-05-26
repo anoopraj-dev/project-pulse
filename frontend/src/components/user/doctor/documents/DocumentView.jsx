@@ -5,7 +5,7 @@ import Thumbnail from "./Thumbnail";
 import { useImageModal } from "../../../../contexts/ImageModalContext";
 import { Icon } from "@iconify/react";
 
-//-------- Card -----------------
+// ---------------- CARD ----------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden ${className}`}

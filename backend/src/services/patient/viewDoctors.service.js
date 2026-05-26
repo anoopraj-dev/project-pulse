@@ -3,7 +3,7 @@ import Doctor from "../../models/doctor.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
 import Review from "../../models/review.model.js";
 
-// -------- GET APPROVED DOCTORS --------
+// ---------------- GET APPROVED DOCTORS ----------------
 export const getApprovedDoctorsService = async () => {
   const doctors = await Doctor.find({
     status: "approved",
@@ -14,7 +14,7 @@ export const getApprovedDoctorsService = async () => {
     throw new Error("Doctors not found");
   }
 
-  // -------- GET DOCTOR RATINGS --------
+  // ---------------- GET DOCTOR RATINGS ----------------
   const reviews = await Review.find({
     doctor: { $in: doctors.map((d) => d._id) },
   });

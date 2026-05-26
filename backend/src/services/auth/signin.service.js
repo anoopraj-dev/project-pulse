@@ -16,7 +16,7 @@ export const loginService = async ({ email, password, role }) => {
     throw new Error("Invalid role");
   }
 
-  // -------- Find user --------
+  // ---------------- FIND USER ----------------
   let user =
     role === "doctor"
       ? await Doctor.findOne({ email })
@@ -26,18 +26,18 @@ export const loginService = async ({ email, password, role }) => {
     throw new Error("User not registered");
   }
 
-  // -------- Password check --------
+  // ---------------- PASSWORD CHECK ----------------
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new Error("Invalid credentials");
   }
 
-  // -------- Email verification --------
+  // ---------------- EMAIL VERIFICATION ----------------
   if (!user.isVerified) {
     throw new Error("Verify your email to continue");
   }
 
-  // -------- JWT Payload --------
+  // ---------------- JWT PAYLOAD ----------------
   const payload = {
     id: user._id,
     customId: role === "doctor" ? user.doctorId : user.patientId,

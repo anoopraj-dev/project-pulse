@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
 import { fetchCurrentUser } from "../api/auth/userService";
 
-// -------- INITIAL STATE --------
+// ---------------- INITIAL STATE ----------------
 const initialState = {
   user:null,
   email: "",
@@ -14,7 +14,7 @@ const initialState = {
   isAuthenticated: null,
 };
 
-// -------- REDUCER --------
+// ---------------- REDUCER ----------------
 const userReducer = (state, action) => {
   switch (action.type) {
     case "SET_USER":
@@ -48,7 +48,7 @@ const userReducer = (state, action) => {
   }
 };
 
-// -------- CONTEXT --------
+// ---------------- CONTEXT ----------------
 const UserContext = createContext({
   ...initialState,
   refreshUser: async () => null,
@@ -58,7 +58,7 @@ const UserContext = createContext({
 export const UserProvider = ({ children }) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
 
-  // -------- REFRESH USER (manual trigger) --------
+  // ---------------- REFRESH USER (MANUAL TRIGGER) ----------------
   const refreshUser = async () => {
     dispatch({ type: "SET_LOADING", payload: true });
 
@@ -80,7 +80,7 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // -------- INITIAL LOAD --------
+  // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
     const controller = new AbortController();
 

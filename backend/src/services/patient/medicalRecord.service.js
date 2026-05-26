@@ -3,7 +3,7 @@ import PatientRecord from "../../models/patientRecord.model.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 import cloudinary from "../../config/cloudinary.js";
 
-// -------- CREATE RECORD --------
+// ---------------- CREATE RECORD ----------------
 export const createPatientMedicalRecordService = async (file, body, user) => {
   if (!file) {
     throw new Error("File is required");
@@ -34,14 +34,14 @@ export const createPatientMedicalRecordService = async (file, body, user) => {
   return record;
 };
 
-// -------- GET PATIENT RECORDS --------
+// ---------------- GET PATIENT RECORDS ----------------
 export const getPatientMedicalRecordsService = async (patientId) => {
   return await PatientRecord.find({ patient: patientId }).sort({
     createdAt: -1,
   });
 };
 
-// -------- GET RECORDS FOR DOCTOR --------
+// ---------------- GET RECORDS FOR DOCTOR ----------------
 export const getPatientMedicalRecordsForDoctorService = async (patientId) => {
   const patient = await Patient.findById(patientId, "-password");
 
@@ -56,7 +56,7 @@ export const getPatientMedicalRecordsForDoctorService = async (patientId) => {
   return { patient, records };
 };
 
-// -------- DELETE RECORD --------
+// ---------------- DELETE RECORD ----------------
 export const deletePatientMedicalRecordService = async (recordId, user) => {
   const record = await PatientRecord.findById(recordId);
 

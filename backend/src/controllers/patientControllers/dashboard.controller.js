@@ -9,26 +9,26 @@ import {
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-//-------- stats -----------
+// ---------------- STATS ----------------
 export const dashboardStats = asyncHandler(async (req, res) => {
   const data = await patientDashboardStatsService(req.user.id);
   return res.status(200).json({ success: true, data });
 });
 
-//------------- upcoming appointments --------------
+// ---------------- UPCOMING APPOINTMENTS ----------------
 export const patientUpcomingAppointments = asyncHandler(async (req, res) => {
   const data = await upcomingAppointmentsService(req.user.id);
   return res.status(200).json({ success: true, data });
 });
 
-//-------------- chart data ----------
+// ---------------- CHART DATA ----------------
 export const patientDashboardChart = asyncHandler(async (req, res) => {
   const { range } = req.query;
   const data = await patientDashboardChartService(req.user.id, range);
   return res.status(200).json({ success: true, data });
 });
 
-//------------ prescriptions -------------
+// ---------------- PRESCRIPTIONS ----------------
 export const patientPrescriptions = asyncHandler(async (req, res) => {
   const patientId = req.user?.id;
   if (!patientId) throw new AppError("Unauthorized", 401);
@@ -41,7 +41,7 @@ export const patientPrescriptions = asyncHandler(async (req, res) => {
   });
 });
 
-//------------ Vitals ----------------
+// ---------------- VITALS ----------------
 export const patientVitals = asyncHandler(async (req, res) => {
   const patient = await patientVitalsService(req.user.id);
 
