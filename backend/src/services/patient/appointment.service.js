@@ -42,6 +42,16 @@ export const getBookingInfoService = async (doctorId) => {
     services,
     availability,
     profileImage: doctor.profilePicture,
+    about: doctor.about || "",
+    gender: doctor.gender || "",
+    email: doctor.email || "",
+    phone: doctor.phone || "",
+    location: doctor.location || "",
+    rating: doctor.rating || 0,
+    qualifications: doctor.professionalInfo?.qualifications || [],
+    specializations: doctor.professionalInfo?.specializations || [],
+    experience: doctor.professionalInfo?.experience || [],
+    education: doctor.professionalInfo?.education || [],
   };
 };
 

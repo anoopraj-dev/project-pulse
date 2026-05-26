@@ -8,14 +8,17 @@ import {
   walletPayment,
 } from "@/api/patient/patientApis";
 import { fetchSearchSuggestions } from "@/api/user/userApis";
+import { AnimatePresence } from "framer-motion";
 import DoctorSearchSection from "./DoctorSearchSection";
 import AppointmentFormSection from "./AppointmentFormSection";
 import CheckoutSection from "./CheckoutSection";
+import DoctorProfileDrawer from "@/components/ui/modals/DoctorProfileDrawer";
 
 const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [query, setQuery] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const user = useUser();
 
@@ -203,6 +206,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
           setFormData={setFormData}
           handleChange={handleChange}
           today={today}
+          onViewProfile={() => setIsProfileOpen(true)}
         />
 
         <CheckoutSection
@@ -215,8 +219,19 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
           handleBooking={handleBooking}
           handleWalletPayment={handleWalletPayment}
           user={user}
+          onViewProfile={() => setIsProfileOpen(true)}
         />
       </div>
+
+      <AnimatePresence>
+        {isProfileOpen && (
+          <DoctorProfileDrawer
+            isOpen={isProfileOpen}
+            onClose={() => setIsProfileOpen(false)}
+            doctor={activeDoctor}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
