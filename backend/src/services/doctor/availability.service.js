@@ -1,12 +1,12 @@
 
 import DoctorAvailability from "../../models/availability.model.js";
 
-// ----------------- Helper: Safe UTC Conversion ----------------
+// ---------------- HELPER: SAFE UTC CONVERSION ----------------
 const buildUTCDate = (date, time) => {
   return new Date(`${date}T${time}:00+05:30`);
 };
 
-// ----------------- Helper: Format time for frontend ----------------
+// ---------------- HELPER: FORMAT TIME FOR FRONTEND ----------------
 const formatTimeLocal = (dateObj) => {
   if (!dateObj) return null;
 
@@ -20,7 +20,7 @@ const formatTimeLocal = (dateObj) => {
   });
 };
 
-// ----------------- Get Availability ----------------
+// ---------------- GET AVAILABILITY ----------------
 export const getAvailabilityService = async (doctorId) => {
   const availability = await DoctorAvailability.find({ doctorId }).sort({
     dateKey: 1,
@@ -41,7 +41,7 @@ export const getAvailabilityService = async (doctorId) => {
   }));
 };
 
-// ----------------- Save Availability ----------------
+// ---------------- SAVE AVAILABILITY ----------------
 export const saveAvailabilityService = async (doctorId, payload) => {
   if (!Array.isArray(payload) || payload.length === 0) {
     throw new Error("No availability provided");
@@ -112,7 +112,7 @@ export const saveAvailabilityService = async (doctorId, payload) => {
   return true;
 };
 
-// ----------------- Remove Slot ----------------
+// ---------------- REMOVE SLOT ----------------
 export const removeAvailabilitySlotService = async (
   doctorId,
   dateKey,

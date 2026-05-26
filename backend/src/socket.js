@@ -83,10 +83,10 @@ export const initSocket = (server) => {
 
         const roomId = newConversationId.toString();
 
-        // -------- FORCE SENDER INTO ROOM --------
+        // ---------------- FORCE SENDER INTO ROOM ----------------
         socket.join(roomId);
 
-        // -------- FORCE RECEIVER INTO ROOM --------
+        // ---------------- FORCE RECEIVER INTO ROOM ----------------
         const receiverRoom = io.sockets.adapter.rooms.get(
           receiverId.toString(),
         );
@@ -97,7 +97,7 @@ export const initSocket = (server) => {
           }
         }
 
-        // -------- EMIT CONVERSATION CREATED (ONCE) --------
+        // ---------------- EMIT CONVERSATION CREATED (ONCE) ----------------
         if (isNewConversation) {
           io.to(senderId.toString()).emit("conversation:created", {
             conversation: senderConversation,
@@ -112,7 +112,7 @@ export const initSocket = (server) => {
           });
         }
 
-        // ---------------- Format message for socket ----------------
+        // ---------------- FORMAT MESSAGE FOR SOCKET ----------------
         const formattedMessage = {
           ...message.toObject(), // plain JS object
           files:
@@ -124,7 +124,7 @@ export const initSocket = (server) => {
             })) || [],
         };
 
-        // -------- EMIT MESSAGE (ROOM-BASED) --------
+        // ---------------- EMIT MESSAGE (ROOM-BASED) ----------------
         io.to(roomId).emit("message:receive", formattedMessage);
 
         const socketsInRoom = await io.in(roomId).allSockets();
@@ -159,7 +159,7 @@ export const initSocket = (server) => {
       });
     });
 
-    //------------ WEBRTC SIGNALING -------------------
+    // ---------------- WEBRTC SIGNALING ----------------
     socket.on("consultation:join", async ({ sessionId }) => {
       if (!sessionId) return;
 
@@ -171,20 +171,20 @@ export const initSocket = (server) => {
       socket.consultationSessionId = sessionId;
       socket.consultattionUserId = userId;
 
-      // ---------- INITIAL CONNECT ----------
+      // ---------------- INITIAL CONNECT ----------------
       // emit both-joined only when the second user actually joins (prevent repeated events)
       if (count === 2) {
         io.to(sessionId).emit("consultation:both-joined");
       }
 
-      // ---------- notify the other participant ----------
+      // ---------------- NOTIFY THE OTHER PARTICIPANT ----------------
       socket.to(sessionId).emit("consultation:user-joined", {
         userId,
       });
     });
 
 
-    //------------ offer (caller to receiver) --------
+    // ---------------- OFFER (CALLER TO RECEIVER) ----------------
     socket.on("webrtc:offer", ({ sessionId, offer }) => {
       socket.to(sessionId).emit("webrtc:offer", {
         offer,
@@ -192,7 +192,7 @@ export const initSocket = (server) => {
       });
     });
 
-    //-------- answer (receiver to caller) ---------
+    // ---------------- ANSWER (RECEIVER TO CALLER) ----------------
     socket.on("webrtc:answer", ({ sessionId, answer }) => {
       socket.to(sessionId).emit("webrtc:answer", {
         answer,
@@ -200,7 +200,7 @@ export const initSocket = (server) => {
       });
     });
 
-    //------------ ice candidate ---------------
+    // ---------------- ICE CANDIDATE ----------------
     socket.on("webrtc:ice-candidate", ({ sessionId, candidate }) => {
       socket.to(sessionId).emit("webrtc:ice-candidate", {
         candidate,
@@ -208,7 +208,7 @@ export const initSocket = (server) => {
       });
     });
 
-    //--------- Camera state sync ------------------
+    // ---------------- CAMERA STATE SYNC ----------------
     socket.on("consultation:camera-state", ({ sessionId, isOff }) => {
 
       if (!sessionId) return;
@@ -216,18 +216,18 @@ export const initSocket = (server) => {
       socket.to(sessionId).emit("consultation:camera-state", { isOff });
     });
 
-    //---------- Submit prescription ------------
+    // ---------------- SUBMIT PRESCRIPTION ----------------
     socket.on("prescription:submitted", ({ sessionId }) => {
       socket.to(sessionId).emit("prescription:submitted", { sessionId });
     });
     
-    //--------- End consultation ------------------
+    // ---------------- END CONSULTATION ----------------
     socket.on("consultation:end", ({ sessionId }) => {
       if (!sessionId) return;
       io.to(sessionId).emit("consultation:ended"); 
     });
 
-    //------------ Consultation disconnect/leave -------------
+    // ---------------- CONSULTATION DISCONNECT/LEAVE ----------------
     socket.on('consultation:leave', async ({sessionId}) => {
       if(!sessionId) return ;
 
@@ -244,7 +244,7 @@ export const initSocket = (server) => {
       }
     })
 
-    //--------- Mute state sync ------------------
+    // ---------------- MUTE STATE SYNC ----------------
     socket.on("consultation:mute-state", ({ sessionId, isMuted }) => {
       if (!sessionId) return;
 

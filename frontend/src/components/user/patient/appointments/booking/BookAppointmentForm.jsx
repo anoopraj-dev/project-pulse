@@ -8,14 +8,17 @@ import {
   walletPayment,
 } from "@/api/patient/patientApis";
 import { fetchSearchSuggestions } from "@/api/user/userApis";
+import { AnimatePresence } from "framer-motion";
 import DoctorSearchSection from "./DoctorSearchSection";
 import AppointmentFormSection from "./AppointmentFormSection";
 import CheckoutSection from "./CheckoutSection";
+import DoctorProfileDrawer from "@/components/ui/modals/DoctorProfileDrawer";
 
 const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
   const [paymentMethod, setPaymentMethod] = useState("razorpay");
   const [query, setQuery] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const user = useUser();
 
@@ -32,7 +35,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     notes: "",
   });
 
-  // ---------- Prefill when bookingInfo exists ----------
+  // ---------------- PREFILL WHEN BOOKINGINFO EXISTS ----------------
   useEffect(() => {
     if (!activeDoctor?.doctorId) return;
 
@@ -55,7 +58,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
 
   console.log("BOOKING INFO RESPONSE:", bookingInfo);
 
-  // -------------------- Get available dates --------------------
+  // ---------------- GET AVAILABLE DATES ----------------
   const getAvailableDates = () => {
     if (!hasBookingInfo) return [];
 
@@ -94,14 +97,14 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
 
   const today = new Date().toISOString().split("T")[0];
 
-  //------------- amount to pay --------------
+  // ---------------- AMOUNT TO PAY ----------------
   const selectedService = activeDoctor?.services?.find(
     (s) => s.serviceType === formData.serviceType,
   );
 
   const amountToPay = selectedService?.fees;
 
-  //------------------- Handle wallet payment -----------------
+  // ---------------- HANDLE WALLET PAYMENT ----------------
   const handleWalletPayment = async () => {
     try {
       const res = await walletPayment({
@@ -126,7 +129,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     }
   };
 
-  //--------------------- Handle Book appointment -------------
+  // ---------------- HANDLE BOOK APPOINTMENT ----------------
   const handleBooking = async (payload) => {
     try {
       const res = await bookAppointment(payload);
@@ -144,7 +147,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     }
   };
 
-  //------------------- Search Suggestions ------------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "patient",
@@ -153,7 +156,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
     });
   };
 
-  //---------------- Select search suggestion --------------------
+  // ---------------- SELECT SEARCH SUGGESTION ----------------
   const handleSelectSuggestion = async (item) => {
     try {
       setQuery(item.name);
@@ -203,6 +206,7 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
           setFormData={setFormData}
           handleChange={handleChange}
           today={today}
+          onViewProfile={() => setIsProfileOpen(true)}
         />
 
         <CheckoutSection
@@ -215,8 +219,19 @@ const BookAppointmentForm = ({ bookingInfo, setActiveTab }) => {
           handleBooking={handleBooking}
           handleWalletPayment={handleWalletPayment}
           user={user}
+          onViewProfile={() => setIsProfileOpen(true)}
         />
       </div>
+
+      <AnimatePresence>
+        {isProfileOpen && (
+          <DoctorProfileDrawer
+            isOpen={isProfileOpen}
+            onClose={() => setIsProfileOpen(false)}
+            doctor={activeDoctor}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

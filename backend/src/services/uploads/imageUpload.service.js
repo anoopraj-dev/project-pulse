@@ -2,7 +2,7 @@ import Patient from "../../models/patient.model.js";
 import Doctor from "../../models/doctor.model.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUtility.js";
 
-// ----------- Helper -------------
+// ---------------- HELPER ----------------
 const resolveUploadType = (role, type) =>
   `${role}${type.charAt(0).toUpperCase()}${type.slice(1)}`;
 
@@ -12,7 +12,7 @@ export const handleImageUpload = async ({ files, type, user }) => {
 
   const normalizedFiles = Array.isArray(files) ? files : [files];
 
-  // -------- Upload to Cloudinary --------
+  // ---------------- UPLOAD TO CLOUDINARY ----------------
   const uploaded = [];
   for (const file of normalizedFiles) {
     const result = await uploadToCloudinary(file);
@@ -22,7 +22,7 @@ export const handleImageUpload = async ({ files, type, user }) => {
   const urls = uploaded.map((r) => r.secure_url);
   let updatedDoc;
 
-  // -------- Business Logic --------
+  // ---------------- BUSINESS LOGIC ----------------
   switch (uploadType) {
     case "patientProfilePicture":
       updatedDoc = await Patient.findByIdAndUpdate(

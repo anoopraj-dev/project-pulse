@@ -61,7 +61,7 @@ export const updateAlertStatus = asyncHandler(async (req, res) => {
   });
 });
 
-//------------ Change Password ------------
+// ---------------- CHANGE PASSWORD ----------------
 export const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword, role } = req.body;
   await changePasswordService(role, req.user.id, currentPassword, newPassword);

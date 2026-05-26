@@ -42,7 +42,7 @@ const PatientPayments = () => {
     role: "patient",
   });
 
-  //------------- Get all payments -----------------
+  // ---------------- GET ALL PAYMENTS ----------------
   const fetchAllPayments = () => {
     fetchPaymentsAction.executeAsyncFn(async () => {
       try {
@@ -65,7 +65,7 @@ const PatientPayments = () => {
     fetchAllPayments();
   }, [page,activeTab]);
 
-  //---------------- Search Suggestions ---------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "patient",
@@ -78,9 +78,9 @@ const PatientPayments = () => {
     setQuery(item.name);
   };
 
-  //--------------- View / Retry Payments --------------
+  // ---------------- VIEW / RETRY PAYMENTS ----------------
   const handleAction = async (id, type) => {
-    //-------------------- Retry Payment --------------------
+    // ---------------- RETRY PAYMENT ----------------
     if (type === "retry") {
       try {
         const response = await retryPayment(id);
@@ -118,7 +118,7 @@ const PatientPayments = () => {
         toast.error(error.response?.data?.message || "Retry failed");
       }
     } else {
-      //-------------------- View Receipt --------------------
+      // ---------------- VIEW RECEIPT ----------------
       const res = await getReceipt(id, role);
 
       const url = window.URL.createObjectURL(res.data);

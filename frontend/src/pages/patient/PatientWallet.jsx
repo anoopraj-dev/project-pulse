@@ -55,7 +55,7 @@ const PatientWallet = () => {
     }
   };
 
-  //------------- Search Suggestions ------------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "patient",
@@ -105,7 +105,7 @@ const PatientWallet = () => {
     .filter((t) => t.type === "debit")
     .reduce((s, t) => s + Math.abs(t.amount), 0);
 
-  //------------- filtered transactions --------------
+  // ---------------- FILTERED TRANSACTIONS ----------------
   const filteredTransactions = transactions.filter((txn) => {
     const searchText = query.toLowerCase();
     return (

@@ -31,7 +31,7 @@ const DoctorProfile = () => {
   const { openModal, closeModal } = useModal();
   const [availability,setAvailability] = useState([]);
 
-  //-------------- FETCH DOCTOR --------------
+  // ---------------- FETCH DOCTOR ----------------
   const fetchDoctor = async () => {
     try {
       await fetchDoctorAction.executeAsyncFn(async () => {
@@ -46,25 +46,25 @@ const DoctorProfile = () => {
 
   console.log('availability in profile',availability)
 
-  //--------------- EDIT PROFILE ---------------
+  // ---------------- EDIT PROFILE ----------------
 
   const handleProfileEdit = () => {
     navigate("/doctor/edit-profile");
   };
 
-  //--------------- UPLOAD PROFILE PICTURE ---------------
+  // ---------------- UPLOAD PROFILE PICTURE ----------------
 
   const handleUpdateProfilePicture = () => {
     openModal("Update your profile picture", UpdateProfilePictureModal);
   };
 
-  //--------------- UPLOAD CERTIFICATE ------------------
+  // ---------------- UPLOAD CERTIFICATE ----------------
 
   const handleUploadCertificates = () => {
     openModal("Upload a certificate", CertificateUploadModal);
   };
 
-  //-------------- REQUEST RESUBMISSION --------------
+  // ---------------- REQUEST RESUBMISSION ----------------
 
   const handleResubmissionRequest = async () => {
     try {
@@ -82,7 +82,7 @@ const DoctorProfile = () => {
     } 
   };
 
-  //-------------- RESUBMIT PROFILE -------------------
+  // ---------------- RESUBMIT PROFILE ----------------
   const handleResubmission = async () => {
     try {
       openModal(
@@ -118,7 +118,7 @@ const DoctorProfile = () => {
     }
   };
 
-  //------------- MANAGE AVAILABILITY ----------------
+  // ---------------- MANAGE AVAILABILITY ----------------
   const handleManageAvailability = async() => {
     navigate('/doctor/availability')
   }

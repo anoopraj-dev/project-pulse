@@ -11,17 +11,18 @@ const CheckoutSection = ({
   handleBooking,
   handleWalletPayment,
   user,
+  onViewProfile,
 }) => {
   return (
     <div className="flex flex-col gap-3">
       {/* Doctor card */}
       {hasBookingInfo && (
-        <div className=" overflow-hidden rounded-2xl bg-gradient-to-br from-[#0096C7] to-[#0077B6] px-5 py-4 flex items-center gap-4">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0096C7] to-[#0077B6] px-5 py-4 flex items-center gap-4">
           <div className="absolute -top-10 -right-7 w-28 h-28 rounded-full bg-white/[0.09]" />
           <div className="absolute -bottom-5 left-10 w-18 h-18 rounded-full bg-white/[0.06]" />
           <img
             src={activeDoctor?.profileImage || "/profile.png"}
-            className="  w-11 h-11 rounded-full object-cover border-2 border-white/30 shrink-0"
+            className="w-11 h-11 rounded-full object-cover border-2 border-white/30 shrink-0"
           />
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-semibold truncate">
@@ -31,9 +32,14 @@ const CheckoutSection = ({
               {activeDoctor?.specialty}
             </p>
           </div>
-          <span className="text-[11px] font-medium text-white bg-white/[0.18] border border-white/25 px-2.5 py-1 rounded-full shrink-0">
-            Available
-          </span>
+          <button
+            type="button"
+            onClick={onViewProfile}
+            className="text-[11px] font-semibold text-white bg-white/[0.15] hover:bg-white/[0.25] border border-white/20 px-3 py-1.5 rounded-full shrink-0 transition-all flex items-center gap-1 cursor-pointer z-10"
+          >
+            <Icon icon="mdi:account-eye-outline" className="text-sm" />
+            View Profile
+          </button>
         </div>
       )}
 

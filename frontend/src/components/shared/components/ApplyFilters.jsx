@@ -4,7 +4,7 @@ import { useTypeahead } from "../../../hooks/useTypeahead";
 import { fetchSearchSuggestions } from "../../../api/user/userApis";
 
 const ApplyFilters = ({ config, onApply }) => {
-  // ---------------- Initial states ----------------
+  // ---------------- INITIAL STATES ----------------
   const initialEnabled = config.reduce((acc, f) => {
     acc[f.key] = false;
     return acc;
@@ -19,7 +19,7 @@ const ApplyFilters = ({ config, onApply }) => {
   const [values, setValues] = useState(initialValues);
   const [activeField, setActiveField] = useState(null);
 
-  // ---------------- Typeahead hook  ----------------
+  // ---------------- TYPEAHEAD HOOK ----------------
   const activeQuery = activeField ? values[activeField] : "";
 
   const { suggestions, loading } = useTypeahead({
@@ -33,7 +33,7 @@ const ApplyFilters = ({ config, onApply }) => {
   });
 
 
-  // ---------------- Toggle filter ----------------
+  // ---------------- TOGGLE FILTER ----------------
   const handleToggle = (e) => {
     const { name, checked } = e.target;
     setEnabled((prev) => ({ ...prev, [name]: checked }));
@@ -44,7 +44,7 @@ const ApplyFilters = ({ config, onApply }) => {
     }
   };
 
-  // ---------------- Apply filters ----------------
+  // ---------------- APPLY FILTERS ----------------
   const handleApply = () => {
     const filters = {};
 
@@ -57,7 +57,7 @@ const ApplyFilters = ({ config, onApply }) => {
     onApply(filters);
   };
 
-  // ---------------- Clear filters ----------------
+  // ---------------- CLEAR FILTERS ----------------
   const handleClear = () => {
     setEnabled(initialEnabled);
     setValues(initialValues);
@@ -65,7 +65,7 @@ const ApplyFilters = ({ config, onApply }) => {
     onApply({});
   };
 
-  // ---------------- Hide suggestions if input cleared ----------------
+  // ---------------- HIDE SUGGESTIONS IF INPUT CLEARED ----------------
   useEffect(() => {
     if (!activeQuery) setActiveField(null);
   }, [activeQuery]);

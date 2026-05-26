@@ -1,6 +1,6 @@
 export const pageBannerConfig = {
 
-    //------------- patient appointments --------------
+    // ---------------- PATIENT APPOINTMENTS ----------------
   patientAppointments: {
     icon: "mdi:calendar-heart",
     roleLabel: "Patient",
@@ -15,7 +15,7 @@ export const pageBannerConfig = {
     loadingText: "Loading appointments...",
   },
 
-  //--------- patient - doctor profile -----------
+  // ---------------- PATIENT - DOCTOR PROFILE ----------------
    patientDoctorProfile: {
     icon: "mdi:stethoscope",
     roleLabel: "Patient",
@@ -29,7 +29,7 @@ export const pageBannerConfig = {
     loadingText: "Loading doctor profile...",
   },
 
-  //------------- patient - doctors view ------
+  // ---------------- PATIENT - DOCTORS VIEW ----------------
   patientDoctors: {
     icon: "mdi:account-heart-outline",
 
@@ -48,7 +48,7 @@ export const pageBannerConfig = {
     loadingText: "Loading doctors…",
   },
 
-  //--------- patient profile view -self ----------
+  // ---------------- PATIENT PROFILE VIEW -SELF ----------------
 
   patientProfile: {
     icon: "mdi:account-circle-outline",
@@ -66,7 +66,7 @@ export const pageBannerConfig = {
     loadingText: "Loading profile...",
   },
 
-  //--------------- Patient messages ----------------
+  // ---------------- PATIENT MESSAGES ----------------
 
    patientMessages: {
     icon: "mdi:message-text-outline",
@@ -84,7 +84,7 @@ export const pageBannerConfig = {
     loadingText: "Loading messages...",
   },
 
-   //--------------- Patient Records ----------------
+   // ---------------- PATIENT RECORDS ----------------
 
    patientRecords: {
     icon: "mdi:file-outline",
@@ -102,7 +102,7 @@ export const pageBannerConfig = {
     loadingText: "Loading reports...",
   },
 
-  //------------------ Admin Banner Configs ----------------
+  // ---------------- ADMIN BANNER CONFIGS ----------------
   adminDashboard: {
     icon: "mdi:view-dashboard-outline",
     roleLabel: "Admin",
@@ -153,7 +153,7 @@ export const pageBannerConfig = {
     activeTabLabel: "Section",
     loadingText: "Loading documents...",
   },
-  //------------------ Admin Revenue ---------------
+  // ---------------- ADMIN REVENUE ----------------
 adminRevenue: {
   icon: "mdi:chart-line",
 
@@ -170,7 +170,7 @@ adminRevenue: {
   loadingText: "Loading revenue analytics...",
 },
 
-  //------------- Patient Dashboard -----------
+  // ---------------- PATIENT DASHBOARD ----------------
    patientDashboard: {
     icon: "mdi:view-dashboard-outline",
 
@@ -187,7 +187,7 @@ adminRevenue: {
     loadingText: "Loading dashboard...",
   },
 
-  //------------- Patient payments --------------
+  // ---------------- PATIENT PAYMENTS ----------------
   patientPayments: {
     icon: "mdi:credit-card-outline",
 
@@ -204,7 +204,7 @@ adminRevenue: {
     loadingText: "Loading payments...",
   },
 
-  //------------------ Patient Wallet ---------------
+  // ---------------- PATIENT WALLET ----------------
   patientWallet: {
     icon: "mdi:wallet-outline",
 
@@ -219,7 +219,7 @@ adminRevenue: {
     loadingText: "Loading wallet details...",
   },
 
-  //---------------- patient edit profile -------------
+  // ---------------- PATIENT EDIT PROFILE ----------------
    patientEditProfile: {
     icon:"mdi:edit-profile-outline",
     roleLabel: "Patient",
@@ -229,7 +229,7 @@ adminRevenue: {
       "Update your persnal info & stay ahead of in your health journey",
   },
 
-  //--------------- patient appoiontments -----------
+  // ---------------- PATIENT APPOIONTMENTS ----------------
   patientAppointmentView:{
     icon:'mdi:calender',
     roleLabel:'Patient',
@@ -238,7 +238,7 @@ adminRevenue: {
     description: " View and manage appointment specifics"
   },
 
-    //--------------- Patient Support Center ----------------
+    // ---------------- PATIENT SUPPORT CENTER ----------------
 
   patientSupportCenter: {
     icon: "mdi:lifebuoy",
@@ -257,9 +257,9 @@ adminRevenue: {
   },
 
 
-  //---------------- DOCTOR BANNER CONFIGS ----------------
+  // ---------------- DOCTOR BANNER CONFIGS ----------------
 
-  //---------- appointments -----------------
+  // ---------------- APPOINTMENTS ----------------
   doctorAppointments: {
     icon: "mdi:calendar-heart",
 
@@ -288,7 +288,7 @@ adminRevenue: {
   },
 
 
-  //--------- doctor profile view -self ----------
+  // ---------------- DOCTOR PROFILE VIEW -SELF ----------------
 
   doctorProfile: {
     icon: "mdi:account-circle-outline",
@@ -306,7 +306,7 @@ adminRevenue: {
     loadingText: "Loading profile...",
   },
 
-  //------------------ doctor documents ---------------
+  // ---------------- DOCTOR DOCUMENTS ----------------
   doctorDocuments: {
     icon: "mdi:file-document-outline",
 
@@ -321,7 +321,7 @@ adminRevenue: {
     loadingText: "Loading documents...",
   },
 
-  //----------------- doctor payments ----------------
+  // ---------------- DOCTOR PAYMENTS ----------------
   doctorPayments: {
     icon: "mdi:stethoscope",
 
@@ -338,7 +338,7 @@ adminRevenue: {
     loadingText: "Loading payments...",
   },
 
-  //---------------- doctor dashboard ------------------
+  // ---------------- DOCTOR DASHBOARD ----------------
   doctorDashboard: {
     icon: "mdi:view-dashboard-outline",
 
@@ -353,7 +353,7 @@ adminRevenue: {
     loadingText: "Loading dashboard data...",
   },
 
-//---------------- doctor messages --------------
+// ---------------- DOCTOR MESSAGES ----------------
   doctorMessages: {
     icon: "mdi:message-text-outline",
 
@@ -370,7 +370,7 @@ adminRevenue: {
     loadingText: "Loading messages...",
   },
 
-  //------------------- doctor availability -------------
+  // ---------------- DOCTOR AVAILABILITY ----------------
   doctorAvailability: {
     icon:"mdi:calendar-outline",
     roleLabel: "Doctor",
@@ -380,7 +380,7 @@ adminRevenue: {
       "Select dates till Saturday and assign time slots. Save once.",
   },
 
-  //-------------- wallet ----------
+  // ---------------- WALLET ----------------
   doctorWallet: {
   icon: "mdi:wallet-outline",
 

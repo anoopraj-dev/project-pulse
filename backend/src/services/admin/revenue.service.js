@@ -23,11 +23,11 @@ export const revenueSummaryService = async (range) => {
       startDate.setMonth(now.getMonth() - 1);
   }
 
-  //-------- PAYMENTS (INFLOW) ----------
+  // ---------------- PAYMENTS (INFLOW) ----------------
   const paymentAgg = await Payment.aggregate([
     {
       $match: {
-        status: "verified",
+        status: { $in: ["verified", "settled"] },
         createdAt: { $gte: startDate },
       },
     },
@@ -42,7 +42,7 @@ export const revenueSummaryService = async (range) => {
 
   const paymentData = paymentAgg[0] || {};
 
-  //-------- SETTLEMENTS ----------
+  // ---------------- SETTLEMENTS ----------------
   const settlementAgg = await Settlement.aggregate([
     {
       $match: {
@@ -73,7 +73,7 @@ export const revenueSummaryService = async (range) => {
 
   const settlementData = settlementAgg[0] || {};
 
-  //-------- REFUNDS + PENALTY (FROM TRANSACTIONS) ----------
+  // ---------------- REFUNDS + PENALTY (FROM TRANSACTIONS) ----------------
   const refundAgg = await Transaction.aggregate([
     {
       $match: {
@@ -106,7 +106,7 @@ export const revenueSummaryService = async (range) => {
 
   const penalty = totalOriginal - totalRefunded;
 
-  //-------- FINAL RESPONSE ----------
+  // ---------------- FINAL RESPONSE ----------------
   return {
     grossVolume: paymentData.grossInflow || 0,
 

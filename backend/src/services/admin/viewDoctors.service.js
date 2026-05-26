@@ -8,7 +8,7 @@ import { EMAIL_TYPES } from "../../constants/email.constants.js";
 import { createNotification } from "../user/notification.service.js";
 
 
-//---------------- Approve Doctor ------------------------
+// ---------------- APPROVE DOCTOR ----------------
 export const approveDoctorService = async (doctorId) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
@@ -34,7 +34,7 @@ export const approveDoctorService = async (doctorId) => {
   return doctor;
 };
 
-//---------------- Reject Doctor ------------------------
+// ---------------- REJECT DOCTOR ----------------
 export const rejectDoctorService = async (doctorId, reason) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
@@ -65,7 +65,7 @@ export const rejectDoctorService = async (doctorId, reason) => {
   return doctor;
 };
 
-//---------------- Block Doctor ------------------------
+// ---------------- BLOCK DOCTOR ----------------
 export const blockDoctorService = async (doctorId, reason) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
@@ -91,7 +91,7 @@ export const blockDoctorService = async (doctorId, reason) => {
   return doctor;
 };
 
-//---------------- Unblock Doctor ----------------------
+// ---------------- UNBLOCK DOCTOR ----------------
 export const unblockDoctorService = async (doctorId) => {
   const doctor = await Doctor.findByIdAndUpdate(
     doctorId,
@@ -116,7 +116,7 @@ export const unblockDoctorService = async (doctorId) => {
   return doctor;
 };
 
-//---------------- Revoke Doctor Status -----------------
+// ---------------- REVOKE DOCTOR STATUS ----------------
 export const revokeDoctorStatusService = async (doctorId, status) => {
   const allowedStatuses = [
     "pending",
@@ -155,7 +155,7 @@ export const revokeDoctorStatusService = async (doctorId, status) => {
   return doctor;
 };
 
-//---------------- Get All Doctors ---------------------
+// ---------------- GET ALL DOCTORS ----------------
 export const getAllDoctorsService = async () => {
   const doctors = await Doctor.find().select("-password");
   if (!doctors) throw new Error("No doctors found");

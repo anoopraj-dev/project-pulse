@@ -6,7 +6,7 @@ export const calculateSettlement = (consultation, payment) => {
     const doctor = consultation.participants?.doctor?.isPresent || !!consultation.participants?.doctor?.joinedAt;
     const patient = consultation.participants?.patient?.isPresent || !!consultation.participants?.patient?.joinedAt;
 
-    // ----------- Completed consultation (Both present and status is completed) ---------
+    // ---------------- COMPLETED CONSULTATION (BOTH PRESENT AND STATUS IS COMPLETED) ----------------
     if (consultation.status === 'completed' && doctor && patient) {
         return {
             type: 'completed',
@@ -16,7 +16,7 @@ export const calculateSettlement = (consultation, payment) => {
         };
     }
 
-    // ------------- If anyone missed (Doctor or Patient or Both) ----------
+    // ---------------- IF ANYONE MISSED (DOCTOR OR PATIENT OR BOTH) ----------------
     // As per requirement: "If a consultation is not joined by either of the user or both... payment made should be refund"
     if (!doctor || !patient) {
         return {

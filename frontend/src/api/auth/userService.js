@@ -1,6 +1,6 @@
 import { api } from "../axiosInstance";
 
-// -------- FETCH CURRENT USER --------
+// ---------------- FETCH CURRENT USER ----------------
 export const fetchCurrentUser = async (signal) => {
   try {
     const res = await api.get("/api/auth/me", {

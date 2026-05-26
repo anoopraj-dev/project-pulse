@@ -16,7 +16,7 @@ const PaymentButton = ({
   const handlePayment = async () => {
     try {
 
-    //------------------ Create Razorpay order ---------------
+    // ---------------- CREATE RAZORPAY ORDER ----------------
       const response = await createRazorpayOrder({
         amount,
         role,

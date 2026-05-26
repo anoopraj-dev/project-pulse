@@ -7,6 +7,7 @@ import NotFound from "../pages/NotFound";
 import AdminLogin from "../pages/admin/AdminLogin";
 import PublicRoute from "../components/auth/routes/PublicRoute";
 import AboutUs from "../pages/AboutUs";
+import HowItWorks from "../pages/HowItWorks";
 
 const CommonRoutes = [
   { path: "/", 
@@ -44,6 +45,7 @@ const CommonRoutes = [
 
   { path: "/admin/login", element: <PublicRoute><AdminLogin /></PublicRoute> },
   { path: "/about-us", element: <PublicRoute><AboutUs /> </PublicRoute>},
+  { path: "/how-it-works", element: <PublicRoute><HowItWorks /></PublicRoute> },
   { path: "/reset-password", element:<PublicRoute><VerifyEmail /></PublicRoute>  },
   { path: "/page-not-found", element: <NotFound /> },
 ];

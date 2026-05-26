@@ -23,7 +23,7 @@ const ViewDoctors = () => {
     type: "doctors",
   });
 
-  //------------- Get All Doctors -------------
+  // ---------------- GET ALL DOCTORS ----------------
   const fetchAllDoctors = () => {
     fetchAllDoctorsAction.executeAsyncFn(async () => {
       try {
@@ -46,7 +46,7 @@ const ViewDoctors = () => {
     fetchAllDoctors();
   }, []);
 
-  //------------- Search Suggestions ---------------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) =>{
     return fetchSearchSuggestions ({
       role: 'admin',
@@ -59,7 +59,7 @@ const ViewDoctors = () => {
   const handleSelectSuggestions  = (item) => {
     setQuery(item.name)
   }
-  // ------------- View Doctors ------------
+  // ---------------- VIEW DOCTORS ----------------
   const handleView = (id) => {
     navigate(`/admin/doctor/${id}`);
   };

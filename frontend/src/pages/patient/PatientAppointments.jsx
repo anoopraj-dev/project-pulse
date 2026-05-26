@@ -43,7 +43,7 @@ const PatientAppointments = () => {
     navigationState?.defaultTab || "confirmed",
   );
 
-  //------------- Get all appointments -----------------
+  // ---------------- GET ALL APPOINTMENTS ----------------
   const fetchAllAppointments = () => {
     fetchAppointmentsAction.executeAsyncFn(async () => {
       try {
@@ -65,7 +65,7 @@ const PatientAppointments = () => {
     fetchAllAppointments();
   }, [activeTab, page]);
 
-  //---------------- Search Suggestions ---------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "patient",
@@ -78,7 +78,7 @@ const PatientAppointments = () => {
     setQuery(item.name);
   };
 
-  //-------------- View Appointment ----------------
+  // ---------------- VIEW APPOINTMENT ----------------
   const handleView = (id) => {
     navigate(`/patient/appointments/${id}`);
   };
@@ -108,7 +108,7 @@ const PatientAppointments = () => {
 
 
 
-  //------------------- Fetch selected doc info (prefill form) -----------
+  // ---------------- FETCH SELECTED DOC INFO (PREFILL FORM) ----------------
   useEffect(() => {
     const fetchBookingInfo = async () => {
       if (!navigationState?.selectedDoctorId) return;

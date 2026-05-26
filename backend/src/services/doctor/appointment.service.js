@@ -8,7 +8,7 @@ import Patient from "../../models/patient.model.js";
 import mongoose from "mongoose";
 import { createNotification } from "../user/notification.service.js";
 
-// ---------------- Get All Appointments ----------------
+// ---------------- GET ALL APPOINTMENTS ----------------
 export const getAllAppointmentsService = async (doctorId) => {
   const appointments = await Appointment.find({ doctor: doctorId });
 
@@ -38,7 +38,7 @@ export const getAllAppointmentsService = async (doctorId) => {
   return updatedAppointments;
 };
 
-// ---------------- Get Appointment By ID ----------------
+// ---------------- GET APPOINTMENT BY ID ----------------
 export const getDoctorAppointmentByIdService = async (id, doctorId) => {
   // Validate ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -57,7 +57,7 @@ export const getDoctorAppointmentByIdService = async (id, doctorId) => {
   return appointment;
 };
 
-//------------ cancel appointment service -------------------
+// ---------------- CANCEL APPOINTMENT SERVICE ----------------
 
 export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
   const session = await mongoose.startSession();
@@ -90,7 +90,7 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
       throw new Error("Appointment already cancelled");
     }
 
-    // ---------------- Cancel appointment ----------------
+    // ---------------- CANCEL APPOINTMENT ----------------
     appointment.status = "cancelled";
     appointment.cancelledBy = "doctor";
     appointment.cancellationReason = reason.trim();
@@ -112,7 +112,7 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
       { session },
     );
 
-    // ---------------- Refund ----------------
+    // ---------------- REFUND ----------------
     const payment = await Payment.findOne({ appointment: appointment._id });
 
     if (payment && payment.status !== "refunded") {
@@ -157,7 +157,7 @@ export const cancelAppointmentService = async ({ id, reason, doctorId }) => {
     throw error;
   }
 
-  // ---------------- Notifications ----------------
+  // ---------------- NOTIFICATIONS ----------------
   try {
     await Promise.all([
       createNotification({

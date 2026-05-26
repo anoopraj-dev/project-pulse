@@ -12,12 +12,12 @@ import { revenueSummary } from "../controllers/adminControllers/adminRevenue.con
 import { getRevenueExportStatus, requestRevenueExport } from "../controllers/adminControllers/export.controller.js";
 const router = Router();
 
-//-------------MIDDLEWARES -----------
+// ---------------- MIDDLEWARES ----------------
 router.use(authenticateUser,authorizeRoles('admin'))
 
 
 
-//--------------ROUTES-------------
+// ---------------- ROUTES ----------------
 router.get('/dashboard',getAdminDashboard)
 
 router.get('/dashboard/stats',dashboardCounts)

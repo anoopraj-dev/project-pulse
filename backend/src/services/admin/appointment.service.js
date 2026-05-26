@@ -1,6 +1,6 @@
 import Appointment from "../../models/appointments.model.js";
 
-//-------------- Get appointments service ------------
+// ---------------- GET APPOINTMENTS SERVICE ----------------
 export const getAllAppointmentsService = async (filters) => {
   const { status, doctorId, patientId, fromDate, toDate } = filters;
 
@@ -50,7 +50,7 @@ export const getAllAppointmentsService = async (filters) => {
   return appointments;
 };
 
-//------------------ Set Appointments status --------------
+// ---------------- SET APPOINTMENTS STATUS ----------------
 export const setAdminAppointmentStatusService = async ({
   appointmentId,
   status,

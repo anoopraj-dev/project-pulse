@@ -2,7 +2,7 @@ import Patient from "../../models/patient.model.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
 
-//-------------- View Patient Profile --------------
+// ---------------- VIEW PATIENT PROFILE ----------------
 export const viewPatientProfile = asyncHandler(async (req, res) => {
   const patient = await Patient.findById(req.params.id, "-password");
 

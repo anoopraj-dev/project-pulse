@@ -1,7 +1,7 @@
 import { Notification } from "../../models/notification.model.js";
 import { getIO } from "../../socket.js";
 
-//------------------- CREATE AND SEND NOTIFICATION ----------------
+// ---------------- CREATE AND SEND NOTIFICATION ----------------
 export const createNotification = async ({ userId, role, title, message }) => {
   const notification = await Notification.create({
     title,
@@ -23,7 +23,7 @@ export const createNotification = async ({ userId, role, title, message }) => {
   return notification;
 };
 
-//------------------- GET NOTIFICATIONS ----------------
+// ---------------- GET NOTIFICATIONS ----------------
 export const getNotifications = async (userId, role) => {
   return Notification.find({ recipient: userId, role }).sort({ createdAt: -1 });
 };

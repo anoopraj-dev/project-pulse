@@ -1,42 +1,42 @@
 import { api } from "../axiosInstance";
 
-//------------ ONBOARDING APIS ----------
+// ---------------- ONBOARDING APIS ----------------
 
-// -------- Personal Info----------
+// ---------------- PERSONAL INFO ----------------
 export const submitPatientPersonalInfo = (payload) => {
   return api.post("/api/patient/personal-info", payload, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
 
-// -------- Medical Info ----------
+// ---------------- MEDICAL INFO ----------------
 export const submitPatientMedicalInfo = (payload) => {
   return api.post("/api/patient/medical-info", payload);
 };
 
-// -------- LifeStyle Info ----------
+// ---------------- LIFESTYLE INFO ----------------
 export const submitPatientLifestyleInfo = (payload) => {
   return api.post("/api/patient/lifestyle-info", payload);
 };
 
-//--------- PROFILE PAGE APIS -----------
+// ---------------- PROFILE PAGE APIS ----------------
 
-// -------- Fetch Patient Profile ----------
+// ---------------- FETCH PATIENT PROFILE ----------------
 export const fetchPatientProfile = () => {
   return api.get("/api/patient/profile");
 };
 
-//------------- Update Patient Profile ------------
+// ---------------- UPDATE PATIENT PROFILE ----------------
 export const updatePatientProfile = (payload) => {
   return api.put("/api/patient/update-profile", payload);
 };
 
-//------------- DOCTORS DISPLAY -------------
+// ---------------- DOCTORS DISPLAY ----------------
 export const getAllDoctors = () => {
   return api.get("/api/patient/doctors");
 };
 
-//---------------- View Doctor ------------------
+// ---------------- VIEW DOCTOR ----------------
 export const viewDoctorProfile = (id) => {
   return api.get(`/api/patient/doctor/${id}`);
 };
@@ -45,22 +45,22 @@ export const viewDoctorAvailability = (id) => {
   return api.get(`/api/patient/doctor/:{id}`);
 };
 
-//-------------- Get Chats ------------------
+// ---------------- GET CHATS ----------------
 export const getConversations = () => {
   return api.get("/api/patient/messages");
 };
 
-//--------------- Fetch Doctor for appointment --------------
+// ---------------- FETCH DOCTOR FOR APPOINTMENT ----------------
 export const getBookingInfo = (id) => {
   return api.get(`/api/patient/doctor/${id}/booking-info`);
 };
 
-//-------------------- Book appointment -------------------
+// ---------------- BOOK APPOINTMENT ----------------
 export const bookAppointment = (payload) => {
   return api.post("/api/patient/appointments/book-appointment", payload);
 };
 
-//--------------------- Fetch All appointments --------------
+// ---------------- FETCH ALL APPOINTMENTS ----------------
 export const fetchAppointments = (page,limit,status) => {
   return api.get("/api/patient/appointments",{
     params:{page,limit,status}
@@ -75,7 +75,7 @@ export const cancelAppointment = (id) => {
   return api.patch(`/api/patient/appointments/${id}`);
 };
 
-//--------------- Fetch Payments ---------------------
+// ---------------- FETCH PAYMENTS ----------------
 export const fetchPatientPayments = (page,limit,status) => {
   return api.get("/api/patient/payments",{
     params:{page,limit,status}
@@ -90,7 +90,7 @@ export const retryPayment = (id) => {
   return api.post(`/api/patient/payments/retry/${id}`);
 };
 
-//---------------- Patient Records -----------------
+// ---------------- PATIENT RECORDS ----------------
 export const fetchPatientRecords = () => {
   return api.get('/api/patient/medical-records');
 };
@@ -105,7 +105,7 @@ export const deletePatientRecord = (id) => {
   return api.delete(`/api/patient/medical-records/${id}`);
 };
 
-//------------------- Wallet -------------
+// ---------------- WALLET ----------------
 export const getPatientWallet = () => {
   return api.get("/api/patient/wallet");
 };
@@ -126,7 +126,7 @@ export const verifyWalletPayment = (payload) => {
   return api.post("/api/patient/verify-wallet-payment", payload);
 };
 
-//-------------- consultation --------------
+// ---------------- CONSULTATION ----------------
 export const endConsultation = (id) => {
   return api.patch(`/api/patient/appointments/consultation/${id}/end`)
 };
@@ -136,7 +136,7 @@ export const submitReview = (id,data) =>{
 }
 
 
-//--------------- dashboard ----------
+// ---------------- DASHBOARD ----------------
 export const fetchDashboardStats = () =>{
   return api.get('/api/patient/dashboard/stats')
 }
@@ -159,7 +159,7 @@ export const fetchPatientVitals = () =>{
   return api.get('/api/patient/dashboard/vitals')
 }
 
-//-------------- Support and Settings -------------
+// ---------------- SUPPORT AND SETTINGS ----------------
 
 export const createSupportTicket = (data) =>{
   return api.post('/api/patient/support/ticket',data)

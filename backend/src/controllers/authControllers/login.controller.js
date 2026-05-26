@@ -1,7 +1,7 @@
 import { loginService } from "../../services/auth/login.service.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
-// -------- USER LOGIN (doctor/patient/admin) --------
+// ---------------- USER LOGIN (DOCTOR/PATIENT/ADMIN) ----------------
 export const login = asyncHandler(async (req, res) => {
   const { token, user } = await loginService(req.body);
 
@@ -18,7 +18,7 @@ export const login = asyncHandler(async (req, res) => {
   });
 });
 
-// -------- AUTH CHECK --------
+// ---------------- AUTH CHECK ----------------
 export const authCheck = asyncHandler(async (req, res) => {
   return res.status(200).json({
     success: true,

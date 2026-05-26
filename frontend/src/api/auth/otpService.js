@@ -1,6 +1,6 @@
 import { api } from "../axiosInstance";
 
-//----------- RESEND OTP -------------------
+// ---------------- RESEND OTP ----------------
 export const resendOtp = async ({email,type}) => {
     try {
         const res = await api.post('/api/auth/resend-otp', {email,type});

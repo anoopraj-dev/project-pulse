@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const PatientSchema = new Schema(
   {
-    // ---Basic Info---
+    // ---------------- BASIC INFO ----------------
     name: { type: String, required: true },
     patientId: { type: String, required: true, unique: true },
     gender: { type: String,enum: ['male', 'female', 'other'] },
@@ -13,7 +13,7 @@ const PatientSchema = new Schema(
     work: { type: String },
     address: {type: [String]},
 
-    // ---Authentication & Role---
+    // ---------------- AUTHENTICATION & ROLE ----------------
     password: { type: String, required: true },
     role: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
@@ -22,7 +22,7 @@ const PatientSchema = new Schema(
     status: {type: String, enum:['active','blocked'], default:'active'},
     blockedReason: { type: String, default:''},
 
-    //---Medical Information--
+    // ---------------- MEDICAL INFORMATION ----------------
     medical_history: {
       bloodGroup: { type: String},
       height: { type: Number },

@@ -16,12 +16,12 @@ export const createConsultationService = async ({ appointmentId,session }) => {
   if (existing) return existing;
   const sessionId = crypto.randomUUID();
 
-  // ---------- FIX: safe validation ----------
+  // ---------------- FIX: SAFE VALIDATION ----------------
   if (!appointment.appointmentDate || !appointment.timeSlot) {
     throw new Error("Appointment date or timeSlot missing");
   }
 
-  // ---------- FIX: build proper datetime ----------
+  // ---------------- FIX: BUILD PROPER DATETIME ----------------
   const appointmentDateTime = new Date(appointment.appointmentDate); 
 
   if (isNaN(appointmentDateTime.getTime())) {
@@ -54,7 +54,7 @@ export const createConsultationService = async ({ appointmentId,session }) => {
   return consultation[0];
 };
 
-//------------------ Join Consultation Service --------------------
+// ---------------- JOIN CONSULTATION SERVICE ----------------
 export const joinConsultationService = async (consultationId, userId) => {
   const consultation = await Consultation.findById(consultationId)
     .populate("appointment", "appointmentDate duration timeSlot")
@@ -76,7 +76,7 @@ export const joinConsultationService = async (consultationId, userId) => {
     throw new Error("Unauthorized");
   }
 
-  // -------- Build appointment datetime safely --------
+  // ---------------- BUILD APPOINTMENT DATETIME SAFELY ----------------
   const appointmentDateTime = new Date(
   consultation.appointment.appointmentDate
 );
@@ -87,7 +87,7 @@ export const joinConsultationService = async (consultationId, userId) => {
 
   const now = new Date();
 
-  // -------- Buffers --------
+  // ---------------- BUFFERS ----------------
   const earlyJoinBuffer = 5;   // minutes before
   const lateGraceBuffer = 10;  // minutes after
 
@@ -104,7 +104,7 @@ export const joinConsultationService = async (consultationId, userId) => {
   console.log("UTC:", appointmentDateTime.toISOString());
 console.log("IST:", appointmentDateTime.toLocaleString());
 
-  // -------- Validation --------
+  // ---------------- VALIDATION ----------------
   if (now < startWindow) {
     throw new Error("Consultation not started yet");
   }
@@ -113,7 +113,7 @@ console.log("IST:", appointmentDateTime.toLocaleString());
     throw new Error("Consultation time expired");
   }
 
-  // -------- Initialize participants --------
+  // ---------------- INITIALIZE PARTICIPANTS ----------------
   if (!consultation.participants) {
     consultation.participants = {
       patient: { joinedAt: null, isPresent: false },
@@ -139,7 +139,7 @@ console.log("IST:", appointmentDateTime.toLocaleString());
   const patientReady = consultation.participants.patient?.isPresent;
   const doctorReady = consultation.participants.doctor?.isPresent;
 
-  // -------- Status update --------
+  // ---------------- STATUS UPDATE ----------------
   if (consultation.status === "scheduled" && patientReady && doctorReady) {
     consultation.status = "in-progress";
     consultation.startTime = consultation.startTime || new Date();
@@ -147,7 +147,7 @@ console.log("IST:", appointmentDateTime.toLocaleString());
 
   await consultation.save();
 
-  // -------- Socket emit --------
+  // ---------------- SOCKET EMIT ----------------
   const io = getIO();
   io.to(consultationId).emit("consultation:status-update", {
     status: consultation.status,
@@ -165,7 +165,7 @@ console.log("IST:", appointmentDateTime.toLocaleString());
   };
 };
 
-//---------------- End consultation service ----------------
+// ---------------- END CONSULTATION SERVICE ----------------
 export const endConsultationService = async (consultationId, userId) => {
   const io = getIO();
   const consultation =
@@ -194,7 +194,7 @@ export const endConsultationService = async (consultationId, userId) => {
       "Prescription must be submitted before ending the consultation",
     );
 
-  //----------- Doctor initiates End -------------
+  // ---------------- DOCTOR INITIATES END ----------------
   if (role === "doctor") {
     consultation.status = "pending-confirmation";
     await consultation.save();

@@ -13,7 +13,7 @@ import { useUser } from "@/contexts/UserContext";
 import BlockedProfile from "@/components/shared/components/BlockedProfile";
 import DoctorStatusBanner from "@/components/user/doctor/profile/DoctorStatusBanner";
 
-// ------------------ Doctor Documents Page ---------------
+// ---------------- DOCTOR DOCUMENTS PAGE ----------------
 const DoctorDocuments = () => {
   const [professionalInfo, setProfessionalInfo] = useState(null);
   const { openModal, closeModal } = useModal();
@@ -21,7 +21,7 @@ const DoctorDocuments = () => {
   const fetchDoctorAction = useAsyncAction();
   const { user } = useUser();
 
-  // ----------- Delete Document -----------------
+  // ---------------- DELETE DOCUMENT ----------------
   const deleteDoc = async (id, label) => {
     try {
       openModal(`Delete ${label}?`, PrimaryButton, {

@@ -39,7 +39,7 @@ export const cancelAppointment = asyncHandler(async (req, res) => {
   const { appointment, patient, doctor } =
     await cancelAppointmentService({ id, reason, doctorId });
 
-  // -------- Emails --------
+  // ---------------- EMAILS ----------------
   await Promise.allSettled([
     sendEmail({
       to: patient.email,

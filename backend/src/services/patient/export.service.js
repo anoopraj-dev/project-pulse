@@ -6,38 +6,38 @@ import Payment from "../../models/payments.model.js";
 import Consultation from "../../models/consultation.model.js";
 
 export const buildPatientExport = async (patientId) => {
-  // ------------ Patient ----------------
+  // ---------------- PATIENT ----------------
   const patient = await Patient.findById(patientId).select("-password");
 
   if (!patient) {
     throw new Error("Patient not found");
   }
 
-  // ------------ Appointments -----------
+  // ---------------- APPOINTMENTS ----------------
   const appointments = await Appointment.find({ patient: patientId })
     .populate("doctor", "name email")
     .lean();
 
-  // ------------ Consultations ----------
+  // ---------------- CONSULTATIONS ----------------
   const consultations = await Consultation.find({ patient: patientId }).lean();
 
-  // ------------ Prescriptions ----------
+  // ---------------- PRESCRIPTIONS ----------------
   const prescriptions = await Prescription.find({ patient: patientId })
     .populate("doctor", "name")
     .lean();
 
-  // ------------ Payments (EXPENSES) -----
+  // ---------------- PAYMENTS (EXPENSES) ----------------
   const payments = await Payment.find({ patient: patientId })
     .populate("doctor", "name")
     .lean();
 
-  // ------------- Expense Calculation -------
+  // ---------------- EXPENSE CALCULATION ----------------
   const totalExpenses = payments.reduce(
     (sum, p) => sum + (p.amount || 0),
     0
   );
 
-  //----------- Stats ----------
+  // ---------------- STATS ----------------
   const stats = {
     totalAppointments: appointments.length,
     totalConsultations: consultations.length,

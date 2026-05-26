@@ -5,7 +5,7 @@ import Prescription from "../../models/prescription.model.js";
 import Patient from "../../models/patient.model.js";
 import { getStartOfTodayIndia } from "../../utils/timeUtils.js";
 
-//------------ Dashboard Stats ---------------
+// ---------------- DASHBOARD STATS ----------------
 export const patientDashboardStatsService = async (patientId) => {
   const now = getStartOfTodayIndia();
 
@@ -34,12 +34,12 @@ export const patientDashboardStatsService = async (patientId) => {
     status: { $in: ["confirmed", "pending"] },
   });
 
-  // ---------------- EXPENSES (ALL VERIFIED PAYMENTS) ----------------
+  // ---------------- EXPENSES (ALL VERIFIED OR SETTLED PAYMENTS) ----------------
   const paymentAgg = await Payment.aggregate([
     {
       $match: {
         patient: new mongoose.Types.ObjectId(patientId),
-        status: "verified",
+        status: { $in: ["verified", "settled"] },
       },
     },
     {
@@ -57,7 +57,7 @@ export const patientDashboardStatsService = async (patientId) => {
     {
       $match: {
         patient: new mongoose.Types.ObjectId(patientId),
-        status: "verified",
+        status: { $in: ["verified", "settled"] },
         createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
       },
     },
@@ -83,7 +83,7 @@ export const patientDashboardStatsService = async (patientId) => {
   };
 };
 
-//---------------- Upcoming appointments -------------
+// ---------------- UPCOMING APPOINTMENTS ----------------
 export const upcomingAppointmentsService = async (patientId) => {
   const now = getStartOfTodayIndia();
 
@@ -127,10 +127,11 @@ export const patientDashboardChartService = async (patientId, range = "week") =>
     startDate.setDate(now.getDate() - 6);
     startDate.setHours(0, 0, 0, 0);
   } else if (range === "month") {
-    startDate.setMonth(now.getMonth() - 1);
+    startDate.setDate(now.getDate() - 29);
     startDate.setHours(0, 0, 0, 0);
   } else if (range === "year") {
-    startDate.setFullYear(now.getFullYear() - 1);
+    startDate.setMonth(now.getMonth() - 11);
+    startDate.setDate(1);
     startDate.setHours(0, 0, 0, 0);
   }
 
@@ -200,7 +201,7 @@ export const patientDashboardChartService = async (patientId, range = "week") =>
 
   const payments = await Payment.find({
     patient: patientId,
-    status: "verified",
+    status: { $in: ["verified", "settled"] },
     createdAt: { $gte: startDate, $lte: now },
   }).select("amount createdAt");
 
@@ -219,7 +220,7 @@ export const patientDashboardChartService = async (patientId, range = "week") =>
   return Object.values(dataMap);
 };
 
-//-------------- prescriptions --------------
+// ---------------- PRESCRIPTIONS ----------------
 export const patientPrescriptionsService = async (patientId) => {
   const prescriptions = await Prescription.find({ patient: patientId })
   .populate("doctor", "name")
@@ -235,7 +236,7 @@ return prescriptions.map((p) => ({
 };
 
 
-//------------- vitals ---------
+// ---------------- VITALS ----------------
 export const patientVitalsService = async (patientId) => {
   return await Patient.findById(patientId).select(
     "medical_history.name medical_history.weight medical_history.height medical_history.sugarLevel medical_history.bloodPressure"

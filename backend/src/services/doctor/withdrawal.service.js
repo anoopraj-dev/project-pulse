@@ -7,19 +7,19 @@ export const requestWithdrawalService = async ({
   amount,
   bankDetails,
 }) => {
-  //----------- Get Wallet -------
+  // ---------------- GET WALLET ----------------
   const wallet = await Wallet.findOne({ userId: doctorId });
 
   if (!wallet) {
     throw new Error("Wallet not found");
   }
 
-  //------------ Validate Balance ------------
+  // ---------------- VALIDATE BALANCE ----------------
   if (wallet.balance < amount * 100) {
     throw new Error("Insufficient balance");
   }
 
-  //-------------- Create withdrawl -----------
+  // ---------------- CREATE WITHDRAWL ----------------
   const withdrawal = await Withdrawal.create({
     doctor: doctorId,
     amount: amount * 100,
@@ -43,13 +43,13 @@ export const processWithdrawalService = async (withdrawalId) => {
 
   if (withdrawal.amount < 100) throw new Error("Minimum withdrawal is 100");
 
-  //-------------- Mark processing ------------
+  // ---------------- MARK PROCESSING ----------------
   withdrawal.status = "processing";
   await withdrawal.save();
 
   try {
     // To do:  integrate razorpay payout
-    //-------- Get Wallet ------------
+    // ---------------- GET WALLET ----------------
     const wallet = await Wallet.findOne({
       userId: withdrawal.doctor,
     });
@@ -58,11 +58,11 @@ export const processWithdrawalService = async (withdrawalId) => {
       throw new Error("Insufficient balance at processing");
     }
 
-    //----------- Deduct wallet ----------
+    // ---------------- DEDUCT WALLET ----------------
     wallet.balance -= withdrawal.amount;
     await wallet.save();
 
-    //------------- Create Transaction -------
+    // ---------------- CREATE TRANSACTION ----------------
     await Transaction.create({
       wallet: wallet._id,
       type: "debit",
@@ -72,14 +72,14 @@ export const processWithdrawalService = async (withdrawalId) => {
       notes: "Doctor withdrawal",
     });
 
-    //------------ Mark processed ---------
+    // ---------------- MARK PROCESSED ----------------
     withdrawal.status = "processed";
     withdrawal.processedAt = new Date();
     await withdrawal.save();
 
     return withdrawal;
   } catch (error) {
-    //------------- Mark failed -------
+    // ---------------- MARK FAILED ----------------
     withdrawal.status = "failed";
     withdrawal.failureReason = error.message;
     await withdrawal.save();

@@ -10,7 +10,7 @@ export const getPatientNotifications = asyncHandler(async (req, res) => {
   return res.json({ success: true, notifications });
 });
 
-//------------------- MARK ALL READ ---------------------
+// ---------------- MARK ALL READ ----------------
 export const setMarkAllRead = asyncHandler(async (req, res) => {
   const result = await Notification.updateMany(
     { role: req.user.role, read: false },

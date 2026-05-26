@@ -11,7 +11,7 @@ import { buildUTCDate, getIndiaDateString } from "../../utils/timeUtils.js";
 
 // Time utility imported from utils/timeUtils.js
 
-// -------- Get Booking Info --------
+// ---------------- GET BOOKING INFO ----------------
 export const getBookingInfoService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).lean();
   if (!doctor) throw new Error("Doctor not found");
@@ -42,10 +42,20 @@ export const getBookingInfoService = async (doctorId) => {
     services,
     availability,
     profileImage: doctor.profilePicture,
+    about: doctor.about || "",
+    gender: doctor.gender || "",
+    email: doctor.email || "",
+    phone: doctor.phone || "",
+    location: doctor.location || "",
+    rating: doctor.rating || 0,
+    qualifications: doctor.professionalInfo?.qualifications || [],
+    specializations: doctor.professionalInfo?.specializations || [],
+    experience: doctor.professionalInfo?.experience || [],
+    education: doctor.professionalInfo?.education || [],
   };
 };
 
-// -------- Book Appointment --------
+// ---------------- BOOK APPOINTMENT ----------------
 export const bookAppointmentService = async (data, patientId) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -96,7 +106,7 @@ export const bookAppointmentService = async (data, patientId) => {
       throw new Error("Time slot already booked or unavailable");
     }
 
-    //---------------- store date in utc--------
+    // ---------------- STORE DATE IN UTC ----------------
     const appointmentDate = buildUTCDate(date, time);
 
     /* -------- Update appointment -------- */

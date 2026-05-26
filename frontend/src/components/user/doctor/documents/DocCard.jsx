@@ -1,5 +1,5 @@
 
-//-------------- DocCard -----------------------
+// ---------------- DOCCARD ----------------
 import Thumbnail from "./Thumbnail";
 import { Icon } from "@iconify/react";
 

@@ -8,7 +8,7 @@ import { Notification } from "../../models/notification.model.js";
 
 import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
-//------------- Get admin dashboard stats -------------
+// ---------------- GET ADMIN DASHBOARD STATS ----------------
 export const getAdminDashboardService = async () => {
   const [doctorCount, patientCount] = await Promise.all([
     Doctor.countDocuments(),
@@ -26,21 +26,21 @@ export const getAdminDashboardService = async () => {
   };
 };
 
-//-------------- Get pending doctor profile -------------
+// ---------------- GET PENDING DOCTOR PROFILE ----------------
 export const getPendingDoctorProfileService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).select("-password");
   if (!doctor) throw new Error("Doctor not found");
   return doctor;
 };
 
-//--------------- Get doctor documents -------------
+// ---------------- GET DOCTOR DOCUMENTS ----------------
 export const getDoctorDocumentsService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId);
   if (!doctor) throw new Error("Doctor not found");
   return doctor;
 };
 
-//---------------- Get admin notifications -------------
+// ---------------- GET ADMIN NOTIFICATIONS ----------------
 export const getAdminNotificationsService = async () => {
   const notifications = await Notification.find({ role: "admin" }).sort({
     createdAt: -1,
@@ -60,7 +60,7 @@ export const dashboardCountsService = async () => {
     Patient.countDocuments(),
     Appointment.countDocuments(),
 
-    // ---------------- SETTLEMENTS (platform fee + payouts not needed for profit) ----------------
+    // ---------------- SETTLEMENTS (PLATFORM FEE + PAYOUTS NOT NEEDED FOR PROFIT) ----------------
     Settlement.aggregate([
       {
         $match: {
@@ -75,7 +75,7 @@ export const dashboardCountsService = async () => {
       },
     ]),
 
-    // ---------------- REFUNDS (for penalty calculation) ----------------
+    // ---------------- REFUNDS (FOR PENALTY CALCULATION) ----------------
     Transaction.aggregate([
       {
         $match: {
@@ -116,7 +116,7 @@ export const dashboardCountsService = async () => {
   };
 };
 
-//----------------- REVENUE CHART SERVICE -----------------
+// ---------------- REVENUE CHART SERVICE ----------------
 export const revenueOverviewService = async (range = "week") => {
   const now = new Date();
   let startDate = new Date();
@@ -164,7 +164,7 @@ export const revenueOverviewService = async (range = "week") => {
   const payments = await Payment.aggregate([
     {
       $match: {
-        status: "verified",
+        status: { $in: ["verified", "settled"] },
         createdAt: { $gte: startDate },
       },
     },
@@ -257,7 +257,7 @@ export const revenueOverviewService = async (range = "week") => {
   return formatted;
 };
 
-//-------------- USER GROWTH CHART ----------------
+// ---------------- USER GROWTH CHART ----------------
 const monthNames = [
   "Jan",
   "Feb",

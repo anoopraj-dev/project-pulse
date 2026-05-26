@@ -34,7 +34,7 @@ const PatientDoctors = () => {
     role: "patient",
   });
 
-  //---------------- Get all doctors --------------
+  // ---------------- GET ALL DOCTORS ----------------
   const fetchAllDoctors = () => {
     fetchDoctorsAction.executeAsyncFn(async () => {
       try {
@@ -47,7 +47,7 @@ const PatientDoctors = () => {
     });
   };
 
-  //------------------ Apply Filters --------------------
+  // ---------------- APPLY FILTERS ----------------
   const applyAllFilters = (list, filters) => {
     if (!filters || Object.keys(filters).length === 0) return list;
 
@@ -78,7 +78,7 @@ const PatientDoctors = () => {
     );
   };
 
-  //--------------- Search Suggestions -------------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "patient",
@@ -91,7 +91,7 @@ const PatientDoctors = () => {
     setQuery(item.name);
   };
 
-  //------------ View Doctor Profile -------------
+  // ---------------- VIEW DOCTOR PROFILE ----------------
   const handleProfileView = (id) => {
     navigate(`/patient/doctor/${id}`);
   };

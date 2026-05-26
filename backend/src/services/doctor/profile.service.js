@@ -2,7 +2,7 @@ import Doctor from "../../models/doctor.model.js";
 import DoctorAvailability from "../../models/availability.model.js";
 import { Notification } from "../../models/notification.model.js";
 
-// ---------- GET PROFILE ----------
+// ---------------- GET PROFILE ----------------
 export const getDoctorProfileService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId).select("-password");
   if (!doctor) throw new Error("Doctor not found");
@@ -30,7 +30,7 @@ export const getDoctorProfileService = async (doctorId) => {
   };
 };
 
-// ---------- UPDATE PROFILE ----------
+// ---------------- UPDATE PROFILE ----------------
 const safeParse = (value) => {
   if (!value) return undefined;
 
@@ -85,7 +85,7 @@ export const updateDoctorProfileService = async (payload) => {
   return doctor;
 };
 
-// ---------- REQUEST RESUBMISSION ----------
+// ---------------- REQUEST RESUBMISSION ----------------
 export const requestProfileResubmissionService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId);
   if (!doctor) throw new Error("Doctor not found");
@@ -114,7 +114,7 @@ export const requestProfileResubmissionService = async (doctorId) => {
   return { doctor, notification };
 };
 
-// ---------- RESUBMIT PROFILE ----------
+// ---------------- RESUBMIT PROFILE ----------------
 export const resubmitProfileService = async (doctorId) => {
   const doctor = await Doctor.findById(doctorId);
   if (!doctor) throw new Error("Doctor profile not found");

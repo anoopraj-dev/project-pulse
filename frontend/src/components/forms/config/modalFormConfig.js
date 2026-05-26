@@ -1,6 +1,6 @@
 import { USER_STATUS_OPTIONS } from "../../../constants/homePageData";
 
-// -------------Email Input Config-------------
+// ---------------- EMAIL INPUT CONFIG ----------------
 export const emailInputConfig = {
   fields: [
     { name: "email", label: "Email", type: "email", required: true },
@@ -15,7 +15,7 @@ export const emailInputConfig = {
   buttonText: "Submit",
 };
 
-//------------- Set Password Config ------------
+// ---------------- SET PASSWORD CONFIG ----------------
 export const setPasswordFormConfig = {
   fields: [
     {
@@ -36,14 +36,14 @@ export const setPasswordFormConfig = {
   buttonText: "Update Password",
 };
 
-//------------------ Send Message/Comment config ------------------
+// ---------------- SEND MESSAGE/COMMENT CONFIG ----------------
 export const sendCommentConfig = {
   fields: [
     { name: "reason", label: "Reason", type: "textarea", required: true },
   ],
 };
 
-//------------- Update Profile Picture config-------
+// ---------------- UPDATE PROFILE PICTURE CONFIG ----------------
 export const updateProfilePictureConfig = {
   fields: [
     {
@@ -54,11 +54,11 @@ export const updateProfilePictureConfig = {
   ],
 };
 
-// ---------- Certificate upload config ----------
+// ---------------- CERTIFICATE UPLOAD CONFIG ----------------
 
 export const certificateUploadConfig = (closeModal) => ({
   fields: [
-    // ---------- CATEGORY ----------
+    // ---------------- CATEGORY ----------------
     {
       name: "certificateCategory",
       label: "Certificate Category",
@@ -67,7 +67,7 @@ export const certificateUploadConfig = (closeModal) => ({
       options: ["Experience", "Education", "ID Proof"],
     },
 
-    // ---------- EXPERIENCE FILE ----------
+    // ---------------- EXPERIENCE FILE ----------------
     {
       name: "experienceCertificate",
       label: "Upload Experience Certificate",
@@ -80,7 +80,7 @@ export const certificateUploadConfig = (closeModal) => ({
       },
     },
 
-    // ---------- EDUCATION FILE ----------
+    // ---------------- EDUCATION FILE ----------------
     {
       name: "educationCertificate",
       label: "Upload Education Certificate",
@@ -93,7 +93,7 @@ export const certificateUploadConfig = (closeModal) => ({
       },
     },
 
-    // ---------- ID PROOF FILE (MULTIPLE) ----------
+    // ---------------- ID PROOF FILE (MULTIPLE) ----------------
     {
       name: "proofDocument",
       label: "Upload ID Proof / License",
@@ -107,7 +107,7 @@ export const certificateUploadConfig = (closeModal) => ({
       },
     },
 
-    // ---------- EDUCATION FIELDS ----------
+    // ---------------- EDUCATION FIELDS ----------------
     {
       name: "degree",
       label: "Degree",
@@ -139,7 +139,7 @@ export const certificateUploadConfig = (closeModal) => ({
       },
     },
 
-    // ---------- EXPERIENCE FIELDS ----------
+    // ---------------- EXPERIENCE FIELDS ----------------
     {
       name: "hospitalName",
       label: "Hospital Name",
@@ -171,7 +171,7 @@ export const certificateUploadConfig = (closeModal) => ({
       },
     },
 
-    // ---------- ID PROOF / LICENSE FIELDS ----------
+    // ---------------- ID PROOF / LICENSE FIELDS ----------------
     {
       name: "registrationNumber",
       label: "Registration Number",
@@ -205,7 +205,7 @@ export const certificateUploadConfig = (closeModal) => ({
   ],
 });
 
-// ----------- Revoke Status config -------------
+// ---------------- REVOKE STATUS CONFIG ----------------
 
 export const revokeStatusConfig = {
   fields: [
@@ -219,7 +219,7 @@ export const revokeStatusConfig = {
   ],
 };
 
-//----------- Set Appointment Status Config ----------------
+// ---------------- SET APPOINTMENT STATUS CONFIG ----------------
 
 export const setAppointmentStatusConfig = {
   fields: [

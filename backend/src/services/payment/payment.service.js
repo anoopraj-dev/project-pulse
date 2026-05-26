@@ -14,7 +14,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-//-------- calculate slot duration --------------
+// ---------------- CALCULATE SLOT DURATION ----------------
 const calculateDuration = (startTime, endTime = null, fallback = 30) => {
   if (!endTime) return fallback;
 
@@ -26,7 +26,7 @@ const calculateDuration = (startTime, endTime = null, fallback = 30) => {
 
 // Time utility imported from utils/timeUtils.js
 
-// -------- CREATE ORDER ----------
+// ---------------- CREATE ORDER ----------------
 export const createOrderService = async (userId, body) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = body;
 
@@ -98,7 +98,7 @@ const appointment = await Appointment.create({
   return order;
 };
 
-// -------- VERIFY PAYMENT ----------
+// ---------------- VERIFY PAYMENT ----------------
 export const verifyPaymentService = async (body) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
 
@@ -129,7 +129,7 @@ export const verifyPaymentService = async (body) => {
   return payment;
 };
 
-// -------- UPDATE PAYMENT STATUS ----------
+// ---------------- UPDATE PAYMENT STATUS ----------------
 export const updatePaymentStatusService = async (body) => {
   const { orderId, status, notes } = body;
 
@@ -183,7 +183,7 @@ export const updatePaymentStatusService = async (body) => {
   return { payment };
 };
 
-// -------- RETRY PAYMENT ----------
+// ---------------- RETRY PAYMENT ----------------
 export const retryPaymentService = async (paymentId) => {
   const payment = await Payment.findById(paymentId);
   if (!payment) throw new Error("Payment not found");
@@ -211,7 +211,7 @@ export const retryPaymentService = async (paymentId) => {
     throw new Error("Retry window expired (6 hours)");
   }
 
-  // -------- FIX: derive datetime safely from schema fields --------
+  // ---------------- FIX: DERIVE DATETIME SAFELY FROM SCHEMA FIELDS ----------------
   if (!appointment.appointmentDate || !appointment.timeSlot) {
     throw new Error("Appointment data missing");
   }
@@ -260,7 +260,7 @@ export const retryPaymentService = async (paymentId) => {
     },
   };
 };
-// -------- WALLET PAYMENT ----------
+// ---------------- WALLET PAYMENT ----------------
 export const walletPaymentService = async (userId, body) => {
   const { amount, doctorId, date, time, serviceType, reason, notes } = body;
 
@@ -429,7 +429,7 @@ export const walletPaymentService = async (userId, body) => {
 };
 
 
-// -------- VERIFY WALLET TOPUP ----------
+// ---------------- VERIFY WALLET TOPUP ----------------
 export const verifyWalletTopupService = async (userId, body) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } =
     body;

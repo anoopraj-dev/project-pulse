@@ -13,7 +13,7 @@ import {
 } from "@/api/patient/patientApis";
 import { useImageModal } from "@/contexts/ImageModalContext";
 
-// ---------------- Shared Card Components ----------------
+// ---------------- SHARED CARD COMPONENTS ----------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden ${className}`}

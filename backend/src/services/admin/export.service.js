@@ -7,7 +7,7 @@ import Doctor from "../../models/doctor.model.js";
 export const buildAdminRevenueExport = async (adminId,filters={}) => {
 
   // ---------------- PAYMENTS (GROSS INCOME) ----------------
-  const payments = await Payment.find({ status: "verified" })
+  const payments = await Payment.find({ status: { $in: ["verified", "settled"] } })
     .populate("patient", "name email")
     .lean();
 

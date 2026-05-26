@@ -33,10 +33,10 @@ export const handleRazorpayPayment = async ({
       },
     },
 
-    //---------------- Verify payment on success ----------------
+    // ---------------- VERIFY PAYMENT ON SUCCESS ----------------
     handler: async function (response) {
       try {
-        //--------- adding fund to wallet -------
+        // ---------------- ADDING FUND TO WALLET ----------------
         if (type === "wallet") {
           const res = await verifyWalletPayment({
             razorpay_order_id: response.razorpay_order_id,
@@ -54,7 +54,7 @@ export const handleRazorpayPayment = async ({
           if (onSuccess) onSuccess(response);
           return;
         } else {
-          //------------ booking appointment ---------------
+          // ---------------- BOOKING APPOINTMENT ----------------
           const verifyRes = await verifyRazorpayPayment(
             {
               razorpay_order_id: response.razorpay_order_id,
@@ -70,7 +70,7 @@ export const handleRazorpayPayment = async ({
           }
         }
 
-        //---------------- Update payment status -----------------
+        // ---------------- UPDATE PAYMENT STATUS ----------------
         const updateRes = await updatePaymentStatus({
           orderId: response.razorpay_order_id,
           status: "verified",
@@ -103,7 +103,7 @@ export const handleRazorpayPayment = async ({
   const rzp = new window.Razorpay(options);
   rzp.open();
 
-  //---------------- Handle payment failure ----------------
+  // ---------------- HANDLE PAYMENT FAILURE ----------------
   rzp.on("payment.failed", async function (response) {
     try {
       rzp.close();

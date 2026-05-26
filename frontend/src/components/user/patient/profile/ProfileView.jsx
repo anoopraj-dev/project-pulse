@@ -6,7 +6,7 @@ import DynamicInfoSection from "../../../ui/cards/DynamicInfoSection";
 import { useUser } from "@/contexts/UserContext";
 import ActionButton from "@/components/shared/components/ActionButton";
 
-// ---------------- Shared Card Components --------------
+// ---------------- SHARED CARD COMPONENTS ----------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}

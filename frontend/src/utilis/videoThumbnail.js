@@ -4,7 +4,7 @@ export const generateVideoThumbnail = (file) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        //----------- video metadata ------------
+        // ---------------- VIDEO METADATA ----------------
         video.preload = 'metadata';
         video.muted = true;
         video.src = URL.createObjectURL(file);

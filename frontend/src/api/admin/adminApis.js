@@ -1,6 +1,6 @@
 import { api } from "../axiosInstance";
 
-//-------- Dashboard stats -----------
+// ---------------- DASHBOARD STATS ----------------
 export const fetchDashboardStats = async () => {
   const response = await api.get("/api/admin/dashboard");
   return response.data;
@@ -22,62 +22,62 @@ export const fetchUserGrowth = async () => {
 }
 
 
-// --------Get doctor for review ------------
+// ---------------- GET DOCTOR FOR REVIEW ----------------
 export const fetchDoctorById = async (id) => {
   const response = await api.get(`/api/admin/doctor/${id}`);
   return response.data;
 };
 
 
-// ------------ Block Doctor --------------
+// ---------------- BLOCK DOCTOR ----------------
 export const blockDoctor = (id,formData) =>{
    return api.patch(`/api/admin/doctor/block/${id}`,formData);
 }
-//------------- Unblock Doctor ------------
+// ---------------- UNBLOCK DOCTOR ----------------
 export const unblockDoctor =async(id) =>{
   const response = await api.patch(`/api/admin/doctor/unblock/${id}`)
   return response.data;
 }
 
-// -------------- Revoke Profile Status -----------
+// ---------------- REVOKE PROFILE STATUS ----------------
 export const revokeProfileStatus = (id,formData) => {
   return api.patch(`/api/admin/doctor/status/${id}`, formData)
 }
 
-//---------- Get all doctors ------------
+// ---------------- GET ALL DOCTORS ----------------
 export const getAllDoctors = async () =>{
   const response = await api.get('/api/admin/doctors');
   return response.data;
 }
 
 
-//------------- Fetch All Patients -----------------
+// ---------------- FETCH ALL PATIENTS ----------------
 export const getAllPatients = () =>{
   return api.get('/api/admin/patients')
 }
 
-//----------------- Get Patient for review --------
+// ---------------- GET PATIENT FOR REVIEW ----------------
 export const fetchPatientById = (id) => {
   return api.get(`/api/admin/patient/${id}`)
 }
 
-//----------------- Block Patient -----------------
+// ---------------- BLOCK PATIENT ----------------
 export const blockPatientProfile = (id,formData) => {
   return api.patch(`/api/admin/patient/block/${id}`,formData)
 }
 
-//----------------- Unblock Patient -----------------
+// ---------------- UNBLOCK PATIENT ----------------
 export const unblockPatientProfile = (id) => {
   return api.patch(`/api/admin/patient/unblock/${id}`)
 }
 
-//--------------- Appointments ----------------------
+// ---------------- APPOINTMENTS ----------------
 export const fetchAppointments = () =>{
   return api.get('/api/admin/appointments')
 }
 
 
-//--------- Support center and settings ---------
+// ---------------- SUPPORT CENTER AND SETTINGS ----------------
 export const fetchSupportTickets = () =>{
   return api.get('/api/admin/support/tickets')
 }
@@ -100,7 +100,7 @@ export const changePassword = (data) =>{
   return api.patch(`/api/admin/support/change-password`,data)
 }
 
-//-------------- Revenue -----------
+// ---------------- REVENUE ----------------
 export const fetchRevenueSummary = (range) =>{
   return api.get(`/api/admin/revenue/summary?range=${range}`);
 }

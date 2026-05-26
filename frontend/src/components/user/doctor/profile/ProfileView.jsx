@@ -7,7 +7,7 @@ import AvailabilityPreview from "../availability/AvailabilityPreview";
 import AvailabilityList from '../availability/AvailabilityList'
 import ActionButton from "@/components/shared/components/ActionButton";
 
-//------------- Card Shell --------------
+// ---------------- CARD SHELL ----------------
 const Card = ({ children, className = "" }) => (
   <div
     className={`bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden ${className}`}
@@ -46,7 +46,7 @@ const CardHeader = ({
   </div>
 );
 
-// ------------ MAIN COMPONENT ------------------
+// ---------------- MAIN COMPONENT ----------------
 const ProfileView = ({
   viewer,
   user,

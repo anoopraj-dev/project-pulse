@@ -10,7 +10,7 @@ export const ChatProvider = ({ children }) => {
   const { role } = useUser();
   const [totalUnread, setTotalUnread] = useState(0);
 
-  // ---------------- Initial fetch of total unread ----------------
+  // ---------------- INITIAL FETCH OF TOTAL UNREAD ----------------
   useEffect(() => {
     const fetchInitialUnread = async () => {
       try {
@@ -28,7 +28,7 @@ export const ChatProvider = ({ children }) => {
     if (role) fetchInitialUnread();
   }, [role]);
 
-  // ---------------- Realtime increment ----------------
+  // ---------------- REALTIME INCREMENT ----------------
   useEffect(() => {
     if (!socket) return;
 

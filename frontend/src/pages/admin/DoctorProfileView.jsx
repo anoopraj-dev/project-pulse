@@ -22,7 +22,7 @@ const DoctorProfileView = () => {
   const navigate = useNavigate();
   const {openModal} = useModal();
 
-  //------------- FETCH DOCTOR ------------------
+  // ---------------- FETCH DOCTOR ----------------
   const fetchDoctor = async () => {
     try {
       await fetchDoctorAction.executeAsyncFn(async () => {
@@ -34,7 +34,7 @@ const DoctorProfileView = () => {
     }
   };
 
-  //--------------- VERIFY DOCUMENTS ------------
+  // ---------------- VERIFY DOCUMENTS ----------------
     const handleVerifyDocuments = async (id) => {
       try {
         await viewDocAction.executeAsyncFn(async () => {
@@ -49,7 +49,7 @@ const DoctorProfileView = () => {
       }
     };
 
-//-------------- APPROVE DOCTOR -------------------
+// ---------------- APPROVE DOCTOR ----------------
    const handleApproveDoctor = async () => {
     try {
       await approveAction.executeAsyncFn(async () => {
@@ -66,7 +66,7 @@ const DoctorProfileView = () => {
     }
   };
 
-//----------------- REJECT DOCTOR ------------------
+// ---------------- REJECT DOCTOR ----------------
   const handleReject = async () => {
     try {
       openModal("Reject this request?", SendCommentModal, { id: user._id, apiCall:rejectDoctorProfile, onSubmit: (updatedUser)=> setUser(updatedUser)  });
@@ -75,7 +75,7 @@ const DoctorProfileView = () => {
     }
   };
 
-  //-------------- BLOCK DOCTOR --------------------
+  // ---------------- BLOCK DOCTOR ----------------
   const handleBlock = async() =>{
     try {
       openModal('Block this doctor?', SendCommentModal, { id: user._id, apiCall: blockDoctor,onSubmit:(updatedUser)=>setUser(updatedUser) })
@@ -84,7 +84,7 @@ const DoctorProfileView = () => {
     }
   }
 
-  //------------ UNBLOCK DOCTOR -------------------
+  // ---------------- UNBLOCK DOCTOR ----------------
   const handleUnblock = async() => {
     try {
       await unblockAction.executeAsyncFn( async ()=> {
@@ -101,7 +101,7 @@ const DoctorProfileView = () => {
     }
   }
 
-  //--------------- REVOKE STATUS -------------------
+  // ---------------- REVOKE STATUS ----------------
   const handleRevokeStatus = async() => {
     try {
       openModal('Revoke doctor profile Status',RevokeStatusModal,{id: user._id,onSubmit:(updatedUser)=> setUser(updatedUser)})

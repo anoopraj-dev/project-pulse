@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 
 const DoctorSchema = new Schema(
   {
-    // --- Basic Info (unchanged) ---
+    // ---------------- BASIC INFO  ----------------
     name: { type: String, required: true },
     doctorId: { type: String, unique: true, required: true },
     gender: { type: String, enum: ["male", "female", "other"] },
@@ -14,14 +14,14 @@ const DoctorSchema = new Schema(
     location: { type: String },
     about:{type:String},
 
-    // --- Authentication & Role  ---
+    // ---------------- AUTHENTICATION & ROLE ----------------
     password: { type: String, required: true },
     role: { type: String, required: true },
     isVerified: { type: Boolean, default: false },
     firstLogin: { type: Boolean, default: true },
 
 
-    // --- Ratings & Status  ---
+    // ---------------- RATINGS & STATUS ----------------
     rating: { type: Number, default: 0 },
     status: { type: String, enum: ["approved", "pending", "rejected","blocked", "resubmit","resubmitted",'requestedResubmission'], default: "pending" },
     rejectionReason: { type: String, default:''},
@@ -31,7 +31,7 @@ const DoctorSchema = new Schema(
     submissionCount: {type:Number,default:0},
     lastSubmitted:{type:Date},
 
-    // --- Professional Info  ---
+    // ---------------- PROFESSIONAL INFO ----------------
     professionalInfo: {
       qualifications: { type: [String], default: [] },
       specializations: { type: [String], default: [] },

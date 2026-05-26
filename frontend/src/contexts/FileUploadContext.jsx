@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react";
 
 const FileUploadContext = createContext(null);
 
-// --------- CUSTOM HOOK ----------
+// ---------------- CUSTOM HOOK ----------------
 export const useFileUploadContext = () => {
   const ctx = useContext(FileUploadContext);
   if (!ctx) {
@@ -13,12 +13,12 @@ export const useFileUploadContext = () => {
   return ctx;
 };
 
-// --------- PROVIDER ----------
+// ---------------- PROVIDER ----------------
 export const FileUploadProvider = ({ children }) => {
   const [files, setFiles] = useState({});
   const [previews, setPreviews] = useState({});
 
-  // ---------- SELECT FILE ----------
+  // ---------------- SELECT FILE ----------------
   const handleFileSelect = (fieldName, fileList, { multiple = false } = {}) => {
     const selected = Array.from(fileList || []);
 
@@ -42,7 +42,7 @@ export const FileUploadProvider = ({ children }) => {
     }));
   };
 
-  // ---------- REMOVE FILE ----------
+  // ---------------- REMOVE FILE ----------------
   const removeFile = (fieldName, index = null) => {
     setFiles((prev) => {
       const value = prev[fieldName];
@@ -73,7 +73,7 @@ export const FileUploadProvider = ({ children }) => {
     });
   };
 
-  // ---------- CLEAR FIELD ----------
+  // ---------------- CLEAR FIELD ----------------
   const clearField = (fieldName) => {
     setFiles((prev) => {
       const updated = { ...prev };

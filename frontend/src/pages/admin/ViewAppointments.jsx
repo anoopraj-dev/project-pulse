@@ -51,7 +51,7 @@ const ViewAppointments = () => {
     fetchAllAppointments();
   }, []);
 
-  // ------------ Search Suggestions ------------------
+  // ---------------- SEARCH SUGGESTIONS ----------------
   const fetchSuggestions = (query) => {
     return fetchSearchSuggestions({
       role: "admin",
@@ -64,7 +64,7 @@ const ViewAppointments = () => {
     setQuery(item.name);
   };
 
-  // ------------- View Appointments -----------------
+  // ---------------- VIEW APPOINTMENTS ----------------
   const handleView = (id) => {
     const appointment = displayedAppointments.find((a) => a._id === id);
     openModal("Appointment Details", AppointmentsActionModal, {

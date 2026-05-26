@@ -33,11 +33,11 @@ import { viewReceipt } from "../controllers/userControllers/receipt.controller.j
 
 const router = Router();
 
-//----------- MIDDLEWARES---------------
+// ---------------- MIDDLEWARES ----------------
 router.use(authenticateUser, authorizeRoles("doctor"));
 
-//------------- ROUTES---------------
-//----- Dashboard -------
+// ---------------- ROUTES ----------------
+// ---------------- DASHBOARD ----------------
 router.get('/dashboard/revenue',doctorRevenue);
 router.get('/dashboard/upcoming-appointments',upcomingAppointments);
 router.get('/dashboard/stats',doctorDashboardStats);
@@ -86,38 +86,38 @@ router.get('/availability',getAvailability)
 router.post('/availability',saveAvailability)
 router.patch('/availability',removeAvailabilitySlot)
 
-//------------ appointments-------------
+// ---------------- APPOINTMENTS ----------------
 router.get('/appointments',getAllAppointments)
 router.get('/appointments/:id',getDoctorAppointmentById)
 router.patch('/appointments/:id',cancelAppointment)
 router.get('/appointments/patient-profile/:id',viewPatientProfile)
 
-//----------------- payments ----------------
+// ---------------- PAYMENTS ----------------
 router.get('/payments',getDoctorPaymentHistory)
 router.get('/payments/:id',viewReceipt)
 
-//---------------- Search ----------------
+// ---------------- SEARCH ----------------
 router.get('/search',searchController)
 router.get('/search/suggestions',searchSuggestionsController)
 
-//------------- consultation-----------
+// ---------------- CONSULTATION ----------------
 router.post('/appointments/consultation/:id',joinConsultation)
 router.get('/appointments/consultation/:id',getConsultationDetails)
 router.patch('/appointments/consultation/:id/end',endConsultation)
 router.post('/appointments/consultation/:consultationId/prescription',submitPrescription)
 router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
 
-//------------- patient medical records -----------
+// ---------------- PATIENT MEDICAL RECORDS ----------------
 router.get('/appointments/patient-records/:patientId', getPatientMedicalRecordsForDoctor)
 
-//------------- Support and Setting ------------
+// ---------------- SUPPORT AND SETTING ----------------
 router.patch('/support/change-password',changePassword);
 router.post('/support/ticket',createSupportTicket);
 router.get('/support/tickets',supportTickets);
 router.post('/support/accountInfo',requestDoctorExport)
 router.get('/support/export-status/:id',getDoctorExportStatus)
 
-//-------------- Wallet --------------
+// ---------------- WALLET ----------------
 router.get('/wallet',doctorWallet)
 router.post('/wallet/withdraw',requestWithdrawal)
 

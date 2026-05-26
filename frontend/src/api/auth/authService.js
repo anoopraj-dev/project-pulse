@@ -1,14 +1,14 @@
 import { api } from "../axiosInstance";
 
-//----------- AUTH SERVICE FUNCTIONS ----------------
+// ---------------- AUTH SERVICE FUNCTIONS ----------------
 
-//------ signup ------
+// ---------------- SIGNUP ----------------
 export const signup = async (signupData) => {
     const response =  await api.post('/api/auth/signup', signupData);
     return response.data;
 };
 
-//------ signin (patient/doctor) ------
+// ---------------- SIGNIN (PATIENT/DOCTOR) ----------------
 export const signin = async (email,password,role) => {
     const response = await api.post('/api/auth/signin', { email, password, role });
     return response.data;
@@ -20,7 +20,7 @@ export const signin = async (email,password,role) => {
 //     return response.data;
 // };
 
-//-------- update clerk user --------
+// ---------------- UPDATE CLERK USER ----------------
 export const updateClerkUser = async (userData,token,signal) => {
     const response = await api.post('/api/auth/update-clerkUser', userData,{
         headers: {
@@ -31,7 +31,7 @@ export const updateClerkUser = async (userData,token,signal) => {
     return response.data;
 };  
 
-//----------- logout user --------------
+// ---------------- LOGOUT USER ----------------
 export const logoutUser = async () => {
   try {
     const res = await api.post("/api/auth/logout", {});

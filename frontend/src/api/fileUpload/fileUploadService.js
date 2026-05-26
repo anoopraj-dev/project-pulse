@@ -39,7 +39,7 @@ export const uploadFileService = async ({
   return res.data;
 };
 
-// ---------- helper ----------
+// ---------------- HELPER ----------------
 const extractUploadType = (fieldPath) => {
   if (!fieldPath) return "";
   const cleanedPath = fieldPath.replace(/\[\d+\]/g, "");

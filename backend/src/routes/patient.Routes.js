@@ -60,11 +60,11 @@ import { getExportStatus, requestPatientExport } from "../controllers/patientCon
 
 const router = Router();
 
-//-------------MIDDLEWARES----------
+// ---------------- MIDDLEWARES ----------------
 router.use(authenticateUser, authorizeRoles("patient"));
 
-//------------- ROUTES----------------
-//------- Dashboard -------------
+// ---------------- ROUTES ----------------
+// ---------------- DASHBOARD ----------------
 router.get('/dashboard/stats',dashboardStats)
 router.get('/dashboard/upcoming-appointments',patientUpcomingAppointments);
 router.get('/dashboard/chart',patientDashboardChart);
@@ -90,18 +90,18 @@ router.get("/search/suggestions", searchSuggestionsController);
 router.get("/notifications", getPatientNotifications);
 router.patch("/notifications/mark-all-read", setMarkAllRead);
 
-//--------- messages --------------
+// ---------------- MESSAGES ----------------
 router.get("/messages/:id", getAllMessages);
 router.get("/conversations", getAllConversations);
 
-//-------------- appointments -------------
+// ---------------- APPOINTMENTS ----------------
 router.get(`/doctor/:id/booking-info`, getBookingInfo);
 router.post("/appointments/book-appointment", bookAppointment);
 router.get("/appointments", getAllAppointments);
 router.get("/appointments/:id", getAppointmentById);
 router.patch("/appointments/:id", cancelAppointment);
 
-//----------------razorpay payments --------------
+// ---------------- RAZORPAY PAYMENTS ----------------
 router.post("/create-order", createOrder);
 router.post("/verify-payment", verifyPayment);
 router.get("/payments", getPatientPaymentHistory);
@@ -110,26 +110,26 @@ router.patch("/payment-status", updatePaymentStatus);
 router.get(`/payments/:id`, viewReceipt);
 router.post("/payments/retry/:id", retryPayment);
 
-//---------------- wallet --------------
+// ---------------- WALLET ----------------
 router.get("/wallet", getPatientWallet);
 router.post("/create-wallet-order", createWalletOrder);
 router.post("/verify-wallet-payment", verifyWalletPayment);
 router.post("/wallet-pay", walletPayment);
 
-//---------------- Patient Medical Records -----------------
+// ---------------- PATIENT MEDICAL RECORDS ----------------
 router.post("/medical-records", upload.single("file"), createPatientMedicalRecord);
 router.get("/medical-records", getPatientMedicalRecords);
 router.delete("/medical-records/:id", deletePatientMedicalRecord);
 
-//--------------- Consultation --------------
+// ---------------- CONSULTATION ----------------
 router.post('/appointments/consultation/:id',joinConsultation)
 router.patch('/appointments/consultation/:id/end',endConsultation)
 router.get('/appointments/consultation/:id/pdf',generateConsultationPDF)
 
-//---------- Review and rating -------------
+// ---------------- REVIEW AND RATING ----------------
 router.post('/review/:id',submitReviewController)
 
-//---------- Support and Settings -----------
+// ---------------- SUPPORT AND SETTINGS ----------------
 router.post('/support/ticket',createSupportTicket);
 router.get('/support/tickets',supportTickets);
 router.patch('/support/change-password',changePassword);

@@ -11,7 +11,7 @@ export const createExportRequestService = async ({
   filters,
 }) => {
 
-  // ---------------- Authorization ---------------
+  // ---------------- AUTHORIZATION ----------------
   if (reportType === "patient_full" && userId !== targetId) {
     throw new Error("Unauthorized");
   }
@@ -28,7 +28,7 @@ export const createExportRequestService = async ({
     throw new Error("Admin only");
   }
 
-  // ----------------- Create DB Record -------------
+  // ---------------- CREATE DB RECORD ----------------
   const exportJob = await Export.create({
     reportType,
     patient: reportType.includes("patient") ? targetId : null,
@@ -38,7 +38,7 @@ export const createExportRequestService = async ({
     filters: filters || {},
   });
 
-  // -------------- Que Job ---------------
+  // ---------------- QUE JOB ----------------
   await exportQueue.add("export", {
     exportId: exportJob._id,
     reportType,

@@ -1,4 +1,4 @@
-//--------- Patient Sidebar Config ----------------
+// ---------------- PATIENT SIDEBAR CONFIG ----------------
 
 export const patientSidebarMenu = [
   {
@@ -48,7 +48,7 @@ export const patientSidebarMenu = [
   },
 ];
 
-//------------- Doctor Sidebar Config -----------------
+// ---------------- DOCTOR SIDEBAR CONFIG ----------------
 export const doctorSidebarMenu = [
   {
     label: "Dashboard",
@@ -98,7 +98,7 @@ export const doctorSidebarMenu = [
 ];
 
 
-//------------- Admin Sidebar Config ---------------
+// ---------------- ADMIN SIDEBAR CONFIG ----------------
 
 export const adminSidebarMenu = [
   {

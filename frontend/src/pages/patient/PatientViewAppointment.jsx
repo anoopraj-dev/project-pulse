@@ -73,12 +73,12 @@ const PatientViewAppointment = () => {
     fetchAppointment();
   }, [id]);
 
-  //------------------ Handle messages --------------
+  // ---------------- HANDLE MESSAGES ----------------
   const handleMessages = (id) => {
     navigate(`/patient/messages/${id}`);
   };
 
-  //-------------- Handle Cancel Appointments ---------------
+  // ---------------- HANDLE CANCEL APPOINTMENTS ----------------
   const handleCancel = async () => {
     setCancelling(true);
 
@@ -141,7 +141,7 @@ const PatientViewAppointment = () => {
     }
   };
 
-  //------------- View PDF -------------------
+  // ---------------- VIEW PDF ----------------
   const handleViewPDF = async () => {
     try {
       const consultationId =
@@ -196,10 +196,10 @@ const PatientViewAppointment = () => {
     appointmentDateTime.setSeconds(0);
   }
 
-  //---------- Current time ---------------
+  // ---------------- CURRENT TIME ----------------
   const now = new Date();
 
-  //--------Difference in milliseconds-----
+  // ---------------- DIFFERENCE IN MILLISECONDS ----------------
   const diffInMs = appointmentDateTime - now;
 
   // Convert to hours

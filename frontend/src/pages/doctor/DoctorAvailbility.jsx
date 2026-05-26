@@ -11,7 +11,7 @@ import {
 } from "@/api/doctor/doctorApis";
 import toast from "react-hot-toast";
 
-//-------- local date helper --------
+// ---------------- LOCAL DATE HELPER ----------------
 const getLocalDate = () => {
   const now = new Date();
   const offset = now.getTimezoneOffset();

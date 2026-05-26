@@ -13,7 +13,7 @@ export default function TextInput({ field, formMethods, errors }) {
       : field.type
     : field.type || "text";
 
-  //------------ read nested errors -------------
+  // ---------------- READ NESTED ERRORS ----------------
   const error = get(errors, field.name);
 
   return (

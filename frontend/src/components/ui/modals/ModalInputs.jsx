@@ -23,7 +23,7 @@ import { useAsyncAction } from "../../../hooks/useAsyncAction";
 import { revokeProfileStatus } from "../../../api/admin/adminApis";
 import { uploadFileService } from "@/api/fileUpload/fileUploadService";
 
-//-------------- Email & role modal --------------------
+// ---------------- EMAIL & ROLE MODAL ----------------
 export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
 
@@ -64,7 +64,7 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   );
 };
 
-//----------------- set Password modal ---------------------
+// ---------------- SET PASSWORD MODAL ----------------
 
 export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const [loading, setLoading] = useState(false);
@@ -119,7 +119,7 @@ export const SetPasswordModal = ({ endPoint, type, onSubmit, closeModal }) => {
   );
 };
 
-//------------- Profile Picture upload ---------------
+// ---------------- PROFILE PICTURE UPLOAD ----------------
 export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
   const { role, dispatch } = useUser();
   const { files, clearField } = useFileUploadContext();
@@ -173,7 +173,7 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
   );
 };
 
-// -------- Certificat upload modal --------------
+// ---------------- CERTIFICAT UPLOAD MODAL ----------------
 
 export const CertificateUploadModal = ({ closeModal }) => {
   const { files, clearField } = useFileUploadContext();
@@ -235,7 +235,7 @@ export const CertificateUploadModal = ({ closeModal }) => {
         }
       }
 
-      // -------- API CALL --------
+      // ---------------- API CALL ----------------
       uploadCertificateAction.executeAsyncFn(async () => {
         const response = await submitDoctorProfessionalInfo(formData);
 
@@ -245,7 +245,7 @@ export const CertificateUploadModal = ({ closeModal }) => {
         }
         toast.success("Certificate added successfully");
 
-        // -------- CLEANUP --------
+        // ---------------- CLEANUP ----------------
         Object.keys(files).forEach(clearField);
         closeModal();
       });
@@ -265,7 +265,7 @@ export const CertificateUploadModal = ({ closeModal }) => {
   );
 };
 
-//------------- Image Viewer -------------
+// ---------------- IMAGE VIEWER ----------------
 
 export const ImageModal = ({ url, label, onClose }) => {
   return (
@@ -298,7 +298,7 @@ export const ImageModal = ({ url, label, onClose }) => {
   );
 };
 
-//----------------- Comment modal --------------
+// ---------------- COMMENT MODAL ----------------
 export const SendCommentModal = ({ id, onSubmit, closeModal, apiCall }) => {
   const apiAction = useAsyncAction();
   const handleSubmit = async (data) => {
@@ -307,7 +307,7 @@ export const SendCommentModal = ({ id, onSubmit, closeModal, apiCall }) => {
 
       formData.append("reason", data.reason);
 
-      //------------- API CALL ------------
+      // ---------------- API CALL ----------------
 
       await apiAction.executeAsyncFn(async () => {
         const res = await apiCall(id, formData);
@@ -332,7 +332,7 @@ export const SendCommentModal = ({ id, onSubmit, closeModal, apiCall }) => {
   );
 };
 
-// -------------------- Revoke Status -----------------
+// ---------------- REVOKE STATUS ----------------
 
 export const RevokeStatusModal = ({ id, onSubmit, closeModal }) => {
   const apiAction = useAsyncAction();
@@ -368,7 +368,7 @@ export const RevokeStatusModal = ({ id, onSubmit, closeModal }) => {
   );
 };
 
-//---------------- Appointments action ------------------
+// ---------------- APPOINTMENTS ACTION ----------------
 export const AppointmentsActionModal = ({
   appointment,
   id,
@@ -378,7 +378,7 @@ export const AppointmentsActionModal = ({
 }) => {
   const apiAction = useAsyncAction();
 
-  //---------------- Allowed action time ---------------
+  // ---------------- ALLOWED ACTION TIME ----------------
   const isActionAllowed = useMemo(() => {
     if (!appointment?.appointmentDate || !appointment?.timeSlot) return false;
 
@@ -557,7 +557,7 @@ const EndConsultationModal = ({ consultationId, closeModal }) => {
 
     let reviewError = false;
 
-    // --------- Submit review (non-blocking) ----------
+    // ---------------- SUBMIT REVIEW (NON-BLOCKING) ----------------
     if (!skip) {
       if (rating === 0) {
         toast.error("Please provide a rating or skip");
@@ -580,7 +580,7 @@ const EndConsultationModal = ({ consultationId, closeModal }) => {
       }
     }
 
-    // --------- Always end consultation ----------
+    // ---------------- ALWAYS END CONSULTATION ----------------
     const res = await endConsultation(consultationId);
 
     if (res?.data?.success) {

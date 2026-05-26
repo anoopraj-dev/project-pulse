@@ -117,6 +117,12 @@ const Navbar = ({ toggleSidebar }) => {
                 >
                   About
                 </Link>
+                <Link 
+                  to='/how-it-works'
+                  className="text-xs font-bold text-gray-600 hover:text-[#0096C7] transition-colors"
+                >
+                  How it works
+                </Link>
               </div>
             )}
           </div>
@@ -231,6 +237,14 @@ const Navbar = ({ toggleSidebar }) => {
           >
             <Icon icon="ph:info" className="h-5 w-5 text-gray-400" />
             About Us
+          </Link>
+          <Link
+            to="/how-it-works"
+            onClick={() => setNavMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+          >
+            <Icon icon="ph:question" className="h-5 w-5 text-gray-400" />
+            How it works
           </Link>
           <Link
             to="/signin"

@@ -19,7 +19,7 @@ export const signupService = async (payload) => {
     registrationId,
   } = payload;
 
-  // -------- Check existing user --------
+  // ---------------- CHECK EXISTING USER ----------------
   const existingPatient = await Patient.findOne({ email });
   const existingDoctor = await Doctor.findOne({ email });
 
@@ -27,17 +27,17 @@ export const signupService = async (payload) => {
     throw new Error("Email already exists. Please use a different email.");
   }
 
-  // -------- Password match --------
+  // ---------------- PASSWORD MATCH ----------------
   if (password !== confirmPassword) {
     throw new Error("Passwords do not match");
   }
 
-  // -------- Hash password --------
+  // ---------------- HASH PASSWORD ----------------
   const hashedPassword = await bcrypt.hash(password, 10);
 
   let user;
 
-  // -------- Create user --------
+  // ---------------- CREATE USER ----------------
   if (role === "patient") {
     user = await Patient.create({
       patientId: registrationId,
@@ -60,7 +60,7 @@ export const signupService = async (payload) => {
     });
   }
 
-  //------------- Notification ----------
+  // ---------------- NOTIFICATION ----------------
   await createNotification({
     userId:'admin',
     role:'admin',
@@ -70,7 +70,7 @@ export const signupService = async (payload) => {
       :`Dr. ${user.name} has registered`
   }) 
 
-  // -------- OTP --------
+  // ---------------- OTP ----------------
   const otpCode = generateOtp();
   const expiryTime = new Date(Date.now() + 60 * 1000);
 
