@@ -7,6 +7,8 @@ import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import ProfileView from "../../components/user/doctor/profile/ProfileView";
 import ProfileShimmer from "../../components/ui/loaders/ProfileShimmer";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const PatientDoctorProfile = () => {
   const [doctor, setDoctor] = useState(null);
@@ -52,31 +54,27 @@ const PatientDoctorProfile = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <PageBanner config={pageBannerConfig.patientDoctorProfile} />
       {/* Content */}
-      {/* <div className="mx-auto max-w-4xl px-4 pb-12 pt-4 sm:px-6 lg:px-8"> */}
-      <div className="flex flex-col gap-4">
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6 flex flex-col gap-4">
         {/* Loading */}
         {isLoading && (
-          <div className="rounded-2xl bg-white px-4 py-6 sm:px-6">
-            <ProfileShimmer />
-          </div>
+          <ProfileShimmer />
         )}
 
         {/* Profile */}
         {!isLoading && doctor && (
-          <div className="rounded-2xl bg-white px-4 py-6 sm:px-6">
-            <ProfileView
-              user={doctor}
-              viewer="patient"
-              availability={availability}
-              onBookAppointment={() => handleBookAppointment(id)}
-            />
-          </div>
+          <ProfileView
+            user={doctor}
+            viewer="patient"
+            availability={availability}
+            onBookAppointment={() => handleBookAppointment(id)}
+          />
         )}
 
         {/* Empty / Error */}
         {!isLoading && !doctor && (
-          <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500 rounded-2xl bg-white">
+          <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500 rounded-2xl bg-white border border-slate-100 shadow-sm">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 mb-4">
               <Icon
                 icon="mdi:stethoscope"

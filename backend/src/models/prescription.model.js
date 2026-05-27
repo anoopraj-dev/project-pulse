@@ -34,6 +34,10 @@ const prescriptionSchema = new mongoose.Schema({
             type: String,
             required: true,
         },
+        timesPerDay: {
+            type: Number,
+            required: true,
+        },
         timing: {
             type: String,
             enum: ['before', 'after'],

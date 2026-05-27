@@ -151,9 +151,16 @@ export const fetchDashboardChart = (range = "week") => {
   });
 };
 
-export const fetchPatientPrescriptions = () =>{
-  return api.get('/api/patient/dashboard/prescriptions')
-}
+export const fetchPatientPrescriptions = (pageOrLimit, limit) => {
+  const params = {};
+  if (limit !== undefined) {
+    params.page = pageOrLimit;
+    params.limit = limit;
+  } else if (pageOrLimit !== undefined) {
+    params.limit = pageOrLimit;
+  }
+  return api.get('/api/patient/dashboard/prescriptions', { params });
+};
 
 export const fetchPatientVitals = () =>{
   return api.get('/api/patient/dashboard/vitals')

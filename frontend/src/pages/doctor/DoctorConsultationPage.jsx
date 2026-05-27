@@ -40,7 +40,7 @@ const DoctorConsultationPage = () => {
   // ---------------- PRESCRIPTION FORM ----------------
   const [form, setForm] = useState({
     diagnosis: "",
-    medicines: [{ medicine: "", dosage: "", timing: "before" }],
+    medicines: [{ medicine: "", dosage: "", timesPerDay: 1, timing: "before" }],
   });
   const [prescriptionSubmitted, setPrescriptionSubmitted] = useState(false);
 
@@ -146,7 +146,7 @@ const DoctorConsultationPage = () => {
       // Reset form
       setForm({
         diagnosis: "",
-        medicines: [{ medicine: "", dosage: "", timing: "before" }],
+        medicines: [{ medicine: "", dosage: "", timesPerDay: 1, timing: "before" }],
       });
     } catch (error) {
       console.error("Error submitting prescription:", error);
@@ -160,7 +160,7 @@ const DoctorConsultationPage = () => {
   const addMedicine = () => {
     setForm({
       ...form,
-      medicines: [...form.medicines, { medicine: "", dosage: "", timing: "before" }],
+      medicines: [...form.medicines, { medicine: "", dosage: "", timesPerDay: 1, timing: "before" }],
     });
   };
 

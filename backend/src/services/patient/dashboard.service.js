@@ -221,18 +221,40 @@ export const patientDashboardChartService = async (patientId, range = "week") =>
 };
 
 // ---------------- PRESCRIPTIONS ----------------
-export const patientPrescriptionsService = async (patientId) => {
-  const prescriptions = await Prescription.find({ patient: patientId })
-  .populate("doctor", "name")
-  .sort({ createdAt: -1 })
-  .limit(3);
+export const patientPrescriptionsService = async (patientId, page, limit) => {
+  const totalPrescriptions = await Prescription.countDocuments({ patient: patientId });
 
-return prescriptions.map((p) => ({
-  ...p.toObject(),
-  medicineSummary: p.medicines
-    .map((m) => `${m.medicine} (${m.dosage}, ${m.timing})`)
-    .join(", "),
-}));
+  const query = Prescription.find({ patient: patientId })
+    .populate("doctor", "name profilePicture professionalInfo.specializations")
+    .sort({ createdAt: -1 });
+
+  if (page && limit) {
+    const skip = (Number(page) - 1) * Number(limit);
+    query.skip(skip).limit(Number(limit));
+  } else if (limit) {
+    query.limit(Number(limit));
+  }
+
+  const prescriptions = await query;
+
+  const formattedPrescriptions = prescriptions.map((p) => ({
+    ...p.toObject(),
+    medicineSummary: p.medicines
+      .map((m) => `${m.medicine} (${m.dosage}, ${m.timesPerDay ? m.timesPerDay + 'x/day, ' : ''}${m.timing})`)
+      .join(", "),
+  }));
+
+  if (page && limit) {
+    const totalPages = Math.ceil(totalPrescriptions / Number(limit));
+    return {
+      prescriptions: formattedPrescriptions,
+      totalPages,
+      currentPage: Number(page),
+      totalPrescriptions,
+    };
+  }
+
+  return formattedPrescriptions;
 };
 
 

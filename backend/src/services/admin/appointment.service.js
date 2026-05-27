@@ -1,7 +1,10 @@
 import Appointment from "../../models/appointments.model.js";
+import { expireAppointments } from "../../utils/AppointmentExpiry.js";
 
 // ---------------- GET APPOINTMENTS SERVICE ----------------
 export const getAllAppointmentsService = async (filters) => {
+  await expireAppointments();
+
   const { status, doctorId, patientId, fromDate, toDate } = filters;
 
   const query = {};
@@ -25,27 +28,6 @@ export const getAllAppointmentsService = async (filters) => {
       appointmentDate: 1,
       timeSlot: 1,
     });
-
-  // ---------------- AUTO EXPIRE LOGIC (STRING BASED) ----------------
-  const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
-
-  const expiredIds = [];
-
-  for (const appt of appointments) {
-    if (["pending", "confirmed"].includes(appt.status)) {
-      if (appt.appointmentDate < todayStr) {
-        expiredIds.push(appt._id);
-      }
-    }
-  }
-
-  if (expiredIds.length) {
-    await Appointment.updateMany(
-      { _id: { $in: expiredIds } },
-      { $set: { status: "expired" } }
-    );
-  }
 
   return appointments;
 };

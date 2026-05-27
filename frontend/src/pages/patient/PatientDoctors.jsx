@@ -126,7 +126,7 @@ const PatientDoctors = () => {
           />
 
           {/* Main Content Wrapper */}
-          <div className="max-w-screen-2xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-8">
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-8">
 
             {/* Search Row */}
             <div className="relative z-40 mb-6">

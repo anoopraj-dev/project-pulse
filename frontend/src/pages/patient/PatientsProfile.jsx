@@ -60,19 +60,17 @@ const PatientsProfile = () => {
       {user?.status === "blocked" && (
         <BlockedProfile reason={user?.blockedReason} />
       )}
-      {user?.status === "active" && (
-        
-         
-          <div>
-            <PageBanner config={pageBannerConfig.patientProfile} activeTab='Overview'/>
-             <ProfileView
-            user={user}
-            onEdit={handleProfileEdit}
-            onUpdateProfilePicture={handleUpdateProfilePicture}
-          />
+      {user?.status !== "blocked" && (
+        <>
+          <PageBanner config={pageBannerConfig.patientProfile} activeTab='Overview'/>
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+            <ProfileView
+              user={user}
+              onEdit={handleProfileEdit}
+              onUpdateProfilePicture={handleUpdateProfilePicture}
+            />
           </div>
-         
-        
+        </>
       )}
     </>
   );

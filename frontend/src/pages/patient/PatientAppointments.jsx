@@ -154,33 +154,34 @@ const PatientAppointments = () => {
           />
 
 
-          {/* Search Section */}
-          {activeTab !== "book" && (
-            <div className="z-10 mx-auto  px-4 pb-2 pt-2 sm:px-6 lg:px-8">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex-1">
-                  <SearchInput
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search appointments"
-                    fetchSuggestions={fetchSuggestions}
-                    onSelectSuggestion={handleSelectSuggestion}
-                    role="patient"
-                    entity="appointments"
-                  />
-                  {searchLoading && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                      <Icon icon="mdi:loading" className="animate-spin" />
-                      Searching…
-                    </div>
-                  )}
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+            {/* Search Section */}
+            {activeTab !== "book" && (
+              <div className="w-full pb-2">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex-1">
+                    <SearchInput
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search appointments"
+                      fetchSuggestions={fetchSuggestions}
+                      onSelectSuggestion={handleSelectSuggestion}
+                      role="patient"
+                      entity="appointments"
+                    />
+                    {searchLoading && (
+                      <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                        <Icon icon="mdi:loading" className="animate-spin" />
+                        Searching…
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Content section */}
-          <div className="mx-auto px-4 pb-6 pt-4 sm:px-6 lg:px-8">
+            {/* Content section */}
+            <div className="w-full">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
               <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
                 <PatientAppointmentTabs
@@ -252,9 +253,10 @@ const PatientAppointments = () => {
               </div>
             </div>
           </div>
-        </>
-      )}
-    </div>
+        </div>
+      </>
+    )}
+  </div>
   );
 };
 

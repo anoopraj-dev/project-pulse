@@ -73,12 +73,10 @@ const ViewDoctors = () => {
 
   return (
     <div className="min-h-screen">
-      {/* ---------- Header band ---------- */}
-      <div className="my-2">
       <PageBanner config={pageBannerConfig.adminDoctors}/>
 
-
-        <div className="mx-auto  sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+        <div className="mb-4">
           <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -89,10 +87,8 @@ const ViewDoctors = () => {
             entity='doctors'
           />
         </div>
-      </div>
 
-      {/* ---------- Content ---------- */}
-      <div className="mx-auto  pb-6 pt-2 sm:px-6 lg:px-8">
+        {/* ---------- Content ---------- */}
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           {/* Table header */}
           <div className="border-b border-slate-100 px-4 py-4 sm:px-6">

@@ -33,7 +33,8 @@ export const patientPrescriptions = asyncHandler(async (req, res) => {
   const patientId = req.user?.id;
   if (!patientId) throw new AppError("Unauthorized", 401);
 
-  const prescriptions = await patientPrescriptionsService(patientId);
+  const { page, limit } = req.query;
+  const prescriptions = await patientPrescriptionsService(patientId, page, limit);
   return res.status(200).json({
     success: true,
     message: "Prescriptions fetched successfully",

@@ -50,7 +50,7 @@ const DoctorPatientRecords = () => {
     <div className="min-h-screen bg-slate-50">
       <PageBanner config={pageBannerConfig.doctorPatientRecords} activeTab="Records" count={records.length} />
 
-      <div className="w-full px-4 pb-6">
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
         {records.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500 rounded-2xl bg-white">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 mb-4">

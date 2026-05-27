@@ -18,6 +18,7 @@ import NotFound from "../pages/NotFound";
 import PatientConsultationPage from "@/pages/patient/PatientConsultationPage";
 import PatientRecords from "@/pages/patient/PatientRecords";
 import PatientSupportPage from "@/pages/patient/PatientSupportPage";
+import PatientPrescriptions from "@/pages/patient/PatientPrescriptions";
 
 const PatientRoutes = () => {
   return useRoutes([
@@ -40,6 +41,7 @@ const PatientRoutes = () => {
         { path: "payments", element: <PatientPayments /> },
         { path: "wallet", element: <PatientWallet /> },
         { path: "records", element: <PatientRecords/> },
+        { path: "prescriptions", element: <PatientPrescriptions /> },
         { path: "support-center", element:<PatientSupportPage/> },
     
       ],

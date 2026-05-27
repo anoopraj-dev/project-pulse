@@ -74,40 +74,35 @@ const ViewPatients = () => {
 
   const displayedPatients = (query.trim()
     ? filteredSearchResult
-    : filteredAppointments)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    : filteredPatients)?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
 
   const isLoading = fetchPatientsAction.loading;
 
   return (
     <div className="min-h-screen ">
-      {/* Header band */}
-      <div className=" ">
-        <PageBanner config={pageBannerConfig.adminPatients}/>
+      <PageBanner config={pageBannerConfig.adminPatients}/>
 
-
-      </div>
-
-      <div className="mx-auto sm:px-6">
-        <SearchInput
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search patients"
-          fetchSuggestions={fetchSuggestions}
-          onSelectSuggestion={handleSelectSuggestion}
-          role='admin'
-          entity='patients'
-        />
-        {searchLoading && (
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+        <div className="mb-4">
+          <SearchInput
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search patients"
+            fetchSuggestions={fetchSuggestions}
+            onSelectSuggestion={handleSelectSuggestion}
+            role='admin'
+            entity='patients'
+          />
+          {searchLoading && (
             <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
               <Icon icon="mdi:loading" className="animate-spin" />
               Searching…
             </div>
           )}
-      </div>
+        </div>
 
-      {/* Content section */}
-      <div className="mx-auto pb-6 pt-2 sm:px-6">
+        {/* Content section */}
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
                 <PatientStatusTabs

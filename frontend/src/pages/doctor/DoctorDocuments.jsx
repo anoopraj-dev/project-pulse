@@ -90,10 +90,12 @@ const DoctorDocuments = () => {
       ) : (
         <>
           <PageBanner config={pageBannerConfig.doctorDocuments} />
-          <DocumentView
-            professionalInfo={professionalInfo}
-            deleteDoc={deleteDoc}
-          />
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+            <DocumentView
+              professionalInfo={professionalInfo}
+              deleteDoc={deleteDoc}
+            />
+          </div>
         </>
       )}
     </div>

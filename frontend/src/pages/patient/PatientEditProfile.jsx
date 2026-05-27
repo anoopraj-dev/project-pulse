@@ -126,7 +126,7 @@ const PatientEditProfile = () => {
         config={pageBannerConfig.patientEditProfile}
       />
 
-      <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
         <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
           <div className="px-3 py-4 sm:px-5 sm:py-6 md:px-6">
             <DynamicForm

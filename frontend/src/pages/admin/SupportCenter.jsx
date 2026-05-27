@@ -175,7 +175,7 @@ const SupportCenter = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
         {/* HEADER */}
         <h1 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
           Support Center
