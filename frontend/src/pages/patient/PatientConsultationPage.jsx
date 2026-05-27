@@ -80,11 +80,7 @@ const PatientConsultationPage = () => {
     };
   }, [sessionId]);
 
-  socket.on("consultation:user-left", ({ userId }) => {
-    toast("Other user left the consultation");
 
-    setStatus("disconnected");
-  });
 
   useEffect(() => {
     const handler = ({ userId }) => {
