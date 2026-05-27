@@ -151,6 +151,7 @@ export const useVideoSession = (sessionId, role, stream) => {
     if (!stream || stream.getTracks().length === 0) return;
 
     if (localStreamRef.current === stream) return;
+    const oldStream = localStreamRef.current;
     localStreamRef.current = stream;
 
     const audio = stream.getAudioTracks()[0];
@@ -162,6 +163,19 @@ export const useVideoSession = (sessionId, role, stream) => {
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
       localVideoRef.current.muted = true;
+    }
+
+    // Replace tracks on existing peer connection if it is already active
+    if (pcRef.current && oldStream) {
+      const senders = pcRef.current.getSenders();
+      stream.getTracks().forEach((track) => {
+        const sender = senders.find((s) => s.track && s.track.kind === track.kind);
+        if (sender) {
+          sender.replaceTrack(track).catch((err) => {
+            console.error("Error replacing track:", err);
+          });
+        }
+      });
     }
 
     setStreamReady(true);
