@@ -1,5 +1,4 @@
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getSegmentation } from "@/utilis/segmentation";
 
 export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
@@ -13,6 +12,7 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
   const isProcessingRef = useRef(false);
 
   const modeRef = useRef(mode);
+  const [processedStream, setProcessedStream] = useState(null);
   const processedStreamRef = useRef(null);
   const prevMaskRef = useRef(null);
 
@@ -42,6 +42,12 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
       bgImageRef.current = img;
     };
   }, [bgImageSrc]);
+
+  // Reset processed stream when inputStream changes
+  useEffect(() => {
+    processedStreamRef.current = null;
+    setProcessedStream(null);
+  }, [inputStream]);
 
   useEffect(() => {
     if (!inputStream) return;
@@ -165,10 +171,12 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
       if (!processedStreamRef.current) {
         const stream = canvas.captureStream(FPS);
 
-        processedStreamRef.current = new MediaStream([
+        const newStream = new MediaStream([
           stream.getVideoTracks()[0],
           ...inputStream.getAudioTracks(),
         ]);
+        processedStreamRef.current = newStream;
+        setProcessedStream(newStream);
       }
 
       processFrame(0);
@@ -183,5 +191,5 @@ export const useVideoProcessor = (inputStream, mode, bgImageSrc) => {
     };
   }, [inputStream, bgImageSrc]);
 
-  return processedStreamRef.current;
+  return processedStream;
 };
