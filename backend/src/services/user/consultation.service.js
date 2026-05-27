@@ -382,6 +382,7 @@ export const submitPrescriptionService = async (
               <div class="medicine-item">
                 <div class="info-item"><span class="label">Medicine ${index + 1}:</span> ${med.medicine}</div>
                 <div class="info-item"><span class="label">Dosage:</span> ${med.dosage}</div>
+                <div class="info-item"><span class="label">Times per day:</span> ${med.timesPerDay}</div>
                 <div class="info-item"><span class="label">Timing:</span> ${med.timing === "before" ? "Before meals" : "After meals"}</div>
               </div>`,
               )
@@ -522,6 +523,7 @@ export const generateConsultationPDFService = async (
               <div class="medicine-item">
                 <div class="info-item"><span class="label">Medicine ${i + 1}:</span> ${med.medicine}</div>
                 <div class="info-item"><span class="label">Dosage:</span> ${med.dosage}</div>
+                <div class="info-item"><span class="label">Times per day:</span> ${med.timesPerDay}</div>
                 <div class="info-item"><span class="label">Timing:</span> ${med.timing === "before" ? "Before meals" : "After meals"}</div>
               </div>
             `,

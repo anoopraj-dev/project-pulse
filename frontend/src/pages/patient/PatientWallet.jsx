@@ -131,7 +131,7 @@ const PatientWallet = () => {
           {/* Banner */}
           <PageBanner config={pageBannerConfig.patientWallet} />
 
-          <div className="w-full px-2 pt-3 pb-10 flex flex-col gap-4 lg:flex-row">
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-10 flex flex-col gap-4 lg:flex-row">
             {/* Balance Card */}
             <div className="w-full lg:w-1/3">
               <div

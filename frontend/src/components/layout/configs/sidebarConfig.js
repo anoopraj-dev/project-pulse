@@ -32,6 +32,11 @@ export const patientSidebarMenu = [
     path: "/patient/records",
   },
   {
+    label: "Prescriptions",
+    icon: "mdi:pill",
+    path: "/patient/prescriptions",
+  },
+  {
     label: "Payments",
     icon: "mdi:credit-card-outline",
     path: "/patient/payments",

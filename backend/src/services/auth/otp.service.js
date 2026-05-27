@@ -12,7 +12,7 @@ export const verifyOtpService = async (session, body) => {
   const savedOtp = await Otp.findOne({ email });
 
   if (!savedOtp) throw new Error("OTP not found");
-  if (savedOtp.expiresAt < new Date()) throw new Error("OTP expired! Try again");
+  if (savedOtp.expiresAt.getTime() < Date.now()) throw new Error("OTP expired! Try again");
   if (savedOtp.otp !== otp) throw new Error("Invalid OTP");
 
   await Otp.deleteOne({ email });
@@ -49,7 +49,7 @@ export const resetPasswordService = async (body, session) => {
   await Otp.create({
     email,
     otp: otpCode,
-    expiresAt: new Date(Date.now() + 60 * 1000),
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes validity
   });
 
   session.OTP = { email, type, role };
@@ -88,7 +88,7 @@ export const resendOtpService = async (body, session) => {
     { email },
     {
       otp: otpCode,
-      expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes validity
     },
     { new: true, upsert: true }
   );

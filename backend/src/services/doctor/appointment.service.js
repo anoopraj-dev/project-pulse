@@ -7,33 +7,15 @@ import Doctor from "../../models/doctor.model.js";
 import Patient from "../../models/patient.model.js";
 import mongoose from "mongoose";
 import { createNotification } from "../user/notification.service.js";
+import { expireAppointments } from "../../utils/AppointmentExpiry.js";
 
 // ---------------- GET ALL APPOINTMENTS ----------------
 export const getAllAppointmentsService = async (doctorId) => {
-  const appointments = await Appointment.find({ doctor: doctorId });
-
-  const now = new Date();
-
-  const expiredIds = appointments
-    .filter((appt) => {
-      if (!appt.appointmentDateTime) return false;
-      if (appt.status !== "pending" && appt.status !== "confirmed") return false;
-
-      const apptDateTime = new Date(appt.appointmentDateTime);
-      return apptDateTime < now;
-    })
-    .map((appt) => appt._id);
-
-  if (expiredIds.length > 0) {
-    await Appointment.updateMany(
-      { _id: { $in: expiredIds } },
-      { $set: { status: "expired" } }
-    );
-  }
+  await expireAppointments();
 
   const updatedAppointments = await Appointment.find({ doctor: doctorId })
     .populate("patient", "name profilePicture gender")
-    .sort({ appointmentDateTime: 1 });
+    .sort({ appointmentDate: 1, timeSlot: 1 });
 
   return updatedAppointments;
 };

@@ -102,6 +102,17 @@ export const pageBannerConfig = {
     loadingText: "Loading reports...",
   },
 
+  // ---------------- PATIENT PRESCRIPTIONS ----------------
+  patientPrescriptions: {
+    icon: "mdi:pill",
+    roleLabel: "Patient",
+    pageLabel: "Prescriptions",
+    title: "Digital Prescriptions",
+    description: "Access and review your digital prescriptions written by your doctors.",
+    activeTabLabel: "Prescription View",
+    loadingText: "Loading prescriptions...",
+  },
+
   // ---------------- ADMIN BANNER CONFIGS ----------------
   adminDashboard: {
     icon: "mdi:view-dashboard-outline",
@@ -287,6 +298,16 @@ adminRevenue: {
     loadingText: "Loading records...",
   },
 
+  doctorPatientProfile: {
+    icon: "mdi:account-circle-outline",
+    roleLabel: "Doctor",
+    pageLabel: "Patient Profile",
+    title: "Patient Details",
+    description:
+      "Review patient profile details, contact information, and medical background history.",
+    loadingText: "Loading patient profile...",
+  },
+
 
   // ---------------- DOCTOR PROFILE VIEW -SELF ----------------
 
@@ -394,20 +415,29 @@ adminRevenue: {
 
   loadingText: "Loading wallet details...",
 },
-doctorSupportCenter: {
-  icon: "mdi:lifebuoy",
-
-  roleLabel: "Doctor",
-  pageLabel: "Support Center",
-
-  title: "Help & Support Center",
-
-  description:
-    "Get assistance with appointments, payments, settlements, platform usage, and technical issues. Raise support tickets and track responses from the admin team.",
-
-  activeTabLabel: "Section",
-
-  loadingText: "Loading support center...",
-},
-
+  doctorSupportCenter: {
+    icon: "mdi:lifebuoy",
+  
+    roleLabel: "Doctor",
+    pageLabel: "Support Center",
+  
+    title: "Help & Support Center",
+  
+    description:
+      "Get assistance with appointments, payments, settlements, platform usage, and technical issues. Raise support tickets and track responses from the admin team.",
+  
+    activeTabLabel: "Section",
+  
+    loadingText: "Loading support center...",
+  },
+  
+  // ---------------- DOCTOR EDIT PROFILE ----------------
+  doctorEditProfile: {
+    icon: "mdi:edit-profile-outline",
+    roleLabel: "Doctor",
+    pageLabel: "Edit Profile",
+    title: "Edit & Update Profile Info",
+    description:
+      "Update your professional info & stay ahead in your medical practice",
+  },
 };

@@ -8,7 +8,7 @@ import { Icon } from "@iconify/react";
 
 import { resendOtp, verifyOtp } from "../../../api/auth/otpService";
 
-const OTP_EXPIRY_SECONDS = 60;
+const OTP_EXPIRY_SECONDS = 600; // 10 minutes
 
 const OtpInputs = () => {
   const [loading, setLoading] = useState(false);

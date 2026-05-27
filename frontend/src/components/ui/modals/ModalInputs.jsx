@@ -30,7 +30,7 @@ export const EmailModal = ({ endPoint, type, onSubmit, closeModal }) => {
   const handleSubmit = async (formData) => {
     try {
       setLoading(true);
-      const expiryTime = Date.now() + 60 * 1000;
+      const expiryTime = Date.now() + 600 * 1000; // 10 minutes
       const payload = { ...formData, type, expiryTime };
 
       const { data } = await api.post(endPoint, payload);

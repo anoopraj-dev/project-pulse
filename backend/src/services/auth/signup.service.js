@@ -72,7 +72,7 @@ export const signupService = async (payload) => {
 
   // ---------------- OTP ----------------
   const otpCode = generateOtp();
-  const expiryTime = new Date(Date.now() + 60 * 1000);
+  const expiryTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes validity
 
   await Otp.create({
     email,

@@ -99,7 +99,7 @@ const filteredPayments = payments?.filter((item) => {
 
 
           {/* TABLE */}
-          <div className="mx-auto pb-2 px-1 sm:px-2">
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
             <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
 
               {/* HEADER */}

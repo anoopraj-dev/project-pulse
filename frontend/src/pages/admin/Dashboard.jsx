@@ -226,9 +226,8 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-950 font-sans">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8 pb-6">
-        {/* Header */}
-        <PageBanner config={pageBannerConfig.adminDashboard} />
+      <PageBanner config={pageBannerConfig.adminDashboard} />
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6 space-y-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div onClick={() => navigate('/admin/doctors')} className="cursor-pointer">

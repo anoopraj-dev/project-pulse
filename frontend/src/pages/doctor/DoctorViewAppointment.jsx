@@ -226,14 +226,14 @@ const DoctorViewAppointment = () => {
   const patientId = patient?._id;
 
   return (
-    <div className="min-h-screen px-3 sm:px-4 lg:px-6">
+    <div className="min-h-screen">
       <PageBanner
         config={pageBannerConfig.doctorAppointments}
         activeTab={appointment.status?.toLowerCase() || "N/A"}
         count={1}
       />
 
-      <div className="mx-auto w-full max-w-7xl px-0 sm:px-2 pb-10 sm:pb-16">
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-10 sm:pb-16">
         <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
           {/* Patient Banner */}
           <div className="flex flex-col gap-4 border-b border-slate-100 px-4 sm:flex-row sm:items-center sm:px-6 py-5">

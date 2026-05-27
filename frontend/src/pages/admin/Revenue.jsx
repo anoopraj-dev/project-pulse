@@ -169,10 +169,9 @@ const RevenuePage = () => {
 
   return (
     <div className="min-h-screen dark:bg-gray-950 font-sans">
-      <div className="w-full mx-auto px-4 py-6 pb-6">
+      <PageBanner config={pageBannerConfig.adminRevenue} />
 
-        {/* HEADER */}
-        <PageBanner config={pageBannerConfig.adminRevenue} />
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
 
         {/* ---------------- RANGE SELECTOR ---------------- */}
         <div className="flex items-center gap-1 mb-5 p-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl w-fit">

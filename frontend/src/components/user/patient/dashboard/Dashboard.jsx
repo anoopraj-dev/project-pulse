@@ -198,7 +198,7 @@ const Dashboard = () => {
       try {
         setLoadingPrescriptions(true);
 
-        const res = await fetchPatientPrescriptions();
+        const res = await fetchPatientPrescriptions(3);
 
         if (!res?.data?.success) return;
 
@@ -260,7 +260,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 space-y-8 pb-6">
+      <div className="w-full pt-1 pb-6 space-y-8">
         
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -549,7 +549,7 @@ const Dashboard = () => {
               subtitle="Recently added records"
               right={
                 <button
-                  onClick={() => navigate('/patient/appointments')}
+                  onClick={() => navigate('/patient/prescriptions')}
                   className="text-[10px] font-bold text-[#0096C7] hover:underline"
                 >
                   View All
@@ -610,6 +610,9 @@ const Dashboard = () => {
                           <span className="text-xs font-bold text-slate-700">{m.medicine}</span>
                           <div className="flex items-center gap-1.5">
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-500">{m.dosage}</span>
+                            {m.timesPerDay && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-500">{m.timesPerDay}x/day</span>
+                            )}
                           </div>
                         </div>
                       ))}

@@ -5,6 +5,8 @@ import { fetchDoctorProfile, updateDoctorProfile } from "../../api/doctor/doctor
 import toast from "react-hot-toast";
 import { buildFormData } from "../../utilis/buildFormData";
 import { useNavigate } from "react-router-dom";
+import PageBanner from "@/components/shared/components/PageBanner";
+import { pageBannerConfig } from "@/components/shared/configs/bannerConfig";
 
 const DoctorEditProfile = () => {
   const [user, setUser] = useState(null);
@@ -54,13 +56,21 @@ const DoctorEditProfile = () => {
   }, []);
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-12 flex flex-col items-center">
-      <DynamicForm
-        config={doctorEditProfileConfig}
-        onSubmit={handleUpdateProfile}
-        mode="page"
-        values={user}
-      />
+    <div className="min-h-screen pb-6">
+      <PageBanner config={pageBannerConfig.doctorEditProfile} />
+
+      <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+        <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
+          <div className="px-3 py-4 sm:px-5 sm:py-6 md:px-6">
+            <DynamicForm
+              config={doctorEditProfileConfig}
+              onSubmit={handleUpdateProfile}
+              mode="page"
+              values={user}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

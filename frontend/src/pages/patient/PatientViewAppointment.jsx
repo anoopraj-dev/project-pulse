@@ -211,7 +211,7 @@ const PatientViewAppointment = () => {
   const isCancellable = status !== "cancelled" && diffInHours > 2;
 
   return (
-    <div className="min-h-screen px-3 sm:px-4">
+    <div className="min-h-screen">
       <PatientStatusBanner
         status={user?.status}
         blockedReason={user?.blockedReason}
@@ -221,11 +221,9 @@ const PatientViewAppointment = () => {
         <BlockedProfile reason={user?.blockedReason} />
       ) : (
         <>
-          <div className="mb-6">
-            <PageBanner config={pageBannerConfig.patientAppointmentView} />
-          </div>
+          <PageBanner config={pageBannerConfig.patientAppointmentView} />
 
-          <div className="mx-auto w-full max-w-7xl px-0 sm:px-4 lg:px-6 pb-6 sm:pb-8">
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-8">
             <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
               {/* Doctor banner */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 border-b border-slate-100 text-sky-600 font-bold px-4 sm:px-6 py-5">

@@ -58,7 +58,7 @@ const ProfileView = ({
 
   return (
     <div className="min-h-screen dark:bg-gray-950">
-      <div className="w-full px-4 py-6 pb-6">
+      <div className="w-full pt-1 pb-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* ----------- LEFT COLUMN ----------- */}
           <div className="lg:col-span-1 space-y-4">

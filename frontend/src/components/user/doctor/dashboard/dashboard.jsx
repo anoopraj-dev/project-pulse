@@ -321,7 +321,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-8">
+    <div className="w-full pt-1 pb-8 space-y-8">
       <div>
         {/* -------- Stat Cards ------ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

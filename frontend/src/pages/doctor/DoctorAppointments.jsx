@@ -122,98 +122,99 @@ const DoctorAppointments = () => {
             isLoading={isLoading}
           />
 
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+            {/* Search Section */}
+            {activeTab !== "book" && (
+              <div className="w-full pb-2">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex-1">
+                    <SearchInput
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search appointments"
+                      fetchSuggestions={fetchSuggestions}
+                      onSelectSuggestion={handleSelectSuggestion}
+                      role="patient"
+                      entity="appointments"
+                    />
+                    {searchLoading && (
+                      <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                        <Icon icon="mdi:loading" className="animate-spin" />
+                        Searching…
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
-          {/* Search Section */}
-          {activeTab !== "book" && (
-            <div className="mx-auto py-1 px-1 sm:px-2">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex-1">
-                  <SearchInput
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search appointments"
-                    fetchSuggestions={fetchSuggestions}
-                    onSelectSuggestion={handleSelectSuggestion}
-                    role="patient"
-                    entity="appointments"
+            {/* Content section */}
+            <div className="w-full">
+              <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+                <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                  <DoctorAppointmentTabs
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
                   />
-                  {searchLoading && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                      <Icon icon="mdi:loading" className="animate-spin" />
-                      Searching…
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                      <Icon icon="mdi:clipboard-text-outline" />
+                      {activeTab === "upcoming"
+                        ? "Upcoming Appointments"
+                        : activeTab === "pending"
+                          ? "Pending Confirmation"
+                          : activeTab === "history"
+                            ? "Past Appointments"
+                            : activeTab === "cancelled"
+                              ? "Cancelled Appointments"
+                              : "Appointments"}
+                    </h2>
+
+                    <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
+                      <Icon icon="mdi:format-list-bulleted" />
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
+                        {filteredAppointments?.length ?? 0}
+                      </span>
+                      records in this view
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-2 py-3 sm:px-4">
+                  {isLoading ? (
+                    <TableSkeleton rows={8} cols={5} />
+                  ) : activeTab === "book" ? (
+                    <BookAppointmentForm
+                      onSuccess={fetchAllAppointments}
+                      bookingInfo={bookingInfo}
+                      setActiveTab={setActiveTab}
+                    />
+                  ) : filteredAppointments && filteredAppointments.length > 0 ? (
+                    <DataTable
+                      data={displayedAppointments}
+                      columns={doctorAppointmentColumns}
+                      onView={(id) => handleView(id)}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
+
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+                        <Icon
+                          icon="mdi:calendar-remove-outline"
+                          className="text-xl text-slate-400"
+                        />
+                      </div>
+                      <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                        No appointments in this view
+                      </h3>
+                      <p className="mt-1 max-w-sm text-xs text-slate-500">
+                        {activeTab === "upcoming"
+                          ? "You have no upcoming appointments. Book one to get started!"
+                          : "You have no past appointments yet."}
+                      </p>
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Content section */}
-          <div className="mx-auto py-1 px-1 sm:px-2">
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
-                <DoctorAppointmentTabs
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                />
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <Icon icon="mdi:clipboard-text-outline" />
-                    {activeTab === "upcoming"
-                      ? "Upcoming Appointments"
-                      : activeTab === "pending"
-                        ? "Pending Confirmation"
-                        : activeTab === "history"
-                          ? "Past Appointments"
-                          : activeTab === "cancelled"
-                            ? "Cancelled Appointments"
-                            : "Appointments"}
-                  </h2>
-
-                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
-                    <Icon icon="mdi:format-list-bulleted" />
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
-                      {filteredAppointments?.length ?? 0}
-                    </span>
-                    records in this view
-                  </div>
-                </div>
-              </div>
-
-              <div className="px-2 py-3 sm:px-4">
-                {isLoading ? (
-                  <TableSkeleton rows={8} cols={5} />
-                ) : activeTab === "book" ? (
-                  <BookAppointmentForm
-                    onSuccess={fetchAllAppointments}
-                    bookingInfo={bookingInfo}
-                    setActiveTab={setActiveTab}
-                  />
-                ) : filteredAppointments && filteredAppointments.length > 0 ? (
-                  <DataTable
-                    data={displayedAppointments}
-                    columns={doctorAppointmentColumns}
-                    onView={(id) => handleView(id)}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
-
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
-                      <Icon
-                        icon="mdi:calendar-remove-outline"
-                        className="text-xl text-slate-400"
-                      />
-                    </div>
-                    <h3 className="mt-4 text-sm font-semibold text-slate-900">
-                      No appointments in this view
-                    </h3>
-                    <p className="mt-1 max-w-sm text-xs text-slate-500">
-                      {activeTab === "upcoming"
-                        ? "You have no upcoming appointments. Book one to get started!"
-                        : "You have no past appointments yet."}
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </div>

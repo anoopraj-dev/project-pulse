@@ -53,9 +53,9 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      maxAge: 10 * 60 * 1000,
-      secure: true,                
-      sameSite: "none"            
+      maxAge: 30 * 60 * 1000,
+      secure: process.env.NODE_ENV === 'production',                
+      sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax"            
     }
   })
 );

@@ -109,7 +109,7 @@ const AuthCard = ({ role: initialRole }) => {
           if (response.success) {
             toast.success(response.message);
 
-            const expiryTime = Date.now() + 60 * 1000;
+            const expiryTime = Date.now() + 600 * 1000; // 10 minutes
             const payload = {
               email: data.email,
               type: "emailVerification",

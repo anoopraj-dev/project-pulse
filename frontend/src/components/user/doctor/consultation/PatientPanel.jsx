@@ -139,7 +139,7 @@ const PatientPanel = React.memo(
                             </p>
                             <p className="text-white/50 text-[11px]">
                               <span className="text-white/30">Rx: </span>
-                              {p.medicines?.map((m) => m.medicine).join(", ") || "N/A"}
+                              {p.medicines?.map((m) => `${m.medicine} (${m.dosage}, ${m.timesPerDay ? m.timesPerDay + 'x/day' : ''})`).join(", ") || "N/A"}
                             </p>
                           </div>
                         ))}
@@ -340,6 +340,15 @@ const PatientPanel = React.memo(
                                 onChange={(e) => updateMedicine(index, "dosage", e.target.value)}
                                 placeholder="Dosage (e.g. 500mg twice daily)"
                                 className="w-full bg-white/[0.05] border border-white/[0.08] hover:border-white/20 focus:border-indigo-500/60 focus:outline-none rounded-lg px-3 py-2 text-white text-xs placeholder-white/20 transition-colors duration-150"
+                              />
+                              <input
+                                type="number"
+                                min="1"
+                                value={med.timesPerDay || ""}
+                                onChange={(e) => updateMedicine(index, "timesPerDay", parseInt(e.target.value) || "")}
+                                placeholder="Times per day (e.g. 3)"
+                                className="w-full bg-white/[0.05] border border-white/[0.08] hover:border-white/20 focus:border-indigo-500/60 focus:outline-none rounded-lg px-3 py-2 text-white text-xs placeholder-white/20 transition-colors duration-150"
+                                required
                               />
                               <select
                                 value={med.timing}

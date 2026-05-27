@@ -141,20 +141,22 @@ const DoctorProfile = () => {
       {user?.isBlocked && <BlockedProfile />}
 
       {!user?.isBlocked && (
-        <div>
+        <>
           <PageBanner config={pageBannerConfig.doctorProfile} activeTab='Overview'/>
-          <ProfileView
-          viewer= 'doctor'
-          user={user}
-          availability={availability}
-          onEdit={handleProfileEdit}
-          onProfilePictureUpload={handleUpdateProfilePicture}
-          onCerticateUpload={handleUploadCertificates}
-          onResubmissionRequest={handleResubmissionRequest}
-          onResubmission={handleResubmission}
-          onManageAvailability={handleManageAvailability}
-        />
-        </div>
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+            <ProfileView
+              viewer= 'doctor'
+              user={user}
+              availability={availability}
+              onEdit={handleProfileEdit}
+              onProfilePictureUpload={handleUpdateProfilePicture}
+              onCerticateUpload={handleUploadCertificates}
+              onResubmissionRequest={handleResubmissionRequest}
+              onResubmission={handleResubmission}
+              onManageAvailability={handleManageAvailability}
+            />
+          </div>
+        </>
       )}
     </div>
   );
