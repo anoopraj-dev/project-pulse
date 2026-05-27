@@ -95,7 +95,9 @@ export const useVideoSession = (sessionId, role, stream) => {
       const state = pc.iceConnectionState;
 
       if (state === "failed") {
-        rebuildConnection();
+        if (role === "doctor") {
+          rebuildConnection();
+        }
       }
     };
 
@@ -113,9 +115,14 @@ export const useVideoSession = (sessionId, role, stream) => {
   };
 
   // ---------------- REBUILD CONNECTION ----------------
-  const rebuildConnection = async () => {
+  const rebuildConnection = async (forceNew = false) => {
+    if (role !== "doctor") return;
     if (isReconnectingRef.current) return;
     isReconnectingRef.current = true;
+
+    if (forceNew) {
+      closePC();
+    }
 
     let pc = pcRef.current;
 
@@ -129,7 +136,7 @@ export const useVideoSession = (sessionId, role, stream) => {
     }
 
     try {
-      const offer = await pc.createOffer({ iceRestart: true });
+      const offer = await pc.createOffer(forceNew ? undefined : { iceRestart: true });
       await pc.setLocalDescription(offer);
 
       socket.emit("webrtc:offer", { sessionId, offer });
@@ -255,17 +262,6 @@ export const useVideoSession = (sessionId, role, stream) => {
 
       socket.emit("consultation:join", { sessionId });
       setStatusSafe("connecting");
-
-      // doctor restart
-      if (role === "doctor") {
-        const pc = createPeerConnection();
-        if (!pc) return;
-
-        const offer = await pc.createOffer({ iceRestart: true });
-        await pc.setLocalDescription(offer);
-
-        socket.emit("webrtc:offer", { sessionId, offer });
-      }
     });
 
     socket.on("consultation:both-joined", async () => {
@@ -274,6 +270,7 @@ export const useVideoSession = (sessionId, role, stream) => {
       if (role === "doctor" && !callStartedRef.current) {
         callStartedRef.current = true;
 
+        closePC();
         const pc = createPeerConnection();
         if (!pc) return;
 
@@ -291,16 +288,15 @@ export const useVideoSession = (sessionId, role, stream) => {
       // Debounce if both-joined just fired
       if (Date.now() - lastOfferTimeRef.current < 2000) return;
 
-      rebuildConnection();
+      rebuildConnection(true);
       lastOfferTimeRef.current = Date.now();
     });
 
     socket.on("webrtc:offer", async ({ offer }) => {
       if (role !== "patient") return;
 
-      if (!pcRef.current) {
-        createPeerConnection();
-      }
+      closePC();
+      createPeerConnection();
 
       const pc = pcRef.current;
       if (!pc) return;
@@ -326,6 +322,11 @@ export const useVideoSession = (sessionId, role, stream) => {
     socket.on("webrtc:answer", async ({ answer }) => {
       if (role !== "doctor") return;
       if (!pcRef.current) return;
+
+      if (pcRef.current.signalingState !== "have-local-offer") {
+        console.warn("Received answer but signalingState is", pcRef.current.signalingState);
+        return;
+      }
 
       await pcRef.current.setRemoteDescription(answer);
 
