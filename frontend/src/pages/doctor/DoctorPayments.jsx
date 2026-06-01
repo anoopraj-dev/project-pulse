@@ -79,7 +79,7 @@ const filteredPayments = payments?.filter((item) => {
   const isLoading = fetchPaymentsAction.loading;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-gray-950">
       <DoctorStatusBanner
         approvalStatus={user?.status}
         submissionCount={user?.submissionCount}
@@ -100,23 +100,23 @@ const filteredPayments = payments?.filter((item) => {
 
           {/* TABLE */}
           <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden">
 
               {/* HEADER */}
-              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+              <div className="border-b border-slate-100 dark:border-gray-800/80 px-4 py-4 sm:px-6">
                 <DoctorPaymentTabs
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                 />
-                <div className="flex items-center justify-between">
-                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
                     <Icon icon="mdi:cash-multiple" />
                     Doctor Payments
                   </h2>
 
-                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 dark:bg-gray-800 px-3 py-1 text-xs text-slate-600 dark:text-slate-300">
                     <Icon icon="mdi:format-list-bulleted" />
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950/40 text-[11px] font-semibold text-indigo-700 dark:text-indigo-400">
                       {filteredPayments?.length ?? 0}
                     </span>
                     records
@@ -134,15 +134,15 @@ const filteredPayments = payments?.filter((item) => {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 dark:bg-gray-800 ring-1 ring-slate-200 dark:ring-gray-700">
                       <Icon icon="mdi:cash-remove" className="text-xl text-slate-400" />
                     </div>
 
-                    <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                    <h3 className="mt-4 text-sm font-semibold text-slate-900 dark:text-white">
                       No payments found
                     </h3>
 
-                    <p className="mt-1 max-w-sm text-xs text-slate-500">
+                    <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
                       You don’t have any transactions in this view yet.
                     </p>
                   </div>

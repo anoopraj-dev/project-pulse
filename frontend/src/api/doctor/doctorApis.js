@@ -143,8 +143,10 @@ export const fetchUpcomingAppointments = async () =>{
 export const fetchRecentPatients = async()=>{
   return api.get('/api/doctor/dashboard/recent-patients')
 }
-export const fetchPatientReviews = async() =>{
-  return api.get('/api/doctor/dashboard/reviews')
+export const fetchPatientReviews = async(page, limit) =>{
+  return api.get('/api/doctor/dashboard/reviews', {
+    params: { page, limit }
+  })
 }
 
 // ---------------- SUPPORT AND SETTINGS ----------------

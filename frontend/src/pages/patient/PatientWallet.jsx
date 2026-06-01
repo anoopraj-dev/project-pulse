@@ -189,8 +189,8 @@ const PatientWallet = () => {
                       type="number"
                       value={addAmount}
                       onChange={(e) => setAddAmount(e.target.value)}
-                      placeholder="amount"
-                      className="w-[120px] rounded-xl px-[14px] py-[10px] border border-black/15 text-[14px] text-white font-bold bg-transparent"
+                      placeholder="Amount"
+                      className="w-[110px] rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white font-bold bg-white/10 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
                     <button
                       onClick={() => {
@@ -203,7 +203,7 @@ const PatientWallet = () => {
                         }
                         handleAddFunds(Number(addAmount));
                       }}
-                      className="flex-1 flex items-center justify-center gap-[7px] bg-white text-[#0077B6] border-none rounded-xl py-[11px] text-[14px] font-semibold cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
+                      className="flex-1 flex items-center justify-center gap-[7px] bg-white text-[#0077B6] border-none rounded-xl py-[11px] text-[14px] font-bold cursor-pointer hover:bg-slate-50 transition active:scale-[0.98]"
                     >
                       <Icon icon="mdi:plus" className="w-[18px] h-[18px]" />
                       Add Funds
@@ -214,110 +214,103 @@ const PatientWallet = () => {
             </div>
 
             {/* Transactions */}
-            <div className="w-full lg:w-2/3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="flex justify-between items-center px-5 pt-[18px] pb-3 border-b border-slate-100">
-                  <h3 className="text-[14px] font-bold text-[#0f172a] m-0">
-                    Recent Transactions
-                  </h3>
-                  <span className="text-[12px] text-[#0096C7] font-medium cursor-pointer">
-                    See all
-                  </span>
-                </div>
-                <div className="px-2">
-                  {/* ------------- Search ------------ */}
-                  <SearchInput
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search transactions - type-credit/debit/refund/topup - date"
-                    role="patient"
-                    fetchSuggestions={fetchSuggestions}
-                    onSelectSuggestion={handleSelectSuggestion}
-                    entity="transactions"
-                  />
-                  {searchLoading && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                      <Icon icon="mdi:loading" className="animate-spin" />
-                      Searching…
-                    </div>
-                  )}
-                </div>
-
-                {filteredTransactions.length === 0 ? (
-                  <div className="text-center py-12 px-5 text-slate-400">
-                    <Icon
-                      icon="mdi:wallet-outline"
-                      className="w-10 h-10 mb-[10px] opacity-40 mx-auto"
-                    />
-                    <p className="text-[14px]">No transactions yet</p>
-                  </div>
-                ) : (
-                  <div className="py-2">
-                    {filteredTransactions.map((txn, i) => {
-                      const isCredit = txn.type === "credit";
-                      const icon =
-                        categoryIcon[txn.category] ||
-                        (isCredit
-                          ? "mdi:arrow-down-circle"
-                          : "mdi:arrow-up-circle");
-                      return (
-                        <div
-                          key={txn.id}
-                          className={`flex items-center gap-[14px] px-5 py-3 transition-colors duration-150 hover:bg-slate-50 ${
-                            i < transactions.length - 1
-                              ? "border-b border-[#f8fafc]"
-                              : ""
-                          }`}
-                        >
-                          {/* Icon */}
-                          <div
-                            className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${
-                              isCredit ? "bg-green-50" : "bg-red-50"
-                            }`}
-                          >
-                            <Icon
-                              icon={icon}
-                              className={`w-[22px] h-[22px] ${
-                                isCredit ? "text-emerald-500" : "text-red-500"
-                              }`}
-                            />
-                          </div>
-
-                          {/* Label */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-semibold text-slate-800 m-0 truncate">
-                              {txn.type} - {txn.referenceType}
-                            </p>
-                            <p className="text-[13px] text-[#336bdb] mt-[2px] mb-0">
-                              {txn.notes}
-                            </p>
-                            <p className="text-[13px] text-[#608ce4] mt-[2px] mb-0">
-                              {new Date(txn.date).toLocaleDateString("en-IN", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-                          </div>
-
-                          {/* Amount */}
-                          <p
-                            className={`text-[14px] font-bold m-0 flex-shrink-0 ${
-                              isCredit ? "text-emerald-500" : "text-red-500"
-                            }`}
-                          >
-                            {isCredit
-                              ? `+₹${(txn.amount / 100).toFixed(2)}`
-                              : `-₹${Math.abs(txn.amount / 100).toFixed(2)}`}
-                          </p>
-                        </div>
-                      );
-                    })}
+            <div className="w-full lg:w-2/3 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center px-5 pt-[18px] pb-3 border-b border-slate-100 dark:border-gray-800/80">
+                <h3 className="text-sm font-bold text-[#0f172a] dark:text-white m-0">
+                  Recent Transactions
+                </h3>
+              </div>
+              <div className="px-5 py-3 border-b border-slate-50 dark:border-gray-800/40">
+                {/* ------------- Search ------------ */}
+                <SearchInput
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search transactions"
+                  role="patient"
+                  fetchSuggestions={fetchSuggestions}
+                  onSelectSuggestion={handleSelectSuggestion}
+                  entity="transactions"
+                />
+                {searchLoading && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                    <Icon icon="mdi:loading" className="animate-spin" />
+                    Searching…
                   </div>
                 )}
               </div>
+
+              {filteredTransactions.length === 0 ? (
+                <div className="text-center py-12 px-5 text-slate-400">
+                  <Icon
+                    icon="mdi:wallet-outline"
+                    className="w-10 h-10 mb-[10px] opacity-40 mx-auto"
+                  />
+                  <p className="text-[14px]">No transactions yet</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-50 dark:divide-gray-800/50 py-1">
+                  {filteredTransactions.map((txn, i) => {
+                    const isCredit = txn.type === "credit";
+                    const icon =
+                      categoryIcon[txn.category] ||
+                      (isCredit
+                        ? "mdi:arrow-down-circle"
+                        : "mdi:arrow-up-circle");
+                    return (
+                      <div
+                        key={txn.id || txn._id || i}
+                        className="flex items-center gap-[14px] px-5 py-3.5 hover:bg-slate-50/50 dark:hover:bg-gray-800/25 transition-colors duration-200"
+                      >
+                        {/* Icon */}
+                        <div
+                          className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${
+                            isCredit 
+                              ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500" 
+                              : "bg-red-50 dark:bg-red-950/20 text-red-500"
+                          }`}
+                        >
+                          <Icon
+                            icon={icon}
+                            className="w-[22px] h-[22px]"
+                          />
+                        </div>
+
+                        {/* Label */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold text-slate-800 dark:text-slate-100 m-0 truncate">
+                            {txn.type} - {txn.referenceType}
+                          </p>
+                          {txn.notes && (
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-[2px] mb-0 truncate">
+                              {txn.notes}
+                            </p>
+                          )}
+                          <p className="text-[11px] text-[#608ce4] mt-[4px] mb-0">
+                            {new Date(txn.date).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+
+                        {/* Amount */}
+                        <p
+                          className={`text-[14px] font-bold m-0 flex-shrink-0 ${
+                            isCredit ? "text-emerald-500" : "text-red-500"
+                          }`}
+                        >
+                          {isCredit
+                            ? `+₹${(txn.amount / 100).toFixed(2)}`
+                            : `-₹${Math.abs(txn.amount / 100).toFixed(2)}`}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </>

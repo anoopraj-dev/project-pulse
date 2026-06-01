@@ -157,7 +157,7 @@ const PatientPayments = () => {
   const isLoading = fetchPaymentsAction.loading;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-gray-950">
       <PatientStatusBanner
         status={user?.status}
         blockedReason={user?.blockedReason}
@@ -204,14 +204,14 @@ const PatientPayments = () => {
 
             {/* Content section */}
             <div className="w-full">
-            <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-              <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+            <div className="rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden">
+              <div className="border-b border-slate-100 dark:border-gray-800/80 px-4 py-4 sm:px-6">
                 <PatientPaymentTabs
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                 />
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
                     <Icon icon="mdi:clipboard-text-outline" />
                     {activeTab === "all"
                       ? "All payments"
@@ -224,9 +224,9 @@ const PatientPayments = () => {
                         : ""}
                   </h2>
 
-                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-600">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 dark:bg-gray-800 px-3 py-1 text-xs text-slate-600 dark:text-slate-300">
                     <Icon icon="mdi:format-list-bulleted" />
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-semibold text-indigo-700">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950/40 text-[11px] font-semibold text-indigo-700 dark:text-indigo-400">
                       {displayedPayments?.length ?? 0}
                     </span>
                     records in this view
@@ -243,23 +243,23 @@ const PatientPayments = () => {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 ring-1 ring-slate-200">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 dark:bg-gray-800 ring-1 ring-slate-200 dark:ring-gray-700">
                       <Icon
                         icon="mdi:calendar-remove-outline"
                         className="text-xl text-slate-400"
                       />
                     </div>
-                    <h3 className="mt-4 text-sm font-semibold text-slate-900">
+                    <h3 className="mt-4 text-sm font-semibold text-slate-900 dark:text-white">
                       No payments in this view
                     </h3>
-                    <p className="mt-1 max-w-sm text-xs text-slate-500">
+                    <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
                       {activeTab === "upcoming"
                         ? "You have no upcoming payments. Book one to get started!"
                         : "You have no past payments yet."}
                     </p>
                   </div>
                 )}
-                <div className="p-2">
+                <div className="border-t border-slate-50 dark:border-gray-800/80 p-2">
                   <Pagination page={page} totalPages={totalPages} onPageChange={setPage}/>
                 </div>
               </div>

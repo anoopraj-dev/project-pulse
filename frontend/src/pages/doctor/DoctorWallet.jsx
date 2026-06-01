@@ -147,11 +147,11 @@ const DoctorWallet = () => {
         <>
           <PageBanner config={pageBannerConfig.doctorWallet} />
 
-          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6 flex flex-col gap-4 lg:flex-row">
+          <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6 flex flex-col gap-6 lg:flex-row">
             {/* ---------------- BALANCE CARD ---------------- */}
             <div className="w-full lg:w-1/3">
               <div
-                className="relative overflow-hidden rounded-[20px] p-[28px_28px_24px]"
+                className="relative overflow-hidden rounded-[20px] p-[28px_28px_24px] hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-300"
                 style={{
                   background:
                     "linear-gradient(135deg, #0096C7 0%, #0077B6 60%, #023E8A 100%)",
@@ -164,11 +164,11 @@ const DoctorWallet = () => {
                 <div className="relative z-[1]">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-white/65 text-[12px] uppercase mb-2">
+                      <p className="text-white/65 text-[11px] tracking-[0.1em] uppercase mb-2 font-bold">
                         Available Balance
                       </p>
 
-                      <p className="text-white text-[38px] font-bold">
+                      <p className="text-white text-[38px] font-bold tracking-[-1px] leading-none">
                         ₹{(wallet?.balance / 100 || 0).toFixed(2)}
                       </p>
                     </div>
@@ -183,35 +183,35 @@ const DoctorWallet = () => {
 
                   <div className="flex gap-3 mt-6">
                     <div className="flex-1 bg-white/10 rounded-xl px-[14px] py-[10px]">
-                      <p className="text-white/60 text-[11px]">
+                      <p className="text-white/60 text-[10px] mb-1 font-bold uppercase tracking-wider">
                         Total Earnings
                       </p>
-                      <p className="text-white text-[15px] font-semibold">
+                      <p className="text-white text-[15px] font-bold">
                         +₹{(totalIn / 100).toFixed(2)}
                       </p>
                     </div>
 
                     <div className="flex-1 bg-white/10 rounded-xl px-[14px] py-[10px]">
-                      <p className="text-white/60 text-[11px]">Withdrawals</p>
-                      <p className="text-white text-[15px] font-semibold">
+                      <p className="text-white/60 text-[10px] mb-1 font-bold uppercase tracking-wider">Withdrawals</p>
+                      <p className="text-white text-[15px] font-bold">
                         -₹{(totalOut / 100).toFixed(2)}
                       </p>
                     </div>
                   </div>
 
                   {/* ---------------- WITHDRAW SECTION ---------------- */}
-                  <div className="flex gap-[10px] mt-4">
+                  <div className="flex gap-[10px] mt-5">
                     <input
                       type="number"
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
-                      placeholder="withdraw"
-                      className="w-[120px] rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white font-bold bg-transparent"
+                      placeholder="Amount"
+                      className="w-[110px] rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white font-bold bg-white/10 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
 
                     <button
                       onClick={handleWithdraw}
-                      className="flex-1 flex items-center justify-center gap-[7px] bg-white text-[#0077B6] rounded-xl py-[11px] text-[14px] font-semibold"
+                      className="flex-1 flex items-center justify-center gap-[7px] bg-white text-[#0077B6] rounded-xl py-[11px] text-[13px] font-bold cursor-pointer hover:bg-slate-50 transition active:scale-[0.98]"
                     >
                       <Icon
                         icon="mdi:cash-minus"
@@ -233,7 +233,7 @@ const DoctorWallet = () => {
                         })
                       }
                       placeholder="Account Number"
-                      className="rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white bg-transparent"
+                      className="rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white bg-white/10 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
 
                     <input
@@ -246,7 +246,7 @@ const DoctorWallet = () => {
                         })
                       }
                       placeholder="IFSC"
-                      className="rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white bg-transparent"
+                      className="rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white bg-white/10 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
 
                     <input
@@ -259,7 +259,7 @@ const DoctorWallet = () => {
                         })
                       }
                       placeholder="Account Holder Name"
-                      className="rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white bg-transparent"
+                      className="rounded-xl px-[14px] py-[10px] border border-white/20 text-[14px] text-white bg-white/10 placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/40"
                     />
                   </div>
                 </div>
@@ -267,14 +267,14 @@ const DoctorWallet = () => {
             </div>
 
             {/* ---------------- TRANSACTIONS ---------------- */}
-            <div className="w-full lg:w-2/3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="flex justify-between items-center px-5 pt-[18px] pb-3 border-b border-slate-100">
-                <h3 className="text-[14px] font-bold text-[#0f172a]">
+            <div className="w-full lg:w-2/3 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center px-5 pt-[18px] pb-3 border-b border-slate-100 dark:border-gray-800/80">
+                <h3 className="text-sm font-bold text-[#0f172a] dark:text-white m-0">
                   Earnings History
                 </h3>
               </div>
 
-              <div className="px-2">
+              <div className="px-5 py-3 border-b border-slate-50 dark:border-gray-800/40">
                 <SearchInput
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -286,18 +286,20 @@ const DoctorWallet = () => {
                 />
               </div>
 
-              <div className="py-2">
+              <div className="divide-y divide-slate-50 dark:divide-gray-800/50 py-1">
                 {filteredTransactions.map((txn, i) => {
                   const isCredit = txn.type === "credit";
 
                   return (
                     <div
-                      key={txn.id}
-                      className="flex items-center gap-[14px] px-5 py-3 hover:bg-slate-50"
+                      key={txn.id || txn._id || i}
+                      className="flex items-center gap-[14px] px-5 py-3.5 hover:bg-slate-50/50 dark:hover:bg-gray-800/25 transition-colors duration-200"
                     >
                       <div
                         className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          isCredit ? "bg-green-50" : "bg-red-50"
+                          isCredit 
+                            ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500" 
+                            : "bg-red-50 dark:bg-red-950/20 text-red-500"
                         }`}
                       >
                         <Icon
@@ -306,19 +308,19 @@ const DoctorWallet = () => {
                               ? "mdi:arrow-down-circle"
                               : "mdi:arrow-up-circle"
                           }
-                          className={`w-[22px] h-[22px] ${
-                            isCredit ? "text-emerald-500" : "text-red-500"
-                          }`}
+                          className="w-[22px] h-[22px]"
                         />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-slate-800">
-                          {txn.type} - {txn.referenceType}
+                        <p className="text-[13px] font-bold text-slate-800 dark:text-slate-100 m-0 truncate">
+                          {txn.type} - {txn.referenceType || "Earning"}
                         </p>
-                        <p className="text-[13px] text-[#336bdb]">
-                          {txn.notes}
-                        </p>
+                        {txn.notes && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-[2px] mb-0 truncate">
+                            {txn.notes}
+                          </p>
+                        )}
                       </div>
 
                       <p
@@ -334,7 +336,7 @@ const DoctorWallet = () => {
                   );
                 })}
               </div>
-              <div className="p-2">
+              <div className="p-2 border-t border-slate-50 dark:border-gray-800/80">
                 <Pagination
                   page={page}
                   totalPages={totalPages}
@@ -350,72 +352,3 @@ const DoctorWallet = () => {
 };
 
 export default DoctorWallet;
-
-const TransactionsList = React.memo(
-  ({ transactions, page, totalPages, setPage }) => {
-    return (
-      <div className="w-full lg:w-2/3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="flex justify-between items-center px-5 pt-[18px] pb-3 border-b border-slate-100">
-          <h3 className="text-[14px] font-bold text-[#0f172a]">
-            Earnings History
-          </h3>
-        </div>
-
-        <div className="py-2">
-          {transactions.map((txn) => {
-            const isCredit = txn.type === "credit";
-
-            return (
-              <div
-                key={txn.id}
-                className="flex items-center gap-[14px] px-5 py-3 hover:bg-slate-50"
-              >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    isCredit ? "bg-green-50" : "bg-red-50"
-                  }`}
-                >
-                  <Icon
-                    icon={
-                      isCredit ? "mdi:arrow-down-circle" : "mdi:arrow-up-circle"
-                    }
-                    className={`w-[22px] h-[22px] ${
-                      isCredit ? "text-emerald-500" : "text-red-500"
-                    }`}
-                  />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-800">
-                    {txn.type} - {txn.referenceType}
-                  </p>
-                  <p className="text-[13px] text-[#336bdb]">{txn.notes}</p>
-                </div>
-
-                <p
-                  className={`text-[14px] font-bold ${
-                    isCredit ? "text-emerald-500" : "text-red-500"
-                  }`}
-                >
-                  {isCredit
-                    ? `+₹${(txn.amount / 100).toFixed(2)}`
-                    : `-₹${Math.abs(txn.amount / 100).toFixed(2)}`}
-                </p>
-              </div>
-            );
-          })}
-
-          {totalPages > 1 && (
-            <div className="p-2">
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  },
-);

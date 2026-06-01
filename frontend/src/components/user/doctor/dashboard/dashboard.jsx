@@ -21,6 +21,7 @@ import {
 } from "@/api/doctor/doctorApis";
 import toast from "react-hot-toast";
 import Skeleton, { StatsSkeleton, CardSkeleton, TableSkeleton } from "@/components/ui/loaders/Skeleton";
+import Pagination from "@/components/shared/components/Pagination";
 
 // ---------------- SUB-COMPONENTS ----------------
 
@@ -74,9 +75,9 @@ const StatCard = ({
         <Icon icon={icon} className={`w-4 h-4 ${iconColor}`} />
       </div>
     </div>
-    <p className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
+    <div className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
       {value}
-    </p>
+    </div>
     {change && (
       <p
         className={`text-[11px] mt-2 flex items-center gap-1 ${changeType === "up" ? "text-emerald-600 dark:text-emerald-400" : changeType === "down" ? "text-red-500" : "text-gray-400 dark:text-gray-500"}`}
@@ -152,7 +153,7 @@ const Dashboard = () => {
   const [revenueData, setRevenueData] = useState([]);
   const [revenueSummary, setRevenueSummary] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
@@ -161,6 +162,8 @@ const Dashboard = () => {
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [reviewSummary, setReviewSummary] = useState(null);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [totalReviewPages, setTotalReviewPages] = useState(1);
 
   // ---------------- API CALLS ----------------
   // ---------------- REVENUE ----------------
@@ -267,16 +270,16 @@ const Dashboard = () => {
       try {
         setLoadingReviews(true);
 
-        const res = await fetchPatientReviews();
+        const res = await fetchPatientReviews(reviewsPage, 3);
 
         if (!res.data.success) {
           toast.error("Failed to load reviews");
           return;
         }
 
-
-        setReviews(res.data.data.data || res.data.data || []);
+        setReviews(res.data.data.data || []);
         setReviewSummary(res?.data?.data?.summary);
+        setTotalReviewPages(res?.data?.data?.pagination?.totalPages || 1);
       } catch (err) {
         console.error("Reviews fetch error:", err);
         toast.error("Could not load reviews");
@@ -286,7 +289,7 @@ const Dashboard = () => {
     };
 
     loadReviews();
-  }, []);
+  }, [reviewsPage]);
   // ---------------- HELPERS ----------------
   const getConsultationChange = () => {
     if (!stats) return "";
@@ -321,7 +324,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full pt-1 pb-8 space-y-8">
+    <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-8 space-y-8">
       <div>
         {/* -------- Stat Cards ------ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -699,13 +702,6 @@ const Dashboard = () => {
               </div>
               <div className="flex-1">
                 {[5, 4, 3, 2, 1].map((star) => {
-                  const widths = {
-                    5: "75%",
-                    4: "15%",
-                    3: "6%",
-                    2: "3%",
-                    1: "1%",
-                  };
                   return (
                     <div key={star} className="flex items-center gap-2 mb-1">
                       <span className="text-[10px] text-gray-400 dark:text-gray-500 w-2">
@@ -782,6 +778,15 @@ const Dashboard = () => {
                 ))
               )}
             </div>
+            {totalReviewPages > 1 && (
+              <div className="p-2 border-t border-slate-50 dark:border-gray-800/80">
+                <Pagination
+                  page={reviewsPage}
+                  totalPages={totalReviewPages}
+                  onPageChange={setReviewsPage}
+                />
+              </div>
+            )}
           </Card>
         </div>
       </div>

@@ -56,17 +56,17 @@ const DoctorEditProfile = () => {
   }, []);
 
   return (
-    <div className="min-h-screen pb-6">
+    <div className="min-h-screen dark:bg-gray-950 pb-6">
       <PageBanner config={pageBannerConfig.doctorEditProfile} />
 
       <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
-        <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
+        <div className="overflow-hidden rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm">
           <div className="px-3 py-4 sm:px-5 sm:py-6 md:px-6">
             <DynamicForm
-              config={doctorEditProfileConfig}
-              onSubmit={handleUpdateProfile}
-              mode="page"
-              values={user}
+               config={doctorEditProfileConfig}
+               onSubmit={handleUpdateProfile}
+               mode="page"
+               values={user}
             />
           </div>
         </div>
