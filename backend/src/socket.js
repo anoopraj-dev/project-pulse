@@ -174,7 +174,11 @@ export const initSocket = (server) => {
       // ---------------- INITIAL CONNECT ----------------
       // emit both-joined only when the second user actually joins (prevent repeated events)
       if (count === 2) {
-        io.to(sessionId).emit("consultation:both-joined");
+        const Consultation = (await import("./models/consultation.model.js")).default;
+        const consultation = await Consultation.findById(sessionId);
+        io.to(sessionId).emit("consultation:both-joined", {
+          startTime: consultation?.startTime,
+        });
       }
 
       // ---------------- NOTIFY THE OTHER PARTICIPANT ----------------
@@ -222,6 +226,11 @@ export const initSocket = (server) => {
     });
     
     // ---------------- END CONSULTATION ----------------
+    socket.on("consultation:ending", ({ sessionId }) => {
+      if (!sessionId) return;
+      io.to(sessionId).emit("consultation:ending");
+    });
+
     socket.on("consultation:end", ({ sessionId }) => {
       if (!sessionId) return;
       io.to(sessionId).emit("consultation:ended"); 

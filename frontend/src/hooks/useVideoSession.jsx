@@ -1,11 +1,14 @@
 import { useSocket } from "@/contexts/SocketContext";
 import { useEffect, useRef, useState } from "react";
+import { endConsultation } from "@/api/patient/patientApis";
 
-export const useVideoSession = (sessionId, role, stream) => {
+export const useVideoSession = (sessionId, role, stream, initialStartTime) => {
   const { socket } = useSocket();
 
   const [streamReady, setStreamReady] = useState(false);
   const [status, setStatus] = useState("waiting");
+  const [countdown, setCountdown] = useState(10);
+  const [startTime, setStartTime] = useState(initialStartTime || null);
 
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
@@ -34,6 +37,28 @@ export const useVideoSession = (sessionId, role, stream) => {
       setStatus(s);
     }
   };
+
+  useEffect(() => {
+    if (status !== "ending") return;
+
+    setCountdown(10);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          if (role === "patient") {
+            endConsultation(sessionId).catch((err) => {
+              console.error("Error ending consultation:", err);
+            });
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [status, role, sessionId]);
 
   // ---------------- CLEAN PEER CONNECTION ----------------
   const closePC = () => {
@@ -278,7 +303,10 @@ export const useVideoSession = (sessionId, role, stream) => {
       setStatusSafe("connecting");
     });
 
-    socket.on("consultation:both-joined", async () => {
+    socket.on("consultation:both-joined", async ({ startTime: serverStartTime } = {}) => {
+      if (serverStartTime) {
+        setStartTime(serverStartTime);
+      }
       setStatusSafe("connecting");
 
       if (role === "doctor" && !callStartedRef.current) {
@@ -369,6 +397,10 @@ export const useVideoSession = (sessionId, role, stream) => {
       }
     });
 
+    socket.on("consultation:ending", () => {
+      setStatusSafe("ending");
+    });
+
     socket.on("consultation:ended", () => {
       endCall();
     });
@@ -391,6 +423,7 @@ export const useVideoSession = (sessionId, role, stream) => {
       socket.off("webrtc:offer");
       socket.off("webrtc:answer");
       socket.off("webrtc:ice-candidate");
+      socket.off("consultation:ending");
       socket.off("consultation:ended");
       socket.off("consultation:camera-state");
       socket.off("consultation:mute-state");
@@ -411,5 +444,7 @@ export const useVideoSession = (sessionId, role, stream) => {
     remoteVideoOff,
     remoteMuted,
     endCall,
+    countdown,
+    startTime,
   };
 };

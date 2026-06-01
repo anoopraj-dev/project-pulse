@@ -6,6 +6,60 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import Payment from "../../models/payments.model.js";
 import Admin from "../../models/admin.model.js";
+import Patient from "../../models/patient.model.js";
+import { viewReceiptService } from "../user/receipt.service.js";
+import { createNotification } from "../user/notification.service.js";
+import { sendEmail } from "../../config/nodemailer.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
+
+const sendRefundNotificationAndEmail = async ({ patientId, appointmentId, amount }) => {
+  try {
+    const patient = await Patient.findById(patientId);
+    if (!patient) return;
+
+    const payment = await Payment.findOne({ appointment: appointmentId });
+    if (!payment) return;
+
+    // 1. Notification
+    try {
+      await createNotification({
+        userId: patient._id.toString(),
+        role: "patient",
+        title: "Refund Processed",
+        message: `A refund of ₹ ${(amount / 100).toFixed(2)} has been credited to your wallet.`,
+      });
+    } catch (err) {
+      console.error("Refund notification failed:", err.message);
+    }
+
+    // 2. Email Receipt
+    try {
+      const pdfBuffer = await viewReceiptService(payment._id, "", "patient");
+
+      await sendEmail({
+        from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+        to: patient.email,
+        subject: "Refund Receipt - PULSE360",
+        html: emailTemplate({
+          title: "Refund Processed",
+          subtitle: "PULSE360 Refund Update",
+          body: `<p>Hello <strong>${patient.name}</strong>,</p>
+                 <p>A refund of <strong>₹ ${(amount / 100).toFixed(2)}</strong> has been credited to your wallet for appointment <strong>#${appointmentId.toString().slice(-6).toUpperCase()}</strong>.</p>
+                 <p>Please find your refund receipt attached to this email.</p>`,
+          highlightText: `Refunded: ₹ ${(amount / 100).toFixed(2)}`,
+          highlightType: "success"
+        }),
+        attachments: [
+          { filename: `refund-receipt-${payment.receipt}.pdf`, content: pdfBuffer }
+        ]
+      });
+    } catch (err) {
+      console.error("Refund email failed:", err.message);
+    }
+  } catch (err) {
+    console.error("Refund notifier helper failed:", err.message);
+  }
+};
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -103,6 +157,12 @@ export const refundToWalletService = async (patientId, body) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    sendRefundNotificationAndEmail({
+      patientId,
+      appointmentId,
+      amount,
+    }).catch((err) => console.error("Refund notification background error:", err));
 
     return { patientWallet, transaction };
   } catch (error) {

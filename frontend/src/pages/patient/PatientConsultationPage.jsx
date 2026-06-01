@@ -1,11 +1,9 @@
 import ConsultationVideo from "@/components/shared/components/ConsultationVideo";
-import { useUser } from "@/contexts/UserContext";
 import { useVideoSession } from "@/hooks/useVideoSession";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useCamera } from "@/hooks/useCamera";
 import { useVideoProcessor } from "@/hooks/useVideoProcessor";
 import { useState,useEffect } from "react";
-import { endConsultation } from "@/api/patient/patientApis";
 import { socket } from "@/socket";
 import toast from "react-hot-toast";
 import { useModal } from "@/contexts/ModalContext";
@@ -13,12 +11,11 @@ import EndConsultationModal from "@/components/ui/modals/ModalInputs";
 
 const PatientConsultationPage = () => {
   const { id: sessionId } = useParams();
-  const { user } = useUser();
   const navigate = useNavigate();
   const { state } = useLocation();
   const { participants } = state;
 
-  const{openModal,closeModal} = useModal();
+  const { openModal } = useModal();
 
   const [mode, setMode] = useState("none");
   const [bgImage, setBgImage] = useState("/healthcare1.jpg");
@@ -32,7 +29,6 @@ const PatientConsultationPage = () => {
   const {
     status,
     setStatus,
-    endCall,
     localVideoRef,
     remoteVideoRef,
     onToggleMute,
@@ -41,7 +37,9 @@ const PatientConsultationPage = () => {
     isCameraOff,
     remoteVideoOff,
     remoteMuted,
-  } = useVideoSession(sessionId, "patient", finalStream, user);
+    countdown,
+    startTime,
+  } = useVideoSession(sessionId, "patient", finalStream, participants?.startTime);
 
   // ---------------- LISTEN FOR END REQUESTS ----------------
   useEffect(()=>{
@@ -83,7 +81,7 @@ const PatientConsultationPage = () => {
 
 
   useEffect(() => {
-    const handler = ({ userId }) => {
+    const handler = () => {
       toast("Other user left the consultation");
       setStatus("disconnected");
     };
@@ -141,6 +139,8 @@ const PatientConsultationPage = () => {
         mode={mode}
         setMode={setMode}
         setBgImage={setBgImage}
+        countdown={countdown}
+        startTime={startTime}
       />
     </div>
   );
