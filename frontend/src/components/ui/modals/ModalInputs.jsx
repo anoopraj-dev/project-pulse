@@ -15,7 +15,6 @@ import { certificateUploadConfig } from "../../forms/config/modalFormConfig";
 import {
   submitDoctorProfessionalInfo,
 } from "../../../api/doctor/doctorApis";
-import { endConsultation } from "../../../api/patient/patientApis";
 import { useUser } from "../../../contexts/UserContext";
 import { useFileUploadContext } from "../../../contexts/FileUploadContext";
 import { Icon } from "@iconify/react";
@@ -125,7 +124,7 @@ export const UpdateProfilePictureModal = ({ onSubmit, closeModal }) => {
   const { files, clearField } = useFileUploadContext();
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (data) => {
+  const handleSubmit = async () => {
     try {
       setLoading(true);
 
@@ -580,24 +579,20 @@ const EndConsultationModal = ({ consultationId, closeModal }) => {
       }
     }
 
-    // ---------------- ALWAYS END CONSULTATION ----------------
-    const res = await endConsultation(consultationId);
+    // ---------------- START COUNTDOWN ----------------
+    socket.emit("consultation:ending", {
+      sessionId: consultationId,
+    });
 
-    if (res?.data?.success) {
-      socket.emit("consultation:end", {
-        sessionId: consultationId,
+    if (reviewError) {
+      toast("Consultation ending shortly (review not saved)", {
+        icon: "",
       });
-
-      if (reviewError) {
-        toast("Consultation ended (review not saved)", {
-          icon: "",
-        });
-      } else {
-        toast.success("Consultation ended");
-      }
-
-      closeModal();
+    } else {
+      toast.success("Consultation ending shortly...");
     }
+
+    closeModal();
   } catch (err) {
     toast.error(err?.response?.data?.message || "Something went wrong");
   } finally {

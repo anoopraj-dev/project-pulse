@@ -18,6 +18,8 @@ const ConsultationVideo = ({
   setMode,
   setBgImage,
   onTogglePatientPanel,
+  countdown,
+  startTime,
 }) => {
   const [callDuration, setCallDuration] = useState(0);
 
@@ -25,22 +27,22 @@ const ConsultationVideo = ({
 
   // ---------------- CALL DURATION ----------------
   useEffect(() => {
-  if (status !== "connected") return;
+  if (status !== "connected" && status !== "ending") return;
 
-  if (!participants?.startTime) return;
+  if (!startTime) return;
 
-  const startTime = new Date(participants.startTime).getTime();
-  startTimeRef.current = startTime;
+  const startMs = new Date(startTime).getTime();
+  startTimeRef.current = startMs;
 
   const interval = setInterval(() => {
-    const diff = Math.floor((Date.now() - startTime) / 1000);
+    const diff = Math.floor((Date.now() - startMs) / 1000);
     setCallDuration(diff);
   }, 1000);
 
   return () => clearInterval(interval);
-}, [status, participants?.startTime]);
+}, [status, startTime]);
 
-  const isConnected = status === "connected";
+  const isConnected = status === "connected" || status === "ending";
 
   const fileInputRef = useRef(null);
 
@@ -54,6 +56,13 @@ const ConsultationVideo = ({
 
   return (
     <div className="h-screen w-full bg-[#0a0a0f] relative flex items-center justify-center overflow-hidden rounded-2xl border ">
+      {status === "ending" && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-red-600/90 text-white font-semibold px-6 py-3 rounded-full shadow-lg backdrop-blur-md border border-red-500/30 animate-pulse">
+          <Icon icon="mdi:clock-outline" className="text-xl animate-spin" />
+          <span>Call ends in {countdown} seconds</span>
+        </div>
+      )}
+
       {/* ------------ Ambient background glow (visible when no video) --------- */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-indigo-900/30 blur-[120px]" />

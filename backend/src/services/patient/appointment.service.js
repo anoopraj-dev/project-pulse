@@ -4,6 +4,61 @@ import DoctorAvailability from "../../models/availability.model.js";
 import Appointment from "../../models/appointments.model.js";
 import Payment from "../../models/payments.model.js";
 import Patient from "../../models/patient.model.js";
+import Wallet from "../../models/wallet.model.js";
+import Transaction from "../../models/transaction.model.js";
+import { viewReceiptService } from "../user/receipt.service.js";
+import { sendEmail } from "../../config/nodemailer.js";
+import { emailTemplate } from "../../utils/emailTemplate.js";
+
+const sendRefundNotificationAndEmail = async ({ patientId, appointmentId, amount }) => {
+  try {
+    const patient = await Patient.findById(patientId);
+    if (!patient) return;
+
+    const payment = await Payment.findOne({ appointment: appointmentId });
+    if (!payment) return;
+
+    // 1. Notification
+    try {
+      await createNotification({
+        userId: patient._id.toString(),
+        role: "patient",
+        title: "Refund Processed",
+        message: `A refund of ₹ ${(amount / 100).toFixed(2)} has been credited to your wallet.`,
+      });
+    } catch (err) {
+      console.error("Refund notification failed:", err.message);
+    }
+
+    // 2. Email Receipt
+    try {
+      const pdfBuffer = await viewReceiptService(payment._id, "", "patient");
+
+      await sendEmail({
+        from: `"PULSE360" <${process.env.GMAIL_USER}>`,
+        to: patient.email,
+        subject: "Refund Receipt - PULSE360",
+        html: emailTemplate({
+          title: "Refund Processed",
+          subtitle: "PULSE360 Refund Update",
+          body: `<p>Hello <strong>${patient.name}</strong>,</p>
+                 <p>A refund of <strong>₹ ${(amount / 100).toFixed(2)}</strong> has been credited to your wallet for appointment <strong>#${appointmentId.toString().slice(-6).toUpperCase()}</strong>.</p>
+                 <p>Please find your refund receipt attached to this email.</p>`,
+          highlightText: `Refunded: ₹ ${(amount / 100).toFixed(2)}`,
+          highlightType: "success"
+        }),
+        attachments: [
+          { filename: `refund-receipt-${payment.receipt}.pdf`, content: pdfBuffer }
+        ]
+      });
+    } catch (err) {
+      console.error("Refund email failed:", err.message);
+    }
+  } catch (err) {
+    console.error("Refund notifier helper failed:", err.message);
+  }
+};
+
 import { createNotification } from "../user/notification.service.js";
 import { createConsultationService } from "../user/consultation.service.js";
 import paginate from "../../utils/paginate.js";
@@ -259,8 +314,57 @@ export const cancelAppointmentService = async (id, patientId) => {
 
     await appointment.save({ session });
 
+    let refundProcessed = false;
+    // ---------------- REFUND ----------------
+    const payment = await Payment.findOne({ appointment: appointment._id });
+
+    if (payment && payment.status !== "refunded") {
+      const pId = appointment.patient._id || appointment.patient;
+      let wallet = await Wallet.findOne({
+        userId: pId,
+        role: "patient",
+      });
+
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: pId,
+          role: "patient",
+          balance: 0,
+        });
+      }
+
+      wallet.balance += payment.amount;
+      await wallet.save({ session });
+
+      await Transaction.create(
+        [
+          {
+            wallet: wallet._id,
+            type: "credit",
+            amount: payment.amount,
+            referenceType: "refund",
+            referenceId: payment._id,
+          },
+        ],
+        { session },
+      );
+
+      payment.status = "refunded";
+      await payment.save({ session });
+      refundProcessed = true;
+    }
+
     await session.commitTransaction();
     session.endSession();
+
+    if (refundProcessed && payment) {
+      const pId = appointment.patient._id || appointment.patient;
+      sendRefundNotificationAndEmail({
+        patientId: pId,
+        appointmentId: appointment._id,
+        amount: payment.amount,
+      }).catch((err) => console.error("Refund notification background error:", err));
+    }
 
     /* Notifications */
     await Promise.all([

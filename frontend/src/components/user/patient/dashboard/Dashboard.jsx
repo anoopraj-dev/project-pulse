@@ -73,9 +73,9 @@ const StatCard = ({
         <Icon icon={icon} className={`w-4 h-4 ${iconColor}`} />
       </div>
     </div>
-    <p className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
+    <div className="text-2xl font-semibold text-gray-900 dark:text-white leading-none">
       {value}
-    </p>
+    </div>
     {change && (
       <p
         className={`text-[11px] mt-2 flex items-center gap-1 ${
@@ -259,18 +259,18 @@ const Dashboard = () => {
 
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="w-full pt-1 pb-6 space-y-8">
+    <div className="w-full px-4 sm:px-6 lg:px-0 pt-1 pb-6">
+      <div className="space-y-8">
         
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-slate-900">{greeting}, {user?.name?.split(' ')[0]}</h1>
-            <p className="text-sm text-slate-500 font-medium">{formattedDate}</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{greeting}, {user?.name?.split(' ')[0]}</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{formattedDate}</p>
           </div>
           <button 
             onClick={() => navigate('/patient/appointments')}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0096C7] text-white text-sm font-bold rounded-xl hover:bg-[#0077a1] transition-all shadow-lg shadow-sky-500/20 active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0096C7] text-white text-sm font-bold rounded-xl hover:bg-[#0077a1] transition-all shadow-lg shadow-sky-500/20 active:scale-95 cursor-pointer"
           >
             <Icon icon="ph:calendar-plus-bold" className="h-4 w-4" />
             Book Appointment

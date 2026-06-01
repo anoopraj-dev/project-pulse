@@ -35,10 +35,10 @@ const CardHeader = ({ icon, title, subtitle }) => (
 );
 
 const categoryMeta = {
-  lab:          { icon: "mdi:flask-outline",         label: "Lab Report",   color: "bg-violet-50 text-violet-600 border-violet-100"  },
-  imaging:      { icon: "mdi:radiology-box-outline", label: "Imaging",      color: "bg-blue-50 text-blue-600 border-blue-100"        },
-  prescription: { icon: "mdi:pill",                  label: "Prescription", color: "bg-emerald-50 text-emerald-600 border-emerald-100"},
-  other:        { icon: "mdi:file-outline",          label: "Other",        color: "bg-slate-50 text-slate-500 border-slate-200"     },
+  lab:          { icon: "mdi:flask-outline",         label: "Lab Report",   color: "bg-violet-50 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400 border-violet-100 dark:border-violet-900/30"  },
+  imaging:      { icon: "mdi:radiology-box-outline", label: "Imaging",      color: "bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/30"        },
+  prescription: { icon: "mdi:pill",                  label: "Prescription", color: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30"},
+  other:        { icon: "mdi:file-outline",          label: "Other",        color: "bg-slate-50 dark:bg-gray-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-gray-700"     },
 };
 
 const PatientRecords = () => {
@@ -281,7 +281,7 @@ const PatientRecords = () => {
                                   <button
                                     type="button"
                                     onClick={() => openImage(record.fileUrl, record.title)}
-                                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border border-slate-200 dark:border-gray-700 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-700 transition"
+                                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border border-slate-200 dark:border-gray-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-700 transition cursor-pointer"
                                   >
                                     <Icon icon="mdi:eye-outline" className="text-sm" />
                                     View
@@ -289,7 +289,7 @@ const PatientRecords = () => {
                                   <a
                                     href={record.fileUrl}
                                     download
-                                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border border-[#0096C7]/30 text-xs font-medium text-[#0096C7] hover:bg-[#0096C7]/5 transition"
+                                    className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border border-[#0096C7]/30 text-xs font-bold text-[#0096C7] dark:text-[#38bdf8] hover:bg-[#0096C7]/5 transition cursor-pointer"
                                   >
                                     <Icon icon="mdi:download-outline" className="text-sm" />
                                     Download
@@ -297,7 +297,7 @@ const PatientRecords = () => {
                                   <button
                                     type="button"
                                     onClick={() => handleRemove(record._id)}
-                                    className="flex items-center justify-center px-3 py-2 rounded-xl border border-red-100 text-xs font-medium text-red-500 hover:bg-red-50 transition"
+                                    className="flex items-center justify-center px-3 py-2 rounded-xl border border-red-100 dark:border-red-950/20 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/10 transition cursor-pointer"
                                   >
                                     <Icon icon="mdi:trash-can-outline" className="text-sm" />
                                   </button>

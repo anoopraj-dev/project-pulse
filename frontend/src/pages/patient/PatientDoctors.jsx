@@ -106,7 +106,7 @@ const PatientDoctors = () => {
   const isInitialLoading = fetchDoctorsAction.loading;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-gray-950">
       {/* Status Banner */}
       <PatientStatusBanner
         status={user?.status}
@@ -153,9 +153,9 @@ const PatientDoctors = () => {
 
               {/* Sidebar Filters — Desktop */}
               <aside className="hidden lg:block w-72 xl:w-80 flex-shrink-0 sticky top-6">
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                  <div className="px-5 py-4 border-b border-slate-100">
-                    <p className="text-sm font-semibold text-slate-700 tracking-wide uppercase">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                  <div className="px-5 py-4 border-b border-slate-100 dark:border-gray-800">
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-350 tracking-wide uppercase">
                       Filters
                     </p>
                   </div>
@@ -176,7 +176,7 @@ const PatientDoctors = () => {
                     {Array.from({ length: 6 }).map((_, i) => (
                       <div
                         key={i}
-                        className="h-52 rounded-2xl bg-white border border-slate-100 shadow-sm animate-pulse"
+                        className="h-52 rounded-2xl bg-white dark:bg-gray-900 border border-slate-100 dark:border-gray-800 shadow-sm animate-pulse"
                       />
                     ))}
                   </div>
@@ -193,18 +193,18 @@ const PatientDoctors = () => {
                 ) : (
                   /* Empty State */
                   <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 mb-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white dark:bg-gray-900 shadow-sm ring-1 ring-slate-200 dark:ring-gray-800 mb-4">
                       <Icon
                         icon="mdi:stethoscope"
-                        className="text-3xl text-slate-300"
+                        className="text-3xl text-slate-300 dark:text-slate-600"
                       />
                     </div>
-                    <h2 className="text-base font-semibold text-slate-800">
+                    <h2 className="text-base font-semibold text-slate-800 dark:text-white">
                       {query.trim()
                         ? "No matching doctors found"
                         : "No doctors available"}
                     </h2>
-                    <p className="mt-1.5 max-w-xs text-sm text-slate-400 leading-relaxed">
+                    <p className="mt-1.5 max-w-xs text-sm text-slate-400 dark:text-slate-500 leading-relaxed">
                       {query.trim()
                         ? "Try a different name or specialization."
                         : "Approved doctors will appear here once added by the admin."}
@@ -215,9 +215,9 @@ const PatientDoctors = () => {
             </div>
 
             {/* Mobile Filters — below grid */}
-            <div className="lg:hidden mt-8 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100">
-                <p className="text-sm font-semibold text-slate-700 tracking-wide uppercase">
+            <div className="lg:hidden mt-8 bg-white dark:bg-gray-900 rounded-2xl border border-slate-100 dark:border-gray-800 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 dark:border-gray-800">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-350 tracking-wide uppercase">
                   Filters
                 </p>
               </div>

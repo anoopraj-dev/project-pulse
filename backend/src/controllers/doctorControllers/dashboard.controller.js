@@ -39,6 +39,7 @@ export const recentPatients = asyncHandler(async (req, res) => {
 });
 
 export const patientFeedbacks = asyncHandler(async (req, res) => {
-  const data = await feedbackService(req.user.id);
+  const { page, limit } = req.query;
+  const data = await feedbackService(req.user.id, page, limit);
   return res.status(200).json({ success: true, data });
 });

@@ -2,7 +2,6 @@
 import React from "react";
 import ConsultationVideo from "@/components/shared/components/ConsultationVideo";
 import PatientPanel from "@/components/user/doctor/consultation/PatientPanel";
-import { useUser } from "@/contexts/UserContext";
 import { useVideoSession } from "@/hooks/useVideoSession";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useCamera } from "@/hooks/useCamera";
@@ -17,10 +16,9 @@ const DoctorConsultationPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { participants } = state;
-  const { user } = useUser();
 
   const [patientData,setPatientData] = useState(null)
-  const [loading,setLoading] = useState(true);
+  const [_loading,setLoading] = useState(true);
 
   const rawStream = useCamera();
 
@@ -66,11 +64,13 @@ const DoctorConsultationPage = () => {
     isCameraOff,
     remoteVideoOff,
     remoteMuted,
+    countdown,
+    startTime,
   } = useVideoSession(
     sessionId,
     "doctor",
     finalStream,
-    user
+    participants?.startTime
   );
 
   // Navigate when consultation ends
@@ -213,6 +213,8 @@ const DoctorConsultationPage = () => {
           onTogglePatientPanel={() =>
             setShowPatientPanel((prev) => !prev)
           }
+          countdown={countdown}
+          startTime={startTime}
         />
       </div>
 

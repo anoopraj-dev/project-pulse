@@ -76,7 +76,7 @@ const DoctorDocuments = () => {
   if (!professionalInfo) return null;
 
   return (
-    <div className="min-h-screen pb-6">
+    <div className="min-h-screen dark:bg-gray-950 pb-6">
        <DoctorStatusBanner
             approvalStatus={user?.status}
             submissionCount={user?.submissionCount}

@@ -302,15 +302,44 @@ export const recentPatientsService = async (doctorId) => {
   }));
 };
 
-export const feedbackService = async (doctorId) => {
-  const reviews = await Review.find({
+export const feedbackService = async (doctorId, page = 1, limit = 5) => {
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const limitNum = Math.max(1, parseInt(limit) || 5);
+  const skip = (pageNum - 1) * limitNum;
+
+  // Fetch all reviews matching doctor to build the rating breakdown/summary
+  const allReviews = await Review.find({
+    doctor: doctorId,
+    rating: { $exists: true, $ne: null },
+  });
+
+  const totalReviews = allReviews.length;
+
+  const averageRating =
+    totalReviews > 0
+      ? allReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews
+      : 0;
+
+  const breakdown = allReviews.reduce(
+    (acc, r) => {
+      const rate = r.rating || 0;
+      if (rate >= 1 && rate <= 5) acc[rate] += 1;
+      return acc;
+    },
+    { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  );
+
+  // Fetch only the paginated subset of reviews
+  const paginatedReviews = await Review.find({
     doctor: doctorId,
     rating: { $exists: true, $ne: null },
   })
     .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNum)
     .populate("patient", "name profilePicture");
 
-  const formattedReviews = reviews.map((r) => ({
+  const formattedReviews = paginatedReviews.map((r) => ({
     _id: r._id,
     name: r.patient?.name || "Unknown",
     profilePicture: r.patient?.profilePicture || null,
@@ -319,25 +348,16 @@ export const feedbackService = async (doctorId) => {
     date: r.createdAt,
   }));
 
-  //  compute summary
-  const totalReviews = reviews.length;
-
-  const averageRating =
-    totalReviews > 0
-      ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / totalReviews
-      : 0;
-
-  const breakdown = reviews.reduce(
-    (acc, r) => {
-      const rate = r.rating || 0;
-      if (rate >= 1 && rate <= 5) acc[rate] += 1;
-      return acc;
-    },
-    { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-  );
-
   return {
     data: formattedReviews,
+    pagination: {
+      total: totalReviews,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(totalReviews / limitNum),
+      hasNext: pageNum * limitNum < totalReviews,
+      hasPrev: pageNum > 1,
+    },
     summary: {
       totalReviews,
       averageRating,
