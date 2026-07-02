@@ -139,8 +139,8 @@ const DoctorSupportPage = () => {
         toast.success("Password updated successfully");
         setPasswordData({ currentPassword: "", newPassword: "" });
       }
-    } catch {
-      toast.error("Failed to update password");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to update password");
     }
   };
 

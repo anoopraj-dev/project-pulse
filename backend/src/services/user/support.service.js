@@ -6,6 +6,7 @@ import Doctor from '../../models/doctor.model.js'
 import Admin from '../../models/admin.model.js'
 import Alert from "../../models/alert.model.js";
 import paginate from "../../utils/paginate.js";
+import AppError from "../../utils/AppError.js";
 
 // ---------------- SUPPORT TICKETS ----------------
 
@@ -77,16 +78,14 @@ export const changePasswordService = async (
   const user = await Model.findById(userId);
 
   if (!user) {
-    throw new Error(`${role} not found`);
+    throw new AppError(`${role.charAt(0).toUpperCase() + role.slice(1)} not found`, 404);
   }
 
   // check current password
   const isMatch = await bcrypt.compare(currentPassword, user.password);
 
   if (!isMatch) {
-    const error = new Error("Current password is incorrect");
-    error.statusCode = 400;
-    throw error;
+    throw new AppError("Current password is incorrect", 400);
   }
 
   // password strength
@@ -96,20 +95,17 @@ export const changePasswordService = async (
     );
 
   if (!isValid) {
-    const error = new Error(
-      "Password must be at least 8 characters and include letters, numbers, and a special character"
+    throw new AppError(
+      "Password must be at least 8 characters and include letters, numbers, and a special character",
+      400
     );
-    error.statusCode = 400;
-    throw error;
   }
 
   // prevent reuse
   const isSame = await bcrypt.compare(newPassword, user.password);
 
   if (isSame) {
-    const error = new Error("New password cannot be same as current password");
-    error.statusCode = 400;
-    throw error;
+    throw new AppError("New password cannot be same as current password", 400);
   }
 
   // hash + save

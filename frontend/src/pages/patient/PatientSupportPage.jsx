@@ -126,7 +126,7 @@ const PatientSupportPage = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to change the password");
+      toast.error(error?.response?.data?.message || "Failed to change the password");
     }
   };
 

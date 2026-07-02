@@ -6,6 +6,7 @@ import Otp from "../../models/otps.model.js";
 import { createNotification } from "../user/notification.service.js";
 import { sendOtpEmailService } from "../user/email.service.js";
 import { EMAIL_TYPES } from "../../constants/email.constants.js";
+import AppError from "../../utils/AppError.js";
 
 export const signupService = async (payload) => {
   const {
@@ -24,12 +25,12 @@ export const signupService = async (payload) => {
   const existingDoctor = await Doctor.findOne({ email });
 
   if (existingPatient || existingDoctor) {
-    throw new Error("Email already exists. Please use a different email.");
+    throw new AppError("Email already exists. Please use a different email.", 400);
   }
 
   // ---------------- PASSWORD MATCH ----------------
   if (password !== confirmPassword) {
-    throw new Error("Passwords do not match");
+    throw new AppError("Passwords do not match", 400);
   }
 
   // ---------------- HASH PASSWORD ----------------

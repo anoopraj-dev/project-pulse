@@ -3,18 +3,19 @@ import Patient from "../../models/patient.model.js";
 import Admin from "../../models/admin.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import AppError from "../../utils/AppError.js";
 
 const jwtSecret = process.env.JWT_SECRET;
 
 export const loginService = async ({ email, password, role }) => {
-  if (!jwtSecret) throw new Error("JWT secret not configured");
+  if (!jwtSecret) throw new AppError("JWT secret not configured", 500);
 
   if (!email || !password) {
-    throw new Error("Email and password are required");
+    throw new AppError("Email and password are required", 400);
   }
 
   if (!["doctor", "patient", "admin"].includes(role)) {
-    throw new Error("Invalid role");
+    throw new AppError("Invalid role", 400);
   }
 
   let user;
@@ -33,18 +34,18 @@ export const loginService = async ({ email, password, role }) => {
   }
 
   if (!user) {
-    throw new Error(`${role} not found`);
+    throw new AppError(`${role.charAt(0).toUpperCase() + role.slice(1)} not found`, 404);
   }
 
   // ---------------- PASSWORD CHECK ----------------
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid credentials", 401);
   }
 
   // ---------------- EXTRA CHECKS FOR NON-ADMIN ----------------
   if (role !== "admin" && !user.isVerified) {
-    throw new Error("Verify your email to continue");
+    throw new AppError("Verify your email to continue", 401);
   }
 
   // ---------------- PAYLOAD ----------------
