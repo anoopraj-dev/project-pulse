@@ -119,10 +119,16 @@ const PatientPayments = () => {
       }
     } else {
       // ---------------- VIEW RECEIPT ----------------
-      const res = await getReceipt(id, role);
-
-      const url = window.URL.createObjectURL(res.data);
-      window.open(url);
+      const toastId = toast.loading("Generating tax invoice...");
+      try {
+        const res = await getReceipt(id, role);
+        const url = window.URL.createObjectURL(res.data);
+        toast.dismiss(toastId);
+        window.open(url);
+      } catch (error) {
+        toast.dismiss(toastId);
+        toast.error("Failed to open receipt");
+      }
     }
   };
 

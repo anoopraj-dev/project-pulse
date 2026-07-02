@@ -23,6 +23,9 @@ const startServer = async () => {
     initSocket(server);
     await initBrowser();
 
+    // Start background export worker
+    await import('./workers/export.worker.js');
+
     server.listen(port, () => {
       console.log(`Server started on http://localhost:${port}`);
     });

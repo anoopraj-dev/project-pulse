@@ -143,6 +143,7 @@ const PatientViewAppointment = () => {
 
   // ---------------- VIEW PDF ----------------
   const handleViewPDF = async () => {
+    const toastId = toast.loading("Generating consultation report...");
     try {
       const consultationId =
         appointment.consultation?._id || appointment.consultation;
@@ -151,8 +152,10 @@ const PatientViewAppointment = () => {
 
       const url = window.URL.createObjectURL(res.data);
 
+      toast.dismiss(toastId);
       window.open(url, "_blank");
     } catch (error) {
+      toast.dismiss(toastId);
       console.error("Error loading PDF:", error);
       toast.error("Failed to load PDF");
     }

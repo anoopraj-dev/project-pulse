@@ -52,6 +52,7 @@ const PatientPrescriptions = () => {
   const handleDownloadPDF = async (consultationId) => {
     if (!consultationId) return;
     setDownloadingId(consultationId);
+    const toastId = toast.loading("Generating prescription PDF...");
     try {
       const res = await getConsultationPDF(consultationId, "patient");
       const url = window.URL.createObjectURL(res.data);
@@ -64,8 +65,10 @@ const PatientPrescriptions = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
       
+      toast.dismiss(toastId);
       toast.success("Prescription downloaded successfully");
     } catch (error) {
+      toast.dismiss(toastId);
       console.error("Error loading PDF:", error);
       toast.error("Failed to download PDF");
     } finally {
@@ -75,11 +78,14 @@ const PatientPrescriptions = () => {
 
   const handleViewPDF = async (consultationId) => {
     if (!consultationId) return;
+    const toastId = toast.loading("Generating prescription PDF...");
     try {
       const res = await getConsultationPDF(consultationId, "patient");
       const url = window.URL.createObjectURL(res.data);
+      toast.dismiss(toastId);
       window.open(url, "_blank");
     } catch (error) {
+      toast.dismiss(toastId);
       console.error("Error loading PDF:", error);
       toast.error("Failed to load PDF");
     }

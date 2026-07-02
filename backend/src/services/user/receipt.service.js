@@ -42,7 +42,7 @@ export const viewReceiptService = async (id, hostUrl, role) => {
 };
 
 //  PULSE360 — PATIENT RECEIPT (TAX INVOICE)
-const buildPatientReceiptHTML = (payment, hostUrl) => {
+export const buildPatientReceiptHTML = (payment, hostUrl) => {
   const serviceType =
     payment.appointment?.serviceType === "online"
       ? "Online (video)"
@@ -206,7 +206,7 @@ const buildPatientReceiptHTML = (payment, hostUrl) => {
 };
 
 //  PULSE360 — DOCTOR PAYOUT STATEMENT
-const buildDoctorReceiptHTML = (settlement, hostUrl) => {
+export const buildDoctorReceiptHTML = (settlement, hostUrl) => {
   const payment = settlement.payment;
   const patient = settlement.patient;
   const appointment = settlement.appointment;

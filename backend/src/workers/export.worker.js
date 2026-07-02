@@ -3,12 +3,15 @@ import { bullRedis } from "../config/redis.js";
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
+import mongoose from "mongoose";
 
 import { connectDB } from "../db/db.js";
 import Export from "../models/export.model.js";
 import { REPORTS } from "../reports/index.js";
 
-await connectDB();
+if (mongoose.connection.readyState !== 1) {
+  await connectDB();
+}
 
 const worker = new Worker(
   "export-queue",

@@ -1,17 +1,11 @@
 
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
-import {
-  motion,
-  useSpring,
-  useTransform,
-  useMotionValue,
-} from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import Footer from "../components/layout/components/Footer";
 import { aboutUs, whyChooseUs, welcomeText } from "../constants/homePageData";
 import GlobalStyles from "@/components/shared/components/GlobalStyles";
 import { useNavigate } from "react-router-dom";
-
 import {
   scaleIn,
   staggerContainer,
@@ -23,7 +17,6 @@ import {
   hoverLiftSubtle,
   viewportOnce,
 } from "../utilis/animations";
-const Heart = lazy(() => import("@/components/ui/3D/Heart"));
 import { fetchHomepageStats } from "@/api/user/userApis";
 
 // ---------------- ARROW ----------------
@@ -43,7 +36,7 @@ const ArrowRight = ({ size = 15 }) => (
 const PrimaryBtn = ({ children, onClick }) => (
   <motion.button
     onClick={onClick}
-    className="flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-white"
+    className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-bold text-white w-full sm:w-auto"
     style={{ background: "#0096C7", boxShadow: "0 6px 24px rgba(0,150,199,.35)" }}
     whileHover={{ backgroundColor: "#007aa3", y: -2, boxShadow: "0 10px 28px rgba(0,150,199,.4)" }}
     whileTap={{ scale: 0.97 }}
@@ -53,251 +46,16 @@ const PrimaryBtn = ({ children, onClick }) => (
   </motion.button>
 );
 
-// ---------------- FEATURE BADGE (TOP BAR) ----------------
-const FeatureBadge = ({ icon, value, label, delay = 0 }) => (
-  <motion.div
-    className="flex items-center gap-2 px-3 py-2 rounded-xl pointer-events-none select-none"
-    style={{
-      background: "rgba(0,150,199,0.12)",
-      border: "1px solid rgba(0,150,199,0.28)",
-      backdropFilter: "blur(10px)",
-      WebkitBackdropFilter: "blur(10px)",
-    }}
-    initial={{ opacity: 0, y: -10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-  >
-    <Icon icon={icon} className="text-base shrink-0" style={{ color: "#48cae4" }} />
-    <div>
-      <div className="text-[11px] font-bold text-white leading-none">{value}</div>
-      <div className="text-[8px] uppercase tracking-widest mt-0.5" style={{ color: "rgba(255,255,255,.4)" }}>
-        {label}
-      </div>
-    </div>
-  </motion.div>
-);
-
-// ---------------- CALLOUT ANNOTATION ----------------
-const Callout = ({ side = "right", label, sub, delay = 0, color = "#48cae4" }) => {
-  const isRight = side === "right";
-  return (
-    <motion.div
-      className={`flex items-center gap-0 pointer-events-none select-none ${isRight ? "flex-row" : "flex-row-reverse"}`}
-      initial={{ opacity: 0, x: isRight ? 16 : -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <div
-        className="w-1.5 h-1.5 rounded-full shrink-0 z-10"
-        style={{ background: color, boxShadow: `0 0 6px ${color}` }}
-      />
-      <div
-        className="h-px shrink-0"
-        style={{
-          width: 32,
-          background: `linear-gradient(${isRight ? "90deg" : "270deg"}, ${color}99, ${color}11)`,
-        }}
-      />
-      <div className={`flex flex-col ${isRight ? "items-start pl-2" : "items-end pr-2"}`}>
-        <span className="text-[9px] sm:text-[11px] font-bold leading-none tracking-wide" style={{ color }}>
-          {label}
-        </span>
-        {sub && (
-          <span
-            className="text-[7px] sm:text-[9px] mt-0.5 font-medium tracking-wider uppercase"
-            style={{ color: "rgba(255,255,255,.35)" }}
-          >
-            {sub}
-          </span>
-        )}
-      </div>
-    </motion.div>
-  );
-};
-
-// ---------------- SCAN RING ----------------
-const ScanRing = ({ delay = 0 }) => (
-  <motion.div
-    className="absolute inset-0 rounded-full pointer-events-none z-10"
-    style={{ border: "1px solid rgba(0,150,199,0.2)" }}
-    initial={{ opacity: 0, scale: 0.7 }}
-    animate={{ opacity: [0, 0.55, 0], scale: [0.7, 1.35, 1.6] }}
-    transition={{ duration: 2.8, delay, repeat: Infinity, ease: "easeOut" }}
-  />
-);
-
 // ---------------- HOME ----------------
 const Home = () => {
-  const [stats, setStats] = useState([]);
-  const [statsData, setStatsData] = useState([]);
+  const [statsData, setStatsData] = useState([
+    { label: "Happy Patients", value: 12500, icon: "mdi:account-heart-outline" },
+    { label: "Expert Doctors", value: 1200, icon: "mdi:stethoscope" },
+    { label: "Appointments", value: 45000, icon: "mdi:calendar-check" },
+  ]);
+  const [stats, setStats] = useState([0, 0, 0]);
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-
-  // ---------------- REFS ----------------
-  const heroRef = useRef(null);
-  const isLockedRef = useRef(false);
-  const progressRef = useRef(0);
-  const touchStartRef = useRef(0);
-  const rafRef = useRef(null);
-
-  // ---------------- MOUSE ROTATION ----------------
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  // ---------------- SCROLL PROGRESS ----------------
-  const progress = useMotionValue(0);
-  const springProg = useSpring(progress, { stiffness: 60, damping: 22, mass: 1 });
-
-  const overlayOpacity = useTransform(springProg, [0, 0.3], [1, 0]);
-
-  // Text panel rises from below
-  const textY = useTransform(springProg, [0, 1], ["100%", "0%"]);
-  const textOpacity = useTransform(springProg, [0, 0.2], [0, 1]);
-
-  // Heart reacts
-  const heartScale = useTransform(springProg, [0, 1], [1.27, 1.5]);
-  const heartDriftY = useTransform(springProg, [0, 1], ["0%", "-10%"]);
-  const heartOpacity = useTransform(springProg, [0.25, 0.72], [1, 0.22]);
-  const vignette = useTransform(springProg, [0, 0.5], [0, 0.95]);
-  const hintOpacity = useTransform(springProg, [0, 0.08], [1, 0]);
-
-  // ---------------- MOUSE HANDLERS ----------------
-  const handleMouseMove = useCallback((e) => {
-    if (!heroRef.current) return;
-    const rect = heroRef.current.getBoundingClientRect();
-    mouseX.set(((e.clientX - rect.left) / rect.width) * 2 - 1);
-    mouseY.set(((e.clientY - rect.top) / rect.height) * 2 - 1);
-  }, [mouseX, mouseY]);
-
-  const handleMouseLeave = useCallback(() => {
-    mouseX.set(0);
-    mouseY.set(0);
-  }, [mouseX, mouseY]);
-
-  // ---------------- CHECK IF HERO IS PINNED AT VIEWPORT TOP ----------------
-  const isHeroAtTop = useCallback(() => {
-    if (!heroRef.current) return false;
-    const rect = heroRef.current.getBoundingClientRect();
-    return rect.top > -10 && rect.top < 10;
-  }, []);
-
-  const isHeroVisible = useCallback(() => {
-    if (!heroRef.current) return false;
-    const rect = heroRef.current.getBoundingClientRect();
-    return rect.top < window.innerHeight && rect.bottom > 0;
-  }, []);
-
-  // ---------------- LOCK SCROLL: KEEP HERO PINNED AT TOP ----------------
-  const lockScroll = useCallback(() => {
-    if (!heroRef.current) return;
-    const top = heroRef.current.offsetTop;
-    window.scrollTo(0, top);
-  }, []);
-
-  // ---------------- DELTA HANDLER ----------------
-  const handleDelta = useCallback((rawDelta) => {
-    if (!heroRef.current) return;
-
-    const down = rawDelta > 0;
-    const up = rawDelta < 0;
-    const p = progressRef.current;
-    const atTop = isHeroAtTop();
-    const visible = isHeroVisible();
-
-    if (!isLockedRef.current) {
-      if (down && atTop && p < 0.99) {
-        isLockedRef.current = true;
-      } else if (up && visible && p >= 0.99 && atTop) {
-        isLockedRef.current = true;
-      } else {
-        return;
-      }
-    }
-
-    lockScroll();
-
-    const step = 0.1;
-    let next = p;
-
-    if (down) {
-      next = Math.min(p + step, 1);
-    } else if (up) {
-      next = Math.max(p - step, 0);
-    }
-
-    progress.set(next);
-    progressRef.current = next;
-
-    if (down && next >= 0.99) {
-      progressRef.current = 1;
-      progress.set(1);
-      isLockedRef.current = false;
-    } else if (up && next <= 0.01) {
-      progressRef.current = 0;
-      progress.set(0);
-      isLockedRef.current = false;
-    }
-  }, [progress, lockScroll, isHeroAtTop, isHeroVisible]);
-
-  // ---------------- WHEEL (DESKTOP ONLY) ----------------
-  useEffect(() => {
-    // Only attach parallax scroll on non-touch / desktop
-    if (window.matchMedia("(max-width: 639px)").matches) return;
-
-    const onWheel = (e) => {
-      if (!isHeroVisible()) return;
-      if (isLockedRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      handleDelta(e.deltaY);
-    };
-    window.addEventListener("wheel", onWheel, { passive: false });
-    return () => window.removeEventListener("wheel", onWheel);
-  }, [handleDelta, isHeroVisible]);
-
-  // ---------------- TOUCH (DESKTOP ONLY) ----------------
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 639px)").matches) return;
-
-    const onStart = (e) => {
-      touchStartRef.current = e.touches[0].clientY;
-    };
-    const onMove = (e) => {
-      if (!isHeroVisible()) return;
-      const currentY = e.touches[0].clientY;
-      const dy = touchStartRef.current - currentY;
-      touchStartRef.current = currentY;
-      if (isLockedRef.current) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      handleDelta(dy * 2.2);
-    };
-    window.addEventListener("touchstart", onStart, { passive: true });
-    window.addEventListener("touchmove", onMove, { passive: false });
-    return () => {
-      window.removeEventListener("touchstart", onStart);
-      window.removeEventListener("touchmove", onMove);
-    };
-  }, [handleDelta, isHeroVisible]);
-
-  // ---------------- PREVENT SCROLL DRIFT WHILE LOCKED ----------------
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 639px)").matches) return;
-
-    const onScroll = () => {
-      if (isLockedRef.current) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = requestAnimationFrame(lockScroll);
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, [lockScroll]);
 
   // ---------------- STATS LOAD ----------------
   useEffect(() => {
@@ -326,14 +84,22 @@ const Home = () => {
 
   useEffect(() => {
     if (!isVisible || statsData.length === 0) return;
+    let frameId;
     let t0;
     const tick = (t) => {
       if (!t0) t0 = t;
       const p = Math.min((t - t0) / 2000, 1);
       setStats(statsData.map((s) => Math.floor(s.value * p)));
-      if (p < 1) requestAnimationFrame(tick);
+      if (p < 1) {
+        frameId = requestAnimationFrame(tick);
+      }
     };
-    requestAnimationFrame(tick);
+    frameId = requestAnimationFrame(tick);
+    return () => {
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
+    };
   }, [isVisible, statsData]);
 
   const fmt = (val = 0, i) => {
@@ -349,23 +115,23 @@ const Home = () => {
     <div className="min-h-screen bg-slate-50 font-[Georgia,serif] overflow-x-hidden">
       <GlobalStyles />
 
-      {/* 
-        ---------------DESKTOP HERO (sm and above only — hidden on mobile)----------- */}
+      {/* ==========================================================
+          HERO SECTION (Responsive unified layout, no 3D rendering)
+      ========================================================== */}
       <div
-        ref={heroRef}
-        className="relative w-full overflow-hidden hidden sm:block"
-        style={{ height: "100vh" }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        className="relative w-full min-h-[75vh] flex items-center overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/online_consultation_hero.png')",
+        }}
       >
-        {/* ------------- BG gradient --------------------- */}
+        {/* Dark gradient overlay for text readability */}
         <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(140deg,#00131e 0%,#002e45 60%,#003f5c 100%)" }}
+          className="absolute inset-0 bg-gradient-to-b lg:bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent pointer-events-none"
         />
-        {/* --------------Grid texture --------------- */}
+
+        {/* Subtle grid texture */}
         <div
-          className="absolute inset-0 opacity-[.032]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
@@ -373,468 +139,174 @@ const Home = () => {
           }}
         />
 
-        {/* ----------- Ambient blobs --------------- */}
+        {/* Ambient glowing blobs */}
         <motion.div
           className="absolute -top-48 -right-32 w-[560px] h-[560px] lg:w-[720px] lg:h-[720px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle,rgba(0,150,199,.28) 0%,transparent 70%)", filter: "blur(72px)" }}
+          style={{
+            background: "radial-gradient(circle,rgba(0,150,199,0.18) 0%,transparent 70%)",
+            filter: "blur(72px)",
+          }}
           {...floatY(14, 7)}
         />
         <motion.div
           className="absolute -bottom-28 -left-24 w-[420px] h-[420px] lg:w-[520px] lg:h-[520px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle,rgba(0,180,216,.16) 0%,transparent 70%)", filter: "blur(64px)" }}
+          style={{
+            background: "radial-gradient(circle,rgba(0,180,216,0.10) 0%,transparent 70%)",
+            filter: "blur(64px)",
+          }}
           {...floatYReverse(14, 9)}
         />
 
-        {/* Heart — desktop only */}
-        <motion.div
-          className="absolute left-1/2 pointer-events-none"
-          style={{
-            x: "-65%",
-            top: "-20%",
-            width: "min(95vw, 800px)",
-            aspectRatio: "1",
-            scale: heartScale,
-            y: heartDriftY,
-            opacity: heartOpacity,
-            transformOrigin: "center top",
-          }}
-        >
-          <Suspense fallback={null}>
-            <Heart mouseX={mouseX} mouseY={mouseY} />
-          </Suspense>
-        </motion.div>
-
-        {/* ------------- Vignette grows with scroll --------------- */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(to top, rgba(0,10,20,1) 0%, rgba(0,10,20,0.75) 28%, rgba(0,10,20,0.18) 55%, transparent 78%)",
-            opacity: vignette,
-          }}
-        />
-
-        <div
-          className="absolute bottom-0 left-0 right-0 h-48 pointer-events-none"
-          style={{ background: "linear-gradient(to top, rgba(0,10,20,0.6) 0%, transparent 100%)" }}
-        />
-
-        {/* Top edge fade */}
-        <div
-          className="absolute top-0 left-0 right-0 h-32 pointer-events-none"
-          style={{ background: "linear-gradient(to bottom, rgba(0,19,30,0.5) 0%, transparent 100%)" }}
-        />
-
-        {/* ----------------- OVERLAY ANNOTATIONS --------------------*/}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{ opacity: overlayOpacity }}
-        >
-          {/* ------------------ Row A ─ top bar ------------- */}
-          <motion.div
-            className="absolute flex items-center"
-            style={{ top: "clamp(12px, 3.5vh, 28px)", left: "clamp(12px, 4%, 48px)" }}
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border text-[9px] sm:text-[10px] font-bold tracking-[.14em] uppercase"
-              style={{
-                background: "rgba(0,150,199,.12)",
-                borderColor: "rgba(0,150,199,.3)",
-                color: "#48cae4",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-              }}
-            >
-              <motion.span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: "#0096C7" }}
-                {...pulseRing}
-              />
-              Pulse360
-            </div>
-          </motion.div>
-
-          <div
-            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-3"
-            style={{ top: "clamp(12px, 3.5vh, 28px)" }}
-          >
-            <FeatureBadge icon="mdi:wifi-check" value="99.9%" label="Uptime" delay={0.3} />
-            <FeatureBadge icon="mdi:shield-lock-outline" value="256-bit" label="Encrypted" delay={0.45} />
-            <FeatureBadge icon="mdi:clock-fast" value="< 2 min" label="Book Time" delay={0.6} />
-          </div>
-
-          <motion.div
-            className="absolute flex items-center"
-            style={{ top: "clamp(12px, 3.5vh, 28px)", right: "clamp(12px, 4%, 48px)" }}
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.25, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-widest uppercase"
-              style={{
-                background: "rgba(0,150,199,.08)",
-                border: "1px solid rgba(0,150,199,.2)",
-                color: "rgba(255,255,255,.4)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-              }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#0096C7" }} />
-              <span className="hidden sm:inline">Platform</span> Live
-            </div>
-          </motion.div>
-
-          <div
-            className="absolute flex flex-col gap-3 sm:gap-5"
-            style={{ top: "38%", left: "clamp(8px, 3%, 40px)" }}
-          >
-            <Callout side="left" label="Easy Booking" sub="2-tap scheduling" delay={0.5} />
-            <Callout side="left" label="Secure Records" sub="End-to-end encrypted" delay={0.65} color="#90e0ef" />
-            <Callout side="left" label="24/7 Support" sub="Always available" delay={0.8} color="#caf0f8" />
-          </div>
-
-          <div
-            className="absolute flex flex-col gap-3 sm:gap-5 items-end"
-            style={{ top: "38%", right: "clamp(8px, 3%, 40px)" }}
-          >
-            <Callout side="right" label="Smart Matching" sub="AI doctor pairing" delay={0.55} />
-            <Callout side="right" label="Telemedicine" sub="Video consultations" delay={0.7} color="#90e0ef" />
-            <Callout side="right" label="Fast Results" sub="< 2 min response" delay={0.85} color="#caf0f8" />
-          </div>
-
-          {/* Scan rings */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 pointer-events-none z-10"
-            style={{ top: "18%", width: "min(160vw, 900px)" }}
-          >
-            <div className="relative w-full" style={{ paddingTop: "50%" }}>
-              <div
-                className="absolute"
+        {/* Hero content container */}
+        <div className="w-full max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            {/* Left Column: Brand badge, Heading, Description, CTAs, Stats */}
+            <div className="lg:col-span-7 flex flex-col text-center lg:text-left items-center lg:items-start space-y-6 sm:space-y-8 relative z-20">
+              
+              {/* Brand badge */}
+              <motion.div
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] sm:text-[11px] font-bold tracking-[.14em] uppercase"
                 style={{
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: "40%",
-                  aspectRatio: "1",
+                  background: "rgba(0,150,199,.12)",
+                  borderColor: "rgba(0,150,199,.3)",
+                  color: "#48cae4",
+                  backdropFilter: "blur(8px)",
+                  WebkitBackdropFilter: "blur(8px)",
                 }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               >
-                <ScanRing delay={0.2} />
-                <ScanRing delay={1.2} />
-                <ScanRing delay={2.2} />
-              </div>
-            </div>
-          </div>
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: "#0096C7" }}
+                  {...pulseRing}
+                />
+                Pulse360
+              </motion.div>
 
-          {/* Hero headline (initial state) */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 text-center w-full px-4"
-            style={{ bottom: "35%" }}
-          >
-            <motion.div
-              className="space-y-2"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <h1
-                className="font-[Georgia] text-2xl sm:text-5xl md:text-6xl font-medium text-white leading-[1.08]"
-                style={{ textShadow: "0 2px 40px rgba(0,0,0,0.75)" }}
+              {/* Headline */}
+              <motion.h1
+                className="font-[Georgia] text-3xl sm:text-5xl lg:text-6xl font-medium text-white leading-[1.12]"
+                style={{ textShadow: "0 2px 32px rgba(0,0,0,0.55)" }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               >
-                Your health.{" "}
-                <em className="not-italic" style={{ color: "#48cae4" }}>Our priority.</em>
-              </h1>
-              <p
-                className="text-[11px] sm:text-sm font-medium tracking-wide"
-                style={{ color: "rgba(255,255,255,.42)", textShadow: "0 1px 12px rgba(0,0,0,0.6)" }}
+                Care that fits
+                <br className="hidden sm:block" />
+                your&nbsp;
+                <span className="not-italic text-[#48cae4]">lifestyle</span>
+              </motion.h1>
+
+              {/* Description */}
+              <motion.p
+                className="text-sm sm:text-base leading-relaxed text-slate-300 max-w-xl"
+                style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               >
-                Modern healthcare, built around you
-              </p>
-            </motion.div>
-          </div>
-        </motion.div>
+                {welcomeText}
+              </motion.p>
 
-        {/* TEXT PANEL — springs up on scroll */}
-        <motion.div
-          className="absolute inset-x-0 bottom-0 z-20"
-          style={{ y: textY, opacity: textOpacity }}
-        >
-          <div>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 pb-8 sm:pb-14">
-              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 lg:gap-16">
+              {/* CTAs */}
+              <motion.div
+                className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <PrimaryBtn onClick={() => navigate("/signin")}>
+                  Find your doctor <ArrowRight />
+                </PrimaryBtn>
+                <motion.button
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold border"
+                  style={{
+                    borderColor: "rgba(255,255,255,.2)",
+                    color: "rgba(255,255,255,.68)",
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    background: "rgba(255,255,255,0.04)",
+                  }}
+                  whileHover={{
+                    backgroundColor: "rgba(255,255,255,0.10)",
+                    color: "#fff",
+                    borderColor: "rgba(255,255,255,0.35)",
+                  }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate("/how-it-works")}
+                >
+                  How it works
+                </motion.button>
+              </motion.div>
 
-                {/* Left: headline + CTAs */}
-                <div className="flex-1 max-w-2xl space-y-4 sm:space-y-6 text-center lg:text-left mx-auto lg:mx-0">
-                  <div
-                    className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border text-[10px] sm:text-[11px] font-bold tracking-[.12em] uppercase"
-                    style={{
-                      background: "rgba(0,150,199,.13)",
-                      borderColor: "rgba(0,150,199,.32)",
-                      color: "#48cae4",
-                      backdropFilter: "blur(8px)",
-                      WebkitBackdropFilter: "blur(8px)",
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: "#0096C7" }} />
-                    Modern Healthcare Platform
-                  </div>
-
-                  <h1
-                    className="font-[Georgia] text-2xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-[4rem] font-medium text-white leading-[1.1]"
-                    style={{ textShadow: "0 2px 32px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.4)" }}
-                  >
-                    Care that fits
-                    <br className="hidden sm:block" />
-                    your&nbsp;
-                    <em className="not-italic" style={{ color: "#48cae4" }}>lifestyle</em>
-                  </h1>
-
-                  <p
-                    className="text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0"
-                    style={{ color: "rgba(255,255,255,.62)", textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
-                  >
-                    {welcomeText}
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-1">
-                    <PrimaryBtn onClick={() => navigate("/signin")}>
-                      Find your doctor <ArrowRight />
-                    </PrimaryBtn>
-                    <motion.button
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold border"
+              {/* Stats pills under CTAs */}
+              {statsData.length > 0 && stats.length === statsData.length && (
+                <motion.div
+                  className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 pt-4 border-t w-full"
+                  style={{ borderColor: "rgba(255,255,255,.1)" }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.45 }}
+                >
+                  {statsData.map((stat, i) => (
+                    <div
+                      key={stat.label}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border"
                       style={{
-                        borderColor: "rgba(255,255,255,.2)",
-                        color: "rgba(255,255,255,.68)",
+                        background: "rgba(0,150,199,0.08)",
+                        borderColor: "rgba(0,150,199,0.2)",
                         backdropFilter: "blur(8px)",
                         WebkitBackdropFilter: "blur(8px)",
-                        background: "rgba(255,255,255,0.04)",
+                        flex: "1 1 calc(50% - 12px)",
+                        minWidth: "140px",
+                        maxWidth: "180px",
                       }}
-                      whileHover={{ backgroundColor: "rgba(255,255,255,0.10)", color: "#fff", borderColor: "rgba(255,255,255,0.35)" }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => navigate("/how-it-works")}
                     >
-                      How it works
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Right: stat pills */}
-                {statsData.length > 0 && (
-                  <div className="hidden lg:flex flex-col gap-3 shrink-0 mb-1">
-                    {statsData.map((stat, i) => (
                       <div
-                        key={stat.label}
-                        className="flex items-center gap-3 px-5 py-3 rounded-2xl border"
-                        style={{
-                          background: "rgba(0,150,199,0.09)",
-                          borderColor: "rgba(0,150,199,0.22)",
-                          backdropFilter: "blur(12px)",
-                          WebkitBackdropFilter: "blur(12px)",
-                          minWidth: "180px",
-                        }}
+                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ background: "rgba(0,150,199,0.15)" }}
                       >
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                          style={{ background: "rgba(0,150,199,0.18)" }}
-                        >
-                          <Icon icon={stat.icon} className="text-lg text-[#48cae4]" />
+                        <Icon icon={stat.icon} className="text-base text-[#48cae4]" />
+                      </div>
+                      <div>
+                        <div className="text-base font-bold text-white leading-none">
+                          {fmt(stats[i], i)}
                         </div>
-                        <div>
-                          <div className="text-lg font-bold text-white leading-none">{fmt(stats[i], i)}</div>
-                          <div
-                            className="text-[9px] uppercase tracking-widest mt-0.5 font-semibold"
-                            style={{ color: "rgba(255,255,255,.38)" }}
-                          >
-                            {stat.label}
-                          </div>
+                        <div
+                          className="text-[8px] uppercase tracking-wider mt-0.5 font-semibold"
+                          style={{ color: "rgba(255,255,255,.4)" }}
+                        >
+                          {stat.label}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
             </div>
 
-            {/* Wave */}
-            <svg
-              viewBox="0 0 1440 56"
-              preserveAspectRatio="none"
-              className="w-full block"
-              style={{ height: "clamp(24px, 4vw, 56px)", marginBottom: "-2px" }}
-            >
-              <path d="M0,56 C480,0 960,0 1440,56 L1440,56 L0,56 Z" fill="#f8fafc" />
-            </svg>
+            {/* Right Column: Empty spacer to let the background image's subject (doctor/laptop) show through clearly */}
+            <div className="lg:col-span-5 h-[200px] lg:h-auto pointer-events-none" />
+
           </div>
-        </motion.div>
-
-        {/* Scroll hint */}
-        <motion.div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-30 pointer-events-none"
-          style={{ opacity: hintOpacity }}
-        >
-          <span
-            className="text-[9px] font-bold tracking-[.2em] uppercase"
-            style={{ color: "rgba(255,255,255,.38)" }}
-          >
-            Scroll to explore
-          </span>
-          <motion.div
-            animate={{ y: [0, 7, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          >
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M10 4v12M5 11l5 5 5-5"
-                stroke="rgba(255,255,255,.35)"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </motion.div>
-        </motion.div>
-      </div>
-      {/* ========== END DESKTOP HERO ========== */}
-
-      {/* ==========================================================
-          MOBILE HERO BANNER (visible on mobile only, replaces full hero)
-      ========================================================== */}
-      <div
-        className="block sm:hidden relative w-full overflow-hidden"
-        style={{
-          background: "linear-gradient(140deg,#00131e 0%,#002e45 60%,#003f5c 100%)",
-          paddingTop: "80px",
-          paddingBottom: "48px",
-        }}
-      >
-        {/* Subtle grid texture */}
-        <div
-          className="absolute inset-0 opacity-[.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-
-        {/* Ambient blob */}
-        <div
-          className="absolute -top-20 -right-16 w-64 h-64 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)", filter: "blur(48px)" }}
-        />
-        <div
-          className="absolute -bottom-16 -left-12 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)", filter: "blur(40px)" }}
-        />
-
-        <div className="relative z-10 px-6 text-center">
-          {/* Brand badge */}
-          <motion.div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-6"
-            style={{
-              background: "rgba(0,150,199,.12)",
-              borderColor: "rgba(0,150,199,.3)",
-              color: "#48cae4",
-            }}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: "#0096C7" }}
-            />
-            <span className="text-[10px] font-bold tracking-[.14em] uppercase">Pulse360</span>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            className="font-[Georgia] text-3xl font-medium text-white leading-[1.12] mb-4"
-            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.6)" }}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            Care that fits your{" "}
-            <em className="not-italic" style={{ color: "#48cae4" }}>lifestyle</em>
-          </motion.h1>
-
-          {/* Subtext */}
-          <motion.p
-            className="text-sm leading-relaxed mb-8 mx-auto max-w-xs"
-            style={{ color: "rgba(255,255,255,.58)" }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {welcomeText}
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            className="flex flex-col gap-3"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <PrimaryBtn onClick={() => navigate("/signin")}>
-              Find your doctor <ArrowRight />
-            </PrimaryBtn>
-            <motion.button
-              className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold border"
-              style={{
-                borderColor: "rgba(255,255,255,.2)",
-                color: "rgba(255,255,255,.68)",
-                background: "rgba(255,255,255,0.04)",
-              }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => navigate("/how-it-works")}
-            >
-              How it works
-            </motion.button>
-          </motion.div>
-
-          {/* Mobile stats strip */}
-          {statsData.length > 0 && stats.length === statsData.length && (
-            <motion.div
-              className="flex justify-center gap-8 mt-8 pt-6 border-t"
-              style={{ borderColor: "rgba(255,255,255,.1)" }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.45 }}
-            >
-              {statsData.map((stat, i) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-lg font-bold text-white">{fmt(stats[i], i)}</div>
-                  <div
-                    className="text-[9px] uppercase tracking-widest mt-0.5"
-                    style={{ color: "rgba(255,255,255,.38)" }}
-                  >
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
-          )}
         </div>
 
         {/* Wave transition into light bg */}
         <svg
-          viewBox="0 0 1440 40"
+          viewBox="0 0 1440 56"
           preserveAspectRatio="none"
           className="absolute bottom-0 left-0 right-0 w-full block"
-          style={{ height: "40px", marginBottom: "-1px" }}
+          style={{ height: "clamp(24px, 4vw, 56px)", marginBottom: "-2px" }}
         >
-          <path d="M0,40 C480,0 960,0 1440,40 L1440,40 L0,40 Z" fill="#f8fafc" />
+          <path d="M0,56 C480,0 960,0 1440,56 L1440,56 L0,56 Z" fill="#f8fafc" />
         </svg>
       </div>
-      {/* ========== END MOBILE HERO BANNER ========== */}
 
       {/* ------------ Healthier Tomorrow ----------------*/}
-      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-10 sm:py-14">
         <div className="grid lg:grid-cols-2 gap-12 sm:gap-20 items-center">
           <motion.div
             className="space-y-6 sm:space-y-8 order-2 lg:order-1 text-center lg:text-left"
@@ -895,7 +367,7 @@ const Home = () => {
       </section>
 
       {/* ------------- Stats ----------------- */}
-      <section className="py-16 sm:py-24" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
+      <section className="py-10 sm:py-14" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <motion.div
             className="text-center mb-12 sm:mb-20 space-y-3"
@@ -949,7 +421,7 @@ const Home = () => {
       </section>
 
       {/* ------------- Why Pulse360 ---------------- */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-10 sm:py-14">
         <motion.div
           className="text-center mb-12 sm:mb-16 space-y-3"
           variants={staggerContainer}
@@ -1004,7 +476,7 @@ const Home = () => {
       </section>
 
       {/*-------------- About ------------------*/}
-      <section className="py-16 sm:py-24" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
+      <section className="py-10 sm:py-14" style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <div className="grid lg:grid-cols-2 gap-14 sm:gap-20 items-center">
             <motion.div
@@ -1077,9 +549,9 @@ const Home = () => {
       </section>
 
       {/* ---------------- Footer CTA ----------------------*/}
-      <section className="px-6 lg:px-16 py-16 sm:py-20">
+      <section className="px-6 lg:px-16 py-10 sm:py-12">
         <motion.div
-          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
+          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-10 sm:py-14 flex flex-col lg:flex-row items-center justify-between gap-10"
           style={{
             background: "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
             boxShadow: "0 20px 60px rgba(0,150,199,.28)",
