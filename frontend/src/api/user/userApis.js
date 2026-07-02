@@ -10,6 +10,10 @@ export const fetchHomepageStats = () =>{
   return api.get('/api/home/stats')
 }
 
+export const fetchHomepageReviews = () => {
+  return api.get('/api/home/reviews')
+}
+
 // ---------------- GENERIC SEARCH API ----------------
 export const searchApi = ({ role,query, type, page = 1, limit = 10 ,filters ={}}) => {
   return api.get(`/api/${role}/search`, {

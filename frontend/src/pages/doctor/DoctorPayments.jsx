@@ -45,11 +45,14 @@ const DoctorPayments = () => {
 
   // ---------------- VIEW RECEIPT ----------------
   const handleView = async (id) => {
+    const toastId = toast.loading("Generating payout receipt...");
     try {
       const res = await getReceipt(id, role);
       const url = window.URL.createObjectURL(res.data);
+      toast.dismiss(toastId);
       window.open(url);
     } catch (error) {
+      toast.dismiss(toastId);
       toast.error("Failed to open receipt");
     }
   };

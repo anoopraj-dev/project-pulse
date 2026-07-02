@@ -122,19 +122,20 @@ const HowItWorks = () => {
     <div className="h-root min-h-screen bg-slate-50 overflow-x-hidden">
       <GlobalStyles />
 
-      {/* ------------------ HERO SECTION ------------------ */}
-      <section className="relative min-h-[75vh] flex items-center overflow-hidden">
-        {/* Dark backdrop */}
+      <section
+        className="relative min-h-[75vh] flex items-center overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/how_it_works_hero_new.png')",
+        }}
+      >
+        {/* Dark gradient overlay for text readability */}
         <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(140deg,#00131e 0%,#002e45 60%,#003f5c 100%)",
-          }}
+          className="absolute inset-0 bg-gradient-to-b lg:bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent pointer-events-none"
         />
 
         {/* Grid texture */}
         <div
-          className="absolute inset-0 opacity-[.035]"
+          className="absolute inset-0 opacity-[.03]"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
@@ -147,7 +148,7 @@ const HowItWorks = () => {
           {...floatY(12, 7)}
           className="absolute -top-48 -right-32 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] lg:w-[700px] lg:h-[700px] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle,rgba(0,150,199,.26) 0%,transparent 70%)",
+            background: "radial-gradient(circle,rgba(0,150,199,.18) 0%,transparent 70%)",
             filter: "blur(72px)",
           }}
         />
@@ -155,7 +156,7 @@ const HowItWorks = () => {
           {...floatYReverse(12, 9)}
           className="absolute -bottom-28 -left-24 w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px] rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle,rgba(0,180,216,.15) 0%,transparent 70%)",
+            background: "radial-gradient(circle,rgba(0,180,216,.10) 0%,transparent 70%)",
             filter: "blur(64px)",
           }}
         />
@@ -163,7 +164,7 @@ const HowItWorks = () => {
         {/* Hero content container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24 flex flex-col lg:flex-row items-center justify-between gap-12">
           {/* Left Column: Heading + Subhead */}
-          <div className="flex-1 w-full space-y-6 sm:space-y-8 text-center lg:text-left">
+          <div className="flex-1 max-w-xl lg:max-w-2xl w-full space-y-6 sm:space-y-8 text-center lg:text-left relative z-20">
             <motion.div
               variants={fadeUp}
               custom={0.1}
@@ -204,8 +205,8 @@ const HowItWorks = () => {
               custom={0.4}
               initial="hidden"
               animate="visible"
-              className="text-base sm:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 font-sans"
-              style={{ color: "rgba(255,255,255,.58)" }}
+              className="text-sm sm:text-base leading-relaxed text-slate-300 max-w-xl"
+              style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
             >
               From booking certified medical specialists to receiving digital prescriptions,
               discover how Pulse360 streamlines your health management journey.
@@ -237,65 +238,8 @@ const HowItWorks = () => {
             </motion.div>
           </div>
 
-          {/* Right Column: Floating interactive card */}
-          <motion.div
-            variants={scaleIn}
-            custom={0.5}
-            initial="hidden"
-            animate="visible"
-            className="hidden lg:block shrink-0"
-          >
-            <div
-              className="w-80 rounded-[2.5rem] p-8 space-y-6 border backdrop-blur-2xl shadow-2xl"
-              style={{
-                background: "rgba(255,255,255,.05)",
-                borderColor: "rgba(255,255,255,.1)",
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400">
-                  Interactive Preview
-                </span>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-white font-bold font-sans text-lg">
-                  Booking in 3 Steps
-                </h3>
-                <div className="space-y-3.5">
-                  {[
-                    { s: "1", t: "Select Doctor", d: "Choose from 1,200+ practitioners", active: true },
-                    { s: "2", t: "Select Time & Type", d: "Audio, video call or offline visit", active: false },
-                    { s: "3", t: "Confirm & Consult", d: "Instant link, zero waiting room", active: false },
-                  ].map((step) => (
-                    <div key={step.s} className="flex gap-3">
-                      <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 ${
-                          step.active
-                            ? "bg-[#0096C7] text-white"
-                            : "bg-white/10 text-white/50 border border-white/15"
-                        }`}
-                      >
-                        {step.s}
-                      </div>
-                      <div>
-                        <div
-                          className={`text-xs font-bold font-sans ${
-                            step.active ? "text-[#48cae4]" : "text-white/80"
-                          }`}
-                        >
-                          {step.t}
-                        </div>
-                        <div className="text-[10px] text-white/40 mt-0.5 leading-normal">
-                          {step.d}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          {/* Right Column: Empty spacer to let background show through */}
+          <div className="hidden lg:block w-[320px] shrink-0 pointer-events-none" />
         </div>
 
         {/* Wave divider at bottom */}
@@ -311,7 +255,7 @@ const HowItWorks = () => {
       </section>
 
       {/* ------------------ WORKFLOW EXPLORER SECTION ------------------ */}
-      <section id="workflows" className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
+      <section id="workflows" className="max-w-7xl mx-auto px-6 lg:px-16 py-10 sm:py-14">
         {/* Section Header */}
         <div className="text-center space-y-4 mb-14">
           <p className="text-[11px] font-bold tracking-[.14em] uppercase text-[#0096C7]">
@@ -433,7 +377,7 @@ const HowItWorks = () => {
       </section>
 
       {/* ------------------ DASHBOARD NAVIGATION GUIDE ------------------ */}
-      <section className="py-16 sm:py-24 bg-slate-100/60 font-sans border-y border-slate-200/30">
+      <section className="py-10 sm:py-14 bg-slate-100/60 font-sans border-y border-slate-200/30">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <motion.div
             variants={fadeUp}
@@ -493,7 +437,7 @@ const HowItWorks = () => {
       </section>
 
       {/* ------------------ FAQ SECTION ------------------ */}
-      <section className="max-w-4xl mx-auto px-6 py-16 sm:py-24">
+      <section className="max-w-4xl mx-auto px-6 py-10 sm:py-14">
         <motion.div
           variants={fadeUp}
           custom={0}
@@ -530,14 +474,14 @@ const HowItWorks = () => {
       </section>
 
       {/* ------------------ CTA SECTION ------------------ */}
-      <section className="px-6 lg:px-16 pb-16 sm:pb-24">
+      <section className="px-6 lg:px-16 pb-10 sm:pb-12">
         <motion.div
           variants={scaleIn}
           custom={0}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
+          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-10 sm:py-14 flex flex-col lg:flex-row items-center justify-between gap-10"
           style={{
             background: "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
             boxShadow: "0 20px 60px rgba(0,150,199,.28)",

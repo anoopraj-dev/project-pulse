@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getApprovedDoctors } from "@/api/user/userApis";
+import { getApprovedDoctors, fetchHomepageStats, fetchHomepageReviews } from "@/api/user/userApis";
 import { useNavigate } from "react-router-dom";
 import {
   fadeUp,
@@ -37,16 +37,59 @@ const StarIcon = () => (
   </svg>
 );
 
+const fallbackReviews = [
+  {
+    _id: "fb-1",
+    patient: { name: "Hari Narayanan" },
+    rating: 5,
+    review: "The consultation was smooth and reassuring. Got answers in minutes and felt genuinely heard. Great experience."
+  },
+  {
+    _id: "fb-2",
+    patient: { name: "Ajith Sudharsnan" },
+    rating: 5,
+    review: "Quick diagnosis and friendly doctor. Took time to explain everything clearly. Highly recommended to all."
+  },
+  {
+    _id: "fb-3",
+    patient: { name: "Anoop Raj" },
+    rating: 5,
+    review: "Very professional and helpful. Clear, actionable guidance without the usual long wait times. Will use again."
+  }
+];
+
 const DoctorLanding = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    patients: 12500,
+    doctors: 1200,
+    appointments: 45000,
+  });
+  const [reviews, setReviews] = useState(fallbackReviews);
   const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await getApprovedDoctors();
-        setDoctors(res.data?.users || []);
+        const [doctorsRes, statsRes, reviewsRes] = await Promise.all([
+          getApprovedDoctors(),
+          fetchHomepageStats().catch(() => null),
+          fetchHomepageReviews().catch(() => null)
+        ]);
+        setDoctors(doctorsRes?.data?.users || []);
+        if (statsRes?.data?.success) {
+          setStats(statsRes.data.data);
+        }
+        if (reviewsRes?.data?.success && reviewsRes.data.data?.length > 0) {
+          const dbReviews = reviewsRes.data.data;
+          if (dbReviews.length >= 3) {
+            setReviews(dbReviews);
+          } else {
+            const padded = [...dbReviews, ...fallbackReviews.slice(dbReviews.length)];
+            setReviews(padded);
+          }
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -55,24 +98,31 @@ const DoctorLanding = () => {
     })();
   }, []);
 
+  const formatVal = (val) => {
+    if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + "M+";
+    if (val >= 1_000) return Math.floor(val / 1000) + "K+";
+    return val + "+";
+  };
+
 
   return (
     <div className="h-root min-h-screen bg-slate-50 overflow-x-hidden">
       <GlobalStyles />
       {/* -------------- Hero section ---------------- */}
-      <section className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden">
-        {/* dark backdrop */}
+      <section
+        className="relative min-h-[75vh] flex items-center overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/about_us_hero.png')",
+        }}
+      >
+        {/* Dark gradient overlay for text readability */}
         <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(140deg,#00131e 0%,#002e45 60%,#003f5c 100%)",
-          }}
+          className="absolute inset-0 bg-gradient-to-b lg:bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent pointer-events-none"
         />
 
         {/* subtle grid */}
         <div
-          className="absolute inset-0 opacity-[.035]"
+          className="absolute inset-0 opacity-[.03]"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
@@ -86,7 +136,7 @@ const DoctorLanding = () => {
           className="absolute -top-48 -right-32 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] lg:w-[700px] lg:h-[700px] rounded-full pointer-events-none"
           style={{
             background:
-              "radial-gradient(circle,rgba(0,150,199,.3) 0%,transparent 70%)",
+              "radial-gradient(circle,rgba(0,150,199,.18) 0%,transparent 70%)",
             filter: "blur(72px)",
           }}
         />
@@ -95,15 +145,15 @@ const DoctorLanding = () => {
           className="absolute -bottom-28 -left-24 w-[250px] h-[250px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px] rounded-full pointer-events-none"
           style={{
             background:
-              "radial-gradient(circle,rgba(0,180,216,.18) 0%,transparent 70%)",
+              "radial-gradient(circle,rgba(0,180,216,.10) 0%,transparent 70%)",
             filter: "blur(64px)",
           }}
         />
 
         {/* inner */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24 flex flex-col lg:flex-row items-center justify-between gap-12">
           {/* ── Left copy ── */}
-          <div className="flex-1 w-full space-y-6 sm:space-y-8 text-center lg:text-left">
+          <div className="flex-1 max-w-xl lg:max-w-2xl w-full space-y-6 sm:space-y-8 text-center lg:text-left relative z-20">
             <motion.div
               variants={fadeUp}
               custom={0.1}
@@ -144,8 +194,8 @@ const DoctorLanding = () => {
               custom={0.4}
               initial="hidden"
               animate="visible"
-              className="text-base sm:text-[1.05rem] leading-relaxed max-w-lg mx-auto lg:mx-0"
-              style={{ color: "rgba(255,255,255,.55)" }}
+              className="text-sm sm:text-base leading-relaxed text-slate-300 max-w-xl"
+              style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
             >
               Consult online or book appointments with trusted, verified doctors
               — instantly, from anywhere.
@@ -191,9 +241,9 @@ const DoctorLanding = () => {
               style={{ borderColor: "rgba(255,255,255,.1)" }}
             >
               {[
-                ["1,200+", "Verified Doctors"],
-                ["4.9 ★", "Avg. Rating"],
-                ["15 min", "Avg. Wait"],
+                [formatVal(stats.doctors), "Verified Doctors"],
+                [formatVal(stats.patients), "Happy Patients"],
+                [formatVal(stats.appointments), "Appointments Booked"],
               ].map(([v, l]) => (
                 <div key={l} className="text-center lg:text-left">
                   <div className="font-[Georgia,serif] text-xl sm:text-2xl font-bold text-white">
@@ -210,89 +260,8 @@ const DoctorLanding = () => {
             </motion.div>
           </div>
 
-          {/* ── Right floating card ── */}
-          <motion.div
-            variants={scaleIn}
-            custom={0.55}
-            initial="hidden"
-            animate="visible"
-            className="hidden lg:block shrink-0"
-          >
-            <div
-              className="w-80 rounded-[2rem] p-8 space-y-6 border backdrop-blur-2xl shadow-2xl"
-              style={{
-                background: "rgba(255,255,255,.07)",
-                borderColor: "rgba(255,255,255,.12)",
-              }}
-            >
-              <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                  style={{
-                    background: "linear-gradient(135deg,#0096C7,#00B4D8)",
-                  }}
-                >
-                  R
-                </div>
-                <div>
-                  <div className="text-white font-bold text-base">
-                    Dr. Reena Nair
-                  </div>
-                  <div
-                    className="text-xs font-medium"
-                    style={{ color: "rgba(255,255,255,.45)" }}
-                  >
-                    Cardiologist
-                  </div>
-                </div>
-                <span
-                  className="ml-auto text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider"
-                  style={{
-                    background: "rgba(0,150,199,.22)",
-                    color: "#48cae4",
-                  }}
-                >
-                  Live
-                </span>
-              </div>
-
-              <div
-                className="divide-y space-y-1"
-                style={{ borderColor: "rgba(255,255,255,.08)" }}
-              >
-                {[
-                  ["Experience", "12 years"],
-                  ["Patients", "3,200+"],
-                  ["Next Slot", "2:30 PM Today"],
-                  ["Rating", "4.9 ★"],
-                ].map(([k, v]) => (
-                  <div key={k} className="flex justify-between py-3">
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: "rgba(255,255,255,.38)" }}
-                    >
-                      {k}
-                    </span>
-                    <span
-                      className="text-xs font-bold"
-                      style={{ color: "rgba(255,255,255,.9)" }}
-                    >
-                      {v}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <motion.button
-                {...tapScale}
-                className="w-full py-4 rounded-2xl text-sm font-bold text-white shadow-lg transition-all"
-                style={{ background: "#0096C7" }}
-                onClick={() => navigate("/signin")}
-              >
-                Book Appointment
-              </motion.button>
-            </div>
-          </motion.div>
+          {/* ── Right spacer to let background show through ── */}
+          <div className="hidden lg:block w-[320px] shrink-0 pointer-events-none" />
         </div>
 
         {/* wave bottom */}
@@ -311,7 +280,7 @@ const DoctorLanding = () => {
       </section>
 
       {/* ---------------- What we offer -------------- */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-16 sm:py-24">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 py-10 sm:py-14">
         <motion.div
           variants={fadeUp}
           custom={0}
@@ -369,7 +338,7 @@ const DoctorLanding = () => {
       </section>
 
       {/* -------------- Find a doctor --------------------- */}
-      <section className="max-w-7xl mx-auto px-6 lg:px-16 pb-6 sm:pb-8">
+      <section className="max-w-7xl mx-auto px-6 lg:px-16 pb-4 sm:pb-6">
         <motion.div
           variants={fadeUp}
           custom={0}
@@ -429,7 +398,7 @@ const DoctorLanding = () => {
 
       {/* ---------------- Testimonials---------------- */}
       <section
-        className="py-16 sm:py-24"
+        className="py-10 sm:py-14"
         style={{ background: "linear-gradient(180deg,#f0f9ff,#e0f2fe)" }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
@@ -461,34 +430,28 @@ const DoctorLanding = () => {
             viewport={viewportOnce}
             className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
           >
-            <Testimonial
-              name="Hari Narayanan"
-              rating={4.8}
-              text="The consultation was smooth and reassuring. Got answers in minutes and felt genuinely heard. Great experience."
-            />
-            <Testimonial
-              name="Ajith Sudharsnan"
-              rating={4.8}
-              text="Quick diagnosis and friendly doctor. Took time to explain everything clearly. Highly recommended to all."
-            />
-            <Testimonial
-              name="Anoop Raj"
-              rating={4.8}
-              text="Very professional and helpful. Clear, actionable guidance without the usual long wait times. Will use again."
-            />
+            {reviews.slice(0, 3).map((rev) => (
+              <Testimonial
+                key={rev._id}
+                name={rev.patient?.name || "Patient"}
+                rating={rev.rating || 5}
+                text={rev.review || "Excellent care and friendly service."}
+                profilePicture={rev.patient?.profilePicture}
+              />
+            ))}
           </motion.div>
         </div>
       </section>
 
       {/* ---------------- Footer CTA ---------------- */}
-      <section className="px-6 lg:px-16 py-16 sm:py-24">
+      <section className="px-6 lg:px-16 py-10 sm:py-12">
         <motion.div
           variants={scaleIn}
           custom={0}
           initial="hidden"
           whileInView="visible"
           viewport={viewportOnce}
-          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-12 sm:py-20 flex flex-col lg:flex-row items-center justify-between gap-10"
+          className="max-w-7xl mx-auto rounded-[2rem] sm:rounded-[3rem] px-8 sm:px-16 py-10 sm:py-14 flex flex-col lg:flex-row items-center justify-between gap-10"
           style={{
             background:
               "linear-gradient(135deg,#003554 0%,#006494 50%,#0096C7 100%)",
@@ -627,7 +590,7 @@ const DoctorCard = ({ doctor }) => (
   </motion.div>
 );
 
-const Testimonial = ({ name, rating, text }) => (
+const Testimonial = ({ name, rating, text, profilePicture }) => (
   <motion.div
     variants={staggerChild}
     {...hoverLift}
@@ -641,12 +604,20 @@ const Testimonial = ({ name, rating, text }) => (
     </div>
     <p className="text-slate-600 text-sm leading-relaxed">{text}</p>
     <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
-      <div
-        className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-        style={{ background: "linear-gradient(135deg,#0096C7,#00B4D8)" }}
-      >
-        {name.charAt(0)}
-      </div>
+      {profilePicture ? (
+        <img
+          src={profilePicture}
+          alt={name}
+          className="w-9 h-9 rounded-full object-cover shrink-0"
+        />
+      ) : (
+        <div
+          className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
+          style={{ background: "linear-gradient(135deg,#0096C7,#00B4D8)" }}
+        >
+          {name.charAt(0)}
+        </div>
+      )}
       <div>
         <div className="font-bold text-slate-900 text-sm">{name}</div>
         <div className="flex items-center gap-0.5 mt-0.5">

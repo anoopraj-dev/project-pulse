@@ -458,7 +458,27 @@ export const generateConsultationPDFService = async (
   if (!prescription) throw { status: 404, message: "Prescription not found" };
 
   // Generate HTML content
-  const htmlContent = `
+  const htmlContent = buildPrescriptionHTML(consultation, prescription);
+
+  // Generate PDF buffer using Puppeteer
+  const browser = await getBrowser();
+  if (!browser)
+    throw { status: 500, message: "PDF generation service unavailable" };
+
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+  const pdfBuffer = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
+  });
+  await page.close();
+
+  return pdfBuffer;
+};
+
+export const buildPrescriptionHTML = (consultation, prescription) => {
+  return `
     <!DOCTYPE html>
     <html>
       <head>
@@ -538,20 +558,4 @@ export const generateConsultationPDFService = async (
       </body>
     </html>
   `;
-
-  // Generate PDF buffer using Puppeteer
-  const browser = await getBrowser();
-  if (!browser)
-    throw { status: 500, message: "PDF generation service unavailable" };
-
-  const page = await browser.newPage();
-  await page.setContent(htmlContent);
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    printBackground: true,
-    margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
-  });
-  await page.close();
-
-  return pdfBuffer;
 };
